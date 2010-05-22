@@ -1,0 +1,38 @@
+
+//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  Use, modification and distribution are subject to the Boost Software
+//  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt).
+
+#ifndef CHEMICAL_SYNTHESIS_ADAPTERS_POINTER_HPP_INCLUDED
+#define CHEMICAL_SYNTHESIS_ADAPTERS_POINTER_HPP_INCLUDED
+
+#include <chemical/synthesis/adapters/adapter.hpp>
+
+namespace chemical {
+namespace synthesis {
+
+//
+// specialization for native pointers
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Traits, class T>
+struct adapter<Traits, T*>
+    : public forwarding_adapter<Traits, T, T*> {
+
+    adapter(T const * const adapted) : adapted_(adapted) {}
+    T const * const adapted_;
+
+ // template <class Adapter> optional<Adapter> forward() const {
+ //     return adapted_ ? Adapter(ref(*adapted_)) : none;
+ // }
+
+
+    template <class A> A forward() const { return A(boost::ref(*adapted_)); }
+    // T const& get() const { return *adapted_; }
+    bool valid() const { return adapted_ != 0; }
+};
+
+}} // namespace chemical::synthesis
+
+#endif // CHEMICAL_SYNTHESIS_ADAPTERS_POINTER_HPP_INCLUDED

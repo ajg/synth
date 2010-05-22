@@ -1,0 +1,1 @@
+<!--#echo var="foo" --><!--#echo var="bar" --><!--#echo var="qux" -->

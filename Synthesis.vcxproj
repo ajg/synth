@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="synthesis.cpp" />
+    <ClCompile Include="tests\django.cpp" />
+    <ClCompile Include="tests\ssi.cpp" />
+    <ClCompile Include="tests\tmpl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".hgignore" />
+    <None Include="LICENSE_1_0.txt" />
+    <None Include="samples\base.tpl" />
+    <None Include="samples\derived.tpl" />
+    <None Include="samples\example.shtml" />
+    <None Include="samples\example.tmpl" />
+    <None Include="samples\expression.tpl" />
+    <None Include="samples\included.tpl" />
+    <None Include="samples\variables.shtml" />
+    <None Include="samples\variables.tmpl" />
+    <None Include="samples\whatever.tpl" />
+    <None Include="SConstruct" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="chemical\synthesis.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\abstract.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\adapter.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\array.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\bool.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\complex.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\container.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\deque.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\detail\smart_ptr_fwd.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\list.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\map.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\memory.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\numeric.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\optional.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\pair.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\pointer.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\ref.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\scoped_array.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\scoped_ptr.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\set.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\shared_array.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\shared_ptr.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\smart_ptr.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\string.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\utility.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\variant.hpp" />
+    <ClInclude Include="chemical\synthesis\adapters\vector.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\base_definition.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\cgi_environment.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\detail.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django\engine.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django\filters.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django\library.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django\tags.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\django\value.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\exceptions.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\ssi.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\ssi\directives.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\ssi\engine.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\ssi\library.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\ssi\value.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\tmpl.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\tmpl\engine.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\tmpl\library.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\tmpl\tags.hpp" />
+    <ClInclude Include="chemical\synthesis\engines\tmpl\value.hpp" />
+    <ClInclude Include="chemical\synthesis\template.hpp" />
+    <ClInclude Include="chemical\synthesis\templates\base_template.hpp" />
+    <ClInclude Include="chemical\synthesis\templates\file_template.hpp" />
+    <ClInclude Include="chemical\synthesis\templates\stream_template.hpp" />
+    <ClInclude Include="chemical\synthesis\templates\string_template.hpp" />
+    <ClInclude Include="chemical\synthesis\value_facade.hpp" />
+    <ClInclude Include="chemical\synthesis\value_iterator.hpp" />
+    <ClInclude Include="chemical\testing.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{03BAE55E-2C0D-4731-BCC8-D62011834D13}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Synthesis</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>./;C:\boost\include\boost-1_42;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>./;C:\boost\include\boost-1_42;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4100;4244;4355;4510;4512;4610;4701</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <StackReserveSize>4194304</StackReserveSize>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4100;4244;4355;4510;4512;4610</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <StackReserveSize>4194304</StackReserveSize>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

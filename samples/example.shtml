@@ -1,0 +1,6 @@
+<!--#set var='foo' value='A' -->
+<!--#set var='bar' value='B' -->
+<!--#set var='qux' value='C' -->
+============
+<!--#include file="samples/variables.shtml" -->
+============

@@ -1,0 +1,10 @@
+^.scons
+\.o$
+glob:synthesis
+glob:misc
+glob:Debug
+glob:Release
+glob:ipch
+glob:Synthesis.opensdf
+glob:Synthesis.sdf
+glob:Synthesis.suo

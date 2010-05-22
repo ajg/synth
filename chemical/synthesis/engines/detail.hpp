@@ -12,6 +12,7 @@
 #include <limits>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 #include <algorithm>
 #include <sys/stat.h>
@@ -69,6 +70,82 @@ namespace synthesis {
 namespace detail {
 
 //
+// lit [Deprecated]:
+//     String literal helper.
+////////////////////////////////////////////////////////////////////////////////
+
+template <class To, class From, std::size_t Length>
+inline std::basic_string<To> lit(From const (&source)[Length]) {
+    return std::basic_string<To>(source, source + Length - 1);
+}
+
+//
+// string_literal:
+//     Helper class to help widen literals on the spot when necessary.
+////////////////////////////////////////////////////////////////////////////////
+
+template <class From, std::size_t Length>
+struct string_literal {
+    From const (&source)[Length];
+    inline string_literal(From const (&source)[Length]) : source(source) {}
+
+    // We define these to more easily interoperate
+    // with the regex_* and algorithm::* functions.
+    typedef From const* const_iterator;
+    inline const_iterator begin() const { return source; }
+    inline const_iterator end() const { return source + Length - 1; }
+
+    template <class Char, class Traits, class Allocator>
+    inline operator std::basic_string<Char, Traits, Allocator>() const {
+        return std::basic_string<Char, Traits, Allocator>(source, source + Length - 1);
+    }
+
+    template <class Char, class Traits, class Allocator>
+    inline bool operator ==(std::basic_string<Char, Traits, Allocator> const& that) const {
+        return that.compare(*this) == 0;
+    }
+
+    template <class Char, class Traits, class Allocator>
+    friend inline bool operator ==( std::basic_string<Char, Traits, Allocator> const& that
+                                  , string_literal const& self
+                                  ) {
+        return that.compare(self) == 0;
+    }
+
+    template <class Char, class Traits, class Allocator>
+    inline bool operator !=(std::basic_string<Char, Traits, Allocator> const& that) const {
+        return that.compare(*this) != 0;
+    }
+
+    template <class Char, class Traits, class Allocator>
+    friend inline bool operator !=( std::basic_string<Char, Traits, Allocator> const& that
+                                  , string_literal const& self
+                                  ) {
+        return that.compare(self) != 0;
+    }
+};
+
+//
+// text:
+//     Creates string_literal objects from native literals.
+////////////////////////////////////////////////////////////////////////////////
+
+template <class From, std::size_t Length>
+inline string_literal<From, Length> text(From const (&source)[Length]) {
+    return string_literal<From, Length>(source);
+}
+
+//
+// VECTOR_0_IF
+////////////////////////////////////////////////////////////////////////////////
+
+#if (BOOST_VERSION > 104000) // 1.40+
+    #define VECTOR_0_IF(n, symbol) symbol
+#else
+    #define VECTOR_0_IF(n, symbol) BOOST_PP_EXPR_IF(n, symbol)
+#endif
+
+//
 // debugging aids
 ////////////////////////////////////////////////////////////////////////////////
 #define DUMP(e) ((std::cerr << std::boolalpha) << #e << " = " << e << std::endl)
@@ -118,12 +195,6 @@ BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, APPLY_AT, nil)
 template <class Engine, class Sequence, typename Engine::size_type Size>
 struct create_definitions;
 
-template <class Engine, class Sequence>
-struct define_sequence {
-    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
-    typedef typename create_definitions<Engine, Sequence, size>::type type;
-};
-
 #define DEFINITION(z, n, nil) \
     BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
         value_at_c<Sequence, n>::type::template \
@@ -132,15 +203,54 @@ struct define_sequence {
 #define CREATE_DEFINITIONS(z, n, nil) \
     template <class Engine, class Sequence> \
     struct create_definitions <Engine, Sequence, n> { \
-        typedef typename fusion::BOOST_PP_EXPR_IF(n, template) BOOST_PP_CAT(vector, n) \
-            BOOST_PP_EXPR_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            BOOST_PP_EXPR_IF(n, >) \
+        typedef typename fusion::VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
+            VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
+            VECTOR_0_IF(n, >) \
         type; \
     };
 
 BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 #undef CREATE_DEFINITIONS
 #undef DEFINITION
+
+//
+// create_definitions_extended
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Engine, class Sequence, typename Engine::size_type Size>
+struct create_definitions_extended;
+
+#define DEFINITION(z, n, nil) \
+    BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
+        value_at_c<Sequence, n>::type::template \
+            definition \
+                < typename Engine::char_type, typename Engine::regex_type, typename Engine::string_type, typename Engine::context_type, typename Engine::value_type \
+                , typename Engine::size_type, typename Engine::match_type, typename Engine::this_type,   typename Engine::options_type, typename Engine::array_type \
+                >
+
+#define CREATE_DEFINITIONS(z, n, nil) \
+    template <class Engine, class Sequence> \
+    struct create_definitions_extended <Engine, Sequence, n> { \
+        typedef typename fusion::VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
+            VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
+            VECTOR_0_IF(n, >) \
+        type; \
+    };
+
+
+BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
+#undef CREATE_DEFINITIONS
+#undef DEFINITION
+
+//
+// define_sequence
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Engine, class Sequence>
+struct define_sequence {
+    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
+    typedef typename create_definitions<Engine, Sequence, size>::type type;
+};
 
 //
 // append_tags
@@ -173,44 +283,6 @@ BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, APPEND_TAGS, nil)
 #undef ALTERNATIVES
 #undef APPEND_SYNTAX
 
-
-//
-// create_definitions_extended
-////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, class Sequence, typename Engine::size_type Size>
-struct create_definitions_extended;
-
-#define DEFINITION(z, n, nil) \
-    BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
-        value_at_c<Sequence, n>::type::template \
-            definition \
-                < typename Engine::char_type, typename Engine::regex_type, typename Engine::string_type, typename Engine::context_type, typename Engine::value_type \
-                , typename Engine::size_type, typename Engine::match_type, typename Engine::this_type,   typename Engine::options_type, typename Engine::array_type \
-                >
-	
-#if (BOOST_VERSION > 104000) // 1.40+
-    #define VECTOR_0_IF(n, symbol) symbol
-#else
-    #define VECTOR_0_IF(n, symbol) BOOST_PP_EXPR_IF(n, symbol)
-#endif
-
-#define CREATE_DEFINITIONS(z, n, nil) \
-    template <class Engine, class Sequence> \
-    struct create_definitions_extended <Engine, Sequence, n> { \
-        typedef typename fusion::VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
-            VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            VECTOR_0_IF(n, >) \
-        type; \
-    };
-
-	
-BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
-#undef CREATE_DEFINITIONS
-#undef VECTOR_0_IF
-#undef DEFINITION
-
-
 //
 // furthest_iterator:
 //     Function object that returns the iterator that is furthest along.
@@ -241,7 +313,7 @@ struct furthest_iterator {
         template <typename> static char (&f(...))[2];                      \
         static bool const value = sizeof(f<T>(0)) == 1;                    \
     }
-    
+
 //
 // element_initializer:
 //     Calls initialize() on the element unless the function doesn't exist.
@@ -281,7 +353,7 @@ struct tag_renderer {
     typename Engine::options_type const& options_;
 
     typedef void result_type;
-    
+
     template <class Tag>
     void operator ()(Tag const& tag, typename disable_if_c<Merge, Tag>::type* = 0) const {
         typedef typename Engine::options_type options_type;
@@ -391,8 +463,8 @@ inline bool is_one_of( String const& string
     BOOST_FOREACH(std::string const& option, options) {
         if (string == String(option.begin(), option.end())) return true;
     }
-    
-    return false; 
+
+    return false;
 }
 
 //
@@ -433,12 +505,12 @@ template <class String>
 inline String uri_encode(String const& string) {
     String result;
     result.reserve(string.size()); // Assume no encodings.
-    typedef typename String::value_type char_type; 
+    typedef typename String::value_type char_type;
 
     BOOST_FOREACH(char_type const c, string) {
         std::isalnum(c) || c == '_' || c == '-'
                         || c == '.' || c == '/'
-            ? result += c 
+            ? result += c
             : result += char_type('%') + to_hex<2>(c);
     }
 
@@ -457,12 +529,12 @@ inline String iri_encode(String const& string) {
 
     BOOST_FOREACH(char_type const c, string) {
         std::isalnum(c) || algorithm::is_any_of("/#%[]=:;$&()+,!?")(c)
-            ? result += c 
+            ? result += c
             : result += char_type('%') + to_hex<2>(c);
     }
 
     return result;
-}                     
+}
 
 //
 // escape_entities
@@ -826,73 +898,6 @@ struct standard_environment {
     }
 };
 
-
-//
-// lit [Deprecated]:
-//     String literal helper.
-////////////////////////////////////////////////////////////////////////////////
-
-template <class To, class From, std::size_t Length>
-inline std::basic_string<To> lit(From const (&source)[Length]) {
-    return std::basic_string<To>(source, source + Length - 1);
-}
-
-//
-// string_literal:
-//     Helper class to help widen literals on the spot when necessary.
-////////////////////////////////////////////////////////////////////////////////
-
-template <class From, std::size_t Length>
-struct string_literal {
-    From const (&source)[Length];
-    inline string_literal(From const (&source)[Length]) : source(source) {}
-
-    // We define these to more easily interoperate
-    // with the regex_* and algorithm::* functions.
-    typedef From const* const_iterator;
-    inline const_iterator begin() const { return source; }
-    inline const_iterator end() const { return source + Length - 1; }
-
-    template <class Char, class Traits, class Allocator>
-    inline operator std::basic_string<Char, Traits, Allocator>() const {
-        return std::basic_string<Char, Traits, Allocator>(source, source + Length - 1);
-    }
-
-    template <class Char, class Traits, class Allocator>
-    inline bool operator ==(std::basic_string<Char, Traits, Allocator> const& that) const {
-        return that.compare(*this) == 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    friend inline bool operator ==( std::basic_string<Char, Traits, Allocator> const& that
-                                  , string_literal const& self
-                                  ) {
-        return that.compare(self) == 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    inline bool operator !=(std::basic_string<Char, Traits, Allocator> const& that) const {
-        return that.compare(*this) != 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    friend inline bool operator !=( std::basic_string<Char, Traits, Allocator> const& that
-                                  , string_literal const& self
-                                  ) {
-        return that.compare(self) != 0;
-    }
-};
-
-//
-// text:
-//     Creates string_literal objects from native literals.
-////////////////////////////////////////////////////////////////////////////////
-
-template <class From, std::size_t Length>
-inline string_literal<From, Length> text(From const (&source)[Length]) {
-    return string_literal<From, Length>(source);
-}
-
 //
 // read_file:
 //     Slurps a whole file directly into a stream, using a buffer.
@@ -919,7 +924,7 @@ void read_file(FILE *const file, Stream& stream) {
 
 //
 // pipe:
-//     Nicer, safer interface to popen/pclose. 
+//     Nicer, safer interface to popen/pclose.
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
@@ -966,6 +971,7 @@ struct pipe : noncopyable {
     FILE* file_;
 };
 
+#undef VECTOR_0_IF
 
 }}} // namespace chemical::synthesis::detail
 

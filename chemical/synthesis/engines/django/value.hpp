@@ -15,9 +15,10 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
-#include <chemical/synthesis/value_facade.hpp>
-
 #include <boost/algorithm/string/classification.hpp>
+
+#include <chemical/synthesis/value_facade.hpp>
+#include <chemical/synthesis/adapters/numeric.hpp>
 
 namespace chemical {
 namespace synthesis {
@@ -52,7 +53,7 @@ struct value : value_facade<typename Iterator::value_type, value<Iterator> > {
   public:
 
     CHEMICAL_SYNTHESIS_VALUE_CONSTRUCTORS(value, base_type,
-        BOOST_PP_COMMA() safe_(false) )
+        BOOST_PP_COMMA() safe_(false) {})
 
   public:
 

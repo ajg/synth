@@ -4,8 +4,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#include <chemical/synthesis/engines/django.hpp>
 #include <chemical/testing.hpp>
+#include <chemical/synthesis/engines/django.hpp>
 
 typedef char char_t;
 namespace cs = chemical::synthesis;
@@ -17,14 +17,14 @@ typedef chemical::test_group<> group_type;
 group_type group_object("django tests");
 
 
-unit_test(addition) { 
+unit_test(addition) {
     string_template t("");
     string_template::context_type context;
     // ensure_equals(t.render_to_string(context), "ABC");
-}}
+}}}
 
 unit_test(subtraction) {
     ensure_equals("2-2=?", 2-2, 0);
-}}
+}}}
 
 

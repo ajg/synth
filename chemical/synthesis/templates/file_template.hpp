@@ -8,6 +8,7 @@
 #define CHEMICAL_SYNTHESIS_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
 
 #include <string>
+#include <cstring>
 #include <sys/stat.h>
 
 #ifdef CHEMICAL_SYNTHESIS_NO_WINDOWS_H

@@ -934,7 +934,7 @@ struct widthratio_tag {
             Match const& limit = get_nested<B>(match);
             Match const& width = get_nested<C>(match);
 
-            typename Value::number_type ratio const
+            typename Value::number_type const ratio
                 = engine.evaluate(value, context, options).count()
                 / engine.evaluate(limit, context, options).count()
                 * engine.evaluate(width, context, options).count();

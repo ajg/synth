@@ -136,17 +136,17 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     value_facade(none_t const&) : adapter_() {}
 
     template <class T>
-    value_facade(T const& t, 
+    value_facade(T const& t,
     typename disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new adapter<Traits, T>(t)) {}
 
     template <class T, class U>
-    value_facade(T const& t, U const& u, 
+    value_facade(T const& t, U const& u,
     typename disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new adapter<Traits, T>(t, u)) {}
 
     template <class T, class U, class V>
-    value_facade(T const& t, U const& u, V const& v, 
+    value_facade(T const& t, U const& u, V const& v,
     typename disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new adapter<Traits, T>(t, u, v)) {}
 
@@ -274,24 +274,24 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     boost::shared_ptr<abstract_type const> adapter_;
 };
 
-#define CHEMICAL_SYNTHESIS_VALUE_CONSTRUCTORS(name, base, init) \
+#define CHEMICAL_SYNTHESIS_VALUE_CONSTRUCTORS(name, base, rest) \
     name() \
-        : base() init {} \
+        : base() rest \
     \
     name(none_t const&) \
-        : base() init {} \
+        : base() rest \
     \
     template <class T> \
     name(T const& t) \
-        : base(t) init {} \
+        : base(t) rest \
     \
     template <class T, class U> \
     name(T const& t, U const& u) \
-        : base(t, u) init {} \
+        : base(t, u) rest \
     \
     template <class T, class U, class V> \
     name(T const& t, U const& u, V const& v) \
-        : base(t, u, v) init {}
+        : base(t, u, v) rest
 
 }} // namespace chemical::synthesis
 

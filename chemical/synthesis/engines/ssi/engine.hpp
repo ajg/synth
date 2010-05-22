@@ -46,8 +46,8 @@ struct options {
 
     string_type size_format;
     string_type time_format;
-    string_type error_message;
     string_type echo_message;
+    string_type error_message;
 };
 
 template < class Library = ssi::default_library
@@ -60,7 +60,7 @@ typedef engine engine_type;
 
 template <class BidirectionalIterator>
 struct definition : base_definition< BidirectionalIterator
-                                   , definition<BidirectionalIterator> 
+                                   , definition<BidirectionalIterator>
                                    > {
   public:
     // Constants:
@@ -68,11 +68,11 @@ struct definition : base_definition< BidirectionalIterator
     BOOST_STATIC_CONSTANT(bool, throw_on_errors = ThrowOnErrors);
 
   public:
-  
+
     typedef definition this_type;
     typedef base_definition< BidirectionalIterator
                            , this_type> base_type;
-    
+
     typedef typename base_type::id_type         id_type;
     typedef typename base_type::size_type       size_type;
     typedef typename base_type::char_type       char_type;
@@ -83,7 +83,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::stream_type     stream_type;
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
-    
+
     typedef Library                           library_type;
     typedef Environment                       environment_type;
     typedef ssi::value<char_type>             value_type;
@@ -136,7 +136,7 @@ struct definition : base_definition< BidirectionalIterator
             = as_xpr(tag_start);
             ;
 
-        initialize_grammar();
+        this->initialize_grammar();
         fusion::for_each(tags_, detail::construct
             <detail::element_initializer<this_type> >(*this));
         detail::append_tags<this_type, tags_type::size::value>(*this);
@@ -176,10 +176,10 @@ struct definition : base_definition< BidirectionalIterator
             throw_exception(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
-        else if(optional<environment_type::mapped_type const>
-                const value = detail::find_mapped_value(
-                   convert<char>(name), environment)) {
-            return convert<char_type>(*value);
+        else if(optional<typename environment_type::mapped_type const>
+                       const value = detail::find_mapped_value(
+                   this->template convert<char>(name), environment)) {
+            return this->template convert<char_type>(*value);
         }
         // Otherwise, use the undefined echo message.
         else {
@@ -202,7 +202,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = convert<char>(filepath);
+        std::string const filepath_ = this->template convert<char>(filepath);
         file_template_type(filepath_).render(stream, context, options);
     }
 
@@ -239,7 +239,7 @@ struct definition : base_definition< BidirectionalIterator
     }
     catch (std::exception const&) {
         if (throw_on_errors) throw;
-        stream << options.error_message; 
+        stream << options.error_message;
     }
 
     void render_match( stream_type&        stream
@@ -276,7 +276,7 @@ struct definition : base_definition< BidirectionalIterator
     string_type const tag_end;
 
   public:
-  
+
     regex_type tag, text, block, skipper;
     regex_type name, attribute, quoted_value;
     environment_type const environment;
@@ -287,7 +287,7 @@ struct definition : base_definition< BidirectionalIterator
     whitelist_type whitelist_;
     tag_definitions_type  tags_;
     std::vector<id_type>  tag_ids_;
-    
+
     template <class Engine, typename Engine::tags_type::size::value_type Size>
     friend struct detail::append_tags;
 

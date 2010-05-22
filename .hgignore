@@ -1,10 +1,19 @@
+# Scons
 ^.scons
+
+# Binaries
 \.o$
 glob:synthesis
-glob:misc
+
+# Code::Blocks
+glob:Synthesis.depend
+glob:Synthesis.layout
+
+# Visual Studio 2010
+glob:ipch
 glob:Debug
 glob:Release
-glob:ipch
-glob:Synthesis.opensdf
-glob:Synthesis.sdf
 glob:Synthesis.suo
+glob:Synthesis.sdf
+glob:Synthesis.opensdf
+

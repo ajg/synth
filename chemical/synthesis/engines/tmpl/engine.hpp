@@ -135,7 +135,7 @@ struct definition : base_definition< BidirectionalIterator
             | alt_open >> prefix >> +(~before(alt_close) >> _) >> alt_close
             ;
 
-        initialize_grammar();
+        this->initialize_grammar();
         fusion::for_each(tags_, detail::construct
             <detail::element_initializer<this_type> >(*this));
         detail::append_tags<this_type, tags_type::size::value>(*this);
@@ -206,7 +206,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = convert<char>(filepath);
+        std::string const filepath_ = this->template convert<char>(filepath);
         file_template_type(filepath_).render(stream, context, options);
     }
 
@@ -264,7 +264,7 @@ struct definition : base_definition< BidirectionalIterator
     string_type const alt_close;
 
   public:
-  
+
     regex_type tag, text, block, skipper;
     regex_type name, attribute, name_attribute;
     regex_type plain_attribute, quoted_attribute;

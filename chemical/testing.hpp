@@ -18,7 +18,7 @@
 
 namespace chemical {
 namespace detail {
- 
+
 #ifdef _WIN32
   #define CHEMICAL_WIN32_DIVERGE(a, b) a
 #else
@@ -30,7 +30,7 @@ namespace detail {
   #define TEST_NUMBER() (__COUNTER__ - chemical::detail::__counter_begin)
 #else
   #define TEST_NUMBER() (__LINE__ >> 2)
-#endif 
+#endif
 
 
 #define ensure_throws(type, expr) \
@@ -40,7 +40,7 @@ namespace detail {
 
 
 #define unit_test(name) \
-    template<> template<> \
+    namespace tut { template<> template<> \
     void group_type::object::test<TEST_NUMBER()>() { \
         set_test_name(#name);
 
@@ -58,13 +58,13 @@ struct test_group : tut::test_group<T> {
 struct test_suite {
   public:
 
-    test_suite(std::string const& name) 
+    test_suite(std::string const& name)
             : name_(name) {
         runner_.get().set_callback(&reporter_);
     }
 
     bool run() {
-        std::cout << "Running the " << name_ 
+        std::cout << "Running the " << name_
                   << " test suite:" << std::endl;
         runner_.get().run_tests();
         return !reporter_.all_ok();

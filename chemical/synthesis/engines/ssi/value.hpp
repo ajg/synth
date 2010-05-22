@@ -25,7 +25,7 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    CHEMICAL_SYNTHESIS_VALUE_CONSTRUCTORS(value, base_type, )
+    CHEMICAL_SYNTHESIS_VALUE_CONSTRUCTORS(value, base_type, {})
 
   public:
 

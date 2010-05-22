@@ -73,7 +73,7 @@ struct definition : base_definition< BidirectionalIterator
     struct define_sequence;
 
   public:
-  
+
     typedef definition this_type;
     typedef base_definition< BidirectionalIterator
                            , this_type> base_type;
@@ -172,7 +172,7 @@ struct definition : base_definition< BidirectionalIterator
                     | block_close | comment_close | variable_close
             ;
 
-        initialize_grammar();
+        this->initialize_grammar();
         fusion::for_each(tags_, detail::construct
             <detail::element_initializer<this_type> >(*this));
         fusion::for_each(filters_, detail::construct<append_filter>(*this));
@@ -221,7 +221,7 @@ struct definition : base_definition< BidirectionalIterator
                 catch (missing_variable const& e) {
                     string_type const string(token.first, token.second);
 
-                    if (convert<char>(string) != e.name) {
+                    if (this->template convert<char>(string) != e.name) {
                         throw_exception(e);
                     }
 
@@ -258,7 +258,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = convert<char>(filepath);
+        std::string const filepath_ = this->template convert<char>(filepath);
         file_template_type(filepath_).render(stream, context, options);
     }
 
@@ -359,7 +359,8 @@ struct definition : base_definition< BidirectionalIterator
                 value.token(literal[0]);
             }
             else {
-                throw_exception(missing_variable(convert<char>(string)));
+                throw_exception(missing_variable(
+                    this->template convert<char>(string)));
             }
         }
         else {
@@ -406,7 +407,8 @@ struct definition : base_definition< BidirectionalIterator
                 it = value.find_attribute(attribute);
 
             if (it == value.end()) {
-                std::string const name = convert<char>(attribute.to_string());
+                std::string const name = this->template
+                    convert<char>(attribute.to_string());
                 throw_exception(missing_attribute(name));
             }
 
@@ -478,7 +480,7 @@ struct definition : base_definition< BidirectionalIterator
     filter_definitions_type  filters_;
     std::vector<id_type>     tag_ids_;
     std::vector<string_type> filter_names_;
-    
+
     template <class Engine, typename Engine::tags_type::size::value_type Size>
     friend struct detail::append_tags;
 

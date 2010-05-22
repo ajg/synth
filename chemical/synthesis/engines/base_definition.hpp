@@ -45,13 +45,11 @@ struct base_definition : noncopyable {
     typedef base_definition                         this_type;
     typedef std::size_t                             size_type;
     typedef typename iterator_type::value_type      char_type;
-    
+
     typedef xpressive::regex_id_type                id_type;
     typedef xpressive::basic_regex<iterator_type>   regex_type;
     typedef xpressive::match_results<iterator_type> frame_type;
     typedef xpressive::match_results<iterator_type> match_type;
-    typedef xpressive::basic_regex<iterator_type>   regex_type;
-    typedef match_type                              frame_type;
     typedef std::basic_string<char_type>            string_type;
     typedef std::basic_ostream<char_type>           stream_type;
 
@@ -65,10 +63,10 @@ struct base_definition : noncopyable {
         definition_type& self = static_cast<definition_type&>(*this);
 
         self.text = +(~before(self.skipper) >> _);
-        
+
         // Using skip is slightly slower than the below.
         // block = skip(text[...])(*tag[...]);
-        
+
         self.block = *keep // causes actions (i.e. furthest) to execute eagerly.
             ( xpressive::ref(self.tag)  [iterator_ = furthest(iterator_, _)]
             | xpressive::ref(self.text) [iterator_ = furthest(iterator_, _)]
@@ -123,8 +121,8 @@ struct base_definition : noncopyable {
         }
 
         // On failure, throw a semi-informative exception.
-        size_type   const room(std::distance(furthest, end_));
-        string_type const site(furthest, furthest + (std::min)(room, 30u));
+        size_type   const room(std::distance(furthest, end_)), limit(30);
+        string_type const site(furthest, furthest + (std::min)(room, limit));
         string_type const line(site.begin(), detail::find_or('\n', site, site.end()));
         throw_exception(parsing_error(convert<char>(line)));
     }

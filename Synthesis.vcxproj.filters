@@ -15,16 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tests\django.cpp">
+    <ClCompile Include="synthesis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="synthesis.cpp">
+    <ClCompile Include="tests\ssi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\tmpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ssi.cpp">
+    <ClCompile Include="tests\django.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

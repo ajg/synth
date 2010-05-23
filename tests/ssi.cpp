@@ -23,8 +23,6 @@ typedef cs::string_template<char_t, engine_type> string_template;
 typedef string_template::string_type string_type;
 
 static string_template::options_type const default_options;
-    
-
 
 unit_test(html tags) {
     string_template const t("<foo>\nA foo <bar /> element.\n</foo>");

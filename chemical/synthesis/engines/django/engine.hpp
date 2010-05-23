@@ -96,14 +96,11 @@ struct definition : base_definition< BidirectionalIterator
     typedef options<iterator_type, value_type> options_type;
     typedef std::map<string_type, value_type>  context_type;
     typedef std::vector<value_type>            array_type;
-
-    typedef typename define_sequence<tags_type>::type    tag_definitions_type;
-    typedef typename define_sequence<filters_type>::type filter_definitions_type;
-    // Define string iterators/regexes specifically. This is useful when
-    // they are different from the main iterator_type and regex_type (e.g.
-    // when the latter two involve the use of a file_iterator.)
-    typedef typename string_type::const_iterator         string_iterator_type;
-    typedef xpressive::basic_regex<string_iterator_type> string_regex_type;
+    
+    typedef detail::indexable_sequence<this_type, tags_type, 
+        id_type, detail::create_definitions_extended>      tag_sequence_type;
+    typedef detail::indexable_sequence<this_type, filters_type, 
+        string_type, detail::create_definitions_extended>  filter_sequence_type;
 
   public:
 
@@ -173,10 +170,12 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_, detail::construct
+        fusion::for_each(tags_.definition, detail::construct
             <detail::element_initializer<this_type> >(*this));
-        fusion::for_each(filters_, detail::construct<append_filter>(*this));
-        detail::append_tags<this_type, tags_type::size::value>(*this);
+        fusion::for_each(filters_.definition,
+            detail::construct<append_filter>(*this));
+        detail::index_sequence<this_type, tag_sequence_type,
+            &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:
@@ -188,7 +187,7 @@ struct definition : base_definition< BidirectionalIterator
                            , options_type const& options
                            ) const {
         process_filter const processor = { *this, value, name, args, context, options };
-        return detail::find_by_index(*this, filters_, filter_names_, name, processor);
+        return detail::find_by_index(*this, filters_.definition, filters_.index, name, processor);
     }
 
     template <char_type Delimiter>
@@ -290,7 +289,7 @@ struct definition : base_definition< BidirectionalIterator
         // "nest" the match, so we use it directly instead.
         match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        find_by_index(*this, tags_, tag_ids_, tag.regex_id(), renderer);
+        find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
 
     void render_match( stream_type&        stream
@@ -437,18 +436,12 @@ struct definition : base_definition< BidirectionalIterator
         }
     };
 
-    template <class Sequence>
-    struct define_sequence {
-        BOOST_STATIC_CONSTANT(size_type, size = Sequence::size::value);
-        typedef typename detail::create_definitions_extended<this_type, Sequence, size>::type type;
-    };
-
     struct append_filter {
         this_type& self;
 
         template <class Filter>
         void operator()(Filter const& filter) const {
-            self.filter_names_.push_back(filter.name());
+            self.filters_.index.push_back(filter.name());
         }
     };
 
@@ -476,13 +469,8 @@ struct definition : base_definition< BidirectionalIterator
 
   private:
 
-    tag_definitions_type     tags_;
-    filter_definitions_type  filters_;
-    std::vector<id_type>     tag_ids_;
-    std::vector<string_type> filter_names_;
-
-    template <class Engine, typename Engine::tags_type::size::value_type Size>
-    friend struct detail::append_tags;
+    tag_sequence_type    tags_;
+    filter_sequence_type filters_;
 
 }; // definition
 

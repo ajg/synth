@@ -85,9 +85,8 @@ struct definition : base_definition< BidirectionalIterator
     typedef library_type                                 tags_type;
     typedef std::map<string_type, value_type, less_type> context_type;
     typedef std::vector<value_type>                      array_type;
-    typedef std::vector<id_type>                         index_type;
-    typedef typename detail::define_sequence
-        <this_type, tags_type>::type                     tag_definitions_type;
+    typedef detail::indexable_sequence<this_type, tags_type, 
+        id_type, detail::create_definitions>             tag_sequence_type;
 
   public:
 
@@ -137,10 +136,10 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_, detail::construct
+        fusion::for_each(tags_.definition, detail::construct
             <detail::element_initializer<this_type> >(*this));
-        detail::append_tags<this_type, &this_type::tags_,
-            &this_type::tag_ids_, tag_definitions_type::size::value>(*this);
+        detail::index_sequence<this_type, tag_sequence_type,
+            &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:
@@ -240,7 +239,7 @@ struct definition : base_definition< BidirectionalIterator
         // "nest" the match, so we use it directly instead.
         match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        find_by_index(*this, tags_, tag_ids_, tag.regex_id(), renderer);
+        find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
 
 
@@ -273,9 +272,8 @@ struct definition : base_definition< BidirectionalIterator
     value_type const default_value;
 
   private:
-
-    tag_definitions_type tags_;
-    index_type tag_ids_;
+  
+    tag_sequence_type tags_;
 
 }; // definition
 

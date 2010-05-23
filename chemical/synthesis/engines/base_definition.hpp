@@ -35,7 +35,7 @@ namespace synthesis {
 
 template <class BidirectionalIterator, class Definition>
 struct base_definition : noncopyable {
-  protected:
+  public:
 
     // Parametrized types:
     typedef BidirectionalIterator iterator_type;
@@ -52,6 +52,13 @@ struct base_definition : noncopyable {
     typedef xpressive::match_results<iterator_type> match_type;
     typedef std::basic_string<char_type>            string_type;
     typedef std::basic_ostream<char_type>           stream_type;
+
+    // Define string iterators/regexes specifically. This is useful when
+    // they are different from the main iterator_type and regex_type (e.g.
+    // when the latter two involve the use of a file_iterator.)
+    typedef typename string_type::const_iterator           string_iterator_type;
+    typedef xpressive::basic_regex<string_iterator_type>   string_regex_type;
+    typedef xpressive::match_results<string_iterator_type> string_match_type;
 
   protected:
 

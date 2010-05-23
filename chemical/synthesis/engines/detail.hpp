@@ -10,6 +10,7 @@
 #include <map>
 #include <ctime>
 #include <limits>
+#include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -23,14 +24,18 @@
 
 #include <boost/assert.hpp>
 #include <boost/random.hpp>
-#include <boost/mpl/if.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/type_traits/is_integral.hpp>
+
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/or.hpp>
+#include <boost/mpl/bool.hpp>
 
 #include <boost/xpressive/basic_regex.hpp>
 #include <boost/xpressive/match_results.hpp>
+
+#include <boost/type_traits/is_integral.hpp>
 
 #include <boost/date_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -243,50 +248,63 @@ BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 #undef DEFINITION
 
 //
-// define_sequence
+// indexable_sequence
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Engine, class Sequence>
-struct define_sequence {
-    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
-    typedef typename create_definitions<Engine, Sequence, size>::type type;
+template <class Engine, class Sequence, class Key,
+          template <class E, class S, typename Engine::size_type K> class Definer>
+struct indexable_sequence {
+  public:
+   
+    typedef Engine                engine_type;
+    typedef Sequence              sequence_type;
+    typedef Key                   key_type;
+    typedef std::vector<key_type> index_type;
+    typedef typename Sequence::size::value_type size_type;
+    BOOST_STATIC_CONSTANT(size_type, size = Sequence::size::value);
+    typedef typename Definer<Engine, Sequence, size>::type definition_type;
+
+  public:
+
+    definition_type definition;
+    index_type      index;
 };
 
 //
-// append_tags
+// index_sequence
 ////////////////////////////////////////////////////////////////////////////////
 
 template < class Engine
-         , typename Engine::tag_definitions_type Engine::*Tags
-         , typename Engine::index_type Engine::*Index
-         , typename Engine::tag_definitions_type::size::value_type Size>
-struct append_tags;
+         , class Indexable
+         , Indexable Engine::*Sequence
+         , typename Indexable::size_type Size>
+struct index_sequence;
 
-#define APPEND_SYNTAX(z, n, nil) \
+#define PUSH_SYNTAX(z, n, nil) \
     typename Engine::regex_type const BOOST_PP_CAT(r, n) = \
-        fusion::at_c<n>(engine.*Tags).syntax(engine); \
-    (engine.*Index).push_back(BOOST_PP_CAT(r, n).regex_id());
+        fusion::at_c<n>((engine.*Sequence).definition).syntax(engine); \
+    (engine.*Sequence).index.push_back(BOOST_PP_CAT(r, n).regex_id());
 
 #define ALTERNATIVES(z, n, nil) \
     BOOST_PP_IF(n, |, engine.tag =) BOOST_PP_CAT(r, n)
 
-#define APPEND_TAGS(z, n, nil) \
+#define INDEX_SEQUENCE(z, n, nil) \
     template < class Engine \
-             , typename Engine::tag_definitions_type Engine::*Tags \
-             , typename Engine::index_type Engine::*Index> \
-    struct append_tags <Engine, Tags, Index, n> { \
+             , class Indexable \
+             , Indexable Engine::*Sequence> \
+    struct index_sequence <Engine, Indexable, Sequence, n> { \
         Engine& engine; \
-        append_tags(Engine& engine) : engine(engine) { \
-            (engine.*Index).reserve(n); \
-            BOOST_PP_REPEAT(n, APPEND_SYNTAX, nil) \
+        index_sequence(Engine& engine) : engine(engine) { \
+            (engine.*Sequence).index.reserve(n); \
+            BOOST_PP_REPEAT(n, PUSH_SYNTAX, nil) \
             BOOST_PP_REPEAT(n, ALTERNATIVES, nil) BOOST_PP_EXPR_IF(n, ;) \
         } \
     };
 
-BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, APPEND_TAGS, nil)
-#undef APPEND_TAGS
+BOOST_PP_REPEAT(CHEMICAL_SYNTHESIS_SEQUENCE_LIMIT, INDEX_SEQUENCE, nil)
+#undef INDEX_SEQUENCE
 #undef ALTERNATIVES
-#undef APPEND_SYNTAX
+#undef PUSH_SYNTAX
 
 //
 // furthest_iterator:
@@ -308,16 +326,20 @@ struct furthest_iterator {
 //
 // HAS_MEMBER_FUNCTION:
 //     Adapted from Johannes Schaub (litb)'s.
+//     NB: Apparently will not detect inherited methods.
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CHEMICAL_DEFINE_MEMBER_FUNCTION_PREDICATE(name)                    \
-    template<typename T, typename Sign>                                    \
-    struct BOOST_PP_CAT(has_, name) {                                      \
-        template <typename U, U> struct check;                             \
-        template <typename V> static char (&f(check<Sign, &V::name>*))[1]; \
-        template <typename> static char (&f(...))[2];                      \
-        static bool const value = sizeof(f<T>(0)) == 1;                    \
-    }
+#define CHEMICAL_DEFINE_METHOD_PREDICATE(name) \
+    template <class T, class Signature> \
+    struct BOOST_PP_CAT(base_has_, name) { \
+        template <typename U, U> struct check; \
+        template <typename V> static char (&f(check<Signature, &V::name>*))[1]; \
+        template <typename> static char (&f(...))[2]; \
+        static bool const value = sizeof(f<T>(0)) == 1; \
+    }; \
+    template <class T, class Signature> \
+    struct BOOST_PP_CAT(has_, name) : \
+        mpl::bool_<BOOST_PP_CAT(base_has_, name)<T, Signature>::value>::type {}
 
 //
 // element_initializer:
@@ -327,20 +349,26 @@ struct furthest_iterator {
 template <class Engine>
 struct element_initializer {
   private:
-    CHEMICAL_DEFINE_MEMBER_FUNCTION_PREDICATE(initialize);
+    CHEMICAL_DEFINE_METHOD_PREDICATE(initialize);
 
   public:
     Engine const& self;
 
+    template <class T>
+    struct has_initializer : mpl::or_
+        < has_initialize<T, void(T::*)(Engine const&)>
+        , has_initialize<T, void(T::*)(Engine const&) const>
+        >::type {};
+
     template <class Element>
-    void operator ()( Element& element, typename enable_if<has_initialize<Element
-                    , void(Element::*)(Engine const&)> >::type* = 0) const {
+    void operator ()(Element& element, typename
+            enable_if<has_initializer<Element> >::type* = 0) const {
         element.initialize(self);
     }
 
     template <class Element>
-    void operator ()( Element& element, typename disable_if<has_initialize<Element
-                    , void(Element::*)(Engine const&)> >::type* = 0) const {
+    void operator ()(Element& element, typename
+            disable_if<has_initializer<Element> >::type* = 0) const {
         // Do nothing.
     }
 };
@@ -491,11 +519,11 @@ inline void validate_option( String const& value
 ////////////////////////////////////////////////////////////////////////////////
 
 template <std::size_t Width, class Char>
-inline static typename std::basic_string<Char> to_hex(Char const c) {
+inline static std::basic_string<Char> to_hex(Char const c) {
     // TODO: Ensure that given the width, the character
     //       passed in won't overflow as a number.
     // BOOST_STATIC_ASSERT(sizeof(Char) ... Width);
-    typename std::basic_ostringstream<Char> stream;
+    std::basic_ostringstream<Char> stream;
     stream << std::hex << std::uppercase << std::setw(Width);
     stream << std::setfill(Char('0')) << static_cast<uintmax_t>(c);
     BOOST_ASSERT(stream);
@@ -838,7 +866,7 @@ inline static optional<typename Container::mapped_type const/*&*/> find_mapped_v
 template <class Needle, class Key, class Value, class Compare, class Allocator>
 inline static optional<Value const&> find_value(
         Needle const& needle, std::map<Key, Value, Compare, Allocator> const& map) {
-    typedef typename std::map<Key, Value, Compare, Allocator> map_type;
+    typedef std::map<Key, Value, Compare, Allocator> map_type;
     typename map_type::const_iterator const it = map.find(needle);
     if (it == map.end()) return none; else return it->second;
 }

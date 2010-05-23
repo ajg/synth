@@ -13,6 +13,7 @@
 
 typedef chemical::test_group<> group_type;
 group_type group_object("ssi tests");
+CHEMICAL_TESTING_BEGIN
 
 typedef char char_t;
 namespace cs = chemical::synthesis;
@@ -22,6 +23,7 @@ typedef cs::string_template<char_t, engine_type> string_template;
 typedef string_template::string_type string_type;
 
 static string_template::options_type const default_options;
+    
 
 
 unit_test(html tags) {
@@ -132,6 +134,8 @@ unit_test(fsize directive abbrev) {
 unit_test(flastmod directive) {
     string_template const t(
         "<!--#flastmod file='LICENSE_1_0.txt' -->");
+    std::cout << "Saturday, 22-May-2010 05:30:42" << std::endl;
+    std::cout << boost::posix_time::time_from_string("Saturday, 22-May-2010 05:30:42") << std::endl;
     ensure_equals(t.render_to_string(), "Saturday, 22-May-2010 05:30:42");
 }}}
 

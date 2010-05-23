@@ -256,23 +256,28 @@ struct define_sequence {
 // append_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Engine, typename Engine::tags_type::size::value_type Size>
+template < class Engine
+         , typename Engine::tag_definitions_type Engine::*Tags
+         , typename Engine::index_type Engine::*Index
+         , typename Engine::tag_definitions_type::size::value_type Size>
 struct append_tags;
 
 #define APPEND_SYNTAX(z, n, nil) \
     typename Engine::regex_type const BOOST_PP_CAT(r, n) = \
-        fusion::at_c<n>(engine.tags_).syntax(engine); \
-    engine.tag_ids_.push_back(BOOST_PP_CAT(r, n).regex_id());
+        fusion::at_c<n>(engine.*Tags).syntax(engine); \
+    (engine.*Index).push_back(BOOST_PP_CAT(r, n).regex_id());
 
 #define ALTERNATIVES(z, n, nil) \
     BOOST_PP_IF(n, |, engine.tag =) BOOST_PP_CAT(r, n)
 
 #define APPEND_TAGS(z, n, nil) \
-    template <class Engine> \
-    struct append_tags <Engine, n> { \
+    template < class Engine \
+             , typename Engine::tag_definitions_type Engine::*Tags \
+             , typename Engine::index_type Engine::*Index> \
+    struct append_tags <Engine, Tags, Index, n> { \
         Engine& engine; \
         append_tags(Engine& engine) : engine(engine) { \
-            engine.tag_ids_.reserve(n); \
+            (engine.*Index).reserve(n); \
             BOOST_PP_REPEAT(n, APPEND_SYNTAX, nil) \
             BOOST_PP_REPEAT(n, ALTERNATIVES, nil) BOOST_PP_EXPR_IF(n, ;) \
         } \

@@ -9,7 +9,7 @@ env = Environment(CPPPATH  = ['.'],
                   # TODO: '-Wextra'
 
 synthesis = env.Clone()
-synthesis.Program(target = "synthesis", source = 
-	["synthesis.cpp", "tests/ssi.cpp", 
-                          "tests/tmpl.cpp", 
-                          "tests/django.cpp"])
+synthesis.Program(target = "synthesis", source =
+    ["synthesis.cpp", "tests/ssi.cpp",
+                      "tests/tmpl.cpp",
+                      "tests/django.cpp"])

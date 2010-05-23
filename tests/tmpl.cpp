@@ -43,6 +43,7 @@ struct context_data {
 
 typedef chemical::test_group<context_data> group_type;
 group_type group_object("tmpl tests");
+CHEMICAL_TESTING_BEGIN
 
 
 unit_test(single tag) {

@@ -92,6 +92,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef std::map<string_type, value_type> context_type;
     typedef library_type                      tags_type;
     typedef options<string_type>              options_type;
+    typedef std::vector<id_type>              index_type;
     typedef typename detail::define_sequence
         <this_type, tags_type>::type          tag_definitions_type;
     // Define string iterators/regexes specifically. This is useful when
@@ -139,7 +140,8 @@ struct definition : base_definition< BidirectionalIterator
         this->initialize_grammar();
         fusion::for_each(tags_, detail::construct
             <detail::element_initializer<this_type> >(*this));
-        detail::append_tags<this_type, tags_type::size::value>(*this);
+        detail::append_tags<this_type, &this_type::tags_,
+            &this_type::tag_ids_, tag_definitions_type::size::value>(*this);
     }
 
   public:
@@ -285,11 +287,8 @@ struct definition : base_definition< BidirectionalIterator
   private:
 
     whitelist_type whitelist_;
-    tag_definitions_type  tags_;
-    std::vector<id_type>  tag_ids_;
-
-    template <class Engine, typename Engine::tags_type::size::value_type Size>
-    friend struct detail::append_tags;
+    tag_definitions_type tags_;
+    index_type tag_ids_;
 
 }; // definition
 

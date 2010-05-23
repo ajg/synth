@@ -2,17 +2,17 @@
 {{3.3}}
 {{3.30}}
 
-{{34.23234|floatformat }} 	== 34.2
-{{34.00000|floatformat }} 	== 34
-{{34.26000|floatformat }} 	== 34.3
+{{34.23234|floatformat }} == 34.2
+{{34.00000|floatformat }} == 34
+{{34.26000|floatformat }} == 34.3
 
 {{34.23234|floatformat:3 }} == 34.232
 {{34.00000|floatformat:3 }} == 34.000
 {{34.26000|floatformat:3 }} == 34.260
 
-{{34.23234|floatformat:"-3" }}  == 34.232
-{{34.00000|floatformat:"-3" }} 	== 34
-{{34.26000|floatformat:"-3" }} 	== 34.260
+{{34.23234|floatformat:"-3" }} == 34.232
+{{34.00000|floatformat:"-3" }} == 34
+{{34.26000|floatformat:"-3" }} == 34.260
 
 
 {% for k, v in a_string_array %}

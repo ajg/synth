@@ -15,6 +15,7 @@ typedef cs::string_template<char_t, engine_type> string_template;
 
 typedef chemical::test_group<> group_type;
 group_type group_object("django tests");
+CHEMICAL_TESTING_BEGIN
 
 
 unit_test(addition) {

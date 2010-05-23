@@ -132,16 +132,17 @@ unit_test(fsize directive abbrev) {
 unit_test(flastmod directive) {
     string_template const t(
         "<!--#flastmod file='LICENSE_1_0.txt' -->");
-    std::cout << "Saturday, 22-May-2010 05:30:42" << std::endl;
-    std::cout << boost::posix_time::time_from_string("Saturday, 22-May-2010 05:30:42") << std::endl;
-    ensure_equals(t.render_to_string(), "Saturday, 22-May-2010 05:30:42");
+    ensure_equals(t.render_to_string(), cs::detail::format_time(default_options.time_format,
+        boost::posix_time::from_time_t(cs::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
 }}}
 
 unit_test(flastmod directive custom) {
+    string_type const format("%H:%M:%S-%d/%m/%y");
     string_template const t(
-        "<!--#config timefmt='%H:%M:%S-%d/%m/%y' -->"
+        "<!--#config timefmt='" + format + "' -->"
         "<!--#flastmod file='LICENSE_1_0.txt' -->");
-    ensure_equals(t.render_to_string(), "05:30:42-22/05/10");
+    ensure_equals(t.render_to_string(), cs::detail::format_time(format,
+        boost::posix_time::from_time_t(cs::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
 }}}
 
 unit_test(directive with error) {

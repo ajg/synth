@@ -29,6 +29,7 @@
     <None Include="samples\variables.tmpl" />
     <None Include="samples\whatever.tpl" />
     <None Include="SConstruct" />
+    <None Include="Synthesis.cbp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chemical\synthesis.hpp" />

@@ -41,6 +41,7 @@
     <None Include="samples\whatever.tpl" />
     <None Include="samples\variables.tmpl" />
     <None Include="samples\variables.shtml" />
+    <None Include="Synthesis.cbp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chemical\synthesis.hpp">

@@ -36,23 +36,11 @@ struct missing_variable;
 struct missing_attribute;
 
 namespace django {
-namespace {
-
-    BOOST_STATIC_CONSTANT(std::size_t, A = 1);
-    BOOST_STATIC_CONSTANT(std::size_t, B = 2);
-    BOOST_STATIC_CONSTANT(std::size_t, C = 3);
-    BOOST_STATIC_CONSTANT(std::size_t, D = 4);
-    BOOST_STATIC_CONSTANT(std::size_t, E = 5);
-    BOOST_STATIC_CONSTANT(std::size_t, F = 6);
-    BOOST_STATIC_CONSTANT(std::size_t, G = 7);
-    BOOST_STATIC_CONSTANT(std::size_t, H = 8);
-    BOOST_STATIC_CONSTANT(std::size_t, I = 9);
-
-} // anonymous
 
 using detail::text;
 using detail::get_nested;
 using detail::operator ==;
+using namespace detail::placeholders;
 
 #define TAG(content) \
     engine.block_open >> *_s >> content >> *_s >> engine.block_close

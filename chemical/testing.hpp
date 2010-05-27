@@ -7,6 +7,7 @@
 #ifndef CHEMICAL_TESTING_HPP_INCLUDED
 #define CHEMICAL_TESTING_HPP_INCLUDED
 
+#include <string>
 #include <iostream>
 
 #include <tut/tut.hpp>
@@ -112,6 +113,19 @@ struct test_suite {
                   << " test suite:" << std::endl;
         runner_.get().run_tests();
         return !reporter_.all_ok();
+    }
+
+    bool run(std::string const group) 
+    try {
+        std::cout << "Running group" << group
+                  << " of the " << name_
+                  << " test suite:" << std::endl;
+        runner_.get().run_tests(group);
+        return !reporter_.all_ok();
+    }
+    catch (tut::no_such_group const&) {
+        std::cerr << "No such group: " << group << std::endl;
+        return false;
     }
 
   private:

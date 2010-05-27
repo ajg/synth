@@ -81,25 +81,97 @@ unit_test(substitution in set directive) {
     ensure_equals(t.render_to_string(), "A_B_C");
 }}}
 
-/*
-unit_test(if directive) {
-    std::cout << std::endl << "======================================" << std::endl;
-    string_template t1("<!--#if -->foo<!--#endif -->");
-    t1.render_to_string();
-    std::cout << std::endl << "======================================" << std::endl;
-    string_template t2("<!--#if -->foo<!--#else -->bar<!--#endif -->");
-    t2.render_to_string();
-    std::cout << std::endl << "======================================" << std::endl;
-}}}*/
-/*
-unit_test(config directive) {
-    // std::cout << std::endl << string_template("<!--#echo var='DATE_LOCAL' -->").render_to_string() << std::endl;
 
-    string_template("<!--#config sizefmt='A' -->").render_to_string();
-    string_template("<!--#config sizefmt='A' timefmt='B' -->").render_to_string();
-    string_template("<!--#config sizefmt='A' timefmt='B' echomsg='C' -->").render_to_string();
-    // ensure_equals(t, "");
+unit_test(if directive a) {
+    string_template t("<!--#if expr='1' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(if directive b) {
+    string_template t("<!--#if expr='``' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(if directive c) {
+    string_template t("<!--#if expr='1 && 1' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(if directive d) {
+    string_template t("<!--#if expr='(1 && 1)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(if directive e) {
+    string_template t("<!--#if expr='(1 && )' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(if directive f) {
+    string_template t("<!--#if expr='(`` && 1)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(if directive g) {
+    string_template t("<!--#if expr='(`` && ``)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(if directive h) {
+    string_template t("<!--#if expr='(1 && 1 && 1)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(if directive i) {
+    string_template t("<!--#if expr='(`` || `` || ``)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(if directive i) {
+    string_template t("<!--#if expr='(`a` < `b`)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(if elif directive) {
+    string_template t("<!--#if expr='' -->foo"
+        "<!--#elif expr='1' -->bar<!--#endif -->");
+    ensure_equals(t.render_to_string(), "bar");
+}}}
+
+unit_test(if else directive) {
+    string_template t("<!--#if expr='' -->foo"
+        "<!--#else -->bar<!--#endif -->");
+    ensure_equals(t.render_to_string(), "bar");
+}}}
+
+unit_test(if elif else directive) {
+    string_template t("<!--#if expr='' -->foo"
+        "<!--#elif expr='' -->bar<!--#else -->qux<!--#endif -->");
+    ensure_equals(t.render_to_string(), "qux");
+}}}
+
+unit_test(invalid if - no expr) {
+    string_template const t("<!--#if -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), default_options.error_message);
+}}}
+
+unit_test(invalid if - multiple expr) {
+    string_template const t("<!--#if expr='1' expr='1' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), default_options.error_message);
+}}}
+
+
+/*
+unit_test(magic variables) {
+    // std::cout << std::endl << string_template("<!--#echo var='DATE_LOCAL' -->").render_to_string() << std::endl;
 }}}*/
+
+
+unit_test(multiple config attributes) {
+    string_template const t("<!--#config sizefmt='bytes' "
+        "timefmt='%Y' echomsg='' errmsg='Error' -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
 
 unit_test(invalid directive) {
     ensure_throws(cs::parsing_error,

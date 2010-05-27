@@ -43,7 +43,7 @@ struct missing_variable : public std::invalid_argument {
     std::string const name;
 
     missing_variable(std::string const& name)
-        : std::invalid_argument("missing context variable `" + name + '"')
+        : std::invalid_argument("missing context variable `" + name + "'")
         , name(name) {}
 
     ~missing_variable() throw () {}
@@ -57,7 +57,7 @@ struct missing_attribute : public std::invalid_argument {
     std::string const name;
 
     missing_attribute(std::string const& name)
-        : std::invalid_argument("missing attribute `" + name + '"')
+        : std::invalid_argument("missing attribute `" + name + "'")
         , name(name) {}
 
     ~missing_attribute() throw () {}
@@ -71,10 +71,24 @@ struct invalid_attribute : public std::invalid_argument {
     std::string const name;
 
     invalid_attribute(std::string const& name)
-        : std::invalid_argument("invalid attribute `" + name + '"')
+        : std::invalid_argument("invalid attribute `" + name + "'")
         , name(name) {}
 
     ~invalid_attribute() throw () {}
+};
+
+//
+// duplicate_attribute exception
+////////////////////////////////////////////////////////////////////////////////
+
+struct duplicate_attribute : public std::invalid_argument {
+    std::string const name;
+
+    duplicate_attribute(std::string const& name)
+        : std::invalid_argument("duplicate attribute `" + name + "'")
+        , name(name) {}
+
+    ~duplicate_attribute() throw () {}
 };
 
 //

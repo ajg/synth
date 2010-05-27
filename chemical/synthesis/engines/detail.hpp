@@ -131,6 +131,18 @@ struct string_literal {
 };
 
 //
+// CHEMICAL_UNREACHABLE:
+//     Wrapper around BOOST_ASSERT that also invokes __assume on MSVC,
+//     which (a) prevents warning C4715 and (b) eliminates wasteful code.
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef _MSC_VER
+  #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
+#else
+  #define CHEMICAL_UNREACHABLE BOOST_ASSERT(0)
+#endif
+
+//
 // text:
 //     Creates string_literal objects from native literals.
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,9 +195,8 @@ struct apply_at;
             \
             switch (index) { \
                 BOOST_PP_REPEAT(n, CASE, nil) \
-                default: BOOST_ASSERT(false); \
+                default: CHEMICAL_UNREACHABLE; \
             } \
-            std::exit(1); /* Silence MSVC C4715. */ \
         } \
     };
 

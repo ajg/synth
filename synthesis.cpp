@@ -4,11 +4,26 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
+#include <cstdlib>
+
 #include <chemical/testing.hpp>
 
-int main() {
+int main(int const argc, char const *const argv[]) {
+    bool success = true;
     chemical::test_suite suite("synthesis");
-    return suite.run(); 
+    
+    if (argc <= 1) {
+        // Run entire suite.
+        success = suite.run();
+    }
+    else {
+        // Run specific groups.
+        for (int i = 1; i < argc; ++i) {
+            success = success && suite.run(argv[i]);
+        }
+    }
+
+    return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }                                                   
  
 

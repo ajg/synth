@@ -139,7 +139,8 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    string_type attribute_string(match_type const& attr) const {
+    template <class Match>
+    string_type attribute_string(Match const& attr) const {
         string_type const string = attr.str();
         BOOST_ASSERT(string.length() >= 2);
         return string.substr(1, string.length() - 2);
@@ -232,8 +233,13 @@ struct definition : base_definition< BidirectionalIterator
         tag_renderer<this_type, true> const renderer = { *this, stream, tag, context, options };
         find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
-    catch (std::exception const&) {
+    catch (std::exception const& e) {
         if (throw_on_errors) throw;
+        else {
+            std::cerr << std::endl << "error (" << e.what() <<
+                ") in directive: " << match.str() << std::endl;
+        }
+        
         stream << options.error_message;
     }
 
@@ -248,22 +254,19 @@ struct definition : base_definition< BidirectionalIterator
         else throw_exception(std::logic_error("invalid template state"));
     }
 
+    /// Creates a regex object to parse a full SSI directive.
+    /// Meaning: tag_start name attribute* tag_end
+    ///
+    /// \param  name The identifier that follows the tag_start.
+    /// \return A regex object that can match an entire tag.
+    /// \pre    name is a valid identifier, character-wise.
+    /// \post   The name of the directive is stored in in s1.
+
     regex_type directive(string_type const& name) const {
         using namespace xpressive;
-        return tag_start >> *_s >> name
+        return tag_start >> *_s >> (s1 = name)
             >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
     }
-/*
-  private:
-
-    static inline void set_undefined_variable( context_type& context
-                                    , typename context_type::key_type    const& key
-                                    , typename context_type::mapped_type const& value
-                                    ) {
-        if (context.find(key) == context.end()) {
-            context.insert(typename context_type::value_type(key, value));
-        }
-    }*/
 
   public:
 

@@ -81,6 +81,12 @@ unit_test(substitution in set directive) {
     ensure_equals(t.render_to_string(), "A_B_C");
 }}}
 
+unit_test(escaped dollar sign) {
+    string_template const t(
+        "<!--#set var='foo' value='\\$A' -->"
+        "<!--#echo var='foo' -->");
+    ensure_equals(t.render_to_string(), "$A");
+}}}
 
 unit_test(if directive a) {
     string_template t("<!--#if expr='1' -->foo<!--#endif -->");

@@ -27,17 +27,24 @@ using detail::get_nested;
 using detail::operator ==;
 using namespace detail::placeholders;
 
-#define FOREACH_ATTRIBUTE_IN(x, if_statement) do { \
-    typename Engine::match_type const& attrs = get_nested<1>(x); \
-    BOOST_FOREACH(typename Engine::match_type const& attr, attrs.nested_results()) { \
-        /* TODO: value, and possibly name, need to be unencoded (html entities) before processing, in some cases. */ \
-        typename Engine::string_type const value = args.engine.attribute_string(attr(args.engine.quoted_value)); \
-        typename Engine::string_type const name = algorithm::to_lower_copy(attr(args.engine.name).str()); \
-        if_statement else throw_exception(invalid_attribute(args.engine.template convert<char>(name))); \
-    } \
+//
+// FOREACH_ATTRIBUTE_IN, NO_ATTRIBUTES_IN:
+//     Macros to facilitate iterating over and validating directive attributes.
+////////////////////////////////////////////////////////////////////////////////
+
+enum { interpolated = true, raw = false };
+
+#define FOREACH_ATTRIBUTE_IN(x, how, if_statement) do {                    \
+    BOOST_FOREACH( typename Engine::match_type const& attr                 \
+                 , get_nested<1>(x).nested_results()) {                    \
+        typename Engine::string_type name, value;                          \
+        tie(name, value) = args.engine.parse_attribute(attr, args, how);   \
+        if_statement else throw_exception                                  \
+            (invalid_attribute(args.engine.template convert<char>(name))); \
+    }                                                                      \
 } while (0)
 
-#define NO_ATTRIBUTES_IN(x) FOREACH_ATTRIBUTE_IN(x, if (false) {})
+#define NO_ATTRIBUTES_IN(x) FOREACH_ATTRIBUTE_IN(x, raw, if (false) {})
 
 //
 // config_directive
@@ -49,9 +56,9 @@ struct config_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("config"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("sizefmt")) {
                     detail::validate_option(value, "sizefmt",
                         assign::list_of("bytes")("abbrev"));
@@ -76,18 +83,19 @@ struct echo_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("echo"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
             typename Engine::string_type encoding = text("entity");
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("var")) {
-                    typename Engine::string_type const result = 
+                    typename Engine::string_type const result =
                         args.engine.lookup_variable(args.context, args.options, value);
 
-                         if (encoding == text("none"))   args.stream << result;
-                    else if (encoding == text("url"))    args.stream << detail::uri_encode(result);
-                    else if (encoding == text("entity")) args.stream << detail::escape_entities(result);
-                    else CHEMICAL_UNREACHABLE;
+                    args.stream <<
+                        CHEMICAL_CASE_OF(encoding,
+                            ((text("none"),   result))
+                            ((text("url"),    detail::uri_encode(result)))
+                            ((text("entity"), detail::escape_entities(result))));
                 }
                 else if (name == text("encoding")) {
                     detail::validate_option(value, "encoding",
@@ -109,9 +117,9 @@ struct exec_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("exec"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("cgi")) {
                     // TODO:
                     // BOOST_ASSERT(detail::file_exists(value));
@@ -136,9 +144,9 @@ struct flastmod_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("flastmod"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("fsize virtual"));
@@ -163,13 +171,13 @@ struct fsize_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("fsize"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
             bool const abbreviate = args.options.size_format == text("abbrev");
             detail::validate_option(args.options.size_format, "size_format",
                 assign::list_of("bytes")("abbrev"));
 
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("fsize virtual"));
@@ -198,9 +206,9 @@ struct if_directive {
                 >> !(engine.directive(text("else")) >> engine.block)
                 >>  (engine.directive(text("endif")));
         }
-        
+
         typename Engine::string_regex_type
-            variable, raw_string, quoted_string,
+            raw_string, quoted_string,
             expression, primary_expression, not_expression,
             and_expression, or_expression, comparison_expression,
             string_expression, regex_expression, comparison_operator;
@@ -214,20 +222,16 @@ struct if_directive {
                 | '\'' >> *(~as_xpr('\'') | "\\'")  >> '\''
                 ;
             raw_string
-                = /*+*/*~set[space | (set= '!', '&', '|', '$', '=', 
+                = /*+*/*~set[space | (set= '!', '&', '|', '$', '=',
                       '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\')]
                 ;
             regex_expression
                 = '/' >> *(~as_xpr('/') | "\\\\")  >> '/'
                 ;
-            variable
-                = "${" >> *~as_xpr('}') >> '}'
-                | "$" >> +_w
-                ;
             string_expression // A
                 = quoted_string
                 | raw_string
-                | variable
+                | engine.variable
                 ;
             expression // A
                 = xpressive::ref(and_expression)
@@ -256,70 +260,85 @@ struct if_directive {
                 = primary_expression >> *(*_s >> "||" >> *_s >> expression)
                 ;
         }
-        
+
         bool compare( typename Engine::args_type         const& args
                     , typename Engine::string_match_type const& expr) const {
-            string_type const op = expr(comparison_operator).str();
-            string_type const left = get_nested<A>(expr).str();
-            string_type const right = get_nested<C>(expr).str();
-                
-                 if (op == text("="))  return left == right;
-            else if (op == text("==")) return left == right;
-            else if (op == text("!=")) return left != right;
-            else if (op == text("<"))  return left <  right;
-            else if (op == text(">"))  return left >  right;
-            else if (op == text("<=")) return left <= right;
-            else if (op == text(">=")) return left >= right;
-            else CHEMICAL_UNREACHABLE;
+            typename Engine::string_type const op = expr(comparison_operator).str(),
+                left = get_nested<A>(expr).str(), right = get_nested<C>(expr).str();
+
+            return CHEMICAL_CASE_OF(op,
+                ((text("="),  left == right))
+                ((text("=="), left == right))
+                ((text("!="), left != right))
+                ((text("<"),  left <  right))
+                ((text(">"),  left >  right))
+                ((text("<="), left <= right))
+                ((text(">="), left >= right)));
         }
 
         template <class Args, class Match, class Functor>
         bool fold(Args const& args, Match const& match, bool initial, Functor const& functor) const {
             BOOST_FOREACH( typename Engine::string_match_type const& operand, match.nested_results()) {
-                initial = functor(initial, evaluate(args, operand));
+                initial = functor(initial, evaluate_expression(args, operand));
             }
 
             return initial;
+        } 
+        
+        bool evaluate_expression( typename Engine::args_type         const& args
+                                , typename Engine::string_match_type const& expr) const {
+            return CHEMICAL_CASE_OF(expr,
+                ((comparison_expression, compare(args, expr)))
+                ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
+                ((string_expression,     evaluate_expression(args, get_nested<A>(expr))))
+                ((expression,            evaluate_expression(args, get_nested<A>(expr))))
+                ((not_expression,        !evaluate_expression(args, get_nested<A>(expr))))
+                ((and_expression,        fold(args, expr, true, std::logical_and<bool>())))
+                ((or_expression,         fold(args, expr, false, std::logical_or<bool>())))
+                ((args.engine.variable,  !args.engine.interpolate(args, expr.str()).empty()))
+                ((quoted_string,         !args.engine.extract_attribute(expr).empty()))
+                ((raw_string,            expr.length() != 0)));
         }
 
-        bool evaluate( typename Engine::args_type         const& args
-                     , typename Engine::string_match_type const& expr) const {
-            if (expr == expression
-             || expr == primary_expression
-             || expr == string_expression) {
-                // Simply recurse down one 'nesting' level.
-                return evaluate(args, get_nested<A>(expr));
-            }
-            else if (expr == not_expression) {
-                return !evaluate(args, get_nested<A>(expr));
-            }
-            else if (expr == comparison_expression) {
-                return compare(args, expr);
-            }
-            else if (expr == and_expression) {
-                return fold(args, expr, true, std::logical_and<bool>());
-            }
-            else if (expr == or_expression) {
-                return fold(args, expr, false, std::logical_or<bool>());
-            }
-            else if (expr == raw_string) {
-                return expr.length() != 0;
-            }
-            else if (expr == quoted_string) {
-                return !args.engine.attribute_string(expr).empty();
+        bool evaluate_directive( typename Engine::args_type  const& args
+                               , typename Engine::match_type const& directive
+                               ) const {
+            bool has_expr = false, result = false;
+            typename Engine::string_match_type match;
+            typename Engine::string_type const name =
+                directive[xpressive::s1].str();
+
+            if (name == text("if") 
+             || name == text("elif")) {
+                FOREACH_ATTRIBUTE_IN(directive, raw,
+                    if (name == text("expr")) {
+                        if (!has_expr) has_expr = true;
+                        else throw_exception(duplicate_attribute("expr"));
+
+                        if (xpressive::regex_match(value, match, expression)) {
+                            result = evaluate_expression(args, match);
+                        }
+                        else {
+                            throw_exception(invalid_attribute("expr"));
+                        }
+                    }
+                );
+
+                if (has_expr) return result;
+                else throw_exception(missing_attribute("expr"));
             }
             else {
-                CHEMICAL_UNREACHABLE;
+                NO_ATTRIBUTES_IN(directive);
+                return CHEMICAL_CASE_OF(name, ((text("else"),  true))
+                                              ((text("endif"), false)));
             }
         }
-        
+
         void render(typename Engine::args_type const& args) const {
             bool condition = false;
-            typename Engine::string_match_type match;
 
             BOOST_FOREACH( typename Engine::match_type const& nested
                          , args.match.nested_results()) {
-
                 if (nested == args.engine.block) {
                     if (condition) {
                         args.engine.render_block(args.stream, nested,
@@ -328,42 +347,7 @@ struct if_directive {
                     }
                 }
                 else {
-                    typename Engine::string_type const name =
-                        nested[xpressive::s1].str();
-
-                    if (name == text("if")
-                     || name == text("elif")) {
-                        bool set = false;
-
-                        FOREACH_ATTRIBUTE_IN(nested,
-                            if (name == text("expr")) {
-                                if (set) {
-                                    throw_exception(duplicate_attribute("expr"));
-                                }
-                                else {
-                                    set = true;
-                                }
-
-                                if (xpressive::regex_match(value, match, expression)) {
-                                    condition = evaluate(args, match);
-                                }
-                                else {
-                                    throw_exception(invalid_attribute("expr"));
-                                }
-                            }
-                        );
-
-                        if (!set) {
-                            throw_exception(missing_attribute("expr"));
-                        }
-                    }
-                    else {
-                        NO_ATTRIBUTES_IN(nested);
-
-                             if (name == text("else"))  condition = true;
-                        else if (name == text("endif")) break;
-                        else CHEMICAL_UNREACHABLE;
-                    }
+                    condition = evaluate_directive(args, nested);
                 }
             }
         }
@@ -380,9 +364,9 @@ struct include_directive {
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("include"));
         }
-        
+
         void render(typename Engine::args_type const& args) const {
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("include virtual"));
@@ -427,38 +411,22 @@ struct printenv_directive {
 struct set_directive {
     template <class Engine>
     struct definition {
-        definition() :
-            variables_("${" >> (xpressive::s1 = +xpressive::_w) >> '}'
-                      |'$' >> (xpressive::s1 = +xpressive::_w)) {}
-
         typename Engine::regex_type syntax(Engine const& engine) const {
             return engine.directive(text("set"));
         }
 
-        static typename Engine::string_type replace
-            ( typename Engine::args_type         const& args
-            , typename Engine::string_match_type const& match
-            ) {
-            return args.engine.lookup_variable(args.context,
-                args.options, match[xpressive::s1].str());
-        }
-        
         void render(typename Engine::args_type const& args) const {
             optional<typename Engine::string_type> name_;
             optional<typename Engine::value_type>  value_;
 
-            FOREACH_ATTRIBUTE_IN(args.match,
+            FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text("var")) {
                     if (name_) throw_exception(duplicate_attribute("name"));
                     else name_ = value;
                 }
                 else if (name == text("value")) {
                     if (value_) throw_exception(duplicate_attribute("value"));
-
-                    boost::function<typename Engine::string_type(
-                            typename Engine::string_match_type const&)> const
-                        formatter = boost::bind(&definition::replace, boost::cref(args), _1);
-                    value_ = xpressive::regex_replace(value, variables_, formatter);
+                    else value_ = value;
                 }
             );
 
@@ -467,10 +435,6 @@ struct set_directive {
 
             args.context[*name_] = *value_;
         }
-
-      private:
-
-        typename Engine::string_regex_type const variables_;
     };
 };
 

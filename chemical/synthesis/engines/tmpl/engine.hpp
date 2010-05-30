@@ -144,14 +144,14 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    string_type attribute_string(match_type const& attr) const {
+    string_type extract_attribute(match_type const& attr) const {
         if (attr == attribute) {
             match_type const& attr_ = detail::get_nested<1>(attr);
-            return attribute_string(attr_);
+            return extract_attribute(attr_);
         }
         else if (attr == name_attribute) {
             match_type const& attr_ = attr(attribute);
-            return attribute_string(attr_);
+            return extract_attribute(attr_);
         }
         else if (attr == quoted_attribute) {
             // TODO: Escape sequences, etc.
@@ -174,7 +174,7 @@ struct definition : base_definition< BidirectionalIterator
                                  , context_type const& context
                                  , options_type const& options
                                  ) const {
-        string_type const name = attribute_string(attr);
+        string_type const name = extract_attribute(attr);
 
         if (optional<value_type const&> const
                 variable = detail::find_value(name, context)) {

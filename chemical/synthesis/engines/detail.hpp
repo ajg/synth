@@ -136,11 +136,32 @@ struct string_literal {
 //     which (a) prevents warning C4715 and (b) eliminates wasteful code.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
   #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
+#elif defined(__GNUC__)
+  #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
 #else
-  #define CHEMICAL_UNREACHABLE BOOST_ASSERT(0)
+  #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0))
 #endif
+
+//
+// CHEMICAL_CASE_OF, CHEMICAL_CASE_OF_ELSE
+////////////////////////////////////////////////////////////////////////////////
+
+#define TERNARY_OPERATOR(r, value, elem) \
+    (value == BOOST_PP_TUPLE_ELEM(2, 0, elem)) ? \
+        BOOST_PP_TUPLE_ELEM(2, 1, elem) :
+
+#define CHEMICAL_CASE_OF_ELSE(value, cases, default_) \
+    (BOOST_PP_SEQ_FOR_EACH(TERNARY_OPERATOR, value, cases) (default_))
+
+// TODO: Figure out how to use CHEMICAL_UNREACHABLE but without
+//       triggering warning C4702; or, how to silence the warning.
+
+#define CHEMICAL_CASE_OF(value, cases) \
+    CHEMICAL_CASE_OF_ELSE(value, cases, (/*CHEMICAL_UNREACHABLE*/BOOST_ASSERT(0), (throw 0)))
+    
+// #undef TERNARY_OPERATOR
 
 //
 // text:

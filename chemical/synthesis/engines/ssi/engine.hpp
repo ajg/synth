@@ -13,12 +13,14 @@
 #include <ostream>
 #include <numeric>
 #include <cstdlib>
+#include <utility>
 #include <algorithm>
 
 #include <boost/ref.hpp>
+#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/function.hpp>
 #include <boost/optional.hpp>
-#include <boost/noncopyable.hpp>
 
 #include <chemical/synthesis/template.hpp>
 #include <chemical/synthesis/engines/detail.hpp>
@@ -92,7 +94,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef std::map<string_type, value_type> context_type;
     typedef library_type                      tags_type;
     typedef options<string_type>              options_type;
-    typedef detail::indexable_sequence<this_type, tags_type, 
+    typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions>  tag_sequence_type;
 
     struct args_type {
@@ -123,6 +125,11 @@ struct definition : base_definition< BidirectionalIterator
             | '`'  >> *~as_xpr('`')  >> '`'
             | '\'' >> *~as_xpr('\'') >> '\''
             ;
+        variable
+            = ~after('\\') >> "${" >> (s1 = +_w) >> '}'
+            | ~after('\\') >> '$' >> (s1 = +_w)
+            | "\\$"
+            ;
         attribute
             = name >> *_s >> '=' >> *_s >> quoted_value
             ;
@@ -139,8 +146,29 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
+    std::pair<string_type, string_type> parse_attribute( match_type const& attr
+                                                       , args_type  const& args
+                                                       , bool const interpolate
+                                                       ) const {
+        // TODO: value, and possibly name, need to be unencoded 
+        //       (html entities) before processing, in some cases.
+        string_type const temp = extract_attribute(attr(args.engine.quoted_value));
+        string_type const name = algorithm::to_lower_copy(attr(this->name).str());
+        string_type const value = interpolate ? this->interpolate(args, temp) : temp;
+        return std::make_pair(name, value);
+    }
+
+    string_type interpolate( args_type   const& args
+                           , string_type const& string
+                           ) const {
+        typedef typename base_type::string_match_type match_type;
+        boost::function<string_type(match_type const&)> const
+            formatter = boost::bind(replace_variable, boost::cref(args), _1);
+        return xpressive::regex_replace(string, variable, formatter);
+    }
+
     template <class Match>
-    string_type attribute_string(Match const& attr) const {
+    string_type extract_attribute(Match const& attr) const {
         string_type const string = attr.str();
         BOOST_ASSERT(string.length() >= 2);
         return string.substr(1, string.length() - 2);
@@ -239,7 +267,7 @@ struct definition : base_definition< BidirectionalIterator
             std::cerr << std::endl << "error (" << e.what() <<
                 ") in directive: " << match.str() << std::endl;
         }
-        
+
         stream << options.error_message;
     }
 
@@ -268,6 +296,15 @@ struct definition : base_definition< BidirectionalIterator
             >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
     }
 
+  private:
+
+    static string_type replace_variable(args_type const& args,
+            typename base_type::string_match_type const& match) {
+        return match.str() == detail::text("\\$") ? detail::text("$")
+            : args.engine.lookup_variable(args.context, args.options,
+                match[xpressive::s1].str());
+    }
+
   public:
 
     string_type const tag_start;
@@ -275,6 +312,7 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
+    typename base_type::string_regex_type variable;
     regex_type tag, text, block, skipper;
     regex_type name, attribute, quoted_value;
     environment_type const environment;

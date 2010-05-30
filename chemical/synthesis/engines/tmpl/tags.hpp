@@ -117,7 +117,7 @@ struct include_tag {
                    , typename Engine::stream_type&        out
                    ) const {
             typename Engine::match_type const& attr = match(engine.name_attribute);
-            typename Engine::string_type const path = engine.attribute_string(attr);
+            typename Engine::string_type const path = engine.extract_attribute(attr);
             engine.render_file(out, path, context, options);
         }
     };
@@ -299,11 +299,11 @@ struct variable_tag {
 
                 if (attr == engine.name_attribute) {
                     if (name) throw_exception(std::logic_error("duplicate variable name"));
-                    else name = engine.attribute_string(value);
+                    else name = engine.extract_attribute(value);
                 }
                 else if (attr == default_attribute) {
                     if (default_) throw_exception(std::logic_error("duplicate default value"));
-                    else default_ = engine.attribute_string(value);
+                    else default_ = engine.extract_attribute(value);
                 }
                 else if (attr == escape_attribute) {
                     if (escape) {

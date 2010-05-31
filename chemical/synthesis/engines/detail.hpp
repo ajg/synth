@@ -138,7 +138,7 @@ struct string_literal {
 
 #if defined(_MSC_VER)
   #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
   #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
 #else
   #define CHEMICAL_UNREACHABLE (BOOST_ASSERT(0))
@@ -159,7 +159,7 @@ struct string_literal {
 //       triggering warning C4702; or, how to silence the warning.
 
 #define CHEMICAL_CASE_OF(value, cases) \
-    CHEMICAL_CASE_OF_ELSE(value, cases, (/*CHEMICAL_UNREACHABLE*/BOOST_ASSERT(0), (throw 0)))
+    CHEMICAL_CASE_OF_ELSE(value, cases, throw (BOOST_ASSERT(0), 0))
     
 // #undef TERNARY_OPERATOR
 

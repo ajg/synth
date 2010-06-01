@@ -89,62 +89,67 @@ unit_test(escaped dollar sign) {
 }}}
 
 unit_test(if directive: true) {
-    string_template t("<!--#if expr='1' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='1' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(if directive: false) {
-    string_template t("<!--#if expr='``' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='``' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
 unit_test(boolean: unparenthesized) {
-    string_template t("<!--#if expr='1 && 1' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='1 && 1' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(boolean: true and true) {
-    string_template t("<!--#if expr='(1 && 1)' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='(1 && 1)' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(boolean: missing operand) {
-    string_template t("<!--#if expr='(1 && )' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='(1 && )' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
 unit_test(boolean: false and true) {
-    string_template t("<!--#if expr='(`` && 1)' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='(`` && 1)' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
 unit_test(boolean: false and false) {
-    string_template t("<!--#if expr='(`` && ``)' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='(`` && ``)' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
 unit_test(disjunctions) {
-    string_template t("<!--#if expr='(1 && 1 && 1)' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='(1 && 1 && 1)' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(conjunctions) {
-    string_template t("<!--#if expr='(`` || `` || ``)' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='(`` || `` || ``)' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
 unit_test(string comparison) {
-    string_template t("<!--#if expr='(`a` < `b`)' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='(`a` < `b`)' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
+}}}
+
+unit_test(lexicographical string comparison) {
+    string_template t("<!--#if expr='(`100` < `20`)' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(regex expression match) {
-    string_template t("<!--#if expr='(`a` = /a/)' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(), "foo");
+    string_template t("<!--#if expr='(`a` = /a/)' -->true<!--#endif -->");
+    ensure_equals(t.render_to_string(), "true");
 }}}
 
 unit_test(regex expression no match) {
-    string_template t("<!--#if expr='(`a` = /b/)' -->foo<!--#endif -->");
+    string_template t("<!--#if expr='(`a` = /b/)' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 

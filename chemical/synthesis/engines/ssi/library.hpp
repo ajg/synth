@@ -27,7 +27,7 @@ typedef fusion::vector9
     , ssi::exec_directive
     , ssi::fsize_directive
     , ssi::flastmod_directive
-    , ssi::if_directive
+    , ssi::if_directive<>
     , ssi::include_directive
     , ssi::printenv_directive
     , ssi::set_directive

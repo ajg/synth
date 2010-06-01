@@ -197,6 +197,7 @@ struct fsize_directive {
 // if_directive
 ////////////////////////////////////////////////////////////////////////////////
 
+template <std::size_t MaxRegexCaptures = 9>
 struct if_directive {
     template <class Engine>
     struct definition {
@@ -216,17 +217,17 @@ struct if_directive {
         void initialize(Engine const& engine) {
             using namespace xpressive;
 
-            quoted_string
-                = '"'  >> *(~as_xpr('"')  | "\\\"") >> '"'
-                | '`'  >> *(~as_xpr('`')  | "\\`")  >> '`'
-                | '\'' >> *(~as_xpr('\'') | "\\'")  >> '\''
-                ;
             raw_string
                 = /*+*/*~set[space | (set= '!', '&', '|', '$', '=',
-                      '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\')]
+                      '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\', '/')]
+                ;
+            quoted_string
+                = '\'' >> *(~as_xpr('\'') | "\\'")  >> '\''
+                | '`'  >> *(~as_xpr('`')  | "\\`")  >> '`'
+                | '"'  >> *(~as_xpr('"')  | "\\\"") >> '"'
                 ;
             regex_expression
-                = '/' >> *(~as_xpr('/') | "\\\\")  >> '/'
+                = '/' >> (s1 = *(~as_xpr('/') | "\\\\")) >> '/'
                 ;
             string_expression // A
                 = quoted_string
@@ -261,43 +262,89 @@ struct if_directive {
                 ;
         }
 
-        bool compare( typename Engine::args_type         const& args
-                    , typename Engine::string_match_type const& expr) const {
-            typename Engine::string_type const op = expr(comparison_operator).str(),
-                left = get_nested<A>(expr).str(), right = get_nested<C>(expr).str();
+        bool compare_regex( typename Engine::args_type         const& args
+                          , typename Engine::string_match_type const& expr) const {
+            typename Engine::string_type const
+                left  = parse_string(args, get_nested<A>(expr)),
+                right = get_nested<C>(expr)[xpressive::s1].str();
+            typename Engine::string_match_type match; 
+            typename Engine::string_regex_type const pattern
+                = Engine::string_regex_type::compile(right);
+                
+            for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
+                args.context.erase(lexical_cast<typename Engine::string_type>(i));
+            }
 
-            return CHEMICAL_CASE_OF(op,
-                ((text("="),  left == right))
-                ((text("=="), left == right))
-                ((text("!="), left != right))
-                ((text("<"),  left <  right))
-                ((text(">"),  left >  right))
-                ((text("<="), left <= right))
-                ((text(">="), left >= right)));
+            if (xpressive::regex_search(left, match, pattern)) {
+                std::size_t const limit = (std::min)(match.size(), MaxRegexCaptures);
+
+                for (std::size_t i = 0; i <= limit; ++i) {
+                    typename Engine::string_type const key =
+                        lexical_cast<typename Engine::string_type>(i);
+                    args.context.insert(std::make_pair(key, match[i].str()));
+                }
+            }
+
+            return match;
         }
 
-        template <class Args, class Match, class Functor>
-        bool fold(Args const& args, Match const& match, bool initial, Functor const& functor) const {
+        bool compare( typename Engine::args_type         const& args
+                    , typename Engine::string_match_type const& expr) const {
+            typename Engine::string_type const op = expr(comparison_operator).str();
+
+            if (get_nested<C>(expr) == regex_expression) {
+                bool const matched = compare_regex(args, expr);                
+                std::logic_error const error("comparison operator");
+                return CHEMICAL_CASE_OF_ELSE(op, ((text("="),  matched))
+                                                 ((text("=="), matched))
+                                                 ((text("!="), !matched)),
+                                                     (throw_exception(error), 0));
+            }
+            else {
+                typename Engine::string_type const
+                    left  = parse_string(args, get_nested<A>(expr)),
+                    right = parse_string(args, get_nested<C>(expr));
+                return CHEMICAL_CASE_OF(op,
+                    ((text("="),  left == right))
+                    ((text("=="), left == right))
+                    ((text("!="), left != right))
+                    ((text("<"),  left <  right))
+                    ((text(">"),  left >  right))
+                    ((text("<="), left <= right))
+                    ((text(">="), left >= right)));
+            }
+        }
+
+        template <class Args, class Match, class Initial, class Functor>
+        Initial fold(Args const& args, Match const& match, Initial initial, Functor const& functor) const {
             BOOST_FOREACH( typename Engine::string_match_type const& operand, match.nested_results()) {
                 initial = functor(initial, evaluate_expression(args, operand));
             }
 
             return initial;
-        } 
+        }
         
+        typename Engine::string_type parse_string( typename Engine::args_type         const& args
+                                                 , typename Engine::string_match_type const& match
+                                                 ) const {
+                return CHEMICAL_CASE_OF(get_nested<A>(match),
+                    ((raw_string,           match.str()))
+                    ((regex_expression,     args.engine.extract_attribute(match)))
+                    ((args.engine.variable, args.engine.interpolate(args, match.str())))
+                    ((quoted_string,        args.engine.interpolate(args, 
+                                                args.engine.extract_attribute(match)))));
+        } 
+
         bool evaluate_expression( typename Engine::args_type         const& args
                                 , typename Engine::string_match_type const& expr) const {
             return CHEMICAL_CASE_OF(expr,
-                ((comparison_expression, compare(args, expr)))
-                ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
-                ((string_expression,     evaluate_expression(args, get_nested<A>(expr))))
-                ((expression,            evaluate_expression(args, get_nested<A>(expr))))
-                ((not_expression,        !evaluate_expression(args, get_nested<A>(expr))))
                 ((and_expression,        fold(args, expr, true, std::logical_and<bool>())))
                 ((or_expression,         fold(args, expr, false, std::logical_or<bool>())))
-                ((args.engine.variable,  !args.engine.interpolate(args, expr.str()).empty()))
-                ((quoted_string,         !args.engine.extract_attribute(expr).empty()))
-                ((raw_string,            expr.length() != 0)));
+                ((not_expression,        !evaluate_expression(args, get_nested<A>(expr))))
+                ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
+                ((expression,            evaluate_expression(args, get_nested<A>(expr))))
+                ((string_expression,     !parse_string(args, expr).empty()))
+                ((comparison_expression, compare(args, expr))));
         }
 
         bool evaluate_directive( typename Engine::args_type  const& args

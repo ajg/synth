@@ -17,20 +17,14 @@
 #include <boost/config.hpp>
 #undef BOOST_HAS_LONG_LONG
 
+#define CHEMICAL_TESTING 1
+
+#ifndef CHEMICAL_TESTING_MAX_TESTS
+#define CHEMICAL_TESTING_MAX_TESTS 100
+#endif
+
 namespace chemical {
 namespace detail {
-
-//
-// DEBUG_ONLY:
-//     Conditional compilation using a macro prefix.
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef NDEBUG
-  #define DEBUG_ONLY
-#else
-  #define CAT_SLASH(c) /##c
-  #define DEBUG_ONLY   CAT_SLASH(/)
-#endif
 
 //
 // CHEMICAL_WIN32_DIVERGE:
@@ -92,8 +86,9 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class T = detail::empty>
-struct test_group : tut::test_group<T> {
-    template <class U> test_group(U const& u) : tut::test_group<T>(u) {}
+struct test_group : public tut::test_group<T, CHEMICAL_TESTING_MAX_TESTS> {
+    typedef tut::test_group<T, CHEMICAL_TESTING_MAX_TESTS> base_type; 
+    template <class U> test_group(U const& u) : base_type(u) {}
 };
 
 //

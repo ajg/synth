@@ -261,12 +261,14 @@ struct definition : base_definition< BidirectionalIterator
         tag_renderer<this_type, true> const renderer = { *this, stream, tag, context, options };
         find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
-    catch (std::exception const& e) {
+    catch (std::exception const&) {
         if (throw_on_errors) throw;
+        /* xxx: Unclear on whether this'd be helpful or even allowed.
+                Also, it's distracting when doing unit tests.
         else {
             std::cerr << std::endl << "error (" << e.what() <<
                 ") in directive: " << match.str() << std::endl;
-        }
+        }*/
 
         stream << options.error_message;
     }

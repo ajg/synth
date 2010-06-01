@@ -88,54 +88,69 @@ unit_test(escaped dollar sign) {
     ensure_equals(t.render_to_string(), "$A");
 }}}
 
-unit_test(if directive a) {
+unit_test(if directive: true) {
     string_template t("<!--#if expr='1' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "foo");
 }}}
 
-unit_test(if directive b) {
+unit_test(if directive: false) {
     string_template t("<!--#if expr='``' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(if directive c) {
+unit_test(boolean: unparenthesized) {
     string_template t("<!--#if expr='1 && 1' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "foo");
 }}}
 
-unit_test(if directive d) {
+unit_test(boolean: true and true) {
     string_template t("<!--#if expr='(1 && 1)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "foo");
 }}}
 
-unit_test(if directive e) {
+unit_test(boolean: missing operand) {
     string_template t("<!--#if expr='(1 && )' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(if directive f) {
+unit_test(boolean: false and true) {
     string_template t("<!--#if expr='(`` && 1)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(if directive g) {
+unit_test(boolean: false and false) {
     string_template t("<!--#if expr='(`` && ``)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(if directive h) {
+unit_test(disjunctions) {
     string_template t("<!--#if expr='(1 && 1 && 1)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "foo");
 }}}
 
-unit_test(if directive i) {
+unit_test(conjunctions) {
     string_template t("<!--#if expr='(`` || `` || ``)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(if directive i) {
+unit_test(string comparison) {
     string_template t("<!--#if expr='(`a` < `b`)' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(regex expression match) {
+    string_template t("<!--#if expr='(`a` = /a/)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "foo");
+}}}
+
+unit_test(regex expression no match) {
+    string_template t("<!--#if expr='(`a` = /b/)' -->foo<!--#endif -->");
+    ensure_equals(t.render_to_string(), "");
+}}}
+
+unit_test(regex substitution) {
+    string_template t("<!--#if expr='(`foo` = /(o+)/)' --><!--#echo var='1' --><!--#endif -->");
+    ensure_equals(t.render_to_string(), "oo");
 }}}
 
 unit_test(if elif directive) {

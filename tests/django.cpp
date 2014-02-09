@@ -1,21 +1,20 @@
-
 //  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#include <chemical/testing.hpp>
-#include <chemical/synthesis/engines/django.hpp>
+#include <ajg/testing.hpp>
+#include <ajg/synthesis/engines/django.hpp>
 
 typedef char char_t;
-namespace cs = chemical::synthesis;
+namespace cs = ajg::synthesis;
 typedef cs::django::engine<> engine_type;
 typedef cs::file_template<char_t, engine_type> file_template;
 typedef cs::string_template<char_t, engine_type> string_template;
 
-typedef chemical::test_group<> group_type;
+typedef ajg::test_group<> group_type;
 group_type group_object("django tests");
-CHEMICAL_TESTING_BEGIN
+AJG_TESTING_BEGIN
 
 
 unit_test(addition) {

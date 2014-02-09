@@ -1,4 +1,3 @@
-
 //  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,11 +5,11 @@
 
 #include <cstdlib>
 
-#include <chemical/testing.hpp>
+#include <ajg/testing.hpp>
 
 int main(int const argc, char const *const argv[]) {
     bool success = true;
-    chemical::test_suite suite("synthesis");
+    ajg::test_suite suite("synthesis");
 
     if (argc <= 1) {
         // Run entire suite.

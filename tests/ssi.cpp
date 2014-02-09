@@ -1,4 +1,3 @@
-
 //  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,17 +5,17 @@
 
 #include <cstdlib>
 
-#include <chemical/testing.hpp>
-#include <chemical/synthesis/template.hpp>
-#include <chemical/synthesis/adapters.hpp>
-#include <chemical/synthesis/engines/ssi.hpp>
+#include <ajg/testing.hpp>
+#include <ajg/synthesis/template.hpp>
+#include <ajg/synthesis/adapters.hpp>
+#include <ajg/synthesis/engines/ssi.hpp>
 
-typedef chemical::test_group<> group_type;
+typedef ajg::test_group<> group_type;
 group_type group_object("ssi tests");
-CHEMICAL_TESTING_BEGIN
+AJG_TESTING_BEGIN
 
 typedef char char_t;
-namespace cs = chemical::synthesis;
+namespace cs = ajg::synthesis;
 typedef cs::ssi::engine<> engine_type;
 typedef cs::file_template<char_t, engine_type> file_template;
 typedef cs::string_template<char_t, engine_type> string_template;
@@ -262,7 +261,7 @@ unit_test(include directive) {
 }}}
 
 unit_test(exec directive) {
-    std::string const command = CHEMICAL_WIN32_DIVERGE("dir", "ls");
+    std::string const command = AJG_WIN32_DIVERGE("dir", "ls");
     string_template const t("<!--#exec cmd='" + command + "' -->");
     ensure(t.render_to_string().find("LICENSE_1_0.txt") != string_type::npos);
 }}}

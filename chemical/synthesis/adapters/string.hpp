@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -29,7 +29,7 @@ struct adapter<Traits, std::basic_string
     typedef std::basic_string< typename Traits::char_type
                              , StringTraits
                              , Allocator
-                             >  basic_string_type; 
+                             >  basic_string_type;
     CHEMICAL_SYNTHESIS_ADAPTER(basic_string_type);
 
   public:

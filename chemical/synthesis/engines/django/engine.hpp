@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -96,10 +96,10 @@ struct definition : base_definition< BidirectionalIterator
     typedef options<iterator_type, value_type> options_type;
     typedef std::map<string_type, value_type>  context_type;
     typedef std::vector<value_type>            array_type;
-    
-    typedef detail::indexable_sequence<this_type, tags_type, 
+
+    typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions_extended>      tag_sequence_type;
-    typedef detail::indexable_sequence<this_type, filters_type, 
+    typedef detail::indexable_sequence<this_type, filters_type,
         string_type, detail::create_definitions_extended>  filter_sequence_type;
 
   public:

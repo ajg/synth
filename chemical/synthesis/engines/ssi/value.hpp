@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -18,7 +18,7 @@ namespace ssi {
 template <class Char>
 struct value : value_facade<Char, value<Char> > {
   public:
-  
+
     typedef value                              this_type;
     typedef Char                               char_type;
     typedef value_facade<char_type, this_type> base_type;

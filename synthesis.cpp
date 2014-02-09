@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -11,7 +11,7 @@
 int main(int const argc, char const *const argv[]) {
     bool success = true;
     chemical::test_suite suite("synthesis");
-    
+
     if (argc <= 1) {
         // Run entire suite.
         success = suite.run();
@@ -24,8 +24,8 @@ int main(int const argc, char const *const argv[]) {
     }
 
     return success ? EXIT_SUCCESS : EXIT_FAILURE;
-}                                                   
- 
+}
+
 
 
 
@@ -69,7 +69,7 @@ int main(int const argc, char const *const argv[]) {
     string_type const string_array[5] = { T("sa0"), T("sa1"), T("sa2"), T("sa3"), T("sa4") };
     string_type const tag_list[5] = { T("<these>"), T("<are>"), T("<tags />"), T("</are>"), T("</these>") };
     float const float_array[6] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f };
-    
+
     /// float const* float_pointer = float_array;
     /// context[T("a_float_pointer")] = value(float_pointer, 6);
 
@@ -118,7 +118,7 @@ int main(int const argc, char const *const argv[]) {
 
     context[T("a_true")] = true;
     context[T("a_false")] = false;
-    
+
     char_t const *const ccc = T("This should be a string.");
     context[T("char_pointer")] = ccc;
 

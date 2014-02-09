@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -267,10 +267,10 @@ struct if_directive {
             typename Engine::string_type const
                 left  = parse_string(args, get_nested<A>(expr)),
                 right = get_nested<C>(expr)[xpressive::s1].str();
-            typename Engine::string_match_type match; 
+            typename Engine::string_match_type match;
             typename Engine::string_regex_type const pattern
                 = Engine::string_regex_type::compile(right);
-                
+
             for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
                 args.context.erase(lexical_cast<typename Engine::string_type>(i));
             }
@@ -293,7 +293,7 @@ struct if_directive {
             typename Engine::string_type const op = expr(comparison_operator).str();
 
             if (get_nested<C>(expr) == regex_expression) {
-                bool const matched = compare_regex(args, expr);                
+                bool const matched = compare_regex(args, expr);
                 std::logic_error const error("comparison operator");
                 return CHEMICAL_CASE_OF_ELSE(op, ((text("="),  matched))
                                                  ((text("=="), matched))
@@ -323,7 +323,7 @@ struct if_directive {
 
             return initial;
         }
-        
+
         typename Engine::string_type parse_string( typename Engine::args_type         const& args
                                                  , typename Engine::string_match_type const& match
                                                  ) const {
@@ -331,9 +331,9 @@ struct if_directive {
                     ((raw_string,           match.str()))
                     ((regex_expression,     args.engine.extract_attribute(match)))
                     ((args.engine.variable, args.engine.interpolate(args, match.str())))
-                    ((quoted_string,        args.engine.interpolate(args, 
+                    ((quoted_string,        args.engine.interpolate(args,
                                                 args.engine.extract_attribute(match)))));
-        } 
+        }
 
         bool evaluate_expression( typename Engine::args_type         const& args
                                 , typename Engine::string_match_type const& expr) const {
@@ -355,7 +355,7 @@ struct if_directive {
             typename Engine::string_type const name =
                 directive[xpressive::s1].str();
 
-            if (name == text("if") 
+            if (name == text("if")
              || name == text("elif")) {
                 FOREACH_ATTRIBUTE_IN(directive, raw,
                     if (name == text("expr")) {

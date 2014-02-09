@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -160,7 +160,7 @@ struct string_literal {
 
 #define CHEMICAL_CASE_OF(value, cases) \
     CHEMICAL_CASE_OF_ELSE(value, cases, throw (BOOST_ASSERT(0), 0))
-    
+
 // #undef TERNARY_OPERATOR
 
 //
@@ -287,7 +287,7 @@ template <class Engine, class Sequence, class Key,
           template <class E, class S, typename Engine::size_type K> class Definer>
 struct indexable_sequence {
   public:
-   
+
     typedef Engine                engine_type;
     typedef Sequence              sequence_type;
     typedef Key                   key_type;

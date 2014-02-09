@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -301,7 +301,7 @@ struct escapejs_filter {
             result.reserve(string.size()); // Assume no escapes.
 
             BOOST_FOREACH(Char const c, string) {
-                result += c < 32 ? String(text("\\x")) + detail::to_hex<2>(c) 
+                result += c < 32 ? String(text("\\x")) + detail::to_hex<2>(c)
                                  : String(1, c);
             }
 

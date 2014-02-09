@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -150,7 +150,7 @@ struct definition : base_definition< BidirectionalIterator
                                                        , args_type  const& args
                                                        , bool const interpolate
                                                        ) const {
-        // TODO: value, and possibly name, need to be unencoded 
+        // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
         string_type const temp = extract_attribute(attr(args.engine.quoted_value));
         string_type const name = algorithm::to_lower_copy(attr(this->name).str());

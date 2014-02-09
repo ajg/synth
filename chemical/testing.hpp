@@ -1,5 +1,5 @@
 
-//  (C) Copyright 2010 Alvy J. Guty <plus {dot} ajg {at} gmail {dot} com>
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
 //  Use, modification and distribution are subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
@@ -87,7 +87,7 @@ namespace {
 
 template <class T = detail::empty>
 struct test_group : public tut::test_group<T, CHEMICAL_TESTING_MAX_TESTS> {
-    typedef tut::test_group<T, CHEMICAL_TESTING_MAX_TESTS> base_type; 
+    typedef tut::test_group<T, CHEMICAL_TESTING_MAX_TESTS> base_type;
     template <class U> test_group(U const& u) : base_type(u) {}
 };
 
@@ -110,7 +110,7 @@ struct test_suite {
         return !reporter_.all_ok();
     }
 
-    bool run(std::string const group) 
+    bool run(std::string const group)
     try {
         std::cout << "Running group" << group
                   << " of the " << name_

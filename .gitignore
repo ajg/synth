@@ -1,5 +1,6 @@
 # Scons
 .scons
+.sconsign.dblite
 
 # Binaries
 *.o

@@ -1,0 +1,18 @@
+# Scons
+.scons
+
+# Binaries
+*.o
+/synthesis
+
+# Code::Blocks
+*.depend
+*.layout
+
+# Visual Studio 2010
+ipch/
+Debug/
+Release/
+*.suo
+*.sdf
+*.opensdf

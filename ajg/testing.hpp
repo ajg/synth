@@ -106,7 +106,7 @@ struct test_suite {
         std::cout << "Running the " << name_
                   << " test suite:" << std::endl;
         runner_.get().run_tests();
-        return !reporter_.all_ok();
+        return reporter_.all_ok();
     }
 
     bool run(std::string const group)
@@ -115,7 +115,7 @@ struct test_suite {
                   << " of the " << name_
                   << " test suite:" << std::endl;
         runner_.get().run_tests(group);
-        return !reporter_.all_ok();
+        return reporter_.all_ok();
     }
     catch (tut::no_such_group const&) {
         std::cerr << "No such group: " << group << std::endl;

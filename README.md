@@ -10,6 +10,11 @@ Synopsis
 
 Synthesis is a template framework—a set of components that can be mixed and matched to build the right functionality; furthermore, components are loosely-coupled, designed to be both extensible and replaceable.
 
+Status
+------
+
+The `synthesis` codebase is mature and well-tested; the bindings are still a work in progress.
+
 License
 -------
 

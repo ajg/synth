@@ -6,12 +6,11 @@
 # TODO: Add an environment with '-std=c++11',
 
 env = Environment(
-    # CXX      = 'g++-4.2',
     CPPPATH  = ['.'],
     CPPFLAGS = [
         # TODO: '-Wall',
+        # TODO: '-Wextra',
         # TODO: '-pedantic',
-        # TODO: '-Wextra', .
         # NOTE: clang-only '-ferror-limit=1',
         '-ftemplate-depth=256',
         '-Wno-unused-function',

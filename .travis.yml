@@ -1,0 +1,17 @@
+##  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
+##  Use, modification and distribution are subject to the Boost Software
+##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+##  http://www.boost.org/LICENSE_1_0.txt).
+
+language: cpp
+
+compiler:
+  - g++
+  - clang++
+
+before_install:
+  - sudo apt-get install libboost-dev
+
+script:
+  - scons
+  - ./test

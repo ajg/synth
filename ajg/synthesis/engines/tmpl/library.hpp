@@ -21,7 +21,7 @@ namespace tmpl {
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef fusion::vector6
-    < tmpl::comment_tag // NB: Part of ctpp, not tmpl.
+    < tmpl::comment_tag // NOTE: Part of ctpp, not tmpl.
     , tmpl::if_tag
     , tmpl::include_tag
     , tmpl::loop_tag<>

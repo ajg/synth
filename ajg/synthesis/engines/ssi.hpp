@@ -6,6 +6,7 @@
 #ifndef AJG_SYNTHESIS_ENGINES_SSI_HPP_INCLUDED
 #define AJG_SYNTHESIS_ENGINES_SSI_HPP_INCLUDED
 
+#include <ajg/synthesis/config.hpp>
 #include <ajg/synthesis/engines/ssi/engine.hpp>
 
 #endif // AJG_SYNTHESIS_ENGINES_SSI_HPP_INCLUDED

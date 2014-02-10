@@ -8,7 +8,7 @@
 
 #include <ajg/synthesis/template.hpp>
 #include <ajg/synthesis/adapters.hpp>
-#include <ajg/synthesis/engines/ssi/engine.hpp>
+#include <ajg/synthesis/engines/ssi.hpp>
 #include <ajg/synthesis/engines/tmpl.hpp>
 #include <ajg/synthesis/engines/django.hpp>
 

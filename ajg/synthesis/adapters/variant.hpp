@@ -28,7 +28,7 @@ struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
   public:
 
     // FIXME: These should be forwarded to the real value.
-    boolean_type equal(abstract_type const& that) const { return compare(*this, that); }
+    boolean_type equal(abstract_type const& that) const { return this->compare(*this, that); }
     number_type  count() const { return adapted_.which(); }
     boolean_type test()  const { return true; }
 

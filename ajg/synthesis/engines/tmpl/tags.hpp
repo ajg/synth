@@ -40,6 +40,7 @@ namespace tmpl {
 
 using detail::text;
 using detail::get_nested;
+using detail::operator ==;
 using namespace detail::placeholders;
 
 //

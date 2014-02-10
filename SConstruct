@@ -3,12 +3,29 @@
 ##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
-env = Environment(CPPPATH  = ['.'],
-                  CPPFLAGS = ['-Wall', '-pedantic'])
-                  # TODO: '-Wextra'
+# TODO: Add an environment with '-std=c++11',
 
-synthesis = env.Clone()
-synthesis.Program(target = "synthesis", source =
-    ["synthesis.cpp", "tests/ssi.cpp",
-                      "tests/tmpl.cpp",
-                      "tests/django.cpp"])
+env = Environment(
+    # CXX      = 'g++-4.2',
+    CPPPATH  = ['.'],
+    CPPFLAGS = [
+        # TODO: '-Wall',
+        # TODO: '-pedantic',
+        # TODO: '-Wextra', .
+        # NOTE: clang-only '-ferror-limit=1',
+        '-ftemplate-depth=256',
+        '-Wno-unused-function',
+        '-Wno-unsequenced',
+    ],
+)
+
+test = env.Clone()
+test.Program(
+    target = 'test',
+    source = [
+        'test.cpp',
+        'tests/ssi.cpp',
+        'tests/tmpl.cpp',
+        'tests/django.cpp',
+    ],
+)

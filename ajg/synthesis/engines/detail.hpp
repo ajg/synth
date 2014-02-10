@@ -6,6 +6,8 @@
 #ifndef AJG_SYNTHESIS_ENGINES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTHESIS_ENGINES_DETAIL_HPP_INCLUDED
 
+#include <ajg/synthesis/config.hpp>
+
 #include <map>
 #include <ctime>
 #include <limits>
@@ -13,12 +15,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <stdexcept>
 #include <algorithm>
 #include <sys/stat.h>
 
 #ifndef _WIN32
   #include <unistd.h>
+  extern char **environ;
 #endif
 
 #include <boost/assert.hpp>
@@ -61,17 +65,12 @@
 
 #include <ajg/synthesis/engines/exceptions.hpp>
 
-#ifndef AJG_SYNTHESIS_SEQUENCE_LIMIT
-#define AJG_SYNTHESIS_SEQUENCE_LIMIT 50
-#endif
-
-#ifndef AJG_SYNTHESIS_CONSTRUCT_LIMIT
-#define AJG_SYNTHESIS_CONSTRUCT_LIMIT 10
-#endif
-
 namespace ajg {
 namespace synthesis {
 namespace detail {
+
+using boost::throw_exception;
+namespace fusion = boost::fusion;
 
 //
 // lit [Deprecated]:
@@ -140,27 +139,46 @@ struct string_literal {
 #elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
   #define AJG_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
 #else
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0))
+  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
 #endif
+
+/*
+//
+// unreachable:
+//     A function to give the last, unreachable, operand to a ternary
+//     operator expression the right type, instead of void.
+////////////////////////////////////////////////////////////////////////////////
+
+inline T unreachable(T const&) {
+    AJG_UNREACHABLE;
+}
+*/
+
+struct unreachable {
+    unreachable() {}
+
+    template <class T>
+    inline operator T() const { AJG_UNREACHABLE; }
+};
+
 
 //
 // AJG_CASE_OF, AJG_CASE_OF_ELSE
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TERNARY_OPERATOR(r, value, elem) \
+#define AJG_TERNARY_OPERATOR(r, value, elem) \
     (value == BOOST_PP_TUPLE_ELEM(2, 0, elem)) ? \
         BOOST_PP_TUPLE_ELEM(2, 1, elem) :
 
 #define AJG_CASE_OF_ELSE(value, cases, default_) \
-    (BOOST_PP_SEQ_FOR_EACH(TERNARY_OPERATOR, value, cases) (default_))
+    (BOOST_PP_SEQ_FOR_EACH(AJG_TERNARY_OPERATOR, value, cases) (default_))
 
 // TODO: Figure out how to use AJG_UNREACHABLE but without
 //       triggering warning C4702; or, how to silence the warning.
 
 #define AJG_CASE_OF(value, cases) \
-    AJG_CASE_OF_ELSE(value, cases, throw (BOOST_ASSERT(0), 0))
-
-// #undef TERNARY_OPERATOR
+    AJG_CASE_OF_ELSE(value, cases, ajg::synthesis::detail::unreachable())
+        // (BOOST_ASSERT(0), throw 0, ajg::synthesis::detail::unreachable(value)))
 
 //
 // text:
@@ -173,20 +191,21 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 }
 
 //
-// VECTOR_0_IF
+// AJG_VECTOR_0_IF
 ////////////////////////////////////////////////////////////////////////////////
 
 #if (BOOST_VERSION > 104000) // 1.40+
-    #define VECTOR_0_IF(n, symbol) symbol
+    #define AJG_VECTOR_0_IF(n, symbol) symbol
 #else
-    #define VECTOR_0_IF(n, symbol) BOOST_PP_EXPR_IF(n, symbol)
+    #define AJG_VECTOR_0_IF(n, symbol) BOOST_PP_EXPR_IF(n, symbol)
 #endif
 
 //
 // debugging aids
 ////////////////////////////////////////////////////////////////////////////////
-#define DUMP(e) ((std::cerr << std::boolalpha) << #e << " = " << e << std::endl)
-#define SAY(e)  ((std::cerr << std::boolalpha) << e << std::endl)
+
+#define AJG_DUMP(e) ((std::cerr << std::boolalpha) << #e << " = " << e << std::endl)
+#define AJG_SAY(e)  ((std::cerr << std::boolalpha) << e << std::endl)
 
 //
 // apply_at:
@@ -198,9 +217,9 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 template <std::size_t Size>
 struct apply_at;
 
-#define CASE(z, n, nil) case n: return functor(fusion::at_c<n>(sequence));
+#define AJG_CASE(z, n, nil) case n: return functor(fusion::at_c<n>(sequence));
 
-#define APPLY_AT(z, n, nil) \
+#define AJG_APPLY_AT(z, n, nil) \
     template <> \
     struct apply_at <n> { \
         template <class Sequence, class Functor> \
@@ -214,21 +233,21 @@ struct apply_at;
             } \
             \
             switch (index) { \
-                BOOST_PP_REPEAT(n, CASE, nil) \
+                BOOST_PP_REPEAT(n, AJG_CASE, nil) \
                 default: AJG_UNREACHABLE; \
             } \
         } \
     };
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, APPLY_AT, nil)
-#undef APPLY_AT
-#undef CASE
+BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, AJG_APPLY_AT, nil)
+#undef AJG_APPLY_AT
+#undef AJG_CASE
 
 //
 // create_definitions
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Engine, class Sequence, typename Engine::size_type Size>
+template <class Engine, class Sequence, std::size_t Size>
 struct create_definitions;
 
 #define DEFINITION(z, n, nil) \
@@ -239,9 +258,9 @@ struct create_definitions;
 #define CREATE_DEFINITIONS(z, n, nil) \
     template <class Engine, class Sequence> \
     struct create_definitions <Engine, Sequence, n> { \
-        typedef typename fusion::VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
-            VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            VECTOR_0_IF(n, >) \
+        typedef typename fusion::AJG_VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
+            AJG_VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
+            AJG_VECTOR_0_IF(n, >) \
         type; \
     };
 
@@ -253,7 +272,7 @@ BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 // create_definitions_extended
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Engine, class Sequence, typename Engine::size_type Size>
+template <class Engine, class Sequence, std::size_t Size>
 struct create_definitions_extended;
 
 #define DEFINITION(z, n, nil) \
@@ -267,9 +286,9 @@ struct create_definitions_extended;
 #define CREATE_DEFINITIONS(z, n, nil) \
     template <class Engine, class Sequence> \
     struct create_definitions_extended <Engine, Sequence, n> { \
-        typedef typename fusion::VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
-            VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            VECTOR_0_IF(n, >) \
+        typedef typename fusion::AJG_VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
+            AJG_VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
+            AJG_VECTOR_0_IF(n, >) \
         type; \
     };
 
@@ -283,7 +302,7 @@ BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine, class Sequence, class Key,
-          template <class E, class S, typename Engine::size_type K> class Definer>
+          template <class E, class S, std::size_t K> class Definer>
 struct indexable_sequence {
   public:
 
@@ -308,7 +327,7 @@ struct indexable_sequence {
 template < class Engine
          , class Indexable
          , Indexable Engine::*Sequence
-         , typename Indexable::size_type Size>
+         , std::size_t Size>
 struct index_sequence;
 
 #define PUSH_SYNTAX(z, n, nil) \
@@ -357,7 +376,7 @@ struct furthest_iterator {
 //
 // HAS_MEMBER_FUNCTION:
 //     Adapted from Johannes Schaub (litb)'s.
-//     NB: Apparently will not detect inherited methods.
+//     NOTE: Apparently will not detect inherited methods.
 ////////////////////////////////////////////////////////////////////////////////
 
 #define AJG_DEFINE_METHOD_PREDICATE(name) \
@@ -708,9 +727,9 @@ advance(Container const& container, Distance const distance) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator>
-bool operator == ( xpressive::match_results<Iterator> const& match
-                 , xpressive::basic_regex<Iterator>   const& regex
-                 ) {
+inline bool operator == ( xpressive::match_results<Iterator> const& match
+                        , xpressive::basic_regex<Iterator>   const& regex
+                        ) {
     return match.regex_id() == regex.regex_id();
 }
 
@@ -1035,7 +1054,7 @@ struct pipe : noncopyable {
     FILE* file_;
 };
 
-#undef VECTOR_0_IF
+#undef AJG_VECTOR_0_IF
 
 }}} // namespace ajg::synthesis::detail
 

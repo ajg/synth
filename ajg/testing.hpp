@@ -14,7 +14,7 @@
 
 // Disable long long for gcc's -pedantic.
 #include <boost/config.hpp>
-#undef BOOST_HAS_LONG_LONG
+// #undef BOOST_HAS_LONG_LONG
 
 #define AJG_TESTING 1
 

@@ -85,7 +85,7 @@ struct base_template : noncopyable {
                        , context_type const& context = context_type()
                        , options_type const& options = options_type()
                        ) const {
-        std::string const path = engine_.template convert<char>(filepath);
+        std::string const path = engine_->template convert<char>(filepath);
         std::basic_ofstream<char_type> file;
 
         try {
@@ -140,7 +140,7 @@ struct base_template : noncopyable {
 };
 
 
-#if OBSOLETE
+#if AJG_SYNTHESIS_OBSOLETE
 
 template <class Char>
 std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
@@ -183,7 +183,7 @@ inline String read_stream
     return result;
 }
 
-#endif
+#endif // AJG_SYNTHESIS_OBSOLETE
 
 
 }} // namespace ajg::synthesis

@@ -6,6 +6,7 @@
 #ifndef AJG_SYNTHESIS_ENGINES_DJANGO_HPP_INCLUDED
 #define AJG_SYNTHESIS_ENGINES_DJANGO_HPP_INCLUDED
 
+#include <ajg/synthesis/config.hpp>
 #include <ajg/synthesis/engines/django/engine.hpp>
 
 #endif // AJG_SYNTHESIS_ENGINES_DJANGO_HPP_INCLUDED

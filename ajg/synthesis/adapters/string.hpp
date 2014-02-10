@@ -33,7 +33,7 @@ struct adapter<Traits, std::basic_string
 
   public:
 
-    boolean_type equal(abstract_type const& that) const { return compare(*this, that); }
+    boolean_type equal(abstract_type const& that) const { return this->compare(*this, that); }
     number_type  count() const { return lexical_cast<number_type>(adapted_); }
     boolean_type test()  const { return !adapted_.empty(); }
     void input (istream_type& in)        { in  >> adapted_; }

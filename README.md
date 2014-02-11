@@ -1,7 +1,7 @@
 synthesis
 =========
 
-An Efficient, Versatile C++ Templating Framework, written by [Alvaro J. Genial](http://alva.ro).
+A Powerful C++ Templating Framework, written by [Alvaro J. Genial](http://alva.ro).
 
 [![Build Status](https://travis-ci.org/ajg/synthesis.png?branch=master)](https://travis-ci.org/ajg/synthesis)
 
@@ -35,6 +35,10 @@ It is known to compile with:
  - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
  - `boost` versions `1.42`, `1.46` & `1.55`
 
+Note: to use the `python` binding, Boost.Python is required; if using `brew` on OS X, use the command:
+
+    brew install boost --build-from-source
+
 Components
 ----------
 
@@ -43,6 +47,10 @@ Components
  - `django`
  - `ssi`
  - `tmpl`
+
+### Bindings
+
+ - `python`
 
 ### Templates
 

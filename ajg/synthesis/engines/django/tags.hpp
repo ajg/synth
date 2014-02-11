@@ -19,10 +19,13 @@
 #include <boost/xpressive/xpressive.hpp>
 
 #include <ajg/synthesis/engines/detail.hpp>
+#include <ajg/synthesis/adapters/map.hpp>
 #include <ajg/synthesis/adapters/bool.hpp>
 #include <ajg/synthesis/adapters/string.hpp>
-// #include <ajg/synthesis/adapters/vector.hpp>
+#include <ajg/synthesis/adapters/vector.hpp>
 #include <ajg/synthesis/adapters/numeric.hpp>
+#include <ajg/synthesis/adapters/utility.hpp>
+#include <ajg/synthesis/adapters/variant.hpp>
 
 namespace ajg {
 namespace synthesis {

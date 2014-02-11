@@ -23,31 +23,20 @@ namespace ajg {
 namespace synthesis {
 namespace django {
 
-template <class Iterator>
-struct value : value_facade<typename Iterator::value_type, value<Iterator> > {
+template <class Char>
+struct value : value_facade<Char, value<Char> > {
   public:
 
     typedef value                              this_type;
-    typedef Iterator                           iterator_type;
-    typedef typename Iterator::value_type      char_type;
+    typedef Char                               char_type;
     typedef value_facade<char_type, this_type> base_type;
 
     typedef typename base_type::size_type      size_type;
     typedef typename base_type::traits_type    traits_type;
     typedef typename base_type::string_type    string_type;
+    typedef typename base_type::string_type    token_type;
     typedef typename base_type::boolean_type   boolean_type;
     typedef typename base_type::const_iterator const_iterator;
-
-  public:
-
-    struct token_type : std::pair<iterator_type, iterator_type> {
-        void assign( iterator_type const& begin
-                   , iterator_type const& end
-                   ) {
-            this->first = begin;
-            this->second = end;
-        }
-    };
 
   public:
 
@@ -79,9 +68,7 @@ struct value : value_facade<typename Iterator::value_type, value<Iterator> > {
 
     template <class Token>
     inline void token(Token const& token) {
-        token_ = token_type();
-        token_->first = token.first;
-        token_->second = token.second;
+        token_ = token_type(token.first, token.second);
     }
 
     inline token_type const& token() const {

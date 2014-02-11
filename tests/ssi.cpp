@@ -254,13 +254,13 @@ unit_test(directive with error) {
 
 unit_test(file template) {
     std::string const m = default_options.echo_message;
-    file_template const t("samples/variables.shtml");
+    file_template const t("samples/ssi/variables.shtml");
     ensure_equals(t.render_to_string(), m + m + m);
 }}}
 
 unit_test(include directive) {
     string_template const t(
-        "<!--#include file='samples/example.shtml' -->");
+        "<!--#include file='samples/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), "\n\n\n"
         "============\nABC\n============");
 }}}

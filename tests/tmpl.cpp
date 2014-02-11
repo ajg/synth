@@ -199,12 +199,12 @@ unit_test(loop __counter__ variable) {
 }}}
 
 unit_test(file template) {
-    file_template t("samples/variables.tmpl");
+    file_template t("samples/tmpl/variables.tmpl");
     ensure_equals(t.render_to_string(context), "ABC");
 }}}
 
 unit_test(include tag) {
-    file_template t("samples/example.tmpl");
+    file_template t("samples/tmpl/example.tmpl");
     ensure_equals(t.render_to_string(context),
         "============\nABC|\nABC\n============");
 }}}

@@ -2,5 +2,5 @@
 <!--#set var='bar' value='B' -->
 <!--#set var='qux' value='C' -->
 ============
-<!--#include file="samples/variables.shtml" -->
+<!--#include file="samples/ssi/variables.shtml" -->
 ============

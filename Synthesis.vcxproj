@@ -17,7 +17,7 @@
     <ClCompile Include="tests\tmpl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".hgignore" />
+    <None Include=".gitignore" />
     <None Include="LICENSE_1_0.txt" />
     <None Include="samples\django\base.tpl" />
     <None Include="samples\django\derived.tpl" />
@@ -29,7 +29,6 @@
     <None Include="samples\tmpl\variables.tmpl" />
     <None Include="samples\tmpl\example.tmpl" />
     <None Include="SConstruct" />
-    <None Include="Synthesis.cbp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ajg\synthesis.hpp" />

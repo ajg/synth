@@ -55,7 +55,6 @@ Components
 ### Templates
 
  - `file_template`
- - `stream_template`
  - `string_template`
 
 ### Adapters
@@ -92,13 +91,20 @@ Components
 Future Work
 -----------
 
+ - Update VS project files and test on Windows.
+ - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
+ - Complex expressions in the `django` engine.
  - `python` binding based on [Boost.Python](http://www.boost.org/doc/libs/release/libs/python/)
+   * Plus template loaders for Django
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
  - `cheetah` engine
- - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
+ - `stream_template`
+ - `multi_engine`
  - `c++11` type adapters
  - `c++14` type adapters
+ - Move `*_template`s to own namespace.
+ - Split out options to separate header files.
 
 License
 -------

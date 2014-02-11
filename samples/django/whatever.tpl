@@ -52,7 +52,7 @@ xml_var: {{ xml_var }}
 xml_var: {{ xml_var|safe }}
 
 Included:
-{% include "samples/included.tpl" %}
+{% include "samples/django/included.tpl" %}
 
 
 {% firstof nonextant a_false a_pair a_deque %}
@@ -151,5 +151,5 @@ var s = "{{ a_bin_string|escapejs }}";
 This is a block
 {% endblock a_block %}
 
-{% include "samples/expression.tpl" %}
+{% include "samples/django/expression.tpl" %}
 

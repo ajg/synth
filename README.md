@@ -96,7 +96,6 @@ Future Work
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
  - `cheetah` engine
- - Split up samples per engine.
  - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
  - `c++11` type adapters
  - `c++14` type adapters

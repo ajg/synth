@@ -32,15 +32,15 @@
     <None Include="LICENSE_1_0.txt" />
     <None Include=".hgignore" />
     <None Include="SConstruct" />
-    <None Include="samples\base.tpl" />
-    <None Include="samples\derived.tpl" />
-    <None Include="samples\example.shtml" />
-    <None Include="samples\example.tmpl" />
-    <None Include="samples\expression.tpl" />
-    <None Include="samples\included.tpl" />
-    <None Include="samples\whatever.tpl" />
-    <None Include="samples\variables.tmpl" />
-    <None Include="samples\variables.shtml" />
+    <None Include="samples\django\base.tpl" />
+    <None Include="samples\django\derived.tpl" />
+    <None Include="samples\django\expression.tpl" />
+    <None Include="samples\django\included.tpl" />
+    <None Include="samples\django\whatever.tpl" />
+    <None Include="samples\ssi\variables.shtml" />
+    <None Include="samples\ssi\example.shtml" />
+    <None Include="samples\tmpl\variables.tmpl" />
+    <None Include="samples\tmpl\example.tmpl" />
     <None Include="Synthesis.cbp" />
   </ItemGroup>
   <ItemGroup>

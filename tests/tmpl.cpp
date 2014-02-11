@@ -12,10 +12,10 @@
 #include <ajg/synthesis/engines/tmpl.hpp>
 
 typedef char char_t;
-namespace cs = ajg::synthesis;
-typedef cs::tmpl::engine<> engine_type;
-typedef cs::file_template<char_t, engine_type> file_template;
-typedef cs::string_template<char_t, engine_type> string_template;
+namespace s = ajg::synthesis;
+typedef s::tmpl::engine<> engine_type;
+typedef s::file_template<char_t, engine_type> file_template;
+typedef s::string_template<char_t, engine_type> string_template;
 
 struct context_data {
 
@@ -44,6 +44,10 @@ typedef ajg::test_group<context_data> group_type;
 group_type group_object("tmpl tests");
 AJG_TESTING_BEGIN
 
+unit_test(plain text) {
+    string_template const t("ABC");
+    ensure_equals(t.render_to_string(), "ABC");
+}}}
 
 unit_test(single tag) {
     string_template t("<TMPL_VAR foo>");
@@ -51,7 +55,7 @@ unit_test(single tag) {
 }}}
 
 unit_test(invalid tag) {
-    ensure_throws(cs::parsing_error,
+    ensure_throws(s::parsing_error,
         string_template("<TMPL_ VAR foo>"));
 }}}
 
@@ -135,7 +139,7 @@ unit_test(compound unless tag) {
 }}}
 
 unit_test(mismatched tags) {
-    ensure_throws(cs::parsing_error,
+    ensure_throws(s::parsing_error,
         string_template("<TMPL_IF true_var>Bad</TMPL_UNLESS>"));
 }}}
 

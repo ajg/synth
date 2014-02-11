@@ -15,13 +15,18 @@ group_type group_object("ssi tests");
 AJG_TESTING_BEGIN
 
 typedef char char_t;
-namespace cs = ajg::synthesis;
-typedef cs::ssi::engine<> engine_type;
-typedef cs::file_template<char_t, engine_type> file_template;
-typedef cs::string_template<char_t, engine_type> string_template;
+namespace s = ajg::synthesis;
+typedef s::ssi::engine<> engine_type;
+typedef s::file_template<char_t, engine_type> file_template;
+typedef s::string_template<char_t, engine_type> string_template;
 typedef string_template::string_type string_type;
 
 static string_template::options_type const default_options;
+
+unit_test(plain text) {
+    string_template const t("ABC");
+    ensure_equals(t.render_to_string(), "ABC");
+}}}
 
 unit_test(html tags) {
     string_template const t("<foo>\nA foo <bar /> element.\n</foo>");
@@ -199,7 +204,7 @@ unit_test(multiple config attributes) {
 }}}
 
 unit_test(invalid directive) {
-    ensure_throws(cs::parsing_error,
+    ensure_throws(s::parsing_error,
         string_template("<!--#e_cho -->"));
 }}}
 
@@ -229,8 +234,8 @@ unit_test(fsize directive abbrev) {
 unit_test(flastmod directive) {
     string_template const t(
         "<!--#flastmod file='LICENSE_1_0.txt' -->");
-    ensure_equals(t.render_to_string(), cs::detail::format_time(default_options.time_format,
-        boost::posix_time::from_time_t(cs::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
+    ensure_equals(t.render_to_string(), s::detail::format_time(default_options.time_format,
+        boost::posix_time::from_time_t(s::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
 }}}
 
 unit_test(flastmod directive custom) {
@@ -238,8 +243,8 @@ unit_test(flastmod directive custom) {
     string_template const t(
         "<!--#config timefmt='" + format + "' -->"
         "<!--#flastmod file='LICENSE_1_0.txt' -->");
-    ensure_equals(t.render_to_string(), cs::detail::format_time(format,
-        boost::posix_time::from_time_t(cs::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
+    ensure_equals(t.render_to_string(), s::detail::format_time(format,
+        boost::posix_time::from_time_t(s::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
 }}}
 
 unit_test(directive with error) {

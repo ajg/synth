@@ -4,6 +4,7 @@
 
 # Binaries
 *.o
+*.os
 *.pyc
 *.so
 /synthesis

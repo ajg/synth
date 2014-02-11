@@ -49,7 +49,7 @@ struct missing_argument : public std::invalid_argument {
 };
 
 namespace {
-    static const char word_delimiters[] = " \t\n.,;:!?'\"-";
+    static char const word_delimiters[] = " \t\n.,;:!?'\"-";
 } // anonymous
 
 //

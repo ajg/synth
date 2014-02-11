@@ -37,15 +37,17 @@ namespace django {
 
 //
 // options
+// TODO: We could get rid of the need for Iterator here by using an offset
+//       between iterators (a size_type) instead of the iterator as a key.
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator, class Value>
 struct options {
     typedef Iterator                           iterator_type;
     typedef Value                              value_type;
-    typedef typename iterator_type::value_type char_type;
-    typedef std::basic_string<char_type>       string_type;
-    typedef typename string_type::size_type    size_type;
+    typedef typename value_type::char_type     char_type;
+    typedef typename value_type::string_type   string_type;
+    typedef typename value_type::size_type     size_type;
 
     bool autoescape;
     std::map<string_type, string_type>* blocks;
@@ -53,6 +55,12 @@ struct options {
     std::map<iterator_type, value_type> registry;
 
     options() : autoescape(true), blocks(0) {}
+
+    template <class I>
+    options(options<I, value_type> const& that)
+        : autoescape(that.autoescape)
+        , blocks(that.blocks) {}
+        // cycles?, registry?
 };
 
 using detail::operator ==;
@@ -91,7 +99,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef Library                            library_type;
     typedef typename library_type::first       tags_type;
     typedef typename library_type::second      filters_type;
-    typedef django::value<iterator_type>       value_type;
+    typedef django::value<char_type>           value_type;
     typedef options<iterator_type, value_type> options_type;
     typedef std::map<string_type, value_type>  context_type;
     typedef std::vector<value_type>            array_type;
@@ -196,28 +204,32 @@ struct definition : base_definition< BidirectionalIterator
                              ) const {
         typedef char_separator<char_type> separator_type;
         typedef typename value_type::token_type token_type;
-        typedef tokenizer<separator_type, iterator_type, token_type> tokenizer_type;
+        typedef tokenizer< separator_type
+                         , typename token_type::const_iterator
+                         , token_type
+                         > tokenizer_type;
+        typedef definition<typename token_type::const_iterator> definition_type;
 
         BOOST_ASSERT(argument.is_literal());
         token_type const& source = argument.token();
         static char_type const delimiter[2] = { Delimiter, 0 };
         separator_type const separator(delimiter, 0, keep_empty_tokens);
-        tokenizer_type const tokenizer(source.first, source.second, separator);
-
+        tokenizer_type const tokenizer(source.begin(), source.end(), separator);
+        static definition_type const tokenizable_definition;
+        typename definition_type::match_type match;
         array_type args;
-        match_type match;
 
         BOOST_FOREACH(token_type const& token, tokenizer) {
-            if (!std::distance(token.first, token.second)) {
+            if (std::distance(token.begin(), token.end()) == 0) {
                 args.push_back(value_type());
             }
-            else if (xpressive::regex_match(token.first,
-                     token.second, match, expression)) {
+            else if (xpressive::regex_match(token.begin(),
+                     token.end(), match, tokenizable_definition.expression)) {
                 try {
-                    args.push_back(evaluate(match, context, options));
+                    args.push_back(tokenizable_definition.evaluate(match, context, options));
                 }
                 catch (missing_variable const& e) {
-                    string_type const string(token.first, token.second);
+                    string_type const string(token.begin(), token.end());
 
                     if (this->template convert<char>(string) != e.name) {
                         throw_exception(e);

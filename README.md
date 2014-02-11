@@ -20,6 +20,21 @@ Motivation
 
 Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process.
 
+Dependencies
+------------
+
+Building `synthesis` requires:
+
+ - A modern C++ compiler
+ - [Boost](http://boost.org)
+ - [SCons](http://scons.org)
+
+It is known to compile with:
+
+ - `g++` versions `4.2.1` & `4.6.3`
+ - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
+ - `boost` versions `1.42`, `1.46` & `1.55`
+
 Components
 ----------
 

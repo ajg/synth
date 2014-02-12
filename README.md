@@ -104,6 +104,7 @@ Future Work
  - `c++11` type adapters
  - `c++14` type adapters
  - Move `*_template`s to own namespace.
+ - Move `engine`s to own namespace.
  - Split out options to separate header files.
 
 License

@@ -206,5 +206,5 @@ unit_test(file template) {
 unit_test(include tag) {
     file_template t("samples/tmpl/example.tmpl");
     ensure_equals(t.render_to_string(context),
-        "============\nABC|\nABC\n============");
+        "============\nABC|\nABC\n============\n");
 }}}

@@ -262,7 +262,7 @@ unit_test(include directive) {
     string_template const t(
         "<!--#include file='samples/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), "\n\n\n"
-        "============\nABC\n============");
+        "============\nABC\n============\n");
 }}}
 
 unit_test(exec directive) {

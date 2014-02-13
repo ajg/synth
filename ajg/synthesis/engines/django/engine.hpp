@@ -19,6 +19,8 @@
 #include <boost/tokenizer.hpp>
 #include <boost/noncopyable.hpp>
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/algorithm.hpp>
 #include <boost/fusion/sequence/intrinsic/size.hpp>
@@ -64,6 +66,7 @@ struct options {
 };
 
 using detail::operator ==;
+namespace x = boost::xpressive;
 
 template <class Library = django::default_library>
 struct engine : detail::nonconstructible {
@@ -160,13 +163,41 @@ struct definition : base_definition< BidirectionalIterator
             = '.' >> *_s >> identifier
             ;
         subscription
-            = '[' >> *_s >> xpressive::ref(expression) >> *_s >> ']'
+            = '[' >> *_s >> x::ref(expression) >> *_s >> ']'
+         // | '(' >> *_s >> x::ref(expression) >> *_s >> ')'
             ;
-        expression
+        chain
             = literal >> *(*_s >> (attribution | subscription))
             ;
+        unary_operator
+            = as_xpr("not") >> +_s
+            ;
+        binary_operator
+            = as_xpr("==")
+            | as_xpr("!=")
+            | as_xpr("<")
+            | as_xpr(">")
+            | as_xpr("<=")
+            | as_xpr(">=")
+            | +_s >> ( as_xpr("and")
+                     | as_xpr("or")
+                     | as_xpr("in")
+                     )
+              >> +_s
+            ;
+        binary_expression
+            = chain >> *(binary_operator >> x::ref(expression))
+            ;
+        unary_expression
+            = unary_operator >> x::ref(expression)
+            ;
+        expression
+            = unary_expression
+            | binary_expression
+            | '(' >> x::ref(expression) >> ')'
+            ;
         filter
-            = identifier >> !(':' >> *_s >> expression)
+            = identifier >> !(':' >> *_s >> chain)
             ;
         pipe
             = filter >> *(*_s >> '|' >> *_s >> filter)
@@ -224,9 +255,11 @@ struct definition : base_definition< BidirectionalIterator
                 args.push_back(value_type());
             }
             else if (xpressive::regex_match(token.begin(),
-                     token.end(), match, tokenizable_definition.expression)) {
+                     token.end(), match, tokenizable_definition.chain)) {
                 try {
-                    args.push_back(tokenizable_definition.evaluate(match, context, options));
+                    value_type const arg = tokenizable_definition.
+                        evaluate_chain(match, context, options);
+                    args.push_back(arg);
                 }
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
@@ -333,6 +366,13 @@ struct definition : base_definition< BidirectionalIterator
         return result;
     }
 
+    value_type evaluate( match_type   const& expression
+                       , context_type const& context
+                       , options_type const& options
+                       ) const {
+        return evaluate_expression(expression, context, options);
+    }
+
     value_type evaluate_literal( match_type   const& match
                                , context_type const& context
                                , options_type const& options
@@ -380,24 +420,108 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
-    value_type evaluate( match_type   const& match
-                       , context_type const& context
-                       , options_type const& options
-                       ) const {
+    value_type evaluate_expression( match_type   const& expression
+                                  , context_type const& context
+                                  , options_type const& options
+                                  ) const {
+        if (expression == unary_expression) {
+            return evaluate_unary(expression, context, options);
+        }
+        else if (expression == binary_expression) {
+            return evaluate_binary(expression, context, options);
+        }
+        else { // Parenthesized expression.
+            match_type const& nested = detail::get_nested<1>(expression);
+            return evaluate_expression(nested, context, options);
+        }
+    }
+
+    value_type evaluate_unary( match_type   const& unary
+                             , context_type const& context
+                             , options_type const& options
+                             ) const {
+        string_type const op = algorithm::trim_copy(detail::get_nested<1>(unary).str());
+        match_type const& operand = detail::get_nested<2>(unary);
+
+        if (op == "not") {
+            return !evaluate_expression(operand, context, options);
+        }
+        else {
+            throw_exception(std::logic_error("invalid unary operator: " + op));
+        }
+    }
+
+    value_type evaluate_binary( match_type   const& binary
+                              , context_type const& context
+                              , options_type const& options
+                              ) const {
+        // First, evaluate the first segment, which is
+        // always present, and which is always a chain.
+        match_type const& chain = detail::get_nested<1>(binary);
+        value_type value = evaluate_chain(chain, context, options);
+        size_type i = 0;
+
+        BOOST_FOREACH( match_type const& segment
+                     , binary.nested_results()
+                     ) {
+            if (!i++) continue; // Skip the first segment (the chain.)
+            string_type const op = algorithm::trim_copy(detail::get_nested<1>(segment).str());
+            match_type const& operand = detail::get_nested<2>(segment);
+
+            if (op == "and") {
+                value = value ? evaluate_expression(operand, context, options) : value;
+            }
+            else if (op == "or") {
+                value = value ? value : evaluate_expression(operand, context, options);
+            }
+            else if (op == "in") {
+                value_type const elements = evaluate_expression(operand, context, options);
+                value = elements.contains(value);
+            }
+            else if (op == "==") {
+                value = value == evaluate_expression(operand, context, options);
+            }
+            else if (op == "!=") {
+                value = value != evaluate_expression(operand, context, options);
+            }
+            else if (op == "<") {
+                value = value < evaluate_expression(operand, context, options);
+            }
+            else if (op == ">") {
+                value = value > evaluate_expression(operand, context, options);
+            }
+            else if (op == "<=") {
+                value = value <= evaluate_expression(operand, context, options);
+            }
+            else if (op == ">=") {
+                value = value >= evaluate_expression(operand, context, options);
+            }
+            else {
+                throw_exception(std::logic_error("invalid binary operator: " + op));
+            }
+        }
+
+        return value;
+    }
+
+    value_type evaluate_chain( match_type   const& chain
+                             , context_type const& context
+                             , options_type const& options
+                             ) const {
         // Handle singly-nested expressions.
-        /*if (match == expression) {
-            match_type const& nested = detail::get_nested<1>(match);
+        /*if (chain == expression) {
+            match_type const& nested = detail::get_nested<1>(chain);
             return evaluate(nested, context, options);
         }*/
 
         // First, evaluate the first segment, which is
         // always present, and which is always a literal.
-        match_type const& literal = detail::get_nested<1>(match);
+        match_type const& literal = detail::get_nested<1>(chain);
         value_type value = evaluate_literal(literal, context, options);
         size_type i = 0;
 
         BOOST_FOREACH( match_type const& segment
-                     , match.nested_results()
+                     , chain.nested_results()
                      ) {
             if (!i++) continue; // Skip the first segment (the literal.)
             value_type attribute;
@@ -472,7 +596,9 @@ struct definition : base_definition< BidirectionalIterator
 
     regex_type tag, text, block, skipper;
     regex_type identifier, filter, pipe;
-    regex_type subscription, attribution, expression;
+    regex_type chain, subscription, attribution;
+    regex_type unary_operator, binary_operator;
+    regex_type unary_expression, binary_expression, expression;
     regex_type string_literal, number_literal;
     regex_type none_literal, boolean_literal;
     regex_type variable_literal, literal;

@@ -168,6 +168,12 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         return this->get()->equal(*that.get());
     }
 
+    // TODO: Make overridable by specializations (e.g. map to `in` in python.)
+    inline boolean_type contains(value_type const& that) const {
+        return !this->find(that).equal(this->end());
+    }
+
+    // TODO: Make overridable by specializations (e.g. map to __len__ in python.)
     inline size_type size() const { return std::distance(begin(), end()); }
     // TODO: Consider getting rid of length() and changing clients to size().
     inline size_type length() const { return this->size(); }
@@ -231,6 +237,23 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     inline boolean_type operator !=(value_type const& that) const {
         return !this->operator ==(that);
     }
+
+    inline boolean_type operator <(value_type const& that) const {
+        throw_exception(not_implemented("<"));
+    }
+
+    inline boolean_type operator <=(value_type const& that) const {
+        return !this->operator >(that);
+    }
+
+    inline boolean_type operator >(value_type const& that) const {
+        return that.operator <(*this);
+    }
+
+    inline boolean_type operator >=(value_type const& that) const {
+        return that.operator <=(*this);
+    }
+
 
     inline value_type const operator [](/*value_type*/number_type const& index) const {
         return *this->at(index);

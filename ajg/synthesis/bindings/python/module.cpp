@@ -6,15 +6,19 @@
 #include <boost/python.hpp>
 
 #include <ajg/synthesis/engines/django.hpp>
+#include <ajg/synthesis/engines/ssi.hpp>
+#include <ajg/synthesis/engines/tmpl.hpp>
 #include <ajg/synthesis/bindings/python/binding.hpp>
 
 BOOST_PYTHON_MODULE(synthesis)
 {
     using namespace boost::python;
-    typedef char                                          Char;
-    typedef ajg::synthesis::django::engine<>              Engine;
-    typedef ajg::synthesis::python::binding<Char, Engine> Template;
-    typedef Template::string_type                         String;
+    typedef ajg::synthesis::python::binding<char
+      , ajg::synthesis::django::engine<>
+      , ajg::synthesis::ssi::engine<>
+      , ajg::synthesis::tmpl::engine<>
+      >                                 Template;
+    typedef Template::string_type       String;
 
     def("version", ajg::synthesis::python::version);
 

@@ -12,9 +12,9 @@
 #include <ajg/synthesis/engines/tmpl.hpp>
 
 namespace {
+namespace s = ajg::synthesis;
 
 typedef char char_t;
-namespace s = ajg::synthesis;
 typedef s::tmpl::engine<> engine_type;
 typedef s::file_template<char_t, engine_type> file_template;
 typedef s::string_template<char_t, engine_type> string_template;
@@ -48,9 +48,16 @@ group_type group_object("tmpl tests");
 
 AJG_TESTING_BEGIN
 
+unit_test(sanity check) {
+    string_template const t("");
+    ensure_equals(t.render_to_string(), "");
+    ensure_equals(t.render_to_string(context), "");
+}}}
+
 unit_test(plain text) {
     string_template const t("ABC");
     ensure_equals(t.render_to_string(), "ABC");
+    ensure_equals(t.render_to_string(context), "ABC");
 }}}
 
 unit_test(single tag) {

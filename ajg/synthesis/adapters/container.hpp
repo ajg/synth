@@ -11,6 +11,7 @@
 #include <ajg/synthesis/adapters/pair.hpp>
 #include <ajg/synthesis/adapters/list.hpp>
 #include <ajg/synthesis/adapters/deque.hpp>
+#include <ajg/synthesis/adapters/stack.hpp>
 #include <ajg/synthesis/adapters/vector.hpp>
 
 // TODO: unordered_[multi]map/hash_[multi]map

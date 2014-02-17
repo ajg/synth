@@ -78,10 +78,11 @@ Components
  - `shared_array`
  - `shared_ptr`
  - `smart_ptr`
+ - `stack`
  - `string`
  - `utility`
  - `variant`
- - `vector``
+ - `vector`
 
 ### Extesibility
 
@@ -104,6 +105,7 @@ Future Work
  - `multi_engine`
  - `c++11` type adapters
  - `c++14` type adapters
+ - `tribool` adapter
  - Move `*_template`s to own namespace.
  - Move `engine`s to own namespace.
  - Split out engine options to separate header files.

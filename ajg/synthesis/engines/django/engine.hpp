@@ -104,7 +104,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename library_type::second      filters_type;
     typedef django::value<char_type>           value_type;
     typedef options<iterator_type, value_type> options_type;
-    typedef std::map<string_type, value_type>  context_type;
+    typedef std::map<string_type, value_type>  context_type; // TODO: value_type keys.
     typedef std::vector<value_type>            array_type;
 
     typedef detail::indexable_sequence<this_type, tags_type,
@@ -440,6 +440,7 @@ struct definition : base_definition< BidirectionalIterator
                              , context_type const& context
                              , options_type const& options
                              ) const {
+        BOOST_ASSERT(unary == unary_expression);
         string_type const op = algorithm::trim_copy(detail::get_nested<1>(unary).str());
         match_type const& operand = detail::get_nested<2>(unary);
 
@@ -455,6 +456,7 @@ struct definition : base_definition< BidirectionalIterator
                               , context_type const& context
                               , options_type const& options
                               ) const {
+        BOOST_ASSERT(binary == binary_expression);
         // First, evaluate the first segment, which is
         // always present, and which is always a chain.
         match_type const& chain = detail::get_nested<1>(binary);
@@ -508,6 +510,7 @@ struct definition : base_definition< BidirectionalIterator
                              , context_type const& context
                              , options_type const& options
                              ) const {
+        BOOST_ASSERT(chain == this->chain);
         // Handle singly-nested expressions.
         /*if (chain == expression) {
             match_type const& nested = detail::get_nested<1>(chain);

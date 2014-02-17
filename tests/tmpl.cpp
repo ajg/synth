@@ -11,6 +11,8 @@
 #include <ajg/synthesis/adapters.hpp>
 #include <ajg/synthesis/engines/tmpl.hpp>
 
+namespace {
+
 typedef char char_t;
 namespace s = ajg::synthesis;
 typedef s::tmpl::engine<> engine_type;
@@ -18,7 +20,6 @@ typedef s::file_template<char_t, engine_type> file_template;
 typedef s::string_template<char_t, engine_type> string_template;
 
 struct context_data {
-
     context_data() {
         context["foo"] = "A";
         context["bar"] = "B";
@@ -42,6 +43,9 @@ struct context_data {
 
 typedef ajg::test_group<context_data> group_type;
 group_type group_object("tmpl tests");
+
+} // namespace
+
 AJG_TESTING_BEGIN
 
 unit_test(plain text) {

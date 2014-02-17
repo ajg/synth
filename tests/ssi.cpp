@@ -10,9 +10,7 @@
 #include <ajg/synthesis/adapters.hpp>
 #include <ajg/synthesis/engines/ssi.hpp>
 
-typedef ajg::test_group<> group_type;
-group_type group_object("ssi tests");
-AJG_TESTING_BEGIN
+namespace {
 
 typedef char char_t;
 namespace s = ajg::synthesis;
@@ -22,6 +20,13 @@ typedef s::string_template<char_t, engine_type> string_template;
 typedef string_template::string_type string_type;
 
 static string_template::options_type const default_options;
+
+typedef ajg::test_group<> group_type;
+group_type group_object("ssi tests");
+
+} // namespace
+
+AJG_TESTING_BEGIN
 
 unit_test(plain text) {
     string_template const t("ABC");

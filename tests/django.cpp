@@ -8,6 +8,7 @@
 #include <ajg/testing.hpp>
 #include <ajg/synthesis/engines/django.hpp>
 
+namespace {
 typedef char char_t;
 namespace s = ajg::synthesis;
 typedef s::django::engine<> engine_type;
@@ -16,6 +17,9 @@ typedef s::string_template<char_t, engine_type> string_template;
 
 typedef ajg::test_group<> group_type;
 group_type group_object("django tests");
+
+} // namespace
+
 AJG_TESTING_BEGIN
 
 unit_test(plain text) {

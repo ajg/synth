@@ -93,6 +93,7 @@ Future Work
 
  - Update VS project files and test on Windows.
  - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
+ - Create `c++11` branch.
  - Complex expressions in the `django` engine.
  - `python` binding based on [Boost.Python](http://www.boost.org/doc/libs/release/libs/python/)
    * Plus template loaders for Django
@@ -105,7 +106,7 @@ Future Work
  - `c++14` type adapters
  - Move `*_template`s to own namespace.
  - Move `engine`s to own namespace.
- - Split out options to separate header files.
+ - Split out engine options to separate header files.
 
 License
 -------

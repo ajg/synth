@@ -29,26 +29,16 @@ struct adapter<Traits, boost::python::object>
 
   private:
 
-    typedef typename boost::python::stl_input_iterator<value_type> stl_iterator;
+    typedef typename boost::python::stl_input_iterator<object_type> stl_iterator;
 
   public:
 
-    boolean_type test() const {
+    boolean_type test() const { return boolean_type(adapted_); }
 
-        /*if (!adapted_) {
-            return false;
-        }
-        boost::python::extract<bool> result(adapted_.attr(
-            PY_MAJOR_VERSION >= 3 ? "__bool__" : "__nonzero__"));
-        return result.check() && boolean_type(result);*/
+ // void input (istream_type& in)        { in >> adapted_; }
+ // void output(ostream_type& out) const { out << adapted_; }
 
-        return boolean_type(adapted_);
-    }
-
- // void input (istream_type& in)        { boost::python::operator >>(in, adapted_); }
- // void output(ostream_type& out) const { boost::python::operator <<(out, adapted_); }
     void output(ostream_type& out) const {
-        // boost::python::extract<string_type> const s(adapted_.attr("__str__"));
         boost::python::extract<string_type> const s((boost::python::str(adapted_)));
 
         if (!s.check()) {
@@ -57,11 +47,11 @@ struct adapter<Traits, boost::python::object>
         out << string_type(s);
     }
 
-    iterator end()   { return iterator(); }
     iterator begin() { return iterator(stl_iterator(adapted_)); }
+    iterator end()   { return iterator(stl_iterator()); }
 
-    const_iterator end()   const { return const_iterator(); }
     const_iterator begin() const { return const_iterator(stl_iterator(adapted_)); }
+    const_iterator end()   const { return const_iterator(stl_iterator()); }
 };
 
 }} // namespace ajg::synthesis

@@ -11,9 +11,9 @@
 #include <ajg/synthesis/engines/ssi.hpp>
 
 namespace {
+namespace s = ajg::synthesis;
 
 typedef char char_t;
-namespace s = ajg::synthesis;
 typedef s::ssi::engine<> engine_type;
 typedef s::file_template<char_t, engine_type> file_template;
 typedef s::string_template<char_t, engine_type> string_template;
@@ -27,6 +27,11 @@ group_type group_object("ssi tests");
 } // namespace
 
 AJG_TESTING_BEGIN
+
+unit_test(sanity check) {
+    string_template const t("");
+    ensure_equals(t.render_to_string(), "");
+}}}
 
 unit_test(plain text) {
     string_template const t("ABC");

@@ -80,19 +80,15 @@ struct binding {
 
     template <class Context>
     inline static Context get_context(py::dict d) {
-        using py::extract;
         Context context;
         py::list const items = d.items();
-        AJG_DUMP(len(items));
 
         for (std::size_t i = 0, n = len(items); i < n; ++i) {
-            py::tuple const item = extract<py::tuple>(items[i]);
-            extract<string_type> key(item[0]);
+            py::tuple const item = py::extract<py::tuple>(items[i]);
+            py::extract<string_type> key((py::str(item[0])));
             py::object value(item[1]);
-            AJG_DUMP(key.check());
 
             if (key.check()) {
-                AJG_DUMP(string_type(key));
                 context[string_type(key)] = value;
             }
         }

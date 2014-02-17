@@ -68,8 +68,8 @@ struct value_iterator
         return (!a && !b) || (a && b && this->iterator_->equal(*that.iterator_));
     }
 
-    void increment() { iterator_->increment(); }
-    Value dereference() const { return iterator_->dereference(); }
+    void increment() { BOOST_ASSERT(iterator_); iterator_->increment(); }
+    Value dereference() const { BOOST_ASSERT(iterator_); return iterator_->dereference(); }
     // value_iterator advance(size_type const distance) const;
 
   private:
@@ -91,7 +91,7 @@ struct value_iterator
         virtual void increment() { iterator_++; }
         virtual Value dereference() const { return *iterator_; }
         virtual this_type& clone() const { return *new this_type(iterator_); }
-        virtual bool equal( virtual_iterator const& that) const {
+        virtual bool equal(virtual_iterator const& that) const {
          // BOOST_ASSERT(typeid(this_type) == typeid(that));
             BOOST_ASSERT(dynamic_cast<this_type const*>(&that));
             return static_cast<this_type const&>(that).iterator_ == this->iterator_;

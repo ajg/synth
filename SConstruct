@@ -16,7 +16,7 @@ env = Environment(
         # TODO: '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        # NOTE: clang-only '-ferror-limit=1',
+        '-ferror-limit=1',
         '-ftemplate-depth=256',
         '-Wno-unused-function',
         '-Wno-unsequenced',

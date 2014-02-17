@@ -8,9 +8,19 @@ import synthesis
 print('Loaded synthesis; version: ' + synthesis.version())
 
 source = """
-foo: {{ foo }}; {% if foo %} yes {% else %} <p>no. {% endif %}
-bar: {{ bar }}; {% if bar %} yes {% else %} <p>no. {% endif %}
-qux: {{ qux }}; {% if qux %} yes {% else %} <p>no. {% endif %}
+foo: {{ foo }}; {% if foo %} yes {% else %} <p>no {% endif %}
+bar: {{ bar }}; {% if bar %} yes {% else %} <p>no {% endif %}
+qux: {{ qux }}; {% if qux %} yes {% else %} <p>no {% endif %}
+True: {{ True }}; {% if True %} yes {% else %} <p>no {% endif %}
+False: {{ False }}; {% if False %} yes {% else %} <p>no {% endif %}
+"": {{ "" }}; {% if "" %} yes {% else %} <p>no {% endif %}
+0: {{ 0 }}; {% if 0 %} yes {% else %} <p>no {% endif %}
+
+{% for k, v in "test" %} {{ k }} - {{ v }} {% endfor %}
+
+{% for k, v in qux %} {{ k }} - {{ v }} {% endfor %}
+
+{% for k, v in qux2 %} {{ k }} - {{ v }} {% endfor %}
 
 {% comment %}
 {{ 0 or 0 }}
@@ -24,7 +34,7 @@ qux: {{ qux }}; {% if qux %} yes {% else %} <p>no. {% endif %}
 {% endcomment %}
 """.encode('utf-8')
 
-context = {'foo': True, 'bar': 42, 'qux': [1,2,3,4,5]}
+context = {'foo': True, 'bar': 42, 'qux': [1,2,3,4,5], 'qux2': {'a': 'A', 'b': 'B', 'c': 'C'}}
 template = synthesis.Template(source, 'django')
 
 print(template.render_to_string(context))

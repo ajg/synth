@@ -64,8 +64,8 @@ struct value_iterator
 
     template <class Value_>
     bool equal(value_iterator<Value_> const& that) const {
-        return (!this->iterator_ && !that.iterator_)
-            || this->iterator_->equal(*that.iterator_);
+        bool const a = this->iterator_, b = that.iterator_;
+        return (!a && !b) || (a && b && this->iterator_->equal(*that.iterator_));
     }
 
     void increment() { iterator_->increment(); }

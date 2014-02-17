@@ -12,7 +12,7 @@
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 
-// #include <ajg/synthesis/bindings/python/adapter.hpp>
+#include <ajg/synthesis/bindings/python/adapter.hpp>
 
 namespace ajg {
 namespace synthesis {
@@ -44,33 +44,33 @@ struct binding {
   private:
 
     // TODO: Use unique_ptr?
-    boost::shared_ptr<django_template_type> django_template;
-    boost::shared_ptr<ssi_template_type>    ssi_template;
-    boost::shared_ptr<tmpl_template_type>   tmpl_template;
+    boost::shared_ptr<django_template_type> django_template_;
+    boost::shared_ptr<ssi_template_type>    ssi_template_;
+    boost::shared_ptr<tmpl_template_type>   tmpl_template_;
 
   public:
 
     binding(string_type source, string_type engine)
-        : django_template(engine == "django" ? new django_template_type(source) : 0)
-        , ssi_template   (engine == "ssi"    ? new ssi_template_type(source)    : 0)
-        , tmpl_template  (engine == "tmpl"   ? new tmpl_template_type(source)   : 0) {
+        : django_template_(engine == "django" ? new django_template_type(source) : 0)
+        , ssi_template_   (engine == "ssi"    ? new ssi_template_type(source)    : 0)
+        , tmpl_template_  (engine == "tmpl"   ? new tmpl_template_type(source)   : 0) {
 
-        if (!django_template && !ssi_template && !tmpl_template) {
+        if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine");
         }
     }
 
     string_type render_to_string(py::dict d) const {
-        if (django_template) {
-            return django_template->render_to_string(
+        if (django_template_) {
+            return django_template_->render_to_string(
                 get_context<typename django_template_type::context_type>(d));
         }
-        else if (ssi_template) {
-            return ssi_template->render_to_string(
+        else if (ssi_template_) {
+            return ssi_template_->render_to_string(
                 get_context<typename ssi_template_type::context_type>(d));
         }
-        else if (tmpl_template) {
-            return tmpl_template->render_to_string(
+        else if (tmpl_template_) {
+            return tmpl_template_->render_to_string(
                 get_context<typename tmpl_template_type::context_type>(d));
         }
         AJG_UNREACHABLE;
@@ -87,16 +87,13 @@ struct binding {
 
         for (std::size_t i = 0, n = len(items); i < n; ++i) {
             py::tuple const item = extract<py::tuple>(items[i]);
-            // AJG_DUMP(item);
             extract<string_type> key(item[0]);
-            extract<string_type> value(item[1]);
-            // AJG_DUMP(key);
-            // AJG_DUMP(value);
+            py::object value(item[1]);
             AJG_DUMP(key.check());
-            AJG_DUMP(value.check());
 
-            if (key.check() && value.check()) {
-                context[string_type(key)] = string_type(value);
+            if (key.check()) {
+                AJG_DUMP(string_type(key));
+                context[string_type(key)] = value;
             }
         }
 

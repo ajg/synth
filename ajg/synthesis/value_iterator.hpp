@@ -50,9 +50,9 @@ struct value_iterator
 
     // explicit value_iterator(Value* const value) : value_(value) {}
 
-    template <class Iterator>
-    value_iterator(Iterator const& iterator)
-        : iterator_(new polymorphic_iterator<Iterator>(iterator)) {}
+    template <class ForwardIterator>
+    value_iterator(ForwardIterator const& iterator)
+        : iterator_(new polymorphic_iterator<ForwardIterator>(iterator)) {}
 
     /*template <class Value_>
     value_iterator(value_iterator<Value_> const& other) : iterator_(new ...) {}
@@ -69,7 +69,6 @@ struct value_iterator
     }
 
     void increment() { iterator_->increment(); }
-    void decrement() { iterator_->decrement(); }
     Value dereference() const { return iterator_->dereference(); }
     // value_iterator advance(size_type const distance) const;
 
@@ -77,20 +76,19 @@ struct value_iterator
 
     struct virtual_iterator {
         virtual void increment() = 0;
-        virtual void decrement() = 0;
         virtual Value dereference() const = 0;
         virtual virtual_iterator& clone() const = 0;
         virtual bool equal(virtual_iterator const& that) const = 0;
         virtual ~virtual_iterator() {}
     };
 
-    template <class Iterator>
+    template <class ForwardIterator>
     struct polymorphic_iterator : virtual_iterator {
         typedef polymorphic_iterator this_type;
-        polymorphic_iterator(Iterator const& iterator) : iterator_(iterator) {}
+        polymorphic_iterator(ForwardIterator const& iterator)
+            : iterator_(iterator) {}
 
         virtual void increment() { iterator_++; }
-        virtual void decrement() { iterator_--; }
         virtual Value dereference() const { return *iterator_; }
         virtual this_type& clone() const { return *new this_type(iterator_); }
         virtual bool equal( virtual_iterator const& that) const {
@@ -100,7 +98,7 @@ struct value_iterator
         }
 
       private:
-        Iterator iterator_;
+        ForwardIterator iterator_;
     };
 
   private:
@@ -113,13 +111,13 @@ struct value_iterator
 
 /*
 
-template <class Iterator>
-adaptable_iterator make_adaptable_iterator(Iterator const& iterator) {
+template <class ForwardIterator>
+adaptable_iterator make_adaptable_iterator(ForwardIterator const& iterator) {
     return adaptable_iterator(iterator);
 }
 
-template <class ValueIterator, class Iterator>
-ValueIterator adapt(Iterator const& iterator) {
+template <class ValueIterator, class ForwardIterator>
+ValueIterator adapt(ForwardIterator const& iterator) {
     return ValueIterator(iterator);
 }
 */

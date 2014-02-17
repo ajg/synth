@@ -354,7 +354,7 @@ struct first_filter {
                 throw_exception(std::invalid_argument("sequence"));
             }
 
-            return *value.begin();
+            return value.front();
         }
     };
 };
@@ -556,7 +556,7 @@ struct last_filter {
                 throw_exception(std::invalid_argument("sequence"));
             }
 
-            return *--value.end();
+            return value.back();
         }
     };
 };

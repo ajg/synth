@@ -64,3 +64,18 @@ unit_test(html tags) {
     ensure_equals(t.render_to_string(), t.text());
     ensure_equals(t.render_to_string(context), t.text());
 }}}
+
+unit_test(for tag) {
+    string_template const t(
+        "{% for k, v in friends %}\n"
+        "    <p>{{ k }} - {{ v }}</p>\n"
+        "{% endfor %}\n");
+    ensure_equals(t.render_to_string(context),
+        "\n"
+        "    <p>0 - age: 23, name: joe</p>\n"
+        "\n"
+        "    <p>1 - age: 55, name: bob</p>\n"
+        "\n"
+        "    <p>2 - age: 41, name: lou</p>\n"
+        "\n");
+}}}

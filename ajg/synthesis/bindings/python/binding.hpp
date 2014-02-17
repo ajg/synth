@@ -85,7 +85,8 @@ struct binding {
 
         for (std::size_t i = 0, n = len(items); i < n; ++i) {
             py::tuple const item = py::extract<py::tuple>(items[i]);
-            py::extract<string_type> key((py::str(item[0])));
+            // py::extract<string_type> key((py::str(item[0])));
+            py::extract<string_type> key(item[0]);
             py::object value(item[1]);
 
             if (key.check()) {

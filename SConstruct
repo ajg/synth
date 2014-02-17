@@ -8,6 +8,7 @@ import subprocess
 from distutils import sysconfig
 
 # TODO: Add environments with '-std=c++11' and eventually '-std=c++14'
+# TODO: Add '-O'/'-O2'/'-O3'/'-Ofast' and '-DNDEBUG' to default environment.
 
 cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
 cxx_version = subprocess.check_output([cxx, '--version'])

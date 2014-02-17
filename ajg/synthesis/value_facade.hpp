@@ -200,9 +200,22 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         return detail::slice(*this, lower, upper);
     }
 
-    inline const_iterator at(/*value_type*/number_type const& index) const {
+    inline value_type front() const {
+        return *this->begin();
+    }
+
+    inline value_type back() const {
+        // return *--this->end();
+        return *this->at(-1);
+    }
+
+    inline const_iterator at(/*value_type*/number_type index) const {
         // TODO: Once we have value_iterator::advance_to
         // consider using return begin() + index, to be O(1).
+
+        if (index < 0) {
+            index = this->length() - index;
+        }
 
         // For now, we must use this O(n) method:
         const_iterator it = begin();

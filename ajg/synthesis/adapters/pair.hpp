@@ -73,12 +73,6 @@ struct adapter<Traits, std::pair<First, Second> >
             else throw_exception(std::logic_error("invalid operation"));
         }
 
-        void decrement() {
-                 if (position_ == second) position_ = first;
-            else if (position_ == past)   position_ = second;
-            else throw_exception(std::logic_error("invalid operation"));
-        }
-
         variant_type dereference() const {
                  if (position_ == first)  return pair_.first;
             else if (position_ == second) return pair_.second;

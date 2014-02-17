@@ -22,6 +22,9 @@ False: {{ False }}; {% if False %} yes {% else %} <p>no {% endif %}
 
 {% for k, v in qux2 %} {{ k }} - {{ v }} {% endfor %}
 
+{% for k, v in empty1 %} {{ k }} - {{ v }} {% empty %} empty1 {% endfor %}
+{% for k, v in empty2 %} {{ k }} - {{ v }} {% empty %} empty2 {% endfor %}
+
 {% comment %}
 {{ 0 or 0 }}
 {{ 0 and 0 }}
@@ -34,7 +37,7 @@ False: {{ False }}; {% if False %} yes {% else %} <p>no {% endif %}
 {% endcomment %}
 """.encode('utf-8')
 
-context = {'foo': True, 'bar': 42, 'qux': [1,2,3,4,5], 'qux2': {'a': 'A', 'b': 'B', 'c': 'C'}}
+context = {'foo': True, 'bar': 42, 'qux': [1,2,3,4,5], 'qux2': {'a': 'A', 'b': 'B', 'c': 'C'}, 'empty1': [], 'empty2': {}}
 template = synthesis.Template(source, 'django')
 
 print(template.render_to_string(context))

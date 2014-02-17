@@ -453,19 +453,20 @@ struct for_tag {
             String const& second = get_nested<2>(vars).str();
             Value  const& value  = engine.evaluate(expr, context, options);
 
-            if (value.begin() != value.end()) { // Not empty.
+            typename Value::const_iterator it(value.begin()), end(value.end());
+
+            if (it != end) { // Not empty.
                 Context copy = context;
                 uintmax_t i = 0;
 
-                BOOST_FOREACH(Value const& v, value) {
+                for (; it != end; ++it, ++i) {
                     if (second.empty()) { // e.g. for i in ...
-                        copy[first] = boost::ref(v);
+                        copy[first] = boost::ref(*it);
                     }
                     else { // e.g. for k, v in ...
-                        copy[first] = i++;
-                        copy[second] = boost::ref(v);
+                        copy[first] = i;
+                        copy[second] = boost::ref(*it);
                     }
-
                     engine.render_block(out, for_, copy, options);
                 }
             }

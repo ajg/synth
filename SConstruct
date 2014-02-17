@@ -4,11 +4,20 @@
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
 import os
+import subprocess
 from distutils import sysconfig
 
 # TODO: Add environments with '-std=c++11' and eventually '-std=c++14'
 
 cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
+cxx_version = subprocess.check_output([cxx, '--version'])
+error_limit = ''
+
+if 'clang' in cxx_version:
+    error_limit = '-ferror-limit=1'
+elif 'g++' in cxx_version:
+    error_limit = '-fmax-errors=1'
+
 env = Environment(
     CXX      = cxx,
     CPPPATH  = ['.'],
@@ -16,7 +25,7 @@ env = Environment(
         # TODO: '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        '-ferror-limit=1',
+        error_limit,
         '-ftemplate-depth=256',
         '-Wno-unused-function',
         '-Wno-unsequenced',

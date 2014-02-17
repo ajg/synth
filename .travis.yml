@@ -10,8 +10,7 @@ compiler:
   - clang++
 
 before_install:
-  - sudo apt-get install libboost-dev
+  - sudo apt-get install libboost-dev libboost-python-dev
 
 script:
-  - scons
-  - ./test
+  - scons && ./test

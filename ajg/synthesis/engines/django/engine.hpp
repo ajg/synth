@@ -597,7 +597,7 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    regex_type tag, text, block, skipper;
+    regex_type tag, text, block, skipper, nothing;
     regex_type identifier, filter, pipe;
     regex_type chain, subscription, attribution;
     regex_type unary_operator, binary_operator;

@@ -22,7 +22,7 @@ namespace django {
 // default_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector23
+typedef fusion::vector24
     < django::autoescape_tag
     , django::block_tag
     , django::comment_tag
@@ -47,7 +47,7 @@ typedef fusion::vector23
     , django::templatetag_tag
  // , django::url_tag
     , django::variable_tag
- // , django::verbatim_tag
+    , django::verbatim_tag
     , django::widthratio_tag
     , django::with_tag
     >

@@ -931,7 +931,7 @@ struct verbatim_tag {
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
             Match const& body = get_nested<A>(match);
-            return body.str();
+            out << body.str();
         }
     };
 };

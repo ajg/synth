@@ -206,6 +206,9 @@ struct definition : base_definition< BidirectionalIterator
             = as_xpr( block_open) | comment_open  | variable_open
                     | block_close | comment_close | variable_close
             ;
+        nothing
+            = as_xpr('\0') // xpressive isn't liking it default-constructed.
+            ;
 
         this->initialize_grammar();
         fusion::for_each(tags_.definition, detail::construct

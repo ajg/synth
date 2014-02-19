@@ -252,7 +252,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     }
 
     inline boolean_type operator <(value_type const& that) const {
-        throw_exception(not_implemented("<"));
+        throw_exception(not_implemented("operator <"));
     }
 
     inline boolean_type operator <=(value_type const& that) const {
@@ -266,7 +266,6 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     inline boolean_type operator >=(value_type const& that) const {
         return that.operator <=(*this);
     }
-
 
     inline value_type const operator [](/*value_type*/number_type const& index) const {
         return *this->at(index);

@@ -213,6 +213,8 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         // TODO: Once we have value_iterator::advance_to
         // consider using return begin() + index, to be O(1).
 
+        // TODO: This behavior is specific to sequential containers
+        //       (e.g. lists) not associative ones (like maps).
         if (index < 0) {
             index = this->length() - index;
         }
@@ -234,6 +236,9 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         return get()->find(value);
     }
 
+    inline optional<value_type> index(value_type const& key) const {
+        return get()->index(key);
+    }
 
   public:
 

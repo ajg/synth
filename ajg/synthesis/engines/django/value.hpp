@@ -98,6 +98,7 @@ struct value : value_facade<Char, value<Char> > {
         return detail::escape_entities(this->to_string());
     }
 
+    /*
     const_iterator find_attribute(this_type const& attribute) const {
         try {
             // First try to find the value itself.
@@ -112,6 +113,29 @@ struct value : value_facade<Char, value<Char> > {
                 catch (std::exception const&) {
                     // Do nothing, and pass through to the `throw' below,
                     // so that we surface the original `find' failure.
+                }
+            }
+
+            throw;
+        }
+    }
+    */
+
+    optional<this_type> get_attribute(this_type const& attribute) const {
+        try {
+            // First try to locate the value as a key.
+            return this->index(attribute);
+        }
+        catch (bad_method const& method) {
+            if (method.name == "index") {
+                try {
+                    // If that fails, try using the value as an index.
+                    const_iterator const it = this->at(attribute.count());
+                    return it == this->end() ? none : *it;
+                }
+                catch (std::exception const&) {
+                    // Do nothing, and pass through to the `throw' below,
+                    // so that we surface the original `index' failure.
                 }
             }
 

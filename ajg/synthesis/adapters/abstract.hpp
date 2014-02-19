@@ -81,6 +81,10 @@ struct abstract_adapter {
         throw_exception(bad_method("find"));
     }
 
+    virtual optional<value_type> index(value_type const& key) const {
+        throw_exception(bad_method("index"));
+    }
+
   public:
 
     virtual ~abstract_adapter() {}

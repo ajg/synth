@@ -913,6 +913,30 @@ struct variable_tag {
 };
 
 //
+// verbatim_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct verbatim_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            return TAG("verbatim") >> engine.block // A
+                >> TAG("endverbatim");
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options const& options
+                   , typename Engine::stream_type& out) const {
+            Match const& body = get_nested<A>(match);
+            return body.str();
+        }
+    };
+};
+
+//
 // widthratio_tag
 ////////////////////////////////////////////////////////////////////////////////
 

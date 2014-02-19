@@ -488,7 +488,7 @@ struct for_empty_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const { return Regex(); }
+        Regex syntax(Engine const& engine) const { return engine.nothing; }
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {}

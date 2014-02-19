@@ -104,6 +104,8 @@ typedef fusion::vector48
  // , django::timesince_filter
  // , django::timeuntil_filter
     , django::title_filter
+ // , django::truncatechars_filter
+ // , django::truncatechars_html_filter
     , django::truncatewords_filter
  // , django::truncatewords_html_filter
     , django::unordered_list_filter

@@ -464,8 +464,16 @@ struct for_tag {
                         copy[first] = boost::ref(*it);
                     }
                     else { // e.g. for k, v in ...
-                        copy[first] = i;
-                        copy[second] = boost::ref(*it);
+                        // copy[first] = i;
+                        // copy[second] = boost::ref(*it);
+
+                        Value const item = *it;
+
+                        if (item.length() < 2) {
+                            throw_exception(std::out_of_range("item"));
+                        }
+                        copy[first] = boost::ref(item[0]);
+                        copy[second] = boost::ref(item[1]);
                     }
                     engine.render_block(out, for_, copy, options);
                 }

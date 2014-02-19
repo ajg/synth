@@ -33,25 +33,84 @@ struct adapter<Traits, boost::python::object>
 
   public:
 
+    inline static string_type as_string(boost::python::object const& obj) {
+        boost::python::extract<string_type> const s((boost::python::str(obj)));
+        if (!s.check()) {
+            throw_exception(bad_method("str"));
+        }
+        return string_type(s);
+    }
+
     boolean_type test() const { return boolean_type(adapted_); }
 
  // void input (istream_type& in)        { in >> adapted_; }
  // void output(ostream_type& out) const { out << adapted_; }
-
-    void output(ostream_type& out) const {
-        boost::python::extract<string_type> const s((boost::python::str(adapted_)));
-
-        if (!s.check()) {
-            throw_exception(bad_method("str"));
-        }
-        out << string_type(s);
-    }
+    void output(ostream_type& out) const { out << as_string(adapted_); }
 
     iterator begin() { return iterator(stl_iterator(adapted_)); }
     iterator end()   { return iterator(stl_iterator()); }
 
     const_iterator begin() const { return const_iterator(stl_iterator(adapted_)); }
     const_iterator end()   const { return const_iterator(stl_iterator()); }
+
+    optional<value_type> index(value_type const& key) const {
+        string_type const k = key.to_string();
+        boost::python::str kk((k));
+
+        // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
+        // 1. Dictionary lookup
+        boost::python::extract<boost::python::dict const&> d((adapted_));
+
+        if (d.check()) {
+            boost::python::dict const& dict((d));
+            if (dict.has_key(kk)) {
+                return value_type(boost::python::object(dict[kk]));
+            }
+            return none;
+        }
+
+        // 2. Attribute lookup
+        // return value_type(boost::python::object(adapted_.attr(kk)));
+        boost::python::object obj = adapted_.attr(kk);
+
+        // 3. Method call
+        if (PyCallable_Check(obj.ptr())) {
+            obj = obj();
+        }
+
+        return value_type(obj);
+
+
+        // 4. TODO: List-index lookup
+    }
+
+    #if 0
+    const_iterator find(value_type const& value) const {
+        // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
+        // 1. Dictionary lookup
+        boost::python::extract<boost::python::dict const&> d((adapted_));
+
+        if (d.check()) {
+          boost::python::dict const& dict((d));
+          const_iterator it = dict.find(value), end(dict.end());
+          if (it != end) {
+              return const_iterator(it);
+          }
+        }
+
+        /*const_iterator it = adapted.attr(value);
+
+        // 2. Attribute lookup
+        if (it != end) {
+            return it;
+        }*/
+
+        // 3. TODO: Method call
+        // 4. TODO: List-index lookup
+
+        return const_iterator(end);
+    }
+    #endif
 };
 
 }} // namespace ajg::synthesis

@@ -543,6 +543,7 @@ struct definition : base_definition< BidirectionalIterator
                 throw_exception(std::logic_error("invalid expression"));
             }
 
+            /*
             typename value_type::const_iterator const
                 it = value.find_attribute(attribute);
 
@@ -553,6 +554,16 @@ struct definition : base_definition< BidirectionalIterator
             }
 
             value = *it;
+            */
+
+            if (optional<value_type> attr = value.get_attribute(attribute)) {
+                value = *attr;
+            }
+            else {
+                std::string const name = this->template
+                    convert<char>(attribute.to_string());
+                throw_exception(missing_attribute(name));
+            }
         }
 
         return value;

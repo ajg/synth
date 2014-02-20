@@ -20,15 +20,14 @@ namespace tmpl {
 // default_library
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector6
+struct default_library : fusion::vector6
     < tmpl::comment_tag // NOTE: Part of ctpp, not tmpl.
     , tmpl::if_tag
     , tmpl::include_tag
     , tmpl::loop_tag<>
     , tmpl::unless_tag
     , tmpl::variable_tag
-    >
-default_library;
+    > {};
 
 }}} // namespace ajg::synthesis::tmpl
 

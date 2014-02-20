@@ -20,7 +20,7 @@ namespace ssi {
 // default_library
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector9
+struct default_library : fusion::vector9
     < ssi::config_directive
     , ssi::echo_directive
     , ssi::exec_directive
@@ -30,8 +30,7 @@ typedef fusion::vector9
     , ssi::include_directive
     , ssi::printenv_directive
     , ssi::set_directive
-    >
-default_library;
+    > {};
 
 }}} // namespace ajg::synthesis::ssi
 

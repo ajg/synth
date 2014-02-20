@@ -198,6 +198,18 @@ SSI Engine
  - `ssi::printenv_directive`
  - `ssi::set_directive`
 
+TMPL Engine
+-----------
+
+### Tags
+
+ - `tmpl::comment_tag` (Part of ctpp, not tmpl.)
+ - `tmpl::if_tag`
+ - `tmpl::include_tag`
+ - `tmpl::loop_tag`
+ - `tmpl::unless_tag`
+ - `tmpl::variable_tag`
+
 Future Work
 -----------
 

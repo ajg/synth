@@ -57,7 +57,7 @@ default_tags;
 // default_filters
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector48
+typedef fusion::vector49
     < django::add_filter
     , django::addslashes_filter
     , django::capfirst_filter
@@ -104,7 +104,7 @@ typedef fusion::vector48
  // , django::timesince_filter
  // , django::timeuntil_filter
     , django::title_filter
- // , django::truncatechars_filter
+    , django::truncatechars_filter
  // , django::truncatechars_html_filter
     , django::truncatewords_filter
  // , django::truncatewords_html_filter
@@ -126,13 +126,6 @@ struct default_library
         , default_filters
         >
 {};
-
-/*
-struct libraries : mpl::list
-    < default_library
-    >
-{};
-*/
 
 }}} // namespace ajg::synthesis::django
 

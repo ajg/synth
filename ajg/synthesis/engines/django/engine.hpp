@@ -116,6 +116,7 @@ struct definition : base_definition< BidirectionalIterator
 
     definition()
         : newline        (detail::text("\n"))
+        , ellipsis       (detail::text("..."))
         , brace_open     (detail::text("{"))
         , brace_close    (detail::text("}"))
         , block_open     (detail::text("{%"))
@@ -600,6 +601,7 @@ struct definition : base_definition< BidirectionalIterator
   public:
 
     string_type const newline;
+    string_type const ellipsis;
     string_type const brace_open;
     string_type const brace_close;
     string_type const block_open;

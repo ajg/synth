@@ -1168,6 +1168,36 @@ struct title_filter {
 };
 
 //
+// truncatechars_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct truncatechars_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("truncatechars"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() < 1) throw_exception(missing_argument());
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            Size const limit = args[0].count();
+            String const input = value.to_string();
+
+            if (input.length() > limit) {
+                return input.substr(0, limit) + engine.ellipsis;
+            }
+            else {
+                return input;
+            }
+        }
+    };
+};
+
+//
 // truncatewords_filter
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1207,7 +1237,7 @@ struct truncatewords_filter {
             }
 
             if (word != end) {
-                stream << " ...";
+                stream << " " << engine.ellipsis;
             }
 
             return stream.str();
@@ -1354,7 +1384,9 @@ struct urlize_filter {
 
         struct formatter {
             Size const limit;
-            formatter(Size const limit) : limit(limit) {}
+            String const ellipsis;
+            formatter(Size const limit, String const& ellipsis)
+                : limit(limit), ellipsis(ellipsis) {}
 
             template <class Match_>
             String operator()(Match_ const& match) const {
@@ -1363,25 +1395,25 @@ struct urlize_filter {
                 String const full = match.str();
                 String const text = full.substr(0, limit);
                 bool const scheme = !match[xpressive::s1];
-                bool const ellipsis = text.size() < full.size();
+                bool const more = text.size() < full.size();
                 stream << "<a href='" << (scheme ? "http://" : "") << link;
-                stream << "'>" << text << (ellipsis ? "..." : "") << "</a>";
+                stream << "'>" << text << (more ? ellipsis : "") << "</a>";
                 return stream.str();
             }
         };
 
-        Value urlize(Value const& value, Size const limit) const {
+        Value urlize(Value const& value, Size const limit, String const& ellipsis) const {
             String const body = value.to_string();
 
             return Value(xpressive::regex_replace(body,
-                url_, formatter(limit))).mark_safe();
+                url_, formatter(limit, ellipsis))).mark_safe();
         }
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
                       Array  const& args,  Options const& options) const {
             if (!args.empty()) throw_exception(superfluous_argument());
-            return this->urlize(value, Size(-1));
+            return this->urlize(value, Size(-1), engine.ellipsis);
         }
 
       private:

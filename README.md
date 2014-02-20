@@ -44,9 +44,9 @@ Components
 
 ### Engines
 
- - [`django`](#django-engine)
- - `ssi`
- - `tmpl`
+ - [`django`](#django-engine): An implementation of [Django Templates](https://docs.djangoproject.com/en/dev/topics/templates/).
+ - [`ssi`](#ssi-engine): An implementation of [Server Side Includes](http://httpd.apache.org/docs/current/howto/ssi.html).
+ - [`tmpl`](#tmpl-engine): An implementation of [Perl's HTML::Template](http://html-template.sourceforge.net/html_template.html).
 
 ### Bindings
 

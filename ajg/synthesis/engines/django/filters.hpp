@@ -1441,7 +1441,7 @@ struct urlizetrunc_filter {
                       Array  const& args,  Options const& options) const {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
-            return this->urlize(value, args[0].count());
+            return this->urlize(value, args[0].count(), engine.ellipsis);
         }
     };
 };

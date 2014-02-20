@@ -7,7 +7,6 @@
 #define AJG_SYNTHESIS_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
 
 #include <boost/mpl/pair.hpp>
-#include <boost/mpl/string.hpp>
 
 #include <boost/fusion/include/vector.hpp>
 
@@ -118,8 +117,7 @@ struct default_filters : fusion::vector49
     > {};
 
 struct default_library
-    : mpl::string<'d','e','f','a','u','l','t'>
-    , mpl::pair
+    : mpl::pair
         < default_tags
         , default_filters
         >

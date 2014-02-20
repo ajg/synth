@@ -65,7 +65,7 @@ unit_test(html tags) {
     ensure_equals(t.render_to_string(context), t.text());
 }}}
 
-unit_test(for tag) {
+unit_test(for_tag) {
     string_template const t(
         "{% for k, v in friends %}\n"
         "    <p>{{ k }} - {{ v }}</p>\n"
@@ -78,4 +78,15 @@ unit_test(for tag) {
         "\n"
         "    <p>2 - age: 41, name: lou</p>\n"
         "\n");
+}}}
+
+unit_test(verbatim_tag) {
+    string_template const t(
+        "{% verbatim %}{% for k, v in friends %}\n"
+        "    <p>{{ k }} - {{ v }}</p>\n"
+        "{% endfor %}{% endverbatim %}\n");
+    ensure_equals(t.render_to_string(context),
+        "{% for k, v in friends %}\n"
+        "    <p>{{ k }} - {{ v }}</p>\n"
+        "{% endfor %}\n");
 }}}

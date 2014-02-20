@@ -183,6 +183,21 @@ Django Engine
  - `django::wordwrap_filter`
  - `django::yesno_filter`
 
+SSI Engine
+----------
+
+### Directives
+
+ - `ssi::config_directive`
+ - `ssi::echo_directive`
+ - `ssi::exec_directive`
+ - `ssi::fsize_directive`
+ - `ssi::flastmod_directive`
+ - `ssi::if_directive`
+ - `ssi::include_directive`
+ - `ssi::printenv_directive`
+ - `ssi::set_directive`
+
 Future Work
 -----------
 

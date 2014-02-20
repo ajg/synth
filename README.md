@@ -170,7 +170,7 @@ Django Engine
  - `django::timesince_filter` (TODO)
  - `django::timeuntil_filter` (TODO)
  - `django::title_filter`
- - `django::truncatechars_filter` (TODO)
+ - `django::truncatechars_filter`
  - `django::truncatechars_html_filter` (TODO)
  - `django::truncatewords_filter`
  - `django::truncatewords_html_filter` (TODO)
@@ -190,8 +190,7 @@ Future Work
  - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
  - Create `c++11` branch.
  - Complex expressions in the `django` engine.
- - `python` binding based on [Boost.Python](http://www.boost.org/doc/libs/release/libs/python/)
-   * Plus template loaders for Django
+ - Django template loaders.
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
  - `cheetah` engine

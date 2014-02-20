@@ -24,14 +24,20 @@ struct context_data {
         context["bar"] = "B";
         context["qux"] = "C";
 
-        context["true_var"] = true;
+        context["true_var"]  = true;
         context["false_var"] = false;
 
         std::map<std::string, std::string> joe, bob, lou;
-        joe["name"] = "joe"; joe["age"] = "23";
-        bob["name"] = "bob"; bob["age"] = "55";
-        lou["name"] = "lou"; lou["age"] = "41";
-        friends[0] = joe; friends[1] = bob; friends[2] = lou;
+        joe["name"] = "joe";
+        joe["age"]  = "23";
+        bob["name"] = "bob";
+        bob["age"]  = "55";
+        lou["name"] = "lou";
+        lou["age"]  = "41";
+
+        friends[0] = joe;
+        friends[1] = bob;
+        friends[2] = lou;
 
         context["friends"] = friends;
     }
@@ -65,7 +71,23 @@ unit_test(html tags) {
     ensure_equals(t.render_to_string(context), t.text());
 }}}
 
-unit_test(for_tag) {
+unit_test(for_tag with only value) {
+    string_template const t(
+        "{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
+        "{% endfor %}\n");
+    ensure_equals(t.render_to_string(context),
+        "\n"
+        "    <p>age: 23, name: joe</p>\n"
+        "\n"
+        "    <p>age: 55, name: bob</p>\n"
+        "\n"
+        "    <p>age: 41, name: lou</p>\n"
+        "\n");
+}}}
+
+/*
+unit_test(for_tag with key and value) {
     string_template const t(
         "{% for k, v in friends %}\n"
         "    <p>{{ k }} - {{ v }}</p>\n"
@@ -79,14 +101,15 @@ unit_test(for_tag) {
         "    <p>2 - age: 41, name: lou</p>\n"
         "\n");
 }}}
+*/
 
 unit_test(verbatim_tag) {
     string_template const t(
-        "{% verbatim %}{% for k, v in friends %}\n"
-        "    <p>{{ k }} - {{ v }}</p>\n"
+        "{% verbatim %}{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
         "{% endfor %}{% endverbatim %}\n");
     ensure_equals(t.render_to_string(context),
-        "{% for k, v in friends %}\n"
-        "    <p>{{ k }} - {{ v }}</p>\n"
+        "{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
         "{% endfor %}\n");
 }}}

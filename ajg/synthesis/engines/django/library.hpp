@@ -22,7 +22,7 @@ namespace django {
 // default_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector24
+struct default_tags : fusion::vector24
     < django::autoescape_tag
     , django::block_tag
     , django::comment_tag
@@ -50,14 +50,13 @@ typedef fusion::vector24
     , django::verbatim_tag
     , django::widthratio_tag
     , django::with_tag
-    >
-default_tags;
+    > {};
 
 //
 // default_filters
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef fusion::vector49
+struct default_filters : fusion::vector49
     < django::add_filter
     , django::addslashes_filter
     , django::capfirst_filter
@@ -116,8 +115,7 @@ typedef fusion::vector49
     , django::wordcount_filter
     , django::wordwrap_filter
     , django::yesno_filter
-    >
-default_filters;
+    > {};
 
 struct default_library
     : mpl::string<'d','e','f','a','u','l','t'>

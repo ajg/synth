@@ -27,7 +27,7 @@ struct adapter<Traits, bool>
     boolean_type equal(abstract_type const& that) const { return this->compare(*this, that); }
     number_type  count() const { return adapted_ ? 1 : 0; }
     boolean_type test()  const { return adapted_; }
-    void input (ostream_type& in)        { adapted_ >> in; }
+    void input (istream_type& in)        { in >> adapted_; }
     void output(ostream_type& out) const { out << (adapted_ ? "True" : "False"); }
 };
 

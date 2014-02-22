@@ -21,3 +21,6 @@ Release/
 *.suo
 *.sdf
 *.opensdf
+
+# Python
+/dist/

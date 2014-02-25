@@ -19,7 +19,7 @@ headers=(
 
 setup(
     name='synthesis',
-    version = '0.1.0',
+    version = '0.1.1',
     description='A Python binding to the Synthesis C++ Template Framework',
     long_description=long_description,
     author='Alvaro J. Genial',

@@ -54,82 +54,47 @@ struct adapter<Traits, boost::python::object>
     const_iterator end()   const { return const_iterator(stl_iterator()); }
 
     optional<value_type> index(value_type const& key) const {
-        string_type const k = key.to_string();
-        AJG_DUMP(k);
-        boost::python::str kk((k));
 
         AJG_DUMP(as_string(adapted_));
+        AJG_DUMP(key.to_string());
 
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
-        // 1. Dictionary lookup
-        /*boost::python::extract<boost::python::dict> const d((adapted_));
-        AJG_DUMP(d.check());
+        // TODO: Support arbitrary values as keys for non-django general case.
 
-        if (d.check()) {
-            boost::python::dict const& dict((d));
-            AJG_DUMP(dict.has_key(kk));
-            if (dict.has_key(kk)) {
-                return value_type(boost::python::object(dict[kk]));
+        PyObject* o = adapted_.ptr();
+        string_type const k = key.to_string();
+
+        // 1. Dictionary lookup
+        if (PyMapping_Check(o)) {
+            if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
+                return value_type(boost::python::object(adapted_[boost::python::str(k)]));
             }
         }
-        */
-        PyObject* o = adapted_.ptr();
-        AJG_DUMP(PyMapping_HasKeyString(o, const_cast<char*>(k.c_str())));
-
-        if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
-            return value_type(boost::python::object(adapted_[kk]));
-        }
-
-        AJG_DUMP(PyObject_HasAttrString(o, k.c_str()));
 
         // 2. Attribute lookup
-        // return value_type(boost::python::object(adapted_.attr(kk)));
-        if (!PyObject_HasAttrString(o, k.c_str())) {
-            return optional<value_type>(); // return none;
+        if (PyObject_HasAttrString(o, k.c_str())) {
+            boost::python::object obj = adapted_.attr(boost::python::str(k));
+
+            // 3. Method call
+            if (PyCallable_Check(obj.ptr())) {
+                obj = obj();
+            }
+
+            return value_type(obj);
         }
 
-        boost::python::object obj = adapted_.attr(kk);
-        AJG_DUMP(as_string(obj));
+        // 4. List-index lookup
+        if (PySequence_Check(o)) {
+            Py_ssize_t n = key.count();
 
-        // 3. Method call
-        if (PyCallable_Check(obj.ptr())) {
-            obj = obj();
+            if (n < PySequence_Size(o)) {
+                return value_type(boost::python::object(adapted_[boost::python::long_(n)]));
+            }
         }
-        AJG_DUMP(as_string(obj));
-        return value_type(obj);
 
-
-        // 4. TODO: List-index lookup
+        return none;
     }
-
-    #if 0
-    const_iterator find(value_type const& value) const {
-        // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
-        // 1. Dictionary lookup
-        boost::python::extract<boost::python::dict const&> d((adapted_));
-
-        if (d.check()) {
-          boost::python::dict const& dict((d));
-          const_iterator it = dict.find(value), end(dict.end());
-          if (it != end) {
-              return const_iterator(it);
-          }
-        }
-
-        /*const_iterator it = adapted.attr(value);
-
-        // 2. Attribute lookup
-        if (it != end) {
-            return it;
-        }*/
-
-        // 3. TODO: Method call
-        // 4. TODO: List-index lookup
-
-        return const_iterator(end);
-    }
-    #endif
 };
 
 }} // namespace ajg::synthesis

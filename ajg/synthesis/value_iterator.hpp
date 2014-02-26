@@ -17,7 +17,7 @@ template <class T>
 struct clone_ptr : scoped_ptr<T> {
   public:
 
-    clone_ptr(T* const t = 0) : scoped_ptr<T>(t) {}
+    clone_ptr(T *const t = 0) : scoped_ptr<T>(t) {}
     clone_ptr(clone_ptr const& c) : scoped_ptr<T>(c ? &c->clone() : 0) {}
 
     clone_ptr& operator =(clone_ptr const& c) {
@@ -48,7 +48,7 @@ struct value_iterator
 
     value_iterator() : iterator_() {}
 
-    // explicit value_iterator(Value* const value) : value_(value) {}
+    // explicit value_iterator(Value *const value) : value_(value) {}
 
     template <class ForwardIterator>
     value_iterator(ForwardIterator const& iterator)

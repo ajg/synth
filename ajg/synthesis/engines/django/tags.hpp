@@ -833,7 +833,7 @@ struct templatetag_tag {
             else if (name == text("openvariable"))  out << e.variable_open;
             else if (name == text("closevariable")) out << e.variable_close;
             else {
-                out << engine.default_value;
+                out << options.default_value;
             }
         }
     };
@@ -867,8 +867,8 @@ struct variable_tag {
                 value = engine.evaluate(expr, context, options);
                 if (pipe) value = engine.apply_pipe(value, pipe, context, options);
             }
-            catch (missing_variable const&) { value = engine.default_value; }
-            catch (missing_attribute const&) { value = engine.default_value; }
+            catch (missing_variable const&) { value = options.default_value; }
+            catch (missing_attribute const&) { value = options.default_value; }
 
             bool const safe = !options.autoescape || value.safe();
             safe ? out << value : out << value.escape();

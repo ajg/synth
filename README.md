@@ -183,6 +183,11 @@ Django Engine
  - `django::wordwrap_filter`
  - `django::yesno_filter`
 
+### Options
+
+ - `django::options::default_value` (`TEMPLATE_STRING_IF_INVALID`)
+ - `django::options::autoescape`
+
 SSI Engine
 ----------
 
@@ -214,8 +219,6 @@ Future Work
 -----------
 
  - Update VS project files and test on Windows.
- - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
- - Facility to handle `TEMPLATE_DIRS`.
  - Create `c++11` branch.
  - Django template loaders.
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)

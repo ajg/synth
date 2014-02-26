@@ -219,15 +219,16 @@ Future Work
 -----------
 
  - Update VS project files and test on Windows.
- - Create `c++11` branch.
+ - Create `c++11`/`c++14` branch.
+   * `c++11` type adapters
+   * `c++14` type adapters
+   * Translate macros to variadic templates
  - Django template loaders.
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
  - `cheetah` engine
  - `stream_template`
  - `multi_engine`
- - `c++11` type adapters
- - `c++14` type adapters
  - `tribool` adapter
  - Move `*_template`s to own namespace.
  - Move `engine`s to own namespace.

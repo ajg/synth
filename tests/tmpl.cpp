@@ -29,10 +29,15 @@ struct context_data {
         context["false_var"] = false;
 
         std::map<std::string, std::string> joe, bob, lou;
-        joe["name"] = "joe"; joe["age"] = "23";
-        bob["name"] = "bob"; bob["age"] = "55";
-        lou["name"] = "lou"; lou["age"] = "41";
-        friends[0] = joe; friends[1] = bob; friends[2] = lou;
+        joe["name"] = "joe";
+        joe["age"]  = "23";
+        bob["name"] = "bob";
+        bob["age"]  = "55";
+        lou["name"] = "lou";
+        lou["age"]  = "41";
+        friends[0] = joe;
+        friends[1] = bob;
+        friends[2] = lou;
 
         context["friends"] = friends;
     }

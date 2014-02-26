@@ -55,29 +55,48 @@ struct adapter<Traits, boost::python::object>
 
     optional<value_type> index(value_type const& key) const {
         string_type const k = key.to_string();
+        AJG_DUMP(k);
         boost::python::str kk((k));
 
+        AJG_DUMP(as_string(adapted_));
+
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
+        // TODO: Move this to django::engine.
         // 1. Dictionary lookup
-        boost::python::extract<boost::python::dict const&> d((adapted_));
+        /*boost::python::extract<boost::python::dict> const d((adapted_));
+        AJG_DUMP(d.check());
 
         if (d.check()) {
             boost::python::dict const& dict((d));
+            AJG_DUMP(dict.has_key(kk));
             if (dict.has_key(kk)) {
                 return value_type(boost::python::object(dict[kk]));
             }
-            return none;
         }
+        */
+        PyObject* o = adapted_.ptr();
+        AJG_DUMP(PyMapping_HasKeyString(o, const_cast<char*>(k.c_str())));
+
+        if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
+            return value_type(boost::python::object(adapted_[kk]));
+        }
+
+        AJG_DUMP(PyObject_HasAttrString(o, k.c_str()));
 
         // 2. Attribute lookup
         // return value_type(boost::python::object(adapted_.attr(kk)));
+        if (!PyObject_HasAttrString(o, k.c_str())) {
+            return optional<value_type>(); // return none;
+        }
+
         boost::python::object obj = adapted_.attr(kk);
+        AJG_DUMP(as_string(obj));
 
         // 3. Method call
         if (PyCallable_Check(obj.ptr())) {
             obj = obj();
         }
-
+        AJG_DUMP(as_string(obj));
         return value_type(obj);
 
 

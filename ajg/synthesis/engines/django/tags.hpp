@@ -512,56 +512,11 @@ struct if_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex boolean_expression, and_expression,
-              or_expression, not_expression;
-
-        void initialize(Engine const& engine) {
-            using namespace xpressive;
-
-            not_expression // not A
-                = "not" >> +_s >> engine.expression
-                ;
-            and_expression // A and B
-                = engine.expression >> +_s >> "and" >> +_s >> engine.expression
-                ;
-            or_expression // A or B
-                = engine.expression >> +_s >> "or" >> +_s >> engine.expression
-                ;
-            boolean_expression // A
-                = not_expression
-                | and_expression
-                | or_expression
-                | engine.expression
-                ;
-        }
-
-        bool evaluate( Match   const& expr,    Engine  const& engine
-                     , Context const& context, Options const& options) const {
-            if (expr == boolean_expression) {
-                // Simply recurse down one 'nesting' level.
-                return evaluate(get_nested<A>(expr), engine, context, options);
-            }
-            else if (expr == not_expression) {
-                return !engine.evaluate(get_nested<A>(expr), context, options);
-            }
-            else if (expr == and_expression) {
-                return engine.evaluate(get_nested<A>(expr), context, options)
-                    && engine.evaluate(get_nested<B>(expr), context, options);
-            }
-            else if (expr == or_expression) {
-                return engine.evaluate(get_nested<A>(expr), context, options)
-                    || engine.evaluate(get_nested<B>(expr), context, options);
-            }
-            else {
-                return engine.evaluate(expr, context, options);
-            }
-        }
-
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            return TAG("if" >> +_s >> boolean_expression) // A
-                       >> engine.block                    // B
-              >> !(TAG("else") >> engine.block)           // C
+            return TAG("if" >> +_s >> engine.expression) // A
+                       >> engine.block                   // B
+              >> !(TAG("else") >> engine.block)          // C
                 >> TAG("endif");
         }
 
@@ -571,7 +526,7 @@ struct if_tag {
             Match const& expr  = get_nested<A>(match);
             Match const& if_   = get_nested<B>(match);
             Match const& else_ = get_nested<C>(match);
-            bool  const  cond_ = evaluate(expr, engine, context, options);
+            bool  const  cond_ = engine.evaluate(expr, context, options);
 
                  if (cond_) engine.render_block(out, if_,   context, options);
             else if (else_) engine.render_block(out, else_, context, options);
@@ -762,6 +717,7 @@ struct now_tag {
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
             String const format = engine.extract_string(match[1]);
+            // TODO: Support abbreviated formats. (e.g. "r" => "%r")
             out << detail::format_current_time<String>(format);
         }
     };

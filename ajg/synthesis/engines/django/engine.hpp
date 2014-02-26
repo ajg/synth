@@ -165,7 +165,6 @@ struct definition : base_definition< BidirectionalIterator
             ;
         subscription
             = '[' >> *_s >> x::ref(expression) >> *_s >> ']'
-         // | '(' >> *_s >> x::ref(expression) >> *_s >> ')'
             ;
         chain
             = literal >> *(*_s >> (attribution | subscription))
@@ -192,10 +191,13 @@ struct definition : base_definition< BidirectionalIterator
         unary_expression
             = unary_operator >> x::ref(expression)
             ;
+        nested_expression
+            = '(' >> *_s >> x::ref(expression) >> *_s >> ')'
+            ;
         expression
             = unary_expression
             | binary_expression
-            | '(' >> x::ref(expression) >> ')'
+            | nested_expression
             ;
         filter
             = identifier >> !(':' >> *_s >> chain)
@@ -359,22 +361,22 @@ struct definition : base_definition< BidirectionalIterator
         value_type result = value;
 
         BOOST_FOREACH(match_type const& filter, pipe.nested_results()) {
-            match_type const& name = detail::get_nested<1>(filter);
-            match_type const& arg  = detail::get_nested<2>(filter);
+            match_type const& name = filter(identifier);
+            match_type const& arg  = filter(chain);
 
             array_type const args = !arg ? array_type()
-                : array_type(1, evaluate(arg, context, options));
+                : array_type(1, evaluate_chain(arg, context, options));
             result = apply_filter(result, name.str(), args, context, options);
         }
 
         return result;
     }
 
-    value_type evaluate( match_type   const& expression
+    value_type evaluate( match_type   const& match
                        , context_type const& context
                        , options_type const& options
                        ) const {
-        return evaluate_expression(expression, context, options);
+        return evaluate_expression(match, context, options);
     }
 
     value_type evaluate_literal( match_type   const& match
@@ -424,19 +426,25 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
-    value_type evaluate_expression( match_type   const& expression
+    value_type evaluate_expression( match_type   const& match
                                   , context_type const& context
                                   , options_type const& options
                                   ) const {
-        if (expression == unary_expression) {
-            return evaluate_unary(expression, context, options);
+        BOOST_ASSERT(match == this->expression);
+        match_type const& expr = detail::get_nested<1>(match);
+
+        if (expr == unary_expression) {
+            return evaluate_unary(expr, context, options);
         }
-        else if (expression == binary_expression) {
-            return evaluate_binary(expression, context, options);
+        else if (expr == binary_expression) {
+            return evaluate_binary(expr, context, options);
         }
-        else { // Parenthesized expression.
-            match_type const& nested = detail::get_nested<1>(expression);
+        else if (expr == nested_expression) {
+            match_type const& nested = detail::get_nested<1>(expr);
             return evaluate_expression(nested, context, options);
+        }
+        else {
+            throw_exception(std::logic_error("invalid expression"));
         }
     }
 
@@ -466,41 +474,47 @@ struct definition : base_definition< BidirectionalIterator
         match_type const& chain = detail::get_nested<1>(binary);
         value_type value = evaluate_chain(chain, context, options);
         size_type i = 0;
+        string_type op;
 
         BOOST_FOREACH( match_type const& segment
                      , binary.nested_results()
                      ) {
             if (!i++) continue; // Skip the first segment (the chain.)
-            string_type const op = algorithm::trim_copy(detail::get_nested<1>(segment).str());
-            match_type const& operand = detail::get_nested<2>(segment);
+            else if (segment == binary_operator) {
+                op = algorithm::trim_copy(segment.str());
+                continue;
+            }
+            else if (!(segment == expression)) {
+                throw_exception(std::logic_error("invalid binary expression"));
+            }
 
             if (op == "and") {
-                value = value ? evaluate_expression(operand, context, options) : value;
+                value = value ? evaluate_expression(segment, context, options) : value;
             }
             else if (op == "or") {
-                value = value ? value : evaluate_expression(operand, context, options);
+                value = value ? value : evaluate_expression(segment, context, options);
             }
             else if (op == "in") {
-                value_type const elements = evaluate_expression(operand, context, options);
+                value_type const elements = evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
             else if (op == "==") {
-                value = value == evaluate_expression(operand, context, options);
+                value = value == evaluate_expression(segment, context, options);
             }
             else if (op == "!=") {
-                value = value != evaluate_expression(operand, context, options);
+                value = value != evaluate_expression(segment, context, options);
             }
             else if (op == "<") {
-                value = value < evaluate_expression(operand, context, options);
+                value = value < evaluate_expression(segment, context, options);
             }
             else if (op == ">") {
-                value = value > evaluate_expression(operand, context, options);
+                value = value > evaluate_expression(segment, context, options);
             }
             else if (op == "<=") {
-                value = value <= evaluate_expression(operand, context, options);
+                value = value <= evaluate_expression(segment, context, options);
             }
             else if (op == ">=") {
-                value = value >= evaluate_expression(operand, context, options);
+                value = value >= evaluate_expression(segment, context, options);
             }
             else {
                 throw_exception(std::logic_error("invalid binary operator: " + op));
@@ -541,7 +555,7 @@ struct definition : base_definition< BidirectionalIterator
                 attribute = nested.str();
             }
             else {
-                throw_exception(std::logic_error("invalid expression"));
+                throw_exception(std::logic_error("invalid chain"));
             }
 
             /*
@@ -617,7 +631,8 @@ struct definition : base_definition< BidirectionalIterator
     regex_type identifier, filter, pipe;
     regex_type chain, subscription, attribution;
     regex_type unary_operator, binary_operator;
-    regex_type unary_expression, binary_expression, expression;
+    regex_type unary_expression, binary_expression;
+    regex_type nested_expression, expression;
     regex_type string_literal, number_literal;
     regex_type none_literal, boolean_literal;
     regex_type variable_literal, literal;

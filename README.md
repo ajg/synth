@@ -216,7 +216,6 @@ Future Work
  - Update VS project files and test on Windows.
  - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
  - Create `c++11` branch.
- - Complex expressions in the `django` engine.
  - Django template loaders.
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)

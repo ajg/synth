@@ -31,15 +31,16 @@ struct binding {
   public:
 
     typedef Char   char_type;
-    typedef Django django_type;
-    typedef SSI    ssi_type;
-    typedef TMPL   tmpl_type;
+    typedef Django django_engine_type;
+    typedef SSI    ssi_engine_type;
+    typedef TMPL   tmpl_engine_type;
 
-    typedef string_template<char_type, django_type>     django_template_type;
-    typedef string_template<char_type, ssi_type>        ssi_template_type;
-    typedef string_template<char_type, tmpl_type>       tmpl_template_type;
-    typedef std::basic_string<Char>                     string_type;
-    // typedef typename engine_type::context_type          context_type;
+    typedef string_template<char_type, django_engine_type> django_template_type;
+    typedef string_template<char_type, ssi_engine_type>    ssi_template_type;
+    typedef string_template<char_type, tmpl_engine_type>   tmpl_template_type;
+
+    typedef std::basic_string<Char>               string_type;
+ // typedef typename engine_type::context_type    context_type;
 
   private:
 
@@ -50,28 +51,29 @@ struct binding {
 
   public:
 
-    binding(string_type source, string_type engine)
-        : django_template_(engine == "django" ? new django_template_type(source) : 0)
-        , ssi_template_   (engine == "ssi"    ? new ssi_template_type(source)    : 0)
-        , tmpl_template_  (engine == "tmpl"   ? new tmpl_template_type(source)   : 0) {
+    binding(string_type source, string_type engine_name)
+        : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
+        , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type(source)    : 0)
+        , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type(source)   : 0) {
 
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
-            throw std::invalid_argument("engine");
+            throw std::invalid_argument("engine_name");
         }
     }
 
-    string_type render_to_string(py::dict d) const {
+    string_type render_to_string(py::dict dictionary, string_type default_value, bool autoescape) const {
         if (django_template_) {
             return django_template_->render_to_string(
-                get_context<typename django_template_type::context_type>(d));
+                get_context<typename django_template_type::context_type>(dictionary),
+                typename django_template_type::options_type(default_value, autoescape));
         }
         else if (ssi_template_) {
             return ssi_template_->render_to_string(
-                get_context<typename ssi_template_type::context_type>(d));
+                get_context<typename ssi_template_type::context_type>(dictionary));
         }
         else if (tmpl_template_) {
             return tmpl_template_->render_to_string(
-                get_context<typename tmpl_template_type::context_type>(d));
+                get_context<typename tmpl_template_type::context_type>(dictionary));
         }
         AJG_UNREACHABLE;
     }
@@ -79,9 +81,9 @@ struct binding {
   private:
 
     template <class Context>
-    inline static Context get_context(py::dict d) {
+    inline static Context get_context(py::dict dictionary) {
         Context context;
-        py::list const items = d.items();
+        py::list const items = dictionary.items();
 
         for (std::size_t i = 0, n = len(items); i < n; ++i) {
             py::tuple const item = py::extract<py::tuple>(items[i]);

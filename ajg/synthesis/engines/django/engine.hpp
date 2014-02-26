@@ -49,18 +49,26 @@ struct options {
     typedef Value                              value_type;
     typedef typename value_type::char_type     char_type;
     typedef typename value_type::string_type   string_type;
+    typedef typename value_type::boolean_type  boolean_type;
     typedef typename value_type::size_type     size_type;
 
-    bool autoescape;
+    value_type                          default_value;
+    boolean_type                        autoescape;
     std::map<string_type, string_type>* blocks;
     std::map<iterator_type, size_type>  cycles;
     std::map<iterator_type, value_type> registry;
 
-    options() : autoescape(true), blocks(0) {}
+    options( value_type const& default_value = detail::text("")
+           , boolean_type const autoescape   = true
+           )
+        : default_value(default_value)
+        , autoescape(autoescape)
+        , blocks(0) {}
 
     template <class I>
     options(options<I, value_type> const& that)
-        : autoescape(that.autoescape)
+        : default_value(that.default_value)
+        , autoescape(that.autoescape)
         , blocks(that.blocks) {}
         // cycles?, registry?
 };
@@ -124,8 +132,7 @@ struct definition : base_definition< BidirectionalIterator
         , comment_open   (detail::text("{#"))
         , comment_close  (detail::text("#}"))
         , variable_open  (detail::text("{{"))
-        , variable_close (detail::text("}}"))
-        , default_value  (detail::text("")) {
+        , variable_close (detail::text("}}")) {
         using namespace xpressive;
 //
 // common grammar
@@ -636,7 +643,6 @@ struct definition : base_definition< BidirectionalIterator
     regex_type string_literal, number_literal;
     regex_type none_literal, boolean_literal;
     regex_type variable_literal, literal;
-    value_type const default_value;
 
   private:
 

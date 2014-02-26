@@ -496,7 +496,7 @@ inline String format_current_time(String const& format) {
         local_time(local_time::time_zone_ptr());
     // The locale takes care of deleting this thing for us.
     // TODO: Figure out a way to allocate the facet on the stack.
-    facet_type* const facet = new facet_type(format.c_str());
+    facet_type *const facet = new facet_type(format.c_str());
     stream.imbue(std::locale(stream.getloc(), facet));
     // Finally, stream out the time, properly formatted.
     return (stream << t), stream.str();
@@ -515,7 +515,7 @@ inline String format_time(String const& format, posix_time::ptime const& time) {
     std::basic_ostringstream<char_type> stream;
     // The locale takes care of deleting this thing for us.
     // TODO: Figure out a way to allocate the facet on the stack.
-    facet_type* const facet = new facet_type(format.c_str());
+    facet_type *const facet = new facet_type(format.c_str());
     stream.imbue(std::locale(stream.getloc(), facet));
     // Finally, stream out the time, properly formatted.
     return (stream << time), stream.str();

@@ -49,7 +49,7 @@ unit_test(html comment) {
 }}}
 
 unit_test(environment variable) {
-    char const * const path = std::getenv("PATH");
+    char const *const path = std::getenv("PATH");
     ensure("PATH environment variable is set", path != 0);
 
     string_template const t("<!--#echo var='PATH' -->");
@@ -63,7 +63,7 @@ unit_test(non-extant variable) {
 }}}
 
 unit_test(print environment) {
-    char const * const path = std::getenv("PATH");
+    char const *const path = std::getenv("PATH");
     ensure("PATH environment variable is set", path != 0);
 
     string_template const t("<!--#printenv -->");

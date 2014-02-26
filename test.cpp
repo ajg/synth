@@ -112,7 +112,7 @@ int main(int const argc, char const *const argv[]) {
     context[T("an_optional_float")] = optional<double>(4.5);
 
     auto_ptr<vector<bool> > bools_(new vector<bool>(2, false));
-    vector<bool>* const bools = bools_.get();
+    vector<bool> *const bools = bools_.get();
     context[T("a_pointer")] = bools;
 
     context[T("a_true")] = true;

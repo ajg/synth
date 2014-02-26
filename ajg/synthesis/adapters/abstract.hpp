@@ -94,7 +94,7 @@ struct abstract_adapter {
     template <class This, class That>
     inline static boolean_type compare(This const& this_, That const& that) {
         // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
-        This const* const self = dynamic_cast<This const*>(&that);
+        This const *const self = dynamic_cast<This const*>(&that);
         return self && this_.adapted_ == self->adapted_;
     }
 

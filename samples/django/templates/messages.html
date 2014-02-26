@@ -1,0 +1,17 @@
+{% comment %}
+{#% regroup messages by tags as type_list %#}
+
+{% for type in type_list %}
+<ul class="{{ type.grouper }} messages">
+{% for message in type.list %}
+  <li>{{ message|safe }}</li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% endcomment %}
+
+{% for message in messages %}
+<ul class="messages">
+  <li>{{ message|safe }}</li>
+</ul>
+{% endfor %}

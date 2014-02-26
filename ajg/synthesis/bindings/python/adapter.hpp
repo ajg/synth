@@ -54,7 +54,7 @@ struct adapter<Traits, boost::python::object>
     const_iterator end()   const { return const_iterator(stl_iterator()); }
 
     optional<value_type> index(value_type const& key) const {
-
+        namespace py = ::boost::python;
         AJG_DUMP(as_string(adapted_));
         AJG_DUMP(key.to_string());
 
@@ -62,19 +62,19 @@ struct adapter<Traits, boost::python::object>
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
 
-        PyObject* o = adapted_.ptr();
+        PyObject *const o = adapted_.ptr();
         string_type const k = key.to_string();
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
             if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
-                return value_type(boost::python::object(adapted_[boost::python::str(k)]));
+                return value_type(py::object(adapted_[py::str(k)]));
             }
         }
 
         // 2. Attribute lookup
         if (PyObject_HasAttrString(o, k.c_str())) {
-            boost::python::object obj = adapted_.attr(boost::python::str(k));
+            py::object obj = adapted_.attr(py::str(k));
 
             // 3. Method call
             if (PyCallable_Check(obj.ptr())) {
@@ -89,7 +89,7 @@ struct adapter<Traits, boost::python::object>
             Py_ssize_t n = key.count();
 
             if (n < PySequence_Size(o)) {
-                return value_type(boost::python::object(adapted_[boost::python::long_(n)]));
+                return value_type(py::object(adapted_[py::long_(n)]));
             }
         }
 

@@ -53,85 +53,51 @@ group_type group_object("django tests");
 
 AJG_TESTING_BEGIN
 
-unit_test(sanity check) {
-    string_template const t("");
-    ensure_equals(t.render_to_string(), "");
-    ensure_equals(t.render_to_string(context), "");
-}}}
+#define DJANGO_TEST(name, in, out, context) \
+    unit_test(sanity check) { \
+        string_template const t(in); \
+        ensure_equals(t.render_to_string(context), out); \
+    }}} \
 
-unit_test(plain text) {
-    string_template const t("ABC");
-    ensure_equals(t.render_to_string(), "ABC");
-    ensure_equals(t.render_to_string(context), "ABC");
-}}}
 
-unit_test(html tags) {
-    string_template const t("<foo>\nA foo <bar /> element.\n</foo>");
-    ensure_equals(t.render_to_string(), t.text());
-    ensure_equals(t.render_to_string(context), t.text());
-}}}
+DJANGO_TEST(empty w/o context,  "", "",)
+DJANGO_TEST(empty with context, "", "", context)
 
-unit_test(variable_tag) {
-    string_template const t("{{ foo }} {{ bar }} {{ qux }}");
-    ensure_equals(t.render_to_string(context), "A B C");
-}}}
+DJANGO_TEST(text w/o context,  "ABC", "ABC",)
+DJANGO_TEST(text with context, "ABC", "ABC", context)
 
-unit_test(yesno_filter yes) {
-    string_template const t("{{ true_var|yesno:'Yes,No' }}");
-    ensure_equals(t.render_to_string(context), "Yes");
-}}}
+DJANGO_TEST(html w/o context,  "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>",)
+DJANGO_TEST(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
 
-unit_test(yesno_filter no) {
-    string_template const t("{{ false_var|yesno:'Yes,No' }}");
-    ensure_equals(t.render_to_string(context), "No");
-}}}
+DJANGO_TEST(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
+DJANGO_TEST(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
+
+DJANGO_TEST(yesno_filter yes, "{{ true_var|yesno:'Yes,No' }}", "Yes", context)
+DJANGO_TEST(yesno_filter no, "{{ false_var|yesno:'Yes,No' }}", "No", context)
+// DJANGO_TEST(yesno_filter maybe, "{{ no_var|yesno:'Yes,No,Maybe' }}", "Maybe", context)
+
+DJANGO_TEST(for_tag with value,
+    "{% for v in friends %}[{{ v }}]{% endfor %}",
+    "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]", context)
 
 /*
-unit_test(yesno_filter maybe) {
-    string_template const t("{{ no_var|yesno:'Yes,No,Maybe' }}");
-    ensure_equals(t.render_to_string(context), "Maybe");
-}}}
+DJANGO_TEST(for_tag with key and value,
+    "{% for k, v in friends %}[{{ k }}| {{ v }}]{% endfor %}",
+    "[0| age: 23, name: joe][1| age: 55, name: bob][2| age: 41, name: lou]", context)
 */
 
-unit_test(for_tag with only value) {
-    string_template const t(
-        "{% for v in friends %}\n"
-        "    <p>{{ v }}</p>\n"
-        "{% endfor %}\n");
-    ensure_equals(t.render_to_string(context),
-        "\n"
-        "    <p>age: 23, name: joe</p>\n"
-        "\n"
-        "    <p>age: 55, name: bob</p>\n"
-        "\n"
-        "    <p>age: 41, name: lou</p>\n"
-        "\n");
-}}}
-
-/*
-unit_test(for_tag with key and value) {
-    string_template const t(
-        "{% for k, v in friends %}\n"
-        "    <p>{{ k }} - {{ v }}</p>\n"
-        "{% endfor %}\n");
-    ensure_equals(t.render_to_string(context),
-        "\n"
-        "    <p>0 - age: 23, name: joe</p>\n"
-        "\n"
-        "    <p>1 - age: 55, name: bob</p>\n"
-        "\n"
-        "    <p>2 - age: 41, name: lou</p>\n"
-        "\n");
-}}}
-*/
-
-unit_test(verbatim_tag) {
-    string_template const t(
+DJANGO_TEST(verbatim_tag w/o context,
         "{% verbatim %}{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
-        "{% endfor %}{% endverbatim %}\n");
-    ensure_equals(t.render_to_string(context),
+        "{% endfor %}{% endverbatim %}\n",
         "{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
-        "{% endfor %}\n");
-}}}
+        "{% endfor %}\n",)
+
+DJANGO_TEST(verbatim_tag with context,
+        "{% verbatim %}{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
+        "{% endfor %}{% endverbatim %}\n",
+        "{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
+        "{% endfor %}\n", context)

@@ -71,6 +71,28 @@ unit_test(html tags) {
     ensure_equals(t.render_to_string(context), t.text());
 }}}
 
+unit_test(variable_tag) {
+    string_template const t("{{ foo }} {{ bar }} {{ qux }}");
+    ensure_equals(t.render_to_string(context), "A B C");
+}}}
+
+unit_test(yesno_filter yes) {
+    string_template const t("{{ true_var|yesno:'Yes,No' }}");
+    ensure_equals(t.render_to_string(context), "Yes");
+}}}
+
+unit_test(yesno_filter no) {
+    string_template const t("{{ false_var|yesno:'Yes,No' }}");
+    ensure_equals(t.render_to_string(context), "No");
+}}}
+
+/*
+unit_test(yesno_filter maybe) {
+    string_template const t("{{ no_var|yesno:'Yes,No,Maybe' }}");
+    ensure_equals(t.render_to_string(context), "Maybe");
+}}}
+*/
+
 unit_test(for_tag with only value) {
     string_template const t(
         "{% for v in friends %}\n"

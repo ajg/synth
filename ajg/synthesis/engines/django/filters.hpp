@@ -1557,10 +1557,11 @@ struct yesno_filter {
                 split_argument<','>(args[0], context, options);
 
             switch (params.size()) {
-                case 0:
-                case 1: throw_exception(missing_argument());
-                case 2:  true_ = params[0]; false_ = none_ = params[1]; break;
-                default: true_ = params[0]; false_ = params[1]; none_ = params[2];
+                case 0: throw_exception(missing_argument()); break;
+                case 1: throw_exception(missing_argument()); break;
+                case 2: true_ = params[0]; false_ = params[1]; none_ = params[1]; break;
+                case 3: true_ = params[0]; false_ = params[1]; none_ = params[2]; break;
+                default: throw_exception(superfluous_argument());
             }
 
             return value.empty() ? none_ : (value ? true_ : false_);

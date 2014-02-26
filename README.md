@@ -215,6 +215,7 @@ Future Work
 
  - Update VS project files and test on Windows.
  - Facility to handle `TEMPLATE_STRING_IF_INVALID`.
+ - Facility to handle `TEMPLATE_DIRS`.
  - Create `c++11` branch.
  - Django template loaders.
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)

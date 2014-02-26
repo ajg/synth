@@ -28,8 +28,9 @@ env = Environment(
         # TODO: '-pedantic',
         error_limit,
         '-ftemplate-depth=256',
-        '-Wno-unused-function',
         '-Wno-unsequenced',
+        '-Wno-unused-function',
+        '-Wno-unused-value',
     ],
 )
 

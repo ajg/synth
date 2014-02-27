@@ -24,7 +24,7 @@
 namespace ajg {
 namespace synth {
 
-using namespace boost;
+using namespace boost; // FIXME: Delete.
 
 template < class Engine
          , class Iterator

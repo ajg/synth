@@ -6,6 +6,7 @@
 *.o
 *.o-*
 *.os
+*.os-*
 *.pyc
 *.so
 /synthesis

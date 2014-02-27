@@ -23,7 +23,7 @@ struct adapter<Traits, std::set<T> >
 
     typedef std::set<T> set_type;
     AJG_SYNTHESIS_ADAPTER(set_type)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 
@@ -47,7 +47,7 @@ struct adapter<Traits, std::multiset<T> >
 
     typedef std::multiset<T> set_type;
     AJG_SYNTHESIS_ADAPTER(set_type)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

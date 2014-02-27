@@ -23,7 +23,7 @@ struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
 
     typedef variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
     AJG_SYNTHESIS_ADAPTER(variant_type)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

@@ -21,7 +21,7 @@ struct adapter<Traits, shared_ptr<T> >
     : public forwarding_adapter<Traits, T, shared_ptr<T> > {
 
     adapter(shared_ptr<T> const& adapted) : adapted_(adapted) {}
-    shared_ptr<T> const adapted_;
+    shared_ptr<T> adapted_;
 
     template <class A> A forward() const { return A(boost::cref(*adapted_)); }
     // T&   get()   const { return *adapted_; }

@@ -111,7 +111,7 @@ struct adapter<Traits, array<T, N> >
 
     ...
 
-    adapted_type const adapted_;
+    adapted_type adapted_;
 };*/
 
 }} // namespace ajg::synthesis

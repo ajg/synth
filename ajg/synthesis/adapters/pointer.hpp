@@ -19,8 +19,8 @@ template <class Traits, class T>
 struct adapter<Traits, T*>
     : public forwarding_adapter<Traits, T, T*> {
 
-    adapter(T const *const adapted) : adapted_(adapted) {}
-    T const *const adapted_;
+    adapter(T* adapted) : adapted_(adapted) {}
+    T* adapted_;
 
  // template <class Adapter> optional<Adapter> forward() const {
  //     return adapted_ ? Adapter(ref(*adapted_)) : none;

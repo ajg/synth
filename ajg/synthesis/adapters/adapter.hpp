@@ -187,7 +187,7 @@ struct adapter;
         return typeid(T);
     }
 
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
     /*typename mpl::template if_<
         is_convertible<const adapted_type, adapted_type>,
@@ -356,7 +356,7 @@ struct adapter<Traits, value_facade<Char, Value> >
     : public forwarding_adapter<Traits, value_facade<Char, Value>, value_facade<Char, Value> > {
 
     adapter(value_facade<Char, Value> const& adapted) : adapted_(adapted) {}
-    value_facade<Char, Value> const adapted_;
+    value_facade<Char, Value> adapted_;
 
     template <class A> A forward() const { return A(ref(adapted_)); }
     bool valid() const { return !adapted_.empty(); }

@@ -41,7 +41,7 @@ struct adapter<Traits, std::pair<First, Second> >
     const_iterator begin() const { return const_pair_iterator(adapted_, first); }
     const_iterator end()   const { return const_pair_iterator(adapted_, past); }
 
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   private:
 

@@ -23,7 +23,7 @@ struct adapter<Traits, std::map<K, V> >
 
     typedef std::map<K, V> map_type;
     AJG_SYNTHESIS_ADAPTER(map_type)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 
@@ -47,7 +47,7 @@ struct adapter<Traits, std::multimap<K, V> >
 
     typedef std::multimap<K, V> map_type;
     AJG_SYNTHESIS_ADAPTER(map_type)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

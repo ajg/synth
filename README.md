@@ -1,5 +1,5 @@
 synth
-=========
+=====
 
 A Powerful C++ Templating Framework, written by [Alvaro J. Genial](http://alva.ro).
 
@@ -224,9 +224,9 @@ Future Work
    * Documentation
  - Distribution:
    * [Homebrew](http://brew.sh/) formula
-   * Update VS project files and test on Windows
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Django template loaders
+   * Create Visual Studio solution & project using Scons
  - Bindings:
    * `ruby` binding based on [Rice](http://rice.rubyforge.org/)
    * `go` binding based on [cgo](http://golang.org/cmd/cgo/)
@@ -253,6 +253,7 @@ Future Work
    * Move `engine`s to own namespace
    * Create `c++11`/`c++14` branch
      ~ Translate macros to variadic templates
+   * Sort `#include`s alphabetically
 
 License
 -------

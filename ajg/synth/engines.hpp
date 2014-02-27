@@ -3,11 +3,12 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_HPP_INCLUDED
-#define AJG_SYNTH_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_HPP_INCLUDED
 
-#include <ajg/synth/template.hpp>
-#include <ajg/synth/adapters.hpp>
-#include <ajg/synth/engines.hpp>
+#include <ajg/synth/engines/django.hpp>
+#include <ajg/synth/engines/ssi.hpp>
+#include <ajg/synth/engines/tmpl.hpp>
 
-#endif // AJG_SYNTH_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_HPP_INCLUDED
+

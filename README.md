@@ -187,6 +187,7 @@ Django Engine
 
  - `django::options::autoescape`
  - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
+ - `django::options::directories` (for `TEMPLATE_DIRS`)
 
 SSI Engine
 ----------

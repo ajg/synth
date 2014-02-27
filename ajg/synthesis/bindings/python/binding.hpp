@@ -10,6 +10,8 @@
 #include <stdexcept>
 
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
 #include <boost/shared_ptr.hpp>
 
 #include <ajg/synthesis/bindings/python/adapter.hpp>
@@ -39,41 +41,51 @@ struct binding {
     typedef string_template<char_type, ssi_engine_type>    ssi_template_type;
     typedef string_template<char_type, tmpl_engine_type>   tmpl_template_type;
 
-    typedef std::basic_string<Char>               string_type;
- // typedef typename engine_type::context_type    context_type;
+    typedef bool                      boolean_type;
+    typedef std::basic_string<Char>   string_type;
+    typedef std::vector<string_type>  directories_type;
 
-  private:
+    // typedef typename engine_type::context_type context_type;
 
-    // TODO: Use unique_ptr?
-    boost::shared_ptr<django_template_type> django_template_;
-    boost::shared_ptr<ssi_template_type>    ssi_template_;
-    boost::shared_ptr<tmpl_template_type>   tmpl_template_;
+    typedef py::init< string_type
+                    , string_type
+                    , py::optional
+                        < boolean_type
+                        , string_type
+                        , py::list
+                        >
+                    > constructor_type;
 
   public:
 
-    binding(string_type source, string_type engine_name)
+    binding( string_type  const& source
+           , string_type  const& engine_name
+           , boolean_type const  autoescape     = true
+           , string_type  const& default_value  = detail::text("")
+           , py::list     const& directories    = py::list()
+           )
         : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
-        , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type(source)    : 0)
-        , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type(source)   : 0) {
+        , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
+        , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
+        , django_options_(autoescape, default_value, get_directories(directories)) {
 
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine_name");
         }
     }
 
-    string_type render_to_string(py::dict dictionary, string_type default_value, bool autoescape) const {
+    string_type render_to_string(py::dict dictionary) const {
         if (django_template_) {
             return django_template_->render_to_string(
-                get_context<typename django_template_type::context_type>(dictionary),
-                typename django_template_type::options_type(default_value, autoescape));
+                get_context<typename django_template_type::context_type>(dictionary), django_options_);
         }
         else if (ssi_template_) {
             return ssi_template_->render_to_string(
-                get_context<typename ssi_template_type::context_type>(dictionary));
+                get_context<typename ssi_template_type::context_type>(dictionary)); // TODO: ssi_options_.
         }
         else if (tmpl_template_) {
             return tmpl_template_->render_to_string(
-                get_context<typename tmpl_template_type::context_type>(dictionary));
+                get_context<typename tmpl_template_type::context_type>(dictionary)); // TODO: tmpl_options_.
         }
         AJG_UNREACHABLE;
     }
@@ -98,6 +110,19 @@ struct binding {
 
         return context;
     }
+
+    inline static directories_type get_directories(py::list list) {
+        py::stl_input_iterator<string_type> begin(list), end;
+        return directories_type(begin, end);
+    }
+
+  private:
+
+    // TODO: Use unique_ptr?
+    boost::shared_ptr<django_template_type>     django_template_;
+    boost::shared_ptr<ssi_template_type>        ssi_template_;
+    boost::shared_ptr<tmpl_template_type>       tmpl_template_;
+    typename django_template_type::options_type django_options_;
 };
 
 }}} // namespace ajg::synthesis::python

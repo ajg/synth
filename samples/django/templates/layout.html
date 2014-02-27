@@ -39,7 +39,7 @@
         <div id="columns">
           <div id="center">
             <div id="content" class="content">
-              {% if messages %}<div id="messages">{% include "samples/django/templates/messages.html" %}</div>{% endif %}
+              {% if messages %}<div id="messages">{% include "messages.html" %}</div>{% endif %}
               {% block prefix %}{% endblock %}
               {% block content %}{% endblock %}
               {% block suffix %}{% endblock %}

@@ -10,43 +10,20 @@
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/django.hpp>
 
+#include <tests/context_data.hpp>
+
 namespace {
+
 namespace s = ajg::synth;
 
-typedef char char_t;
-typedef s::django::engine<>                     engine_type;
-typedef s::file_template<char_t, engine_type>   file_template;
-typedef s::string_template<char_t, engine_type> string_template;
+typedef char                                       char_type;
+typedef s::django::engine<>                        engine_type;
+typedef s::file_template<char_type, engine_type>   file_template;
+typedef s::string_template<char_type, engine_type> string_template;
+typedef string_template::context_type              context_type;
+typedef tests::context_data<context_type>          context_data_type;
+typedef ajg::test_group<context_data_type>         group_type;
 
-struct context_data {
-    context_data() {
-        context["foo"] = "A";
-        context["bar"] = "B";
-        context["qux"] = "C";
-
-        context["true_var"]  = true;
-        context["false_var"] = false;
-
-        std::map<std::string, std::string> joe, bob, lou;
-        joe["name"] = "joe";
-        joe["age"]  = "23";
-        bob["name"] = "bob";
-        bob["age"]  = "55";
-        lou["name"] = "lou";
-        lou["age"]  = "41";
-
-        friends[0] = joe;
-        friends[1] = bob;
-        friends[2] = lou;
-
-        context["friends"] = friends;
-    }
-
-    string_template::context_type context;
-    std::map<std::string, std::string> friends[3];
-};
-
-typedef ajg::test_group<context_data> group_type;
 group_type group_object("django tests");
 
 } // namespace
@@ -101,3 +78,35 @@ DJANGO_TEST(verbatim_tag with context,
         "{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
         "{% endfor %}\n", context)
+
+/* TODO: unit_testize
+{{some_strings[2]}}, {{some_strings[1]}}
+{{3.3}}
+{{3.30}}
+
+{{34.23234|floatformat }} == 34.2
+{{34.00000|floatformat }} == 34
+{{34.26000|floatformat }} == 34.3
+
+{{34.23234|floatformat:3 }} == 34.232
+{{34.00000|floatformat:3 }} == 34.000
+{{34.26000|floatformat:3 }} == 34.260
+
+{{34.23234|floatformat:"-3" }} == 34.232
+{{34.00000|floatformat:"-3" }} == 34
+{{34.26000|floatformat:"-3" }} == 34.260
+
+
+{% for k, v in a_string_array %}
+    {% cycle k v as ttt %} hello. {{ttt}}
+{% endfor %}
+hi.
+
+{{"Joel is a slug"|truncatewords:2}}
+
+{{"This is some text containing a http://www.url.com sir and also another.url.com."|urlize}}
+{{"This is some text containing a http://www.url.com sir and also another.url.com."|urlizetrunc:15}}
+
+{{"<b>Joel</b> <button>is</button> a <span>slug</span>"|removetags:"b span"|safe }}
+{{"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>"|removetags:"b span foo"|safe }}
+*/

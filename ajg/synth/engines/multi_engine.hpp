@@ -1,0 +1,101 @@
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
+//  Use, modification and distribution are subject to the Boost Software
+//  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt).
+
+#ifndef AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
+
+#include <map>
+#include <string>
+#include <vector>
+#include <ostream>
+#include <numeric>
+#include <cstdlib>
+#include <utility>
+#include <algorithm>
+
+#include <boost/ref.hpp>
+#include <boost/bind.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/optional.hpp>
+
+#include <ajg/synth/template.hpp>
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/ssi/value.hpp>
+#include <ajg/synth/engines/ssi/library.hpp>
+
+namespace ajg {
+namespace synth {
+
+template <class String>
+struct options {
+    typedef String string_type;
+
+    string_type engine;
+
+    options(string_type const& engine)
+        : engine(engine) {}
+};
+
+template <>
+struct multi_engine : detail::nonconstructible {
+
+typedef multi_engine engine_type;
+
+template <class BidirectionalIterator>
+struct definition : base_definition< BidirectionalIterator
+                                   , definition<BidirectionalIterator>
+                                   > {
+  public:
+
+    typedef definition this_type;
+    typedef base_definition< BidirectionalIterator
+                           , this_type> base_type;
+
+    typedef typename base_type::id_type         id_type;
+    typedef typename base_type::size_type       size_type;
+    typedef typename base_type::char_type       char_type;
+    typedef typename base_type::match_type      match_type;
+    typedef typename base_type::regex_type      regex_type;
+    typedef typename base_type::frame_type      frame_type;
+    typedef typename base_type::string_type     string_type;
+    typedef typename base_type::stream_type     stream_type;
+    typedef typename base_type::iterator_type   iterator_type;
+    typedef typename base_type::definition_type definition_type;
+
+    // typedef ssi::value<char_type>             value_type;
+    typedef std::map<string_type, value_type> context_type;
+    typedef options<string_type>              options_type;
+    typedef detail::indexable_sequence<this_type, tags_type,
+        id_type, detail::create_definitions>  tag_sequence_type;
+
+  public:
+
+    definition() {}
+
+  public:
+
+    void render( stream_type&        stream
+               , frame_type   const& frame
+               , context_type const& context
+               , options_type const& options) const {
+        fusion::for_each(filters_.definition,
+            detail::construct<append_filter>(*this));
+
+        if (options.engine == engine::name()) {
+
+        }
+    }
+
+}; // definition
+
+}; // multi_engine
+
+}} // namespace ajg::synth
+
+#endif // AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
+

@@ -151,5 +151,5 @@ var s = "{{ a_bin_string|escapejs }}";
 This is a block
 {% endblock a_block %}
 
-{% include "samples/django/expression.tpl" %}
+{% include "samples/django/empty.tpl" %}
 

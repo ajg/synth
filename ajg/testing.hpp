@@ -124,8 +124,8 @@ struct test_suite {
 
   private:
 
-    std::string name_;
-    tut::reporter reporter_;
+    std::string                name_;
+    tut::reporter              reporter_;
     tut::test_runner_singleton runner_;
 };
 

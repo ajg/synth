@@ -233,7 +233,10 @@ Future Work
    * `lua` binding
    * `node` binding
    * `php` binding
-   * `json` binding
+ - Inputs:
+   * `json` input
+   * `ini` input
+   * `xml` input
  - Engines:
    * `cheetah` engine
    * `ctpp` engine

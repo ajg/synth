@@ -3,24 +3,24 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_ADAPTER_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_ADAPTER_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_ADAPTER_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_ADAPTER_HPP_INCLUDED
 
 #include <boost/lexical_cast.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
-#include <ajg/synthesis/adapters/abstract.hpp>
+#include <ajg/synth/adapters/abstract.hpp>
 
 
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTHESIS_ADAPTER_TYPEDEFS(adaptedT, thisT)    \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, thisT)    \
   public:                                                    \
                                                              \
     typedef thisT                    this_type;              \
@@ -41,8 +41,8 @@ namespace synthesis {
     typedef typename traits_type::iterator       iterator;   \
     typedef typename traits_type::const_iterator const_iterator
 
-#define AJG_SYNTHESIS_ADAPTER(adaptedT)                    \
-    AJG_SYNTHESIS_ADAPTER_TYPEDEFS(adaptedT, adapter);     \
+#define AJG_SYNTH_ADAPTER(adaptedT)                    \
+    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter);     \
   public:                                                       \
                                                                 \
     adapter(adapted_type const& adapted) : adapted_(adapted) {} \
@@ -59,7 +59,7 @@ struct adapter;
 
  : public abstract_adapter<Char> {
 
-    AJG_SYNTHESIS_ADAPTER_TYPEDEFS(Adapted, adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted, adapter);
 
   public:
 
@@ -281,7 +281,7 @@ struct abstract_forwarding_adapter : public abstract_adapter<Traits> {};
 template <class Traits, class T, class Adapted, class Derived = adapter<Traits, Adapted> >
 struct forwarding_adapter : public abstract_adapter<Traits> {
 
-    AJG_SYNTHESIS_ADAPTER_TYPEDEFS(Adapted, forwarding_adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted, forwarding_adapter);
 
   protected:
 
@@ -363,7 +363,7 @@ struct adapter<Traits, value_facade<Char, Value> >
 };
 */
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_ADAPTER_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_ADAPTER_HPP_INCLUDED
 

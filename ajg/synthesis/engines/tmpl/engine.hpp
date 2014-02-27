@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_TMPL_ENGINE_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_TMPL_ENGINE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_TMPL_ENGINE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_TMPL_ENGINE_HPP_INCLUDED
 
 #include <map>
 #include <string>
@@ -18,15 +18,15 @@
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <ajg/synthesis/template.hpp>
-#include <ajg/synthesis/engines/detail.hpp>
-#include <ajg/synthesis/engines/exceptions.hpp>
-#include <ajg/synthesis/engines/base_definition.hpp>
-#include <ajg/synthesis/engines/tmpl/value.hpp>
-#include <ajg/synthesis/engines/tmpl/library.hpp>
+#include <ajg/synth/template.hpp>
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/tmpl/value.hpp>
+#include <ajg/synth/engines/tmpl/library.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace tmpl {
 
 enum tag_mode
@@ -278,6 +278,6 @@ struct definition : base_definition< BidirectionalIterator
 
 }; // engine
 
-}}} // namespace ajg::synthesis::tmpl
+}}} // namespace ajg::synth::tmpl
 
-#endif // AJG_SYNTHESIS_ENGINES_TMPL_ENGINE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_TMPL_ENGINE_HPP_INCLUDED

@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_ABSTRACT_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_ABSTRACT_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
 
 #include <string>
 #include <istream>
@@ -17,7 +17,7 @@
 #include <boost/throw_exception.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // bad_method exception
@@ -126,7 +126,7 @@ struct abstract_adapter {
     }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_ABSTRACT_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
 

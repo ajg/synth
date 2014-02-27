@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_DJANGO_TAGS_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_DJANGO_TAGS_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DJANGO_TAGS_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DJANGO_TAGS_HPP_INCLUDED
 
 #include <string>
 #include <locale>
@@ -18,17 +18,17 @@
 
 #include <boost/xpressive/xpressive.hpp>
 
-#include <ajg/synthesis/engines/detail.hpp>
-#include <ajg/synthesis/adapters/map.hpp>
-#include <ajg/synthesis/adapters/bool.hpp>
-#include <ajg/synthesis/adapters/string.hpp>
-#include <ajg/synthesis/adapters/vector.hpp>
-#include <ajg/synthesis/adapters/numeric.hpp>
-#include <ajg/synthesis/adapters/utility.hpp>
-#include <ajg/synthesis/adapters/variant.hpp>
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/adapters/map.hpp>
+#include <ajg/synth/adapters/bool.hpp>
+#include <ajg/synth/adapters/string.hpp>
+#include <ajg/synth/adapters/vector.hpp>
+#include <ajg/synth/adapters/numeric.hpp>
+#include <ajg/synth/adapters/utility.hpp>
+#include <ajg/synth/adapters/variant.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // forward declaration of engine exceptions
@@ -973,6 +973,6 @@ struct with_tag {
 
 #undef TAG
 
-}}} // namespace ajg::synthesis::django
+}}} // namespace ajg::synth::django
 
-#endif // AJG_SYNTHESIS_ENGINES_DJANGO_TAGS_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DJANGO_TAGS_HPP_INCLUDED

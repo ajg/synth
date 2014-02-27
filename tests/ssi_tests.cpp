@@ -6,12 +6,12 @@
 #include <cstdlib>
 
 #include <ajg/testing.hpp>
-#include <ajg/synthesis/template.hpp>
-#include <ajg/synthesis/adapters.hpp>
-#include <ajg/synthesis/engines/ssi.hpp>
+#include <ajg/synth/template.hpp>
+#include <ajg/synth/adapters.hpp>
+#include <ajg/synth/engines/ssi.hpp>
 
 namespace {
-namespace s = ajg::synthesis;
+namespace s = ajg::synth;
 
 typedef char char_t;
 typedef s::ssi::engine<> engine_type;

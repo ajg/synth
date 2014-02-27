@@ -3,10 +3,10 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_TMPL_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_TMPL_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_TMPL_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_TMPL_HPP_INCLUDED
 
-#include <ajg/synthesis/config.hpp>
-#include <ajg/synthesis/engines/tmpl/engine.hpp>
+#include <ajg/synth/config.hpp>
+#include <ajg/synth/engines/tmpl/engine.hpp>
 
-#endif // AJG_SYNTHESIS_ENGINES_TMPL_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_TMPL_HPP_INCLUDED

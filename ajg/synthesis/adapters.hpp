@@ -3,22 +3,22 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_HPP_INCLUDED
 
-#include <ajg/synthesis/adapters/ref.hpp>
-#include <ajg/synthesis/adapters/bool.hpp>
-#include <ajg/synthesis/adapters/array.hpp>
-#include <ajg/synthesis/adapters/string.hpp>
-#include <ajg/synthesis/adapters/memory.hpp>
-#include <ajg/synthesis/adapters/pointer.hpp>
-#include <ajg/synthesis/adapters/complex.hpp>
-#include <ajg/synthesis/adapters/numeric.hpp>
-#include <ajg/synthesis/adapters/utility.hpp>
-#include <ajg/synthesis/adapters/variant.hpp>
-#include <ajg/synthesis/adapters/optional.hpp>
-#include <ajg/synthesis/adapters/container.hpp>
-#include <ajg/synthesis/adapters/smart_ptr.hpp>
+#include <ajg/synth/adapters/ref.hpp>
+#include <ajg/synth/adapters/bool.hpp>
+#include <ajg/synth/adapters/array.hpp>
+#include <ajg/synth/adapters/string.hpp>
+#include <ajg/synth/adapters/memory.hpp>
+#include <ajg/synth/adapters/pointer.hpp>
+#include <ajg/synth/adapters/complex.hpp>
+#include <ajg/synth/adapters/numeric.hpp>
+#include <ajg/synth/adapters/utility.hpp>
+#include <ajg/synth/adapters/variant.hpp>
+#include <ajg/synth/adapters/optional.hpp>
+#include <ajg/synth/adapters/container.hpp>
+#include <ajg/synth/adapters/smart_ptr.hpp>
 
-#endif // AJG_SYNTHESIS_ADAPTERS_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_HPP_INCLUDED
 

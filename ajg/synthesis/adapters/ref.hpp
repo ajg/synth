@@ -3,15 +3,15 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_REF_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_REF_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_REF_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_REF_HPP_INCLUDED
 
 #include <boost/ref.hpp>
 #include <boost/type_traits/remove_const.hpp>
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for boost::reference_wrapper
@@ -21,9 +21,9 @@ template <class Traits, class T>
 struct adapter<Traits, reference_wrapper<T> >
     : public abstract_adapter<Traits> {
 
-    // AJG_SYNTHESIS_ADAPTER(reference_wrapper<T>)
+    // AJG_SYNTH_ADAPTER(reference_wrapper<T>)
 
-    AJG_SYNTHESIS_ADAPTER_TYPEDEFS(reference_wrapper<T>, adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(reference_wrapper<T>, adapter);
     // /*const*/ adapted_type adapted_;
 
     adapter(adapted_type const& adapted) : adapted_(adapted) {}
@@ -72,7 +72,7 @@ struct adapter<Traits, reference_wrapper<T> >
 
 
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_REF_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_REF_HPP_INCLUDED
 

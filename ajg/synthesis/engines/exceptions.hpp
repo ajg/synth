@@ -3,14 +3,14 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_EXCEPTIONS_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_EXCEPTIONS_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_EXCEPTIONS_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_EXCEPTIONS_HPP_INCLUDED
 
 #include <string>
 #include <stdexcept>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // not_implemented exception
@@ -108,6 +108,6 @@ struct file_error : public std::runtime_error {
     ~file_error() throw () {}
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ENGINES_EXCEPTIONS_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_EXCEPTIONS_HPP_INCLUDED

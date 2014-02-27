@@ -3,18 +3,18 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_PAIR_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_PAIR_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_PAIR_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_PAIR_HPP_INCLUDED
 
 #include <utility>
 
 #include <boost/variant.hpp>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for std::pair
@@ -26,7 +26,7 @@ struct adapter<Traits, std::pair<First, Second> >
 
     typedef std::pair<First, Second> pair_type;
     typedef variant<First, Second> variant_type;
-    AJG_SYNTHESIS_ADAPTER(pair_type)
+    AJG_SYNTH_ADAPTER(pair_type)
 
   public:
 
@@ -90,6 +90,6 @@ struct adapter<Traits, std::pair<First, Second> >
     typedef pair_iterator<value_type const> const_pair_iterator;
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_PAIR_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_PAIR_HPP_INCLUDED

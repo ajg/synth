@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 
 #include <map>
 #include <string>
@@ -26,16 +26,16 @@
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
-#include <ajg/synthesis/template.hpp>
-#include <ajg/synthesis/engines/detail.hpp>
-#include <ajg/synthesis/engines/exceptions.hpp>
-#include <ajg/synthesis/engines/base_definition.hpp>
-#include <ajg/synthesis/engines/django/value.hpp>
-#include <ajg/synthesis/engines/django/library.hpp>
-#include <ajg/synthesis/engines/django/options.hpp>
+#include <ajg/synth/template.hpp>
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/django/value.hpp>
+#include <ajg/synth/engines/django/library.hpp>
+#include <ajg/synth/engines/django/options.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace django {
 
 using detail::operator ==;
@@ -618,6 +618,6 @@ struct definition : base_definition< BidirectionalIterator
 
 }; // engine
 
-}}} // namespace ajg::synthesis::django
+}}} // namespace ajg::synth::django
 
-#endif // AJG_SYNTHESIS_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED

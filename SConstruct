@@ -45,10 +45,10 @@ test.Program(
     source = ['test.cpp'] + Glob('tests/*_tests.cpp'),
 )
 
-python_synthesis = env.Clone()
-python_synthesis.LoadableModule(
-    target    = 'synthesis.so',
-    source    = ['ajg/synthesis/bindings/python/module.cpp'],
+python_synth = env.Clone()
+python_synth.LoadableModule(
+    target    = 'synth.so',
+    source    = ['ajg/synth/bindings/python/module.cpp'],
     CPPPATH   = ['.', sysconfig.get_python_inc()],
     LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
     LIBPREFIX = '',

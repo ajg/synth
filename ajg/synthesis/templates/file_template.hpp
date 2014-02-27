@@ -3,31 +3,31 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTHESIS_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
+#define AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
 
 #include <string>
 #include <vector>
 #include <cstring>
 #include <sys/stat.h>
 
-#ifdef AJG_SYNTHESIS_NO_WINDOWS_H
+#ifdef AJG_SYNTH_NO_WINDOWS_H
   #ifndef BOOST_SPIRIT_FILEITERATOR_STD
   // Prevents the inclusion of <windows.h>:
     #define BOOST_SPIRIT_FILEITERATOR_STD
   #endif // !BOOST_SPIRIT_FILEITERATOR_STD
-#endif // AJG_SYNTHESIS_NO_WINDOWS_H
+#endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
-#include <ajg/synthesis/engines/exceptions.hpp>
-#include <ajg/synthesis/templates/base_template.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 template < class Char
          , class Engine
@@ -116,6 +116,6 @@ struct file_template
     filepath_type const filepath_;
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
+#endif // AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED

@@ -3,15 +3,15 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_SET_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_SET_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_SET_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_SET_HPP_INCLUDED
 
 #include <set>
 
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for std::set
@@ -22,7 +22,7 @@ struct adapter<Traits, std::set<T> >
     : public abstract_adapter<Traits> {
 
     typedef std::set<T> set_type;
-    AJG_SYNTHESIS_ADAPTER(set_type)
+    AJG_SYNTH_ADAPTER(set_type)
     adapted_type adapted_;
 
   public:
@@ -46,7 +46,7 @@ struct adapter<Traits, std::multiset<T> >
     : public abstract_adapter<Traits> {
 
     typedef std::multiset<T> set_type;
-    AJG_SYNTHESIS_ADAPTER(set_type)
+    AJG_SYNTH_ADAPTER(set_type)
     adapted_type adapted_;
 
   public:
@@ -61,6 +61,6 @@ struct adapter<Traits, std::multiset<T> >
     const_iterator end()   const { return const_iterator(adapted_.end()); }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_SET_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_SET_HPP_INCLUDED

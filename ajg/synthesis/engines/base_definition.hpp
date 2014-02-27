@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_BASE_ENGINE_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_BASE_ENGINE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_BASE_ENGINE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_BASE_ENGINE_HPP_INCLUDED
 
 #include <map>
 #include <string>
@@ -25,12 +25,12 @@
 #include <boost/xpressive/regex_algorithms.hpp>
 #include <boost/xpressive/regex_primitives.hpp>
 
-#include <ajg/synthesis/template.hpp>
-#include <ajg/synthesis/engines/detail.hpp>
-#include <ajg/synthesis/engines/exceptions.hpp>
+#include <ajg/synth/template.hpp>
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 template <class BidirectionalIterator, class Definition>
 struct base_definition : noncopyable {
@@ -139,6 +139,6 @@ struct base_definition : noncopyable {
 
 }; // base_definition
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ENGINES_BASE_ENGINE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_BASE_ENGINE_HPP_INCLUDED

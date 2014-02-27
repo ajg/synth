@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_ARRAY_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_ARRAY_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_ARRAY_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_ARRAY_HPP_INCLUDED
 
 namespace boost {
 
@@ -13,10 +13,10 @@ template <class T, std::size_t N> class array;
 
 }
 
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for native arrays of statically known size
@@ -27,7 +27,7 @@ struct adapter<Traits, T[N]>
     : public abstract_adapter<Traits> {
 
     typedef T array_type[N];
-    AJG_SYNTHESIS_ADAPTER(array_type)
+    AJG_SYNTH_ADAPTER(array_type)
 
   public:
 
@@ -64,7 +64,7 @@ template <class Traits, class T>
 struct adapter<Traits, T[]>
     : public abstract_adapter<Traits> {
 
-    AJG_SYNTHESIS_ADAPTER_TYPEDEFS(T const*, adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(T const*, adapter);
     // /*const*/ adapted_type adapted_;
     adapted_type adapted_;
     std::size_t const length_;
@@ -105,7 +105,7 @@ struct adapter<Traits, array<T, N> >
     : public abstract_adapter<Traits> {
 
     typedef array<T, N> array_type;
-    AJG_SYNTHESIS_ADAPTER(array_type)
+    AJG_SYNTH_ADAPTER(array_type)
 
   public:
 
@@ -114,7 +114,7 @@ struct adapter<Traits, array<T, N> >
     adapted_type adapted_;
 };*/
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_ARRAY_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_ARRAY_HPP_INCLUDED
 

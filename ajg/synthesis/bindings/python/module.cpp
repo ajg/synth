@@ -7,22 +7,22 @@
 
 #include <boost/python.hpp>
 
-#include <ajg/synthesis/engines/django.hpp>
-#include <ajg/synthesis/engines/ssi.hpp>
-#include <ajg/synthesis/engines/tmpl.hpp>
-#include <ajg/synthesis/bindings/python/binding.hpp>
+#include <ajg/synth/engines/django.hpp>
+#include <ajg/synth/engines/ssi.hpp>
+#include <ajg/synth/engines/tmpl.hpp>
+#include <ajg/synth/bindings/python/binding.hpp>
 
-BOOST_PYTHON_MODULE(synthesis)
+BOOST_PYTHON_MODULE(synth)
 {
     using namespace boost::python;
-    typedef ajg::synthesis::python::binding
+    typedef ajg::synth::python::binding
       < char
-      , ajg::synthesis::django::engine<>
-      , ajg::synthesis::ssi::engine<>
-      , ajg::synthesis::tmpl::engine<>
+      , ajg::synth::django::engine<>
+      , ajg::synth::ssi::engine<>
+      , ajg::synth::tmpl::engine<>
       > Template;
 
-    def("version", ajg::synthesis::python::version);
+    def("version", ajg::synth::python::version);
 
     class_<Template>("Template", Template::constructor_type())
         .def("render_to_string", &Template::render_to_string)

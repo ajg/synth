@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_DJANGO_VALUE_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_DJANGO_VALUE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED
 
 #include <utility>
 #include <algorithm>
@@ -16,11 +16,11 @@
 
 #include <boost/algorithm/string/classification.hpp>
 
-#include <ajg/synthesis/value_facade.hpp>
-#include <ajg/synthesis/adapters/numeric.hpp>
+#include <ajg/synth/value_facade.hpp>
+#include <ajg/synth/adapters/numeric.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace django {
 
 template <class Char>
@@ -40,7 +40,7 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    AJG_SYNTHESIS_VALUE_CONSTRUCTORS(value, base_type,
+    AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type,
         BOOST_PP_COMMA() safe_(false) {})
 
   public:
@@ -149,10 +149,10 @@ struct value : value_facade<Char, value<Char> > {
     optional<token_type> token_;
 };
 
-}}} // namespace ajg::synthesis::django
+}}} // namespace ajg::synth::django
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for above
@@ -175,6 +175,6 @@ struct adapter<Traits, django::value<Iterator> > {
     bool valid() const { return adapted_; }
 };*/
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ENGINES_DJANGO_VALUE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED

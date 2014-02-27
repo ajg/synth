@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
 
 #include <set>
 #include <string>
@@ -13,10 +13,10 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/assign/list_of.hpp>
-#include <ajg/synthesis/engines/detail.hpp>
+#include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 
 template < class Engine
@@ -145,6 +145,6 @@ struct standard_environment {
     }
 };*/
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED

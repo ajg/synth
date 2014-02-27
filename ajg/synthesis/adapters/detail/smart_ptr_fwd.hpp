@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED
 
 namespace boost {
 
@@ -22,4 +22,4 @@ template <class T> class enable_shared_from_this;
 
 } // namespace boost
 
-#endif // AJG_SYNTHESIS_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_DETAIL_SMART_PTR_FWD_HPP_INCLUDED

@@ -3,17 +3,17 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTHESIS_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
+#define AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
 
 #include <string>
 
 #include <boost/utility/base_from_member.hpp>
 #include <boost/type_traits/remove_reference.hpp>
-#include <ajg/synthesis/templates/base_template.hpp>
+#include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 template < class Char
          , class Engine
@@ -51,6 +51,6 @@ struct string_template
     string_type const& str() const { return this->member(); }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
+#endif // AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED

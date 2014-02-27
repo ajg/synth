@@ -3,15 +3,15 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_VARIANT_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_VARIANT_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_VARIANT_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_VARIANT_HPP_INCLUDED
 
 #include <boost/variant/variant_fwd.hpp>
 
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for boost::variant
@@ -22,7 +22,7 @@ struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     : public abstract_adapter<Traits> {
 
     typedef variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
-    AJG_SYNTHESIS_ADAPTER(variant_type)
+    AJG_SYNTH_ADAPTER(variant_type)
     adapted_type adapted_;
 
   public:
@@ -41,7 +41,7 @@ struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     void output(ostream_type& out) const { out << adapted_; }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_OPTIONAL_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_OPTIONAL_HPP_INCLUDED
 

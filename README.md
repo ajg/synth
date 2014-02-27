@@ -18,7 +18,7 @@ The `synthesis` codebase is mature and well-tested; the bindings are still a wor
 Motivation
 ----------
 
-Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process.
+Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, etc.)
 
 Dependencies
 ------------
@@ -233,7 +233,7 @@ Future Work
  - Move `*_template`s to own namespace.
  - Move `engine`s to own namespace.
  - Split out engine options to separate header files.
- - Compare benefit/cost of -O, -O2, -O3 and -Ofast.
+ - Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`.
 
 License
 -------

@@ -13,4 +13,6 @@ before_install:
   - sudo apt-get install libboost-dev libboost-python-dev
 
 script:
+  # Prevent slow builds from dying by echoing something every 2 minutes.
+  - (while true; do echo "I am a little teapot."; sleep 120; done)&
   - scons && ./test

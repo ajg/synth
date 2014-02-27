@@ -3,13 +3,9 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#include <vector>
-
 #include <boost/python.hpp>
 
-#include <ajg/synth/engines/django.hpp>
-#include <ajg/synth/engines/ssi.hpp>
-#include <ajg/synth/engines/tmpl.hpp>
+#include <ajg/synth/engines.hpp>
 #include <ajg/synth/bindings/python/binding.hpp>
 
 BOOST_PYTHON_MODULE(synth)

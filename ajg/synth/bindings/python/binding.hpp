@@ -7,6 +7,7 @@
 #define AJG_SYNTH_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
 
 #include <memory>
+#include <vector>
 #include <stdexcept>
 
 #include <boost/python.hpp>

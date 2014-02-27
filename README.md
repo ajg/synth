@@ -13,7 +13,7 @@ Synthesis is a template framework—a set of components that can be mixed and ma
 Status
 ------
 
-The `synthesis` codebase is mature and well-tested; the bindings are still a work in progress.
+Beta, approaching a first full release.
 
 Motivation
 ----------
@@ -209,7 +209,7 @@ TMPL Engine
 
 ### Tags
 
- - `tmpl::comment_tag` (Part of [`ctpp`](http://ctpp.havoc.ru/en/), not `tmpl`.)
+ - `tmpl::comment_tag` (Part of [`ctpp`](http://ctpp.havoc.ru/en/))
  - `tmpl::if_tag`
  - `tmpl::include_tag`
  - `tmpl::loop_tag`
@@ -219,22 +219,37 @@ TMPL Engine
 Future Work
 -----------
 
- - Update VS project files and test on Windows.
- - Create `c++11`/`c++14` branch.
+ - Core:
+   * Command-line utility
+   * Documentation
+ - Distribution:
+   * [Homebrew](http://brew.sh/) formula
+   * Update VS project files and test on Windows
+   * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
+   * Django template loaders
+ - Bindings:
+   * `ruby` binding based on [Rice](http://rice.rubyforge.org/)
+   * `go` binding based on [cgo](http://golang.org/cmd/cgo/)
+   * `lua` binding
+   * `node` binding
+   * `php` binding
+   * `json` binding
+ - Engines:
+   * `cheetah` engine
+   * `ctpp` engine
+   * `multi_engine`
+ - Adapters:
+   * `tribool` adapter
+   * `property_tree` adapter
    * `c++11` type adapters
    * `c++14` type adapters
-   * Translate macros to variadic templates
- - Django template loaders.
- - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
- - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
- - `cheetah` engine
- - `ctpp` engine
- - `stream_template`
- - `multi_engine`
- - `tribool` adapter
- - Move `*_template`s to own namespace.
- - Move `engine`s to own namespace.
- - Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`.
+ - Templates:
+   * `stream_template`
+ - Refactoring:
+   * Move `*_template`s to own namespace
+   * Move `engine`s to own namespace
+   * Create `c++11`/`c++14` branch
+     ~ Translate macros to variadic templates
 
 License
 -------

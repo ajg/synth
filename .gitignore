@@ -4,6 +4,7 @@
 
 # Binaries
 *.o
+*.o-*
 *.os
 *.pyc
 *.so

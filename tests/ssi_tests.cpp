@@ -15,7 +15,7 @@ namespace s = ajg::synthesis;
 
 typedef char char_t;
 typedef s::ssi::engine<> engine_type;
-typedef s::file_template<char_t, engine_type> file_template;
+typedef s::file_template<char_t, engine_type>   file_template;
 typedef s::string_template<char_t, engine_type> string_template;
 typedef string_template::string_type string_type;
 

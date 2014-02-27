@@ -14,8 +14,8 @@ namespace {
 namespace s = ajg::synthesis;
 
 typedef char char_t;
-typedef s::django::engine<> engine_type;
-typedef s::file_template<char_t, engine_type> file_template;
+typedef s::django::engine<>                     engine_type;
+typedef s::file_template<char_t, engine_type>   file_template;
 typedef s::string_template<char_t, engine_type> string_template;
 
 struct context_data {

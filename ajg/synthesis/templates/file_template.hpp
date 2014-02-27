@@ -18,6 +18,7 @@
   #endif // !BOOST_SPIRIT_FILEITERATOR_STD
 #endif // AJG_SYNTHESIS_NO_WINDOWS_H
 
+#include <boost/foreach.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>

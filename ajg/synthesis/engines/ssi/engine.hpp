@@ -27,29 +27,13 @@
 #include <ajg/synthesis/engines/base_definition.hpp>
 #include <ajg/synthesis/engines/ssi/value.hpp>
 #include <ajg/synthesis/engines/ssi/library.hpp>
+#include <ajg/synthesis/engines/ssi/options.hpp>
 
 namespace ajg {
 namespace synthesis {
 namespace ssi {
 
 using detail::operator ==;
-
-template <class String>
-struct options {
-    typedef String string_type;
-
-    options()
-        : size_format(detail::text("bytes"))
-        , time_format(detail::text("%A, %d-%b-%Y %H:%M:%S %Z"))
-        , echo_message(detail::text("(none)"))
-        , error_message(detail::text("[an error occurred"
-              " while processing this directive]")) {}
-
-    string_type size_format;
-    string_type time_format;
-    string_type echo_message;
-    string_type error_message;
-};
 
 template < class Library = ssi::default_library
          , class Environment = detail::standard_environment
@@ -331,4 +315,3 @@ struct definition : base_definition< BidirectionalIterator
 }}} // namespace ajg::synthesis::ssi
 
 #endif // AJG_SYNTHESIS_ENGINES_SSI_ENGINE_HPP_INCLUDED
-

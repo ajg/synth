@@ -232,7 +232,6 @@ Future Work
  - `tribool` adapter
  - Move `*_template`s to own namespace.
  - Move `engine`s to own namespace.
- - Split out engine options to separate header files.
  - Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`.
 
 License

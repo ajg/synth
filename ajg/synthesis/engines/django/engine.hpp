@@ -32,46 +32,11 @@
 #include <ajg/synthesis/engines/base_definition.hpp>
 #include <ajg/synthesis/engines/django/value.hpp>
 #include <ajg/synthesis/engines/django/library.hpp>
+#include <ajg/synthesis/engines/django/options.hpp>
 
 namespace ajg {
 namespace synthesis {
 namespace django {
-
-//
-// options
-// TODO: We could get rid of the need for Iterator here by using an offset
-//       between iterators (a size_type) instead of the iterator as a key.
-////////////////////////////////////////////////////////////////////////////////
-
-template <class Iterator, class Value>
-struct options {
-    typedef Iterator                           iterator_type;
-    typedef Value                              value_type;
-    typedef typename value_type::char_type     char_type;
-    typedef typename value_type::string_type   string_type;
-    typedef typename value_type::boolean_type  boolean_type;
-    typedef typename value_type::size_type     size_type;
-
-    value_type                          default_value;
-    boolean_type                        autoescape;
-    std::map<string_type, string_type>* blocks;
-    std::map<iterator_type, size_type>  cycles;
-    std::map<iterator_type, value_type> registry;
-
-    options( value_type const& default_value = detail::text("")
-           , boolean_type const autoescape   = true
-           )
-        : default_value(default_value)
-        , autoescape(autoescape)
-        , blocks(0) {}
-
-    template <class I>
-    options(options<I, value_type> const& that)
-        : default_value(that.default_value)
-        , autoescape(that.autoescape)
-        , blocks(that.blocks) {}
-        // cycles?, registry?
-};
 
 using detail::operator ==;
 namespace x = boost::xpressive;

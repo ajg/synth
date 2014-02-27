@@ -254,6 +254,9 @@ Future Work
    * Create `c++11`/`c++14` branch
      ~ Translate macros to variadic templates
    * Sort `#include`s alphabetically
+   * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
+   * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
+   * Test or drop support for non-`char` types (e.g. `wchar_t`)
 
 License
 -------

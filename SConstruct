@@ -42,7 +42,7 @@ else:
 test = env.Clone()
 test.Program(
     target = 'test',
-    source = ['test.cpp'] + Glob('tests/*_tests.cpp'),
+    source = ['tests/test.cpp'] + Glob('tests/*_tests.cpp'),
 )
 
 python_synth = env.Clone()

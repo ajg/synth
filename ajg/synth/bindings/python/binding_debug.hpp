@@ -22,7 +22,7 @@ namespace py = boost::python;
 
 inline char const* version()
 {
-   return BOOST_PP_STRINGIZE(AJG_SYNTH_VERSION);
+   return AJG_SYNTH_VERSION_STRING;
 }
 
 template <class Char, class Django/*, class SSI, class TMPL*/>

@@ -9,7 +9,7 @@
 *.os-*
 *.pyc
 *.so
-/synthesis
+/synth
 /test
 
 # Code::Blocks

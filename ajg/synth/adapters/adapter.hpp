@@ -11,10 +11,10 @@
 
 #include <ajg/synth/adapters/abstract.hpp>
 
-
-
 namespace ajg {
 namespace synth {
+
+using namespace boost; // FIXME: Delete.
 
 //
 // Shortcut macros
@@ -278,6 +278,7 @@ struct abstract_forwarding_adapter : public abstract_adapter<Traits> {};
 
 */
 
+// TODO: Move to separate file.
 template <class Traits, class T, class Adapted, class Derived = adapter<Traits, Adapted> >
 struct forwarding_adapter : public abstract_adapter<Traits> {
 

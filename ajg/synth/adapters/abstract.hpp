@@ -13,11 +13,16 @@
 #include <stdexcept>
 
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 
 namespace ajg {
 namespace synth {
+
+using boost::lexical_cast;
+using boost::optional;
+using boost::throw_exception;
 
 //
 // bad_method exception

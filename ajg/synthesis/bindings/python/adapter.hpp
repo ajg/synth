@@ -25,7 +25,7 @@ struct adapter<Traits, boost::python::object>
 
     typedef boost::python::object object_type;
     AJG_SYNTHESIS_ADAPTER(object_type)
-    object_type const adapted_;
+    object_type adapted_;
 
   private:
 

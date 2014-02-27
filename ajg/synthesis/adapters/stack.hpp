@@ -22,7 +22,7 @@ struct adapter<Traits, std::stack<T> >
     : public abstract_adapter<Traits> {
 
     AJG_SYNTHESIS_ADAPTER(std::stack<T>)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

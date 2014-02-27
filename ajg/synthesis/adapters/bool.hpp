@@ -20,7 +20,7 @@ struct adapter<Traits, bool>
     : public abstract_adapter<Traits> {
 
     AJG_SYNTHESIS_ADAPTER(bool)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

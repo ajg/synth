@@ -22,7 +22,7 @@ struct adapter<Traits, optional<T> >
     : public forwarding_adapter<Traits, T, optional<T> > {
 
     adapter(optional<T> const& adapted) : adapted_(adapted) {}
-    optional<T> const adapted_;
+    optional<T> adapted_;
 
     bool   valid() const { return adapted_; }
     //T const& get() const { return *adapted_; }

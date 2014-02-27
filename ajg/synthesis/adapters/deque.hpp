@@ -22,7 +22,7 @@ struct adapter<Traits, std::deque<T> >
     : public abstract_adapter<Traits> {
 
     AJG_SYNTHESIS_ADAPTER(std::deque<T>)
-    adapted_type const adapted_;
+    adapted_type adapted_;
 
   public:
 

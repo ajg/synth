@@ -280,7 +280,7 @@ struct definition : base_definition< BidirectionalIterator
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
         std::string const filepath_ = this->template convert<char>(filepath);
-        file_template_type(filepath_).render(stream, context, options);
+        file_template_type(filepath_, options.directories).render(stream, context, options);
     }
 
     void render_text( stream_type&        stream

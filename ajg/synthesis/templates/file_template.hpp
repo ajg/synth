@@ -7,6 +7,7 @@
 #define AJG_SYNTHESIS_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
 
 #include <string>
+#include <vector>
 #include <cstring>
 #include <sys/stat.h>
 
@@ -41,25 +42,57 @@ struct file_template
 
   public:
 
-    file_template(std::string const& filepath)
-        : base_from_member<Iterator>(check_exists(filepath))
+    typedef std::string                filepath_type;
+    typedef std::vector<filepath_type> directories_type;
+
+  public:
+
+    file_template( filepath_type    const& filepath
+                 , directories_type const& directories = directories_type(/*1, "."*/)
+                 )
+        : base_from_member<Iterator>(find_path(filepath, directories)) // (check_exists(filepath))
         , base_type(this->member, this->member.make_end())
         , filepath_(filepath) {}
 
   public:
 
-    std::string const& filepath() const { return filepath_; }
+    filepath_type const& filepath() const { return filepath_; }
 
   private:
 
-    inline static std::string const& check_exists(std::string const& filepath) {
+    inline static filepath_type find_path( filepath_type    const& filepath
+                                         , directories_type const& directories
+                                         ) {
+        struct stat file;
+
+        // First try looking in the directories specified.
+        BOOST_FOREACH(filepath_type const& directory, directories) {
+            filepath_type const& path = directory + filepath;
+            if (stat(path.c_str(), &file) == 0) {
+                return path;
+            }
+        }
+
+        // Then try the current directory.
+        if (stat(filepath.c_str(), &file) != 0) {
+            throw_exception(file_error(filepath, "read", std::strerror(errno)));
+        }
+        else if (file.st_size == 0) {
+            throw_exception(file_error(filepath, "read", "file is empty"));
+        }
+
+        return filepath;
+    }
+
+    /*
+    inline static filepath_type const& check_exists(filepath_type const& filepath) {
         struct stat file;
 
         if (stat(filepath.c_str(), &file) != 0) {
             throw_exception(file_error(filepath, "read", std::strerror(errno)));
         }
         else if (file.st_size == 0) {
-            throw_exception(file_error(filepath, "read", "File is empty"));
+            throw_exception(file_error(filepath, "read", "file is empty"));
         }
 
         // Using fopen:
@@ -75,10 +108,11 @@ struct file_template
 
         return filepath;
     }
+    */
 
   private:
 
-    std::string const filepath_;
+    filepath_type const filepath_;
 };
 
 }} // namespace ajg::synthesis

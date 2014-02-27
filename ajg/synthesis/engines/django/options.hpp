@@ -7,6 +7,7 @@
 #define AJG_SYNTHESIS_ENGINES_DJANGO_OPTIONS_HPP_INCLUDED
 
 #include <map>
+#include <vector>
 
 #include <ajg/synthesis/engines/detail.hpp>
 
@@ -28,24 +29,29 @@ struct options {
     typedef typename value_type::string_type   string_type;
     typedef typename value_type::boolean_type  boolean_type;
     typedef typename value_type::size_type     size_type;
+    typedef std::vector<string_type>           directories_type;
 
-    value_type                          default_value;
     boolean_type                        autoescape;
+    value_type                          default_value;
+    directories_type                    directories;
     std::map<string_type, string_type>* blocks;
     std::map<iterator_type, size_type>  cycles;
     std::map<iterator_type, value_type> registry;
 
-    options( value_type const& default_value = detail::text("")
-           , boolean_type const autoescape   = true
+    options( boolean_type     const  autoescape    = true
+           , value_type       const& default_value = detail::text("")
+           , directories_type const& directories   = directories_type()
            )
-        : default_value(default_value)
-        , autoescape(autoescape)
+        : autoescape(autoescape)
+        , default_value(default_value)
+        , directories(directories)
         , blocks(0) {}
 
     template <class I>
     options(options<I, value_type> const& that)
-        : default_value(that.default_value)
-        , autoescape(that.autoescape)
+        : autoescape(that.autoescape)
+        , default_value(that.default_value)
+        , directories(that.directories)
         , blocks(that.blocks) {}
         // cycles?, registry?
 };

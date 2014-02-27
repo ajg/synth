@@ -3,10 +3,10 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_DETAIL_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_DETAIL_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
-#include <ajg/synthesis/config.hpp>
+#include <ajg/synth/config.hpp>
 
 #include <map>
 #include <ctime>
@@ -63,10 +63,10 @@
 
 #include <boost/program_options/environment_iterator.hpp>
 
-#include <ajg/synthesis/engines/exceptions.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace detail {
 
 using boost::throw_exception;
@@ -177,8 +177,8 @@ struct unreachable {
 //       triggering warning C4702; or, how to silence the warning.
 
 #define AJG_CASE_OF(value, cases) \
-    AJG_CASE_OF_ELSE(value, cases, ajg::synthesis::detail::unreachable())
-        // (BOOST_ASSERT(0), throw 0, ajg::synthesis::detail::unreachable(value)))
+    AJG_CASE_OF_ELSE(value, cases, ajg::synth::detail::unreachable())
+        // (BOOST_ASSERT(0), throw 0, ajg::synth::detail::unreachable(value)))
 
 //
 // text:
@@ -239,7 +239,7 @@ struct apply_at;
         } \
     };
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, AJG_APPLY_AT, nil)
+BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, AJG_APPLY_AT, nil)
 #undef AJG_APPLY_AT
 #undef AJG_CASE
 
@@ -264,7 +264,7 @@ struct create_definitions;
         type; \
     };
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
+BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 #undef CREATE_DEFINITIONS
 #undef DEFINITION
 
@@ -293,7 +293,7 @@ struct create_definitions_extended;
     };
 
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
+BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 #undef CREATE_DEFINITIONS
 #undef DEFINITION
 
@@ -351,7 +351,7 @@ struct index_sequence;
         } \
     };
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_SEQUENCE_LIMIT, INDEX_SEQUENCE, nil)
+BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, INDEX_SEQUENCE, nil)
 #undef INDEX_SEQUENCE
 #undef ALTERNATIVES
 #undef PUSH_SYNTAX
@@ -781,7 +781,7 @@ template <class T> inline T construct() { T const t; return t; }
     BOOST_PP_SEQ_FOR_EACH_PRODUCT(CONSTRUCT, \
         BOOST_PP_REPEAT(BOOST_PP_ADD(n, 1), PARAM_, nil))
 
-BOOST_PP_REPEAT(AJG_SYNTHESIS_CONSTRUCT_LIMIT, CONSTRUCT_N, nil)
+BOOST_PP_REPEAT(AJG_SYNTH_CONSTRUCT_LIMIT, CONSTRUCT_N, nil)
 
 #undef CONSTRUCT_N
 #undef CONSTRUCT
@@ -1011,25 +1011,25 @@ void read_file(FILE *const file, Stream& stream) {
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-  #define AJG_SYNTHESIS_POPEN  _popen
-  #define AJG_SYNTHESIS_PCLOSE _pclose
+  #define AJG_SYNTH_POPEN  _popen
+  #define AJG_SYNTH_PCLOSE _pclose
 #else
-  #define AJG_SYNTHESIS_POPEN  /*std::*/popen
-  #define AJG_SYNTHESIS_PCLOSE /*std::*/pclose
+  #define AJG_SYNTH_POPEN  /*std::*/popen
+  #define AJG_SYNTH_PCLOSE /*std::*/pclose
 #endif
 
 struct pipe : noncopyable {
   public:
 
     explicit pipe(std::string const& command, bool const reading = true) {
-        if ((file_ = AJG_SYNTHESIS_POPEN(command.c_str(),
+        if ((file_ = AJG_SYNTH_POPEN(command.c_str(),
                 reading ? "r" : "w")) == 0) {
             throw_exception(error("open"));
         }
     }
 
     ~pipe() {
-        if (AJG_SYNTHESIS_PCLOSE(file_) == -1) {
+        if (AJG_SYNTH_PCLOSE(file_) == -1) {
             throw_exception(error("close"));
         }
     }
@@ -1056,8 +1056,8 @@ struct pipe : noncopyable {
 
 #undef AJG_VECTOR_0_IF
 
-}}} // namespace ajg::synthesis::detail
+}}} // namespace ajg::synth::detail
 
-#endif // AJG_SYNTHESIS_ENGINES_DETAIL_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
 

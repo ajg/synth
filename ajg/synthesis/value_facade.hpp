@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_VALUE_HPP_INCLUDED
-#define AJG_SYNTHESIS_VALUE_HPP_INCLUDED
+#ifndef AJG_SYNTH_VALUE_HPP_INCLUDED
+#define AJG_SYNTH_VALUE_HPP_INCLUDED
 
 #include <cstddef>
 #include <utility>
@@ -17,15 +17,15 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-#include <ajg/synthesis/value_iterator.hpp>
-#include <ajg/synthesis/adapters/abstract.hpp>
+#include <ajg/synth/value_iterator.hpp>
+#include <ajg/synth/adapters/abstract.hpp>
 
 // #include <boost/spirit/home/support/safe_bool.hpp>
 #include <boost/spirit/home/classic/core/safe_bool.hpp>
 
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace detail {
 
 // Accepts the indices for a half-open range [lower, upper)
@@ -313,7 +313,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     boost::shared_ptr<abstract_type const> adapter_;
 };
 
-#define AJG_SYNTHESIS_VALUE_CONSTRUCTORS(name, base, rest) \
+#define AJG_SYNTH_VALUE_CONSTRUCTORS(name, base, rest) \
     name() \
         : base() rest \
     \
@@ -332,6 +332,6 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     name(T const& t, U const& u, V const& v) \
         : base(t, u, v) rest
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_VALUE_HPP_INCLUDED
+#endif // AJG_SYNTH_VALUE_HPP_INCLUDED

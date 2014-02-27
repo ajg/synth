@@ -3,15 +3,15 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_LIST_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_LIST_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_LIST_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_LIST_HPP_INCLUDED
 
 #include <list>
 
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for std::list
@@ -21,7 +21,7 @@ template <class Traits, class T>
 struct adapter<Traits, std::list<T> >
     : public abstract_adapter<Traits> {
 
-    AJG_SYNTHESIS_ADAPTER(std::list<T>)
+    AJG_SYNTH_ADAPTER(std::list<T>)
     adapted_type adapted_;
 
   public:
@@ -36,7 +36,7 @@ struct adapter<Traits, std::list<T> >
     const_iterator end()   const { return const_iterator(adapted_.end()); }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_LIST_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_LIST_HPP_INCLUDED
 

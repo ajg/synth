@@ -3,16 +3,16 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_CONTAINER_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_CONTAINER_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_CONTAINER_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_CONTAINER_HPP_INCLUDED
 
-#include <ajg/synthesis/adapters/set.hpp>
-#include <ajg/synthesis/adapters/map.hpp>
-#include <ajg/synthesis/adapters/pair.hpp>
-#include <ajg/synthesis/adapters/list.hpp>
-#include <ajg/synthesis/adapters/deque.hpp>
-#include <ajg/synthesis/adapters/stack.hpp>
-#include <ajg/synthesis/adapters/vector.hpp>
+#include <ajg/synth/adapters/set.hpp>
+#include <ajg/synth/adapters/map.hpp>
+#include <ajg/synth/adapters/pair.hpp>
+#include <ajg/synth/adapters/list.hpp>
+#include <ajg/synth/adapters/deque.hpp>
+#include <ajg/synth/adapters/stack.hpp>
+#include <ajg/synth/adapters/vector.hpp>
 
 // TODO: unordered_[multi]map/hash_[multi]map
 // TODO: unordered_[multi]set/hash_[multi]set
@@ -20,5 +20,5 @@
 // TODO: ptr_containers
 // TODO: bitset
 
-#endif // AJG_SYNTHESIS_ADAPTERS_CONTAINER_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_CONTAINER_HPP_INCLUDED
 

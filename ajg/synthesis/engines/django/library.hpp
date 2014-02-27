@@ -3,18 +3,18 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
 
 #include <boost/mpl/pair.hpp>
 
 #include <boost/fusion/include/vector.hpp>
 
-#include <ajg/synthesis/engines/django/tags.hpp>
-#include <ajg/synthesis/engines/django/filters.hpp>
+#include <ajg/synth/engines/django/tags.hpp>
+#include <ajg/synth/engines/django/filters.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace django {
 
 //
@@ -123,6 +123,6 @@ struct default_library
         >
 {};
 
-}}} // namespace ajg::synthesis::django
+}}} // namespace ajg::synth::django
 
-#endif // AJG_SYNTHESIS_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED

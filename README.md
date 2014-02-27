@@ -1,14 +1,14 @@
-synthesis
+synth
 =========
 
 A Powerful C++ Templating Framework, written by [Alvaro J. Genial](http://alva.ro).
 
-[![Build Status](https://travis-ci.org/ajg/synthesis.png?branch=master)](https://travis-ci.org/ajg/synthesis)
+[![Build Status](https://travis-ci.org/ajg/synth.png?branch=master)](https://travis-ci.org/ajg/synth)
 
 Synopsis
 --------
 
-Synthesis is a template framework—a set of components that can be mixed and matched to build the right functionality; furthermore, components are loosely-coupled, designed to be both extensible and replaceable.
+Synth is a template framework—a set of components that can be mixed and matched to build the right functionality; furthermore, components are loosely-coupled, designed to be both extensible and replaceable.
 
 Status
 ------
@@ -18,12 +18,12 @@ Beta, approaching a first full release.
 Motivation
 ----------
 
-Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, values, etc.)
+Synth blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, values, etc.)
 
 Dependencies
 ------------
 
-Building `synthesis` requires:
+Building `synth` requires:
 
  - A modern C++ compiler
  - [Boost](http://boost.org)
@@ -260,5 +260,5 @@ License
 This library is distributed under the Boost [LICENSE](./LICENSE_1_0.txt).
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ajg/synthesis/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ajg/synth/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

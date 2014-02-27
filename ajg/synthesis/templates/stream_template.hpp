@@ -3,17 +3,17 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTHESIS_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
+#define AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
 
 // #include <*stream>
 
 #include <boost/utility/base_from_member.hpp>
 
-#include <ajg/synthesis/templates/base_template.hpp>
+#include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 // TODO:
 /*
@@ -25,6 +25,6 @@ template < class Char
 struct stream_template { ... }; */
 
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
+#endif // AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED

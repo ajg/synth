@@ -3,17 +3,17 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_TMPL_LIBRARY_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_TMPL_LIBRARY_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_TMPL_LIBRARY_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_TMPL_LIBRARY_HPP_INCLUDED
 
 #include <boost/mpl/pair.hpp>
 
 #include <boost/fusion/include/vector.hpp>
 
-#include <ajg/synthesis/engines/tmpl/tags.hpp>
+#include <ajg/synth/engines/tmpl/tags.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace tmpl {
 
 //
@@ -29,6 +29,6 @@ struct default_library : fusion::vector6
     , tmpl::variable_tag
     > {};
 
-}}} // namespace ajg::synthesis::tmpl
+}}} // namespace ajg::synth::tmpl
 
-#endif // AJG_SYNTHESIS_ENGINES_TMPL_LIBRARY_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_TMPL_LIBRARY_HPP_INCLUDED

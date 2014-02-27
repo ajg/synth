@@ -9,7 +9,7 @@
 
 int main(int const argc, char const *const argv[]) {
     bool success = true;
-    ajg::test_suite suite("synthesis");
+    ajg::test_suite suite("synth");
 
     if (argc <= 1) {
         // Run entire suite.

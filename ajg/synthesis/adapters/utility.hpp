@@ -3,19 +3,19 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ADAPTERS_UTILITY_HPP_INCLUDED
-#define AJG_SYNTHESIS_ADAPTERS_UTILITY_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_UTILITY_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_UTILITY_HPP_INCLUDED
 
 #include <utility>
 
-#include <ajg/synthesis/adapters/pair.hpp>
+#include <ajg/synth/adapters/pair.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 // Nothing here for now.
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_ADAPTERS_UTILITY_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_UTILITY_HPP_INCLUDED
 

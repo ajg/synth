@@ -3,17 +3,17 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
-#define AJG_SYNTHESIS_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
+#ifndef AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
 
 
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 
-#include <ajg/synthesis/adapters/adapter.hpp>
+#include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 //
 // specialization for boost::python::object
@@ -24,7 +24,7 @@ struct adapter<Traits, boost::python::object>
     : public abstract_adapter<Traits> {
 
     typedef boost::python::object object_type;
-    AJG_SYNTHESIS_ADAPTER(object_type)
+    AJG_SYNTH_ADAPTER(object_type)
     object_type adapted_;
 
   private:
@@ -97,6 +97,6 @@ struct adapter<Traits, boost::python::object>
     }
 };
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
+#endif // AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED

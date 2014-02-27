@@ -3,15 +3,15 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_ENGINES_SSI_VALUE_HPP_INCLUDED
-#define AJG_SYNTHESIS_ENGINES_SSI_VALUE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
 
 #include <boost/lexical_cast.hpp>
 
-#include <ajg/synthesis/value_facade.hpp>
+#include <ajg/synth/value_facade.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace ssi {
 
 template <class Char>
@@ -24,7 +24,7 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    AJG_SYNTHESIS_VALUE_CONSTRUCTORS(value, base_type, {})
+    AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type, {})
 
   public:
 
@@ -33,6 +33,6 @@ struct value : value_facade<Char, value<Char> > {
     }
 };
 
-}}} // namespace ajg::synthesis::ssi
+}}} // namespace ajg::synth::ssi
 
-#endif // AJG_SYNTHESIS_ENGINES_SSI_VALUE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED

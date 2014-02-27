@@ -5,31 +5,31 @@ from distutils.core import setup, Extension
 from glob import glob
 
 long_description='''
-Synthesis is a framework that provides C++ implementations of various template
+Synth is a framework that provides C++ implementations of various template
 engines, including Django, SSI and HTML::Template (TMPL). This library provides
-a simple binding to Synthesis in the form of a Template class.
+a simple binding to Synth in the form of a Template class.
 '''
 
 headers=(
-    glob('ajg/synthesis/*.hpp') +
-    glob('ajg/synthesis/*/*.hpp') +
-    glob('ajg/synthesis/*/*/*.hpp') +
-    glob('ajg/synthesis/*/*/*/*.hpp')
+    glob('ajg/synth/*.hpp') +
+    glob('ajg/synth/*/*.hpp') +
+    glob('ajg/synth/*/*/*.hpp') +
+    glob('ajg/synth/*/*/*/*.hpp')
 )
 
 setup(
-    name='synthesis',
+    name='synth',
     version = '0.1.1',
-    description='A Python binding to the Synthesis C++ Template Framework',
+    description='A Python binding to the Synth C++ Template Framework',
     long_description=long_description,
     author='Alvaro J. Genial',
     author_email='genial@alva.ro',
     license = "Boost Software License V1",
-    url="https://github.com/ajg/synthesis",
+    url="https://github.com/ajg/synth",
     ext_modules=[
         Extension(
-            'synthesis',
-            sources=['ajg/synthesis/bindings/python/module.cpp'],
+            'synth',
+            sources=['ajg/synth/bindings/python/module.cpp'],
             libraries=['boost_python'],
             include_dirs=['.'],
             language='c++',

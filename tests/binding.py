@@ -3,9 +3,9 @@
 ##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
-import synthesis
+import synth
 
-print('Loaded synthesis; version: ' + synthesis.version())
+print('Loaded synth; version: ' + synth.version())
 
 source = """
 
@@ -69,7 +69,7 @@ context = {
     'dict_empty': {},
     'dict_abc':   {'a': 'A', 'b': 'B', 'c': 'C'},
 }
-template = synthesis.Template(source, 'django')
+template = synth.Template(source, 'django')
 
 print(template.render_to_string(context))
 

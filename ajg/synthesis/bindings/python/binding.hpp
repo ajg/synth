@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
-#define AJG_SYNTHESIS_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
+#ifndef AJG_SYNTH_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
 
 #include <memory>
 #include <stdexcept>
@@ -14,17 +14,17 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ajg/synthesis/bindings/python/adapter.hpp>
+#include <ajg/synth/bindings/python/adapter.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 namespace python {
 
 namespace py = boost::python;
 
 inline char const* version()
 {
-   return BOOST_PP_STRINGIZE(AJG_SYNTHESIS_VERSION);
+   return BOOST_PP_STRINGIZE(AJG_SYNTH_VERSION);
 }
 
 template <class Char, class Django, class SSI, class TMPL>
@@ -125,6 +125,6 @@ struct binding {
     typename django_template_type::options_type django_options_;
 };
 
-}}} // namespace ajg::synthesis::python
+}}} // namespace ajg::synth::python
 
-#endif // AJG_SYNTHESIS_BINDINGS_PYTHON_BINDING_HPP_INCLUDED
+#endif // AJG_SYNTH_BINDINGS_PYTHON_BINDING_HPP_INCLUDED

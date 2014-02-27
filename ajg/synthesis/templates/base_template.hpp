@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTHESIS_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTHESIS_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED
+#define AJG_SYNTH_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED
 
 #include <map>
 #include <string>
@@ -19,10 +19,10 @@
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
 
-#include <ajg/synthesis/engines/exceptions.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
-namespace synthesis {
+namespace synth {
 
 using namespace boost;
 
@@ -140,7 +140,7 @@ struct base_template : noncopyable {
 };
 
 
-#if AJG_SYNTHESIS_OBSOLETE
+#if AJG_SYNTH_OBSOLETE
 
 template <class Char>
 std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
@@ -183,9 +183,9 @@ inline String read_stream
     return result;
 }
 
-#endif // AJG_SYNTHESIS_OBSOLETE
+#endif // AJG_SYNTH_OBSOLETE
 
 
-}} // namespace ajg::synthesis
+}} // namespace ajg::synth
 
-#endif // AJG_SYNTHESIS_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED
+#endif // AJG_SYNTH_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED

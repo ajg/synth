@@ -18,7 +18,7 @@ The `synthesis` codebase is mature and well-tested; the bindings are still a wor
 Motivation
 ----------
 
-Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, etc.)
+Synthesis blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, values, etc.)
 
 Dependencies
 ------------
@@ -185,8 +185,8 @@ Django Engine
 
 ### Options
 
- - `django::options::default_value` (`TEMPLATE_STRING_IF_INVALID`)
  - `django::options::autoescape`
+ - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
 
 SSI Engine
 ----------
@@ -208,7 +208,7 @@ TMPL Engine
 
 ### Tags
 
- - `tmpl::comment_tag` (Part of ctpp, not tmpl.)
+ - `tmpl::comment_tag` (Part of [`ctpp`](http://ctpp.havoc.ru/en/), not `tmpl`.)
  - `tmpl::if_tag`
  - `tmpl::include_tag`
  - `tmpl::loop_tag`
@@ -227,6 +227,7 @@ Future Work
  - `ruby` binding based on [Rice](http://rice.rubyforge.org/)
  - `go` binding based on [cgo](http://golang.org/cmd/cgo/)
  - `cheetah` engine
+ - `ctpp` engine
  - `stream_template`
  - `multi_engine`
  - `tribool` adapter

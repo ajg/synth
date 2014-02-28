@@ -234,6 +234,7 @@ Future Work
    * `lua` binding
    * `node` binding
    * `php` binding
+   * `c` binding
  - Inputs:
    * `json` input
    * `ini` input
@@ -248,7 +249,9 @@ Future Work
    * `c++11` type adapters
    * `c++14` type adapters
  - Templates:
+   * `descriptor_template`
    * `stream_template`
+   * Clean up and make `multi_template` public
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

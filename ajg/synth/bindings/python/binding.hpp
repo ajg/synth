@@ -35,6 +35,7 @@ struct binding : MultiTemplate {
     typedef typename base_type::boolean_type     boolean_type;
     typedef typename base_type::string_type      string_type;
     typedef typename base_type::directories_type directories_type;
+    typedef py::dict                             context_type;
 
     typedef py::init< string_type
                     , string_type
@@ -82,7 +83,7 @@ struct binding : MultiTemplate {
   public: // TODO: Replace (in c++11) with `friend MultiTemplate;`
 
     template <class Context>
-    inline static Context get_context(py::dict dictionary) {
+    inline static Context adapt_context(context_type const& dictionary) {
         Context context;
         py::list const items = dictionary.items();
 

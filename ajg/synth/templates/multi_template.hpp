@@ -67,15 +67,15 @@ struct multi_template {
     void render(stream_type& stream, Context const& context) const {
         if (django_template_) {
             return django_template_->render(stream,
-                X::template get_context<typename django_template_type::context_type>(context), django_options_);
+                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
         }
         else if (ssi_template_) {
             return ssi_template_->render(stream,
-                X::template get_context<typename ssi_template_type::context_type>(context), ssi_options_);
+                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
             return tmpl_template_->render(stream,
-                X::template get_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }
@@ -84,15 +84,15 @@ struct multi_template {
     string_type render_to_string(Context const& context) const {
         if (django_template_) {
             return django_template_->render_to_string(
-                X::template get_context<typename django_template_type::context_type>(context), django_options_);
+                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
         }
         else if (ssi_template_) {
             return ssi_template_->render_to_string(
-                X::template get_context<typename ssi_template_type::context_type>(context), ssi_options_);
+                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
             return tmpl_template_->render_to_string(
-                X::template get_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }
@@ -101,15 +101,15 @@ struct multi_template {
     void render_to_file(string_type const& filepath, Context const& context) const {
         if (django_template_) {
             return django_template_->render_to_file(filepath,
-                X::template get_context<typename django_template_type::context_type>(context), django_options_);
+                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
         }
         else if (ssi_template_) {
             return ssi_template_->render_to_file(filepath,
-                X::template get_context<typename ssi_template_type::context_type>(context), ssi_options_);
+                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
             return tmpl_template_->render_to_file(filepath,
-                X::template get_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }

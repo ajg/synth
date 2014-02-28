@@ -12,15 +12,16 @@
 BOOST_PYTHON_MODULE(synth)
 {
     using namespace boost::python;
-    typedef ajg::synth::python::binding<ajg::synth::detail::multi_template
+    namespace synth = ajg::synth;
+    typedef synth::python::binding<synth::detail::multi_template
         < char
-        , ajg::synth::django::engine<>
-        , ajg::synth::ssi::engine<>
-        , ajg::synth::tmpl::engine<>
+        , synth::django::engine<>
+        , synth::ssi::engine<>
+        , synth::tmpl::engine<>
         >
     > Template;
 
-    def("version", ajg::synth::python::version);
+    def("version", synth::python::version);
 
     class_<Template>("Template", Template::constructor_type())
         // .def("render", &Template::render)

@@ -39,6 +39,13 @@ if debug:
 else:
     env.Append(CPPFLAGS = ['-O3', '-DNDEBUG'])
 
+synth = env.Clone()
+synth.Program(
+    target = 'synth',
+    source = ['ajg/synth.cpp'],
+    LIBS   = ['boost_program_options'],
+)
+
 test = env.Clone()
 test.Program(
     target = 'test',

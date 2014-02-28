@@ -376,7 +376,7 @@ struct if_directive {
             else {
                 NO_ATTRIBUTES_IN(directive);
                 return AJG_CASE_OF(name, ((text("else"),  true))
-                                              ((text("endif"), false)));
+                                         ((text("endif"), false)));
             }
         }
 

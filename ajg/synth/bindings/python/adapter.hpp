@@ -34,11 +34,7 @@ struct adapter<Traits, boost::python::object>
   public:
 
     inline static string_type as_string(boost::python::object const& obj) {
-        boost::python::extract<string_type> const s((boost::python::str(obj)));
-        if (!s.check()) {
-            throw_exception(bad_method("str"));
-        }
-        return string_type(s);
+        return boost::python::extract<string_type>(boost::python::str(obj));
     }
 
     boolean_type test() const { return boolean_type(adapted_); }

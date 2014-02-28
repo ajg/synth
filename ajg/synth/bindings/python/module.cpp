@@ -23,6 +23,8 @@ BOOST_PYTHON_MODULE(synth)
     def("version", ajg::synth::python::version);
 
     class_<Template>("Template", Template::constructor_type())
+        // .def("render", &Template::render)
         .def("render_to_string", &Template::render_to_string)
+        .def("render_to_file", &Template::render_to_file)
     ;
 }

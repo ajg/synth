@@ -6,6 +6,8 @@
 #ifndef AJG_SYNTH_ENGINES_SSI_OPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_SSI_OPTIONS_HPP_INCLUDED
 
+#include <vector>
+
 #include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
@@ -14,18 +16,26 @@ namespace ssi {
 
 template <class String>
 struct options {
-    typedef String string_type;
+    typedef String                   string_type;
+    typedef std::vector<string_type> directories_type;
 
-    options()
-        : size_format(detail::text("bytes"))
-        , time_format(detail::text("%A, %d-%b-%Y %H:%M:%S %Z"))
-        , echo_message(detail::text("(none)"))
-        , error_message(detail::text("[an error occurred while processing this directive]")) {}
+    options( string_type      const& echo_message  = detail::text("(none)")
+           , directories_type const& directories   = directories_type(/*1, "."*/)
+           , string_type      const& size_format   = detail::text("bytes")
+           , string_type      const& time_format   = detail::text("%A, %d-%b-%Y %H:%M:%S %Z")
+           , string_type      const& error_message = detail::text("[an error occurred while processing this directive]")
+           )
+        : echo_message(echo_message)
+        , directories(directories)
+        , size_format(size_format)
+        , time_format(time_format)
+        , error_message(error_message) {}
 
-    string_type size_format;
-    string_type time_format;
-    string_type echo_message;
-    string_type error_message;
+    string_type      echo_message;
+    directories_type directories;
+    string_type      size_format;
+    string_type      time_format;
+    string_type      error_message;
 };
 
 }}} // namespace ajg::synth::ssi

@@ -56,8 +56,20 @@ struct binding : MultiTemplate {
            )
         : base_type(source, engine_name, autoescape, default_value, get_directories(directories)) {}
 
+    void render(py::object file, py::dict dictionary) const {
+        throw_exception(not_implemented("render"));
+        // TODO:
+        // streambuf stream(file, buffer_size=0); // (from python_streambuf.h)
+        // return base_type::template render<binding>(stream, dictionary);
+    }
+
     string_type render_to_string(py::dict dictionary) const {
         return base_type::template render_to_string<binding>(dictionary);
+    }
+
+    void render_to_file(py::str filepath, py::dict dictionary) const {
+        string_type const s = boost::python::extract<string_type>(filepath);
+        return base_type::template render_to_file<binding>(s, dictionary);
     }
 
   private:

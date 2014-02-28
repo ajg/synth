@@ -60,6 +60,9 @@ struct multi_template {
 
   protected:
 
+    // TODO: Support post-construction options (maybe using something like multi_options?)
+    //       e.g. Options const& options = django_options_, ssi_options_, tmpl_options_
+
     template <class X, class Context>
     void render(stream_type& stream, Context const& context) const {
         if (django_template_) {

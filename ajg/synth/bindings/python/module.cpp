@@ -7,16 +7,18 @@
 
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/bindings/python/binding.hpp>
+#include <ajg/synth/templates/multi_template.hpp>
 
 BOOST_PYTHON_MODULE(synth)
 {
     using namespace boost::python;
-    typedef ajg::synth::python::binding
-      < char
-      , ajg::synth::django::engine<>
-      , ajg::synth::ssi::engine<>
-      , ajg::synth::tmpl::engine<>
-      > Template;
+    typedef ajg::synth::python::binding<ajg::synth::detail::multi_template
+        < char
+        , ajg::synth::django::engine<>
+        , ajg::synth::ssi::engine<>
+        , ajg::synth::tmpl::engine<>
+        >
+    > Template;
 
     def("version", ajg::synth::python::version);
 

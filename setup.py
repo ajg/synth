@@ -19,7 +19,7 @@ headers=(
 
 setup(
     name='synth',
-    version = '0.1.1',
+    version = '0.2.0',
     description='A Python binding to the Synth C++ Template Framework',
     long_description=long_description,
     author='Alvaro J. Genial',

@@ -235,6 +235,7 @@ Future Work
    * `node` binding
    * `php` binding
    * `c` binding
+   * `haskell` binding
  - Inputs:
    * `json` input
    * `ini` input
@@ -257,9 +258,11 @@ Future Work
    * Move `engine`s to own namespace
    * Create `c++11`/`c++14` branch
      ~ Translate macros to variadic templates
+     ~ Replace `BOOST_FOREACH` with new `for` loop
    * Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
+     ~ Consider making `context`s top-level `value`s instead of `map`s
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
 
 License

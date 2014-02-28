@@ -55,6 +55,7 @@ Components
 ### Templates
 
  - `file_template`
+ - `multi_template`
  - `string_template`
 
 ### Adapters

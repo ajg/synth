@@ -348,6 +348,7 @@ Future Work
    * Create `c++11`/`c++14` branch
      ~ Translate macros to variadic templates
      ~ Replace `BOOST_FOREACH` with new `for` loop
+     ~ Remove needlessly configurable (especially defaulted) template parameters
    * Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s

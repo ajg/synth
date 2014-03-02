@@ -8,6 +8,7 @@
 
 #include <string>
 
+#include <boost/mpl/identity.hpp>
 #include <boost/utility/base_from_member.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <ajg/synth/templates/base_template.hpp>

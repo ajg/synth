@@ -19,6 +19,7 @@
 #endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
+#include <boost/mpl/identity.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
@@ -115,6 +116,11 @@ struct file_template
 
     filepath_type const filepath_;
 };
+
+template < class Char
+         , class Engine
+         >
+struct file_template_identity : boost::mpl::identity<file_template<Char, Engine> > {};
 
 }} // namespace ajg::synth
 

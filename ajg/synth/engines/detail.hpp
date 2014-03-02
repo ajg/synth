@@ -1059,5 +1059,3 @@ struct pipe : noncopyable {
 }}} // namespace ajg::synth::detail
 
 #endif // AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
-
-

@@ -18,12 +18,98 @@ Beta, approaching a first full release.
 Motivation
 ----------
 
-Synth blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted; and (c) the templates to do so. The name is an allusion to this process, which generates new entities (strings, streams, files, values, etc.)
+Synth blurs the line between compile-time and runtime, and it does so by blending three worlds: (a) the static C++ type system; (b) the dynamic values that need to be manipulated and formatted, including those from other languages; and (c) the templates to do so. The name is an allusion to this synthesis process, which combines values to generate new ones (streams, files, strings, numbers, etc.)
+
+Examples
+--------
+
+### Command-line
+
+```shell
+echo '{"user": "Dolph Lundgren"}' > 'ctx.json'
+echo 'Howdy, {{ user }}!' > 'tpl.txt'
+
+cat tpl.txt | synth -c ctx.json
+```
+
+### Python
+
+```python
+import synth
+
+def simple_tmpl_example():
+    tpl = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
+    ctx = {'user': 'Dolph Lundgren'}
+
+    tpl.render_to_file("greeting.txt", ctx);
+    // or, e.g.:
+    return tpl.render_to_string(ctx)
+```
+
+### C++
+
+```c++
+#include <map>
+#include <string>
+#include <iostream>
+
+#include <ajg/synth.hpp>
+
+std::string simple_ssi_example() {
+    using namespace ajg::synth;
+
+    typedef string_template<char, ssi::engine<> > template_type;
+    template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
+    template_type::context_type ctx;
+    ctx["user"] = "Dolph Lundgren";
+
+    tpl.render(std::cout);
+    // or, e.g.:
+    tpl.render_to_file("greeting.txt", ctx);
+    // or, e.g.:
+    return tpl.render_to_string(ctx);
+}
+```
+
+Reference
+---------
+
+### Command-line
+
+```
+synth [FLAGS...]
+  -h [ --help ]             print help message
+  -v [ --version ]          print library version
+  -c [ --context ] file     the data: *.{ini,json,xml}
+  -e [ --engine ] name      template engine: {django,ssi,tmpl}
+  -a [ --autoescape ] bool  automatically escape values (default: 'true')
+  -d [ --directories ] path template lookup directories (default: '.')
+  -r [ --replacement ] text replaces missing values (default: '')
+```
+
+Installation
+------------
+
+### From source (see [dependencies](#dependencies)):
+
+1. Get the source:
+
+    git clone https://github.com/ajg/synth.git && cd synth
+
+2. [Optional] Build the command-line program:
+
+    scons synth # Add debug=1 to generate debugging symbols & disable optimization.
+
+3. [Optional] Build the Python module:
+
+    python setup.py install
+
+(Pre-built binaries are [in the works](#future-work).)
 
 Dependencies
 ------------
 
-Building `synth` requires:
+Building `synth` from source requires:
 
  - A modern C++ compiler
  - [Boost](http://boost.org)
@@ -212,7 +298,7 @@ TMPL Engine
 
 ### Tags
 
- - `tmpl::comment_tag` (Part of [`ctpp`](http://ctpp.havoc.ru/en/))
+ - `tmpl::comment_tag` (Technically, part of [`ctpp`](http://ctpp.havoc.ru/en/))
  - `tmpl::if_tag`
  - `tmpl::include_tag`
  - `tmpl::loop_tag`
@@ -223,10 +309,11 @@ Future Work
 -----------
 
  - Core:
-   * Command-line utility
-   * Documentation
+   * Expand documentation
  - Distribution:
    * [Homebrew](http://brew.sh/) formula
+   * Pre-built OS X binaries
+   * Pre-built Windows binaries
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Django template loaders
    * Create Visual Studio solution & project using Scons
@@ -238,6 +325,7 @@ Future Work
    * `php` binding
    * `c` binding
    * `haskell` binding
+   * Re-implement command-line utility as a binding
  - Inputs:
    * `json` input
    * `ini` input
@@ -253,7 +341,6 @@ Future Work
    * `c++14` type adapters
  - Templates:
    * `descriptor_template`
-   * `stream_template`
    * Clean up and make `multi_template` public
  - Refactoring:
    * Move `*_template`s to own namespace
@@ -266,6 +353,7 @@ Future Work
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
      ~ Consider making `context`s top-level `value`s instead of `map`s
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
+   * Hygienicize and prefix all macros (and #undef private ones after usage)
 
 License
 -------

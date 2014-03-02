@@ -71,6 +71,7 @@ Components
  - `numeric`
  - `optional`
  - `pair`
+ - `ptree`
  - `pointer`
  - `ref`
  - `scoped_array`

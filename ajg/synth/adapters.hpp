@@ -9,6 +9,7 @@
 #include <ajg/synth/adapters/ref.hpp>
 #include <ajg/synth/adapters/bool.hpp>
 #include <ajg/synth/adapters/array.hpp>
+#include <ajg/synth/adapters/ptree.hpp>
 #include <ajg/synth/adapters/string.hpp>
 #include <ajg/synth/adapters/memory.hpp>
 #include <ajg/synth/adapters/pointer.hpp>

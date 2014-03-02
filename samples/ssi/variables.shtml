@@ -1,1 +1,3 @@
-<!--#echo var="foo" --><!--#echo var="bar" --><!--#echo var="qux" -->
+foo: <!--#echo var="foo" -->
+bar: <!--#echo var="bar" -->
+qux: <!--#echo var="qux" -->

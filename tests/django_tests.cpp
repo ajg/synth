@@ -6,7 +6,7 @@
 #include <string>
 
 #include <ajg/testing.hpp>
-#include <ajg/synth/template.hpp>
+#include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/django.hpp>
 

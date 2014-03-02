@@ -22,14 +22,18 @@ namespace ajg {
 namespace synth {
 namespace command_line {
 
-#define AJG_ARG(name, type) po::value<type##_type>()->value_name(name)
+#if (BOOST_VERSION > 105000) // 1.50+
+    #define AJG_ARG(name, type) po::value<type##_type>()->value_name(name)
+#else
+    #define AJG_ARG(name, type) po::value<type##_type>()
+#endif
 
 template <class Binding>
 struct command {
 
   public:
 
-    typedef Binding                                   binding_type;
+    typedef Binding                                 binding_type;
     typedef typename binding_type::char_type        char_type;
     typedef typename binding_type::boolean_type     boolean_type;
     typedef typename binding_type::string_type      string_type;

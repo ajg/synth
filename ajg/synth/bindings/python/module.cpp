@@ -14,6 +14,7 @@ BOOST_PYTHON_MODULE(synth)
 {
     using namespace boost::python;
     namespace synth = ajg::synth;
+
     typedef synth::python::binding<synth::detail::multi_template
         < char
         , synth::string_template_identity

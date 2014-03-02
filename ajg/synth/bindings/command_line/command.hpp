@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_COMMAND_HPP_INCLUDED
-#define AJG_SYNTH_COMMAND_HPP_INCLUDED
+#ifndef AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
 
 #include <string>
 #include <vector>
@@ -20,25 +20,26 @@
 
 namespace ajg {
 namespace synth {
+namespace command_line {
 
 #define AJG_ARG(name, type) po::value<type##_type>()->value_name(name)
 
-template <class Processor>
+template <class Binding>
 struct command {
 
   public:
 
-    typedef Processor                                 processor_type;
-    typedef typename processor_type::char_type        char_type;
-    typedef typename processor_type::boolean_type     boolean_type;
-    typedef typename processor_type::string_type      string_type;
-    typedef typename processor_type::stream_type      stream_type;
-    typedef typename processor_type::context_type     context_type;
-    typedef typename processor_type::directories_type dirs_type;
+    typedef Binding                                   binding_type;
+    typedef typename binding_type::char_type        char_type;
+    typedef typename binding_type::boolean_type     boolean_type;
+    typedef typename binding_type::string_type      string_type;
+    typedef typename binding_type::stream_type      stream_type;
+    typedef typename binding_type::context_type     context_type;
+    typedef typename binding_type::directories_type dirs_type;
 
   public:
 
-    static void process(int const argc, char_type const *const argv[]) {
+    static void run(int const argc, char_type const *const argv[]) {
         namespace po = boost::program_options;
         namespace pt = boost::property_tree;
 
@@ -72,7 +73,7 @@ struct command {
             throw_exception(std::invalid_argument("missing engine name"));
         }
 
-        processor_type const processor
+        binding_type const binding
             ( std::cin >> std::noskipws
             , flags["engine"].as<string_type>()
             , flags.count("autoescape")  ? flags["autoescape"].as<boolean_type>() : boolean_type(true)
@@ -100,13 +101,13 @@ struct command {
             }
         }
 
-        processor.render(std::cout, context);
+        binding.render(std::cout, context);
     }
 };
 
 #undef AJG_ARG
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::command_line
 
-#endif // AJG_SYNTH_COMMAND_HPP_INCLUDED
+#endif // AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
 

@@ -100,7 +100,7 @@ Installation
 
     scons synth # Add debug=1 to generate debugging symbols & disable optimization.
 
-3. [Optional] Build the Python module:
+3. [Optional] Build (and install) the Python module:
 
     python setup.py install
 
@@ -136,6 +136,7 @@ Components
 
 ### Bindings
 
+ - `command_line`
  - `python`
 
 ### Templates
@@ -172,6 +173,12 @@ Components
  - `utility`
  - `variant`
  - `vector`
+
+### Formats
+
+ - `ini`
+ - `json`
+ - `xml`
 
 ### Extesibility
 
@@ -325,11 +332,6 @@ Future Work
    * `php` binding
    * `c` binding
    * `haskell` binding
-   * Re-implement command-line utility as a binding
- - Inputs:
-   * `json` input
-   * `ini` input
-   * `xml` input
  - Engines:
    * `cheetah` engine
    * `ctpp` engine

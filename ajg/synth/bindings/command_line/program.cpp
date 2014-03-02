@@ -4,32 +4,38 @@
 //  http://www.boost.org/LICENSE_1_0.txt).
 
 #include <cstdlib>
+#include <iostream>
 
-#include <ajg/synth.hpp>
-#include <ajg/synth/command.hpp>
-#include <ajg/synth/processor.hpp>
+#include <ajg/synth/engines.hpp>
+#include <ajg/synth/bindings/command_line/command.hpp>
+#include <ajg/synth/bindings/command_line/binding.hpp>
+#include <ajg/synth/templates/multi_template.hpp>
+#include <ajg/synth/templates/stream_template.hpp>
+
 
 namespace {
 
 namespace synth = ajg::synth;
 
-typedef synth::processor<synth::detail::multi_template
+typedef synth::command_line::binding<synth::detail::multi_template
     < char
     , synth::stream_template_identity
     , synth::django::engine<>
     , synth::ssi::engine<>
     , synth::tmpl::engine<>
     >
-> processor_type;
+> binding_type;
+
+typedef synth::command_line::command<binding_type> command_type;
 
 } // namespace
 
 namespace boost {
 namespace property_tree {
 
-processor_type::stream_type& operator <<( processor_type::stream_type&        output
-                                        , processor_type::context_type const& context
-                                        ) {
+binding_type::stream_type& operator <<( binding_type::stream_type&        output
+                                      , binding_type::context_type const& context
+                                      ) {
     return output << "[context]";
 }
 
@@ -37,7 +43,7 @@ processor_type::stream_type& operator <<( processor_type::stream_type&        ou
 
 int main(int const argc, char const *const argv[])
 try {
-    ajg::synth::command<processor_type>::process(argc, argv);
+    command_type::run(argc, argv);
     return EXIT_SUCCESS;
 } catch (std::exception const& e) {
     std::cerr << "synth: " << e.what() << std::endl;

@@ -6,7 +6,7 @@
 #ifndef AJG_SYNTH_HPP_INCLUDED
 #define AJG_SYNTH_HPP_INCLUDED
 
-#include <ajg/synth/template.hpp>
+#include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines.hpp>
 

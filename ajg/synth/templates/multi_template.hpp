@@ -12,12 +12,14 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <ajg/synth/engines/detail.hpp> // For AJG_UNREACHABLE
+
 namespace ajg {
 namespace synth {
 namespace detail {
 
 // TODO: Replace with multi_engine.
-template <class Char, class Django, class SSI, class TMPL>
+template <class Char, template <class C, class E> class Template, class Django, class SSI, class TMPL>
 struct multi_template {
 
   public:
@@ -27,9 +29,9 @@ struct multi_template {
     typedef SSI    ssi_engine_type;
     typedef TMPL   tmpl_engine_type;
 
-    typedef string_template<char_type, django_engine_type> django_template_type;
-    typedef string_template<char_type, ssi_engine_type>    ssi_template_type;
-    typedef string_template<char_type, tmpl_engine_type>   tmpl_template_type;
+    typedef typename Template<char_type, django_engine_type>::type django_template_type;
+    typedef typename Template<char_type, ssi_engine_type>::type    ssi_template_type;
+    typedef typename Template<char_type, tmpl_engine_type>::type   tmpl_template_type;
 
     typedef bool                          boolean_type;
     typedef std::basic_string<char_type>  string_type;
@@ -40,7 +42,8 @@ struct multi_template {
 
   public:
 
-    multi_template( string_type      const& source
+    template <class Source>
+    multi_template( Source&                 source
                   , string_type      const& engine_name
                   , boolean_type     const  autoescape
                   , string_type      const& default_value

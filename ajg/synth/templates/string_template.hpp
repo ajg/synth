@@ -38,18 +38,23 @@ struct string_template
   public:
 
     string_template(string_type const& string)
-        : base_from_member<String>(string)
+        : base_from_member<string_type>(string)
         , base_type(this->member.begin(), this->member.end()) {}
 
-    template <class Iterator_>
-    string_template(Iterator_ const& begin, Iterator_ const& end)
-        : base_from_member<String>(string_type(begin, end))
+    template <class I>
+    string_template(I const& begin, I const& end)
+        : base_from_member<string_type>(string_type(begin, end))
         , base_type(this->member.begin(), this->member.end()) {}
 
   public:
 
     string_type const& str() const { return this->member(); }
 };
+
+template < class Char
+         , class Engine
+         >
+struct string_template_identity : boost::mpl::identity<string_template<Char, Engine> > {};
 
 }} // namespace ajg::synth
 

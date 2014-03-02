@@ -56,6 +56,7 @@ Components
 
  - `file_template`
  - `multi_template`
+ - `stream_template`
  - `string_template`
 
 ### Adapters

@@ -25,7 +25,7 @@
 #include <boost/xpressive/regex_algorithms.hpp>
 #include <boost/xpressive/regex_primitives.hpp>
 
-#include <ajg/synth/template.hpp>
+#include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 

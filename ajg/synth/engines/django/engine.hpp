@@ -26,7 +26,7 @@
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
-#include <ajg/synth/template.hpp>
+#include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_definition.hpp>

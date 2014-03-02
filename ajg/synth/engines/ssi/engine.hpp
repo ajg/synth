@@ -21,7 +21,7 @@
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
 
-#include <ajg/synth/template.hpp>
+#include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_definition.hpp>

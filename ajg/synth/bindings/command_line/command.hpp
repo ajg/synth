@@ -18,6 +18,8 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <ajg/synth/engines/exceptions.hpp>
+
 namespace ajg {
 namespace synth {
 namespace command_line {
@@ -88,16 +90,23 @@ struct command {
         context_type context;
 
         if (flags.count("context")) {
-            string_type const& filename = flags["context"].as<string_type>();
-            std::basic_ifstream<char_type> file(filename);
+            string_type const& path = flags["context"].as<string_type>();
+            std::basic_ifstream<char_type> file;
 
-            if (boost::algorithm::ends_with(filename, synth::detail::text(".ini"))) {
+            try {
+                file.open(path.c_str(), std::ios::binary);
+            }
+            catch (std::exception const& e) {
+                throw_exception(file_error(path, "read", e.what()));
+            }
+
+            if (boost::algorithm::ends_with(path, synth::detail::text(".ini"))) {
                 pt::read_ini(file, context);
             }
-            else if (boost::algorithm::ends_with(filename, synth::detail::text(".json"))) {
+            else if (boost::algorithm::ends_with(path, synth::detail::text(".json"))) {
                 pt::read_json(file, context);
             }
-            else if (boost::algorithm::ends_with(filename, synth::detail::text(".xml"))) {
+            else if (boost::algorithm::ends_with(path, synth::detail::text(".xml"))) {
                 pt::read_xml(file, context);
             }
             else {

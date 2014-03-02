@@ -97,6 +97,11 @@ struct stream_template
   */
 };
 
+template < class Char
+         , class Engine
+         >
+struct stream_template_identity : boost::mpl::identity<stream_template<Char, Engine> > {};
+
 }} // namespace ajg::synth
 
 #endif // AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED

@@ -26,3 +26,6 @@ Release/
 
 # Python
 /dist/
+
+# Misc.
+SCRATCH

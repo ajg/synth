@@ -104,8 +104,7 @@ struct abstract_adapter {
     }
 
     void list( ostream_type&      out
-             , string_type const& delimiter
-                  = lexical_cast<string_type>(", ")
+             , string_type const& delimiter = lexical_cast<string_type>(", ")
              ) const {
         size_type i = 0;
 

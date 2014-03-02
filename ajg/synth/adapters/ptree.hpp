@@ -29,7 +29,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
 
     boolean_type test() const {
         if (adapted_.empty()) {
-            return boolean_type(adapted_.data());
+            return boolean_type(value_type(adapted_.data()));
         }
         else {
             return true;

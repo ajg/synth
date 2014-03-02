@@ -3,19 +3,24 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_PROCESSOR_HPP_INCLUDED
-#define AJG_SYNTH_PROCESSOR_HPP_INCLUDED
+#ifndef AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
 
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <ajg/synth/adapters/map.hpp>
+#include <ajg/synth/adapters/ptree.hpp>
+#include <ajg/synth/adapters/string.hpp>
+
 namespace ajg {
 namespace synth {
+namespace command_line {
 
 namespace pt = boost::property_tree;
 
 template <class MultiTemplate>
-struct processor : MultiTemplate {
+struct binding : MultiTemplate {
 
   public:
 
@@ -29,12 +34,12 @@ struct processor : MultiTemplate {
   public:
 
     template <class Source>
-    processor( Source&                 source
-             , string_type      const& engine_name
-             , boolean_type     const  autoescape
-             , string_type      const& default_value
-             , directories_type const& directories
-             ) : base_type(source, engine_name, autoescape, default_value, directories) {}
+    binding( Source&                 source
+           , string_type      const& engine_name
+           , boolean_type     const  autoescape
+           , string_type      const& default_value
+           , directories_type const& directories
+           ) : base_type(source, engine_name, autoescape, default_value, directories) {}
 
   public:
 
@@ -42,20 +47,20 @@ struct processor : MultiTemplate {
                , context_type const& context = context_type()
             // , options_type const& options = options_type()
                ) const {
-        return base_type::template render<processor>(stream, context);
+        return base_type::template render<binding>(stream, context);
     }
 
     string_type render_to_string( context_type const& context = context_type()
                              // , options_type const& options = options_type()
                                 ) const {
-        return base_type::template render_to_string<processor>(context);
+        return base_type::template render_to_string<binding>(context);
     }
 
     void render_to_file( string_type  const& filepath
                        , context_type const& context = context_type()
                     // , options_type const& options = options_type()
                        ) const {
-        return base_type::template render_to_file<processor>(filepath, context);
+        return base_type::template render_to_file<binding>(filepath, context);
     }
 
   public: // TODO: Replace (in c++11) with `friend MultiTemplate;`
@@ -72,7 +77,7 @@ struct processor : MultiTemplate {
     }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::command_line
 
-#endif // AJG_SYNTH_PROCESSOR_HPP_INCLUDED
+#endif // AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
 

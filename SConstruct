@@ -39,22 +39,22 @@ if debug:
 else:
     env.Append(CPPFLAGS = ['-O3', '-DNDEBUG'])
 
-synth = env.Clone()
-synth.Program(
-    target = 'synth',
-    source = ['ajg/synth.cpp'],
-    LIBS   = ['boost_program_options'],
-)
-
 test = env.Clone()
 test.Program(
     target = 'test',
     source = ['tests/test.cpp'] + Glob('tests/*_tests.cpp'),
 )
 
-python_synth = env.Clone()
-python_synth.LoadableModule(
-    target    = 'synth.so',
+command_line = env.Clone()
+command_line.Program(
+    target = 'synth',
+    source = ['ajg/synth/bindings/command_line/program.cpp'],
+    LIBS   = ['boost_program_options'],
+)
+
+python = env.Clone()
+python.LoadableModule(
+    target    = 'python-synth.so',
     source    = ['ajg/synth/bindings/python/module.cpp'],
     CPPPATH   = ['.', sysconfig.get_python_inc()],
     LIBPATH   = [sysconfig.get_config_var('LIBDIR')],

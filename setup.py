@@ -10,6 +10,7 @@ engines, including Django, SSI and HTML::Template (TMPL). This library provides
 a simple binding to Synth in the form of a Template class.
 '''
 
+# TODO: Find a more elegant way to do this:
 headers=(
     glob('ajg/synth/*.hpp') +
     glob('ajg/synth/*/*.hpp') +
@@ -19,7 +20,7 @@ headers=(
 
 setup(
     name='synth',
-    version = '0.5.0',
+    version = '0.6.0',
     description='A Python binding to the Synth C++ Template Framework',
     long_description=long_description,
     author='Alvaro J. Genial',

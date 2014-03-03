@@ -106,6 +106,10 @@ Installation
 
 (Pre-built binaries are [in the works](#future-work).)
 
+### Using `pip` (assuming you have Boost installed already—see [dependencies](#dependencies)):
+
+    pip install synth
+
 Dependencies
 ------------
 

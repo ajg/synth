@@ -102,19 +102,19 @@ Synth is known to compile with:
 
 ### Installing Boost
 
- - On OS X, with Homebrew:
+ - On OS X, using Homebrew:
 
         brew install boost --build-from-source
 
- - With Apt, typically on Debian or Ubuntu:
+ - Using Apt, typically on Debian or Ubuntu:
 
         sudo apt-get install libboost-all-dev
 
- - With Yum, typically on Fedora or RHEL (untested):
+ - Using Yum, typically on Fedora or RHEL (untested):
 
         sudo yum install boost-devel
 
- - On Windows, pick a suitable version from here:
+ - On Windows, download a suitable version from here:
 
         http://sourceforge.net/projects/boost/files/boost-binaries/
 
@@ -141,10 +141,9 @@ Installation
 
 ### Using Pip:
 
-(Assuming you have Boost installed already—see [dependencies](#dependencies))
+Install [Boost](#installing-boost), then:
 
     pip install synth
-
 
 Components
 ----------
@@ -227,7 +226,8 @@ Django Engine
  - `django::ifequal_tag`
  - `django::ifnotequal_tag`
  - `django::include_tag`
- - `django::load_tag` (TODO)
+ - `django::load_tag`
+ - `django::load_from_tag`
  - `django::now_tag`
  - `django::regroup_tag` (TODO)
  - `django::spaceless_tag`

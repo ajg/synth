@@ -8,6 +8,8 @@ import synth
 print('Loaded synth; version: ' + synth.version())
 
 source = """
+{% load foo bar qux %}
+{% load x y z from some.package %}
 
 True:   {{ True }}; {% if True %} GOOD {% else %} BAD {% endif %}
 False:  {{ False }}; {% if False %} BAD {% else %} GOOD {% endif %}

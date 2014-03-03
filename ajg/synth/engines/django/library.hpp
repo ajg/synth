@@ -21,7 +21,7 @@ namespace django {
 // default_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_tags : fusion::vector24
+struct default_tags : fusion::vector26
     < django::autoescape_tag
     , django::block_tag
     , django::comment_tag
@@ -38,7 +38,8 @@ struct default_tags : fusion::vector24
     , django::ifequal_tag
     , django::ifnotequal_tag
     , django::include_tag
- // , django::load_tag
+    , django::load_tag
+    , django::load_from_tag
     , django::now_tag
  // , django::regroup_tag
     , django::spaceless_tag

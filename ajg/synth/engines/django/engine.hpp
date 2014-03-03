@@ -107,6 +107,9 @@ struct definition : base_definition< BidirectionalIterator
         identifier
             = (alpha | '_') >> *_w
             ;
+        package
+            = identifier >> *('.' >> identifier)
+            ;
         none_literal
             = as_xpr("None")
             ;
@@ -562,6 +565,24 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
+    void load_library( context_type const& context
+                     , options_type&       options
+                     , string_type  const& library
+                     ) const {
+        AJG_PRINT("load_library1");
+        AJG_DUMP(library);
+    }
+
+    void load_library( context_type             const& context
+                     , options_type&                   options
+                     , string_type              const& library
+                     , std::vector<string_type> const& names
+                     ) const {
+        AJG_PRINT("load_library2");
+        AJG_DUMP(library);
+        AJG_DUMP(value_type(names));
+    }
+
   private:
 
     struct process_filter {
@@ -606,7 +627,7 @@ struct definition : base_definition< BidirectionalIterator
   public:
 
     regex_type tag, text, block, skipper, nothing;
-    regex_type identifier, filter, pipe;
+    regex_type identifier, package, filter, pipe;
     regex_type chain, subscription, attribution;
     regex_type unary_operator, binary_operator;
     regex_type unary_expression, binary_expression;

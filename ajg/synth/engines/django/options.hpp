@@ -9,6 +9,8 @@
 #include <map>
 #include <vector>
 
+#include <boost/function.hpp>
+
 #include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
@@ -30,10 +32,18 @@ struct options {
     typedef typename value_type::boolean_type  boolean_type;
     typedef typename value_type::size_type     size_type;
     typedef std::vector<string_type>           directories_type;
+    typedef std::vector<value_type>            array_type;
+
+    typedef void (tag_fn_type)(); // TODO: Figure out what the signature should be.
+    typedef value_type (filter_fn_type)(value_type, array_type);
+    typedef boost::function<tag_fn_type>       tag_type;
+    typedef boost::function<filter_fn_type>    filter_type;
 
     boolean_type                        autoescape;
     value_type                          default_value;
     directories_type                    directories;
+    std::map<string_type, tag_type>     tags;
+    std::map<string_type, filter_type>  filters;
     std::map<string_type, string_type>* blocks;
     std::map<iterator_type, size_type>  cycles;
     std::map<iterator_type, value_type> registry;
@@ -45,6 +55,8 @@ struct options {
         : autoescape(autoescape)
         , default_value(default_value)
         , directories(directories)
+        , tags()
+        , filters()
         , blocks(0) {}
 
     template <class I>
@@ -52,6 +64,8 @@ struct options {
         : autoescape(that.autoescape)
         , default_value(that.default_value)
         , directories(that.directories)
+        , tags(that.tags)
+        , filters(that.filters)
         , blocks(that.blocks) {}
         // cycles?, registry?
 };

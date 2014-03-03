@@ -193,11 +193,11 @@ unit_test(loop __counter__ variable) {
 
 unit_test(file template) {
     file_template t("samples/tmpl/variables.tmpl");
-    ensure_equals(t.render_to_string(context), "ABC");
+    ensure_equals(t.render_to_string(context), "A\nB\nC\n");
 }}}
 
 unit_test(include tag) {
     file_template t("samples/tmpl/example.tmpl");
     ensure_equals(t.render_to_string(context),
-        "============\nABC|\nABC\n============\n");
+        "============\nA\nB\nC\n|\nA\nB\nC\n\n============\n");
 }}}

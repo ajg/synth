@@ -94,21 +94,21 @@ Installation
 
 1. Get the source:
 
-    git clone https://github.com/ajg/synth.git && cd synth
+    `git clone https://github.com/ajg/synth.git && cd synth`
 
 2. [Optional] Build the command-line program:
 
-    scons synth # Add debug=1 to generate debugging symbols & disable optimization.
+    `scons synth # Add debug=1 to generate debugging symbols & disable optimization.`
 
 3. [Optional] Build (and install) the Python module:
 
-    python setup.py install
+    `python setup.py install`
 
 (Pre-built binaries are [in the works](#future-work).)
 
-### Using `pip` (assuming you have Boost installed already—see [dependencies](#dependencies)):
+### Using Pip (assuming you have Boost installed already—see [dependencies](#dependencies)):
 
-    pip install synth
+    `pip install synth`
 
 Dependencies
 ------------

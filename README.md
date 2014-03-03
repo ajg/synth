@@ -29,7 +29,7 @@ Examples
 echo '{"user": "Dolph Lundgren"}' > 'ctx.json'
 echo 'Howdy, {{ user }}!' > 'tpl.txt'
 
-cat tpl.txt | synth -c ctx.json
+cat tpl.txt | synth -e django -c ctx.json
 ```
 
 ### Python

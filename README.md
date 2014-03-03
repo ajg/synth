@@ -117,7 +117,7 @@ Dependencies
 
 Building `synth` from source requires:
 
- - A modern C++ compiler
+ - A modern C++ compiler (`c++11` support is *not* required.)
  - [Boost](http://boost.org)
  - [SCons](http://scons.org)
 
@@ -348,7 +348,6 @@ Future Work
    * `multi_engine`
  - Adapters:
    * `tribool` adapter
-   * `property_tree` adapter
    * `c++11` type adapters
    * `c++14` type adapters
  - Templates:

@@ -41,7 +41,7 @@ def simple_tmpl_example():
     tpl = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
     ctx = {'user': 'Dolph Lundgren'}
 
-    tpl.render_to_file("greeting.txt", ctx);
+    tpl.render_to_file("greeting.txt", ctx)
     # or, e.g.:
     return tpl.render_to_string(ctx)
 ```

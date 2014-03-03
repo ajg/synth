@@ -42,7 +42,7 @@ def simple_tmpl_example():
     ctx = {'user': 'Dolph Lundgren'}
 
     tpl.render_to_file("greeting.txt", ctx);
-    // or, e.g.:
+    # or, e.g.:
     return tpl.render_to_string(ctx)
 ```
 

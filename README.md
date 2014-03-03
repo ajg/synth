@@ -76,33 +76,66 @@ Reference
 
 ### Command-line
 
-```
-synth [FLAGS...]
-  -h [ --help ]             print help message
-  -v [ --version ]          print library version
-  -c [ --context ] file     the data: *.{ini,json,xml}
-  -e [ --engine ] name      template engine: {django,ssi,tmpl}
-  -a [ --autoescape ] bool  automatically escape values (default: 'true')
-  -d [ --directories ] path template lookup directories (default: '.')
-  -r [ --replacement ] text replaces missing values (default: '')
-```
+    synth [FLAGS...]
+      -h [ --help ]             print help message
+      -v [ --version ]          print library version
+      -c [ --context ] file     the data: *.{ini,json,xml}
+      -e [ --engine ] name      template engine: {django,ssi,tmpl}
+      -a [ --autoescape ] bool  automatically escape values (default: 'true')
+      -d [ --directories ] path template lookup directories (default: '.')
+      -r [ --replacement ] text replaces missing values (default: '')
+
+Dependencies
+------------
+
+Building `synth` from source requires:
+
+ - [Boost](http://boost.org)
+ - [SCons](http://scons.org)
+ - A modern C++ compiler (`c++11` support is not required.)
+
+Synth is known to compile with:
+
+ - `g++` versions `4.2.1` & `4.6.3`
+ - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
+ - `boost` versions `1.42`, `1.46` & `1.55`
+
+### Installing Boost
+
+ - On OS X, with Homebrew:
+
+        brew install boost --build-from-source
+
+ - With Apt, typically on Debian or Ubuntu:
+
+        sudo apt-get install libboost-all-dev
+
+ - With Yum, typically on Fedora or RHEL (untested):
+
+        sudo yum install boost-devel
+
+ - On Windows, pick a suitable version from here:
+
+        http://sourceforge.net/projects/boost/files/boost-binaries/
 
 Installation
 ------------
 
-### From source (see [dependencies](#dependencies)):
+### From source:
 
-1. Get the source:
+ 1. Install the [dependencies](#dependencies).
 
-    `git clone https://github.com/ajg/synth.git && cd synth`
+ 2. Get the source:
 
-2. [Optional] Build the command-line program:
+        git clone https://github.com/ajg/synth.git && cd synth
 
-    `scons synth # Add debug=1 to generate debugging symbols & disable optimization.`
+ 3. [Optional] Build the command-line program:
 
-3. [Optional] Build (and install) the Python module:
+        scons synth # Add debug=1 to generate debugging symbols & disable optimization.
 
-    `python setup.py install`
+ 4. [Optional] Build (and install) the Python module:
+
+        python setup.py install
 
 (Pre-built binaries are [in the works](#future-work).)
 
@@ -112,30 +145,6 @@ Installation
 
     pip install synth
 
-Dependencies
-------------
-
-Building `synth` from source requires:
-
- - A modern C++ compiler (`c++11` support is *not* required.)
- - [Boost](http://boost.org)
- - [SCons](http://scons.org)
-
-It is known to compile with:
-
- - `g++` versions `4.2.1` & `4.6.3`
- - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
- - `boost` versions `1.42`, `1.46` & `1.55`
-
-*Note*: to use the `python` binding, Boost.Python is required.
-
- * If you're using Homebrew on OS X, use the command:
-
-    brew install boost --build-from-source
-
- * If you're using a Debian/Ubuntu-ish system, use the following:
-
-    sudo apt-get install libboost-all-dev
 
 Components
 ----------
@@ -368,6 +377,18 @@ Future Work
      + Consider making `context`s top-level `value`s instead of `map`s
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
    * Hygienicize and prefix all macros (and #undef private ones after usage)
+
+Frequently Asked Questions (FAQs)
+---------------------------------
+
+ - Q: Why does installation fail with the following error?
+
+        #include <boost/python.hpp>
+                ^
+        1 error generated.
+        error: command 'cc' failed with exit status 1
+
+   A: You need to [install Boost.Python](#installing-boost) first.
 
 License
 -------

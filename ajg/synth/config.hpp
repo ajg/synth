@@ -8,7 +8,7 @@
 
 #include <boost/preprocessor/stringize.hpp>
 
-#define AJG_SYNTH_VERSION        0.5.0
+#define AJG_SYNTH_VERSION        0.6.0
 #define AJG_SYNTH_VERSION_STRING BOOST_PP_STRINGIZE(AJG_SYNTH_VERSION)
 
 #ifndef AJG_SYNTH_SEQUENCE_LIMIT

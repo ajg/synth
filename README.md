@@ -131,6 +131,10 @@ Note: to use the `python` binding, Boost.Python is required; if using `brew` on 
 
     brew install boost --build-from-source
 
+If you're using a Debian/Ubuntu-ish system, you may need something like:
+
+    sudo apt-get install libboost-dev libboost-program-options-dev libboost-python-dev
+
 Components
 ----------
 

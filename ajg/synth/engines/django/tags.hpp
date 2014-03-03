@@ -69,8 +69,7 @@ struct autoescape_tag {
             bool const flag = match[1].str() == text("on");
             Match const& block = get_nested<A>(match);
 
-            // Don't make copy const!
-            Options copy = options;
+            Options copy = options; // NOTE: Don't make the copy const.
             copy.autoescape = flag;
             engine.render_block(out, block, context, copy);
         }
@@ -201,9 +200,10 @@ struct cycle_tag {
              >
     struct definition {
         struct not_as {
-        bool operator ()(typename Match::value_type const& match) const {
-            return match.str() != lexical_cast<String>("as");
-        }};
+            bool operator ()(typename Match::value_type const& match) const {
+                return match.str() != lexical_cast<String>("as");
+            }
+        };
 
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
@@ -695,6 +695,88 @@ struct include_tag {
                    , typename Engine::stream_type& out) const {
             String const path = engine.extract_string(match[1]);
             engine.render_file(out, path, context, options);
+        }
+    };
+};
+
+//
+// load_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct load_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        struct not_from {
+            bool operator ()(typename Match::value_type const& match) const {
+                return match.str() != lexical_cast<String>("from");
+            }
+        };
+
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            Regex const packages = +(+_s >> engine.package[ check(not_from()) ]);
+
+            return TAG("load" >> packages)
+                   >> engine.block;
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options const& options
+                   , typename Engine::stream_type& out) const {
+            Match const& packages = match.nested_results().front();
+            Match const& block    = match(engine.block);
+            Options copy = options; // NOTE: Don't make the copy const.
+
+            BOOST_FOREACH(Match const& package, packages.nested_results()) {
+                String const library = package.str();
+                engine.load_library(context, copy, library);
+            }
+
+            engine.render_block(out, block, context, copy);
+        }
+    };
+};
+
+//
+// load_from_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct load_from_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        struct not_from {
+            bool operator ()(typename Match::value_type const& match) const {
+                return match.str() != lexical_cast<String>("from");
+            }
+        };
+
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            Regex const identifiers = +(+_s >> engine.identifier[ check(not_from()) ]);
+            return TAG("load" >> identifiers >> +_s >> "from" >> +_s >> engine.package)
+                   >> engine.block;
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options const& options
+                   , typename Engine::stream_type& out) const {
+            Match const& identifiers = match.nested_results().front();
+            Match const& package     = match(engine.package);
+            Match const& block       = match(engine.block);
+            String const library = package.str();
+            std::vector<String> names;
+
+            BOOST_FOREACH(Match const& identifier, identifiers.nested_results()) {
+                names.push_back(identifier.str());
+            }
+
+            Options copy = options; // NOTE: Don't make the copy const.
+            engine.load_library(context, copy, library, names);
+            engine.render_block(out, block, context, copy);
         }
     };
 };

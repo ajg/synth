@@ -20,6 +20,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/include/algorithm.hpp>
@@ -154,6 +155,7 @@ struct definition : base_definition< BidirectionalIterator
             | +_s >> ( as_xpr("and")
                      | as_xpr("or")
                      | as_xpr("in")
+                     | as_xpr("not") >> +_s >> "in"
                      )
               >> +_s
             ;
@@ -460,17 +462,7 @@ struct definition : base_definition< BidirectionalIterator
                 throw_exception(std::logic_error("invalid binary expression"));
             }
 
-            if (op == "and") {
-                value = value ? evaluate_expression(segment, context, options) : value;
-            }
-            else if (op == "or") {
-                value = value ? value : evaluate_expression(segment, context, options);
-            }
-            else if (op == "in") {
-                value_type const elements = evaluate_expression(segment, context, options);
-                value = elements.contains(value);
-            }
-            else if (op == "==") {
+            if (op == "==") {
                 value = value == evaluate_expression(segment, context, options);
             }
             else if (op == "!=") {
@@ -487,6 +479,20 @@ struct definition : base_definition< BidirectionalIterator
             }
             else if (op == ">=") {
                 value = value >= evaluate_expression(segment, context, options);
+            }
+            else if (op == "and") {
+                value = value ? evaluate_expression(segment, context, options) : value;
+            }
+            else if (op == "or") {
+                value = value ? value : evaluate_expression(segment, context, options);
+            }
+            else if (op == "in") {
+                value_type const elements = evaluate_expression(segment, context, options);
+                value = elements.contains(value);
+            }
+            else if (algorithm::starts_with(op, "not") && algorithm::ends_with(op, "in")) {
+                value_type const elements = evaluate_expression(segment, context, options);
+                value = !elements.contains(value);
             }
             else {
                 throw_exception(std::logic_error("invalid binary operator: " + op));

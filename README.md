@@ -127,13 +127,15 @@ It is known to compile with:
  - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
  - `boost` versions `1.42`, `1.46` & `1.55`
 
-Note: to use the `python` binding, Boost.Python is required; if using `brew` on OS X, use the command:
+*Note*: to use the `python` binding, Boost.Python is required.
+
+ * If you're using Homebrew on OS X, use the command:
 
     brew install boost --build-from-source
 
-If you're using a Debian/Ubuntu-ish system, you may need something like:
+ * If you're using a Debian/Ubuntu-ish system, use the following:
 
-    sudo apt-get install libboost-dev libboost-program-options-dev libboost-python-dev
+    sudo apt-get install libboost-all-dev
 
 Components
 ----------

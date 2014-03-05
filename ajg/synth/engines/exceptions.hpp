@@ -63,6 +63,20 @@ struct missing_attribute : public std::invalid_argument {
 };
 
 //
+// missing_library exception
+////////////////////////////////////////////////////////////////////////////////
+
+struct missing_library : public std::invalid_argument {
+    std::string const name;
+
+    missing_library(std::string const& name)
+        : std::invalid_argument("missing library `" + name + "'")
+        , name(name) {}
+
+    ~missing_library() throw () {}
+};
+
+//
 // invalid_attribute exception
 ////////////////////////////////////////////////////////////////////////////////
 

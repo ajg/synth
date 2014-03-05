@@ -63,7 +63,7 @@ struct binding : MultiTemplate {
         return base_type::template render_to_file<binding>(filepath, context);
     }
 
-  public: // TODO: Replace (in c++11) with `friend MultiTemplate;`
+  public: // TODO[c++11]: Replace with `friend MultiTemplate;`
 
     template <class Context>
     inline static Context adapt_context(context_type const& parent) {

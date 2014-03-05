@@ -185,7 +185,6 @@ inline String read_stream
 
 #endif // AJG_SYNTH_OBSOLETE
 
-
 }} // namespace ajg::synth
 
 #endif // AJG_SYNTH_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED

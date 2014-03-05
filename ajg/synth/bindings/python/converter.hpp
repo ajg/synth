@@ -1,4 +1,12 @@
+//  (C) Copyright 2014 Alvaro J. Genial (http://alva.ro)
+//  Use, modification and distribution are subject to the Boost Software
+//  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt).
 
+#ifndef AJG_SYNTH_BINDINGS_PYTHON_CONVERTER_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_PYTHON_CONVERTER_HPP_INCLUDED
+
+#if AJG_SYNTH_OBSOLETE
 
 // ---- adapter.hpp
 
@@ -30,3 +38,6 @@ static void construct(PyObject* obj, boost::python::converter::rvalue_from_pytho
     typedef Template::django_template_type::value_type Value;
     converter::registry::push_back(&convertible<Value>, &construct<Value>, type_id<Value>());
 
+#endif // AJG_SYNTH_OBSOLETE
+
+#endif // AJG_SYNTH_BINDINGS_PYTHON_CONVERTER_HPP_INCLUDED

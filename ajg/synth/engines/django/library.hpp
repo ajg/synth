@@ -21,7 +21,7 @@ namespace django {
 // default_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_tags : fusion::vector26
+struct default_tags : fusion::vector27
     < django::autoescape_tag
     , django::block_tag
     , django::comment_tag
@@ -50,6 +50,7 @@ struct default_tags : fusion::vector26
     , django::verbatim_tag
     , django::widthratio_tag
     , django::with_tag
+    , django::library_tag
     > {};
 
 //

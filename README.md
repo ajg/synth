@@ -238,6 +238,7 @@ Django Engine
  - `django::verbatim_tag`
  - `django::widthratio_tag`
  - `django::with_tag`
+ - `django::library_tag`
 
 ### Filters
 
@@ -366,7 +367,7 @@ Future Work
    * Clean up and make `multi_template` public
  - Django:
    * Named arguments (e.g. for tags and filters)
-   * Option to pre-load libraries
+   * Option to pre-load libraries, tags and filters
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

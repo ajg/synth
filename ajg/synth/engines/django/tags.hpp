@@ -1048,9 +1048,49 @@ struct with_tag {
             Match const& name  = get_nested<B>(match);
             Match const& body  = get_nested<C>(match);
 
-            Context copy = context;
-            copy[name.str()] = engine.evaluate(expr, context, options);
-            engine.render_block(out, body, copy, options);
+            Context context_copy = context;
+            context_copy[name.str()] = engine.evaluate(expr, context, options);
+            engine.render_block(out, body, context_copy, options);
+        }
+    };
+};
+
+//
+// library_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct library_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            return TAG(engine.identifier                     // A
+                >> (Regex() = *(+_s >> engine.expression)))  // B
+                >> engine.block;
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options const& options
+                   , typename Engine::stream_type& out) const {
+            String const& name  = match(engine.identifier).str();
+            Match  const& body  = match(engine.block);
+            Array arguments;
+
+            BOOST_FOREACH(Match const& expr, get_nested<B>(match).nested_results()) {
+                arguments.push_back(engine.evaluate(expr, context, options));
+            }
+
+            Context context_copy = context;
+            Options options_copy = options;
+
+            if (typename Options::tag_type const& tag = options_copy.loaded_tags[name]) {
+                if (Value const& value = tag(options_copy, &context_copy, arguments)) {
+                    out << value;
+                }
+                engine.render_block(out, body, context_copy, options_copy);
+            }
         }
     };
 };

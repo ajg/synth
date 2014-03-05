@@ -32,6 +32,7 @@
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_definition.hpp>
 #include <ajg/synth/engines/django/value.hpp>
+#include <ajg/synth/engines/django/loader.hpp>
 #include <ajg/synth/engines/django/library.hpp>
 #include <ajg/synth/engines/django/options.hpp>
 
@@ -42,7 +43,9 @@ namespace django {
 using detail::operator ==;
 namespace x = boost::xpressive;
 
-template <class Library = django::default_library>
+template < class Library = django::default_library
+         , class Loader  = django::default_loader
+         >
 struct engine : detail::nonconstructible {
 
 typedef engine engine_type;
@@ -58,10 +61,11 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    typedef definition this_type;
-    typedef base_definition< BidirectionalIterator
-                           , this_type> base_type;
-
+    typedef definition                          this_type;
+    typedef base_definition
+        < BidirectionalIterator
+        , this_type
+        >                                       base_type;
     typedef typename base_type::id_type         id_type;
     typedef typename base_type::size_type       size_type;
     typedef typename base_type::char_type       char_type;
@@ -74,12 +78,14 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::definition_type definition_type;
 
     typedef Library                            library_type;
+    typedef Loader                             loader_type;
     typedef typename library_type::first       tags_type;
     typedef typename library_type::second      filters_type;
     typedef django::value<char_type>           value_type;
-    typedef options<iterator_type, value_type> options_type;
+    typedef options<value_type>                options_type;
     typedef std::map<string_type, value_type>  context_type; // TODO: value_type keys.
     typedef std::vector<value_type>            array_type;
+    typedef std::vector<string_type>           names_type;
 
     typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions_extended>      tag_sequence_type;
@@ -565,22 +571,12 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
-    void load_library( context_type const& context
-                     , options_type&       options
-                     , string_type  const& library
+    void load_library( context_type&      context
+                     , options_type&      options
+                     , string_type const& library
+                     , names_type const*  names   = 0
                      ) const {
-        AJG_PRINT("load_library1");
-        AJG_DUMP(library);
-    }
-
-    void load_library( context_type             const& context
-                     , options_type&                   options
-                     , string_type              const& library
-                     , std::vector<string_type> const& names
-                     ) const {
-        AJG_PRINT("load_library2");
-        AJG_DUMP(library);
-        AJG_DUMP(value_type(names));
+        loader_.template load<this_type>(context, options, library, names);
     }
 
   private:
@@ -640,6 +636,7 @@ struct definition : base_definition< BidirectionalIterator
 
     tag_sequence_type    tags_;
     filter_sequence_type filters_;
+    loader_type          loader_;
 
 }; // definition
 

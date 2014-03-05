@@ -216,17 +216,17 @@ struct cycle_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
-            typename Engine::iterator_type const it = match[0].first;
+            typename Engine::size_type const position = match.position();
             // Alternative style to get_nested<X>(match):
             Match const& exprs = match.nested_results().front();
             Match const& ident = match(engine.identifier);
             Match const& block = match(engine.block);
             Size const total   = exprs.nested_results().size();
-            Size const current = options.cycles[it];
+            Size const current = options.cycles[position];
 
             Match const& expr = *detail::advance(exprs.nested_results(), current);
             Value const value = engine.evaluate(expr, context, options);
-            options.cycles[it] = (current + 1) % total;
+            options.cycles[position] = (current + 1) % total;
             out << value;
 
             if (!ident) {
@@ -563,8 +563,8 @@ struct ifchanged_tag {
             Match const& if_   = get_nested<B>(match);
             Match const& else_ = get_nested<C>(match);
 
-            typename Engine::iterator_type const key(match[0].first);
-            optional<Value const&> const value = detail::find_value(key, options.registry);
+            typename Engine::size_type const position = match.position();
+            optional<Value const&> const value = detail::find_value(position, options.registry);
 
             // This is the case with no variables (compare contents).
             if (vars.nested_results().empty()) {
@@ -578,7 +578,7 @@ struct ifchanged_tag {
                     }
                 }
                 else {
-                    options.registry[key] = result;
+                    options.registry[position] = result;
                     out << result;
                 }
             }
@@ -597,7 +597,7 @@ struct ifchanged_tag {
                     }
                 }
                 else {
-                    options.registry[key] = values;
+                    options.registry[position] = values;
                     engine.render_block(out, if_, context, options);
                 }
             }
@@ -727,14 +727,15 @@ struct load_tag {
                    , typename Engine::stream_type& out) const {
             Match const& packages = match.nested_results().front();
             Match const& block    = match(engine.block);
-            Options copy = options; // NOTE: Don't make the copy const.
+            Options options_copy = options;
+            Context context_copy = context;
 
             BOOST_FOREACH(Match const& package, packages.nested_results()) {
                 String const library = package.str();
-                engine.load_library(context, copy, library);
+                engine.load_library(context_copy, options_copy, library);
             }
 
-            engine.render_block(out, block, context, copy);
+            engine.render_block(out, block, context_copy, options_copy);
         }
     };
 };
@@ -774,9 +775,10 @@ struct load_from_tag {
                 names.push_back(identifier.str());
             }
 
-            Options copy = options; // NOTE: Don't make the copy const.
-            engine.load_library(context, copy, library, names);
-            engine.render_block(out, block, context, copy);
+            Options options_copy = options;
+            Context context_copy = context;
+            engine.load_library(context_copy, options_copy, library, &names);
+            engine.render_block(out, block, context_copy, options_copy);
         }
     };
 };

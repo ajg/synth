@@ -43,7 +43,7 @@ struct bad_method : public std::invalid_argument {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits>
-struct abstract_adapter {
+struct abstract_adapter { // TODO: Rename to virtual_adapter
   public:
 
     typedef abstract_adapter this_type;

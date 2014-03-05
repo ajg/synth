@@ -131,7 +131,7 @@ Installation
 
  3. [Optional] Build the command-line program:
 
-        scons synth # Add debug=1 to generate debugging symbols & disable optimization.
+        scons synth # Add debug=1 to generate debugging symbols & disable optimizations.
 
  4. [Optional] Build (and install) the Python module:
 
@@ -364,6 +364,9 @@ Future Work
  - Templates:
    * `descriptor_template`
    * Clean up and make `multi_template` public
+ - Django:
+   * Named arguments (e.g. for tags and filters)
+   * Option to pre-load libraries
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
@@ -377,6 +380,7 @@ Future Work
      + Consider making `context`s top-level `value`s instead of `map`s
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
    * Hygienicize and prefix all macros (and #undef private ones after usage)
+   * Rename `this_type` to `self_type` unless it's actually a pointer
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

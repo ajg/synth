@@ -6,6 +6,8 @@
 #ifndef AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
 
+#if AJG_SYNTH_OBSOLETE
+
 #include <map>
 #include <string>
 #include <vector>
@@ -97,5 +99,6 @@ struct definition : base_definition< BidirectionalIterator
 
 }} // namespace ajg::synth
 
-#endif // AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED
+#endif // AJG_SYNTH_OBSOLETE
 
+#endif // AJG_SYNTH_ENGINES_MULTI_ENGINE_HPP_INCLUDED

@@ -33,12 +33,22 @@ struct multi_template {
     typedef typename Template<char_type, ssi_engine_type>::type    ssi_template_type;
     typedef typename Template<char_type, tmpl_engine_type>::type   tmpl_template_type;
 
+    typedef typename django_template_type::context_type django_context_type;
+    typedef typename ssi_template_type::context_type    ssi_context_type;
+    typedef typename tmpl_template_type::context_type   tmpl_context_type;
+
+    typedef typename django_template_type::options_type django_options_type;
+    typedef typename ssi_template_type::options_type    ssi_options_type;
+    typedef typename tmpl_template_type::options_type   tmpl_options_type;
+
     typedef bool                          boolean_type;
     typedef std::basic_string<char_type>  string_type;
     typedef std::basic_ostream<char_type> stream_type;
     typedef std::vector<string_type>      directories_type;
 
-    // typedef typename engine_type::context_type context_type;
+    typedef django_options_type                          options_type;
+    typedef typename django_options_type::library_type   library_type;
+    typedef typename django_options_type::libraries_type libraries_type;
 
   public:
 
@@ -48,11 +58,12 @@ struct multi_template {
                   , boolean_type     const  autoescape
                   , string_type      const& default_value
                   , directories_type const& directories
+                  , libraries_type   const& libraries
                   )
         : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, directories)
+        , django_options_(autoescape, default_value, directories, libraries)
         , ssi_options_(default_value, directories) // TODO: size_format, time_format, error_message
         , tmpl_options_() { // TODO: directories
 
@@ -64,21 +75,18 @@ struct multi_template {
   protected:
 
     // TODO: Support post-construction options (maybe using something like multi_options?)
-    //       e.g. Options const& options = django_options_, ssi_options_, tmpl_options_
+    //       e.g. Options const& options = {django_options_, ssi_options_, tmpl_options_}
 
     template <class X, class Context>
     void render(stream_type& stream, Context const& context) const {
         if (django_template_) {
-            return django_template_->render(stream,
-                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
+            return django_template_->render(stream, X::template adapt_context<django_context_type>(context), django_options_);
         }
         else if (ssi_template_) {
-            return ssi_template_->render(stream,
-                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
+            return ssi_template_->render(stream, X::template adapt_context<ssi_context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
-            return tmpl_template_->render(stream,
-                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+            return tmpl_template_->render(stream, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }
@@ -86,16 +94,13 @@ struct multi_template {
     template <class X, class Context>
     string_type render_to_string(Context const& context) const {
         if (django_template_) {
-            return django_template_->render_to_string(
-                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
+            return django_template_->render_to_string(X::template adapt_context<django_context_type>(context), django_options_);
         }
         else if (ssi_template_) {
-            return ssi_template_->render_to_string(
-                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
+            return ssi_template_->render_to_string(X::template adapt_context<ssi_context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
-            return tmpl_template_->render_to_string(
-                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+            return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }
@@ -103,16 +108,13 @@ struct multi_template {
     template <class X, class Context>
     void render_to_file(string_type const& filepath, Context const& context) const {
         if (django_template_) {
-            return django_template_->render_to_file(filepath,
-                X::template adapt_context<typename django_template_type::context_type>(context), django_options_);
+            return django_template_->render_to_file(filepath, X::template adapt_context<django_context_type>(context), django_options_);
         }
         else if (ssi_template_) {
-            return ssi_template_->render_to_file(filepath,
-                X::template adapt_context<typename ssi_template_type::context_type>(context), ssi_options_);
+            return ssi_template_->render_to_file(filepath, X::template adapt_context<ssi_context_type>(context), ssi_options_);
         }
         else if (tmpl_template_) {
-            return tmpl_template_->render_to_file(filepath,
-                X::template adapt_context<typename tmpl_template_type::context_type>(context), tmpl_options_);
+            return tmpl_template_->render_to_file(filepath, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
         AJG_UNREACHABLE;
     }
@@ -120,12 +122,13 @@ struct multi_template {
   private:
 
     // TODO: Use unique_ptr?
-    boost::shared_ptr<django_template_type>     django_template_;
-    boost::shared_ptr<ssi_template_type>        ssi_template_;
-    boost::shared_ptr<tmpl_template_type>       tmpl_template_;
-    typename django_template_type::options_type django_options_;
-    typename ssi_template_type::options_type    ssi_options_;
-    typename tmpl_template_type::options_type   tmpl_options_;
+    boost::shared_ptr<django_template_type> django_template_;
+    boost::shared_ptr<ssi_template_type>    ssi_template_;
+    boost::shared_ptr<tmpl_template_type>   tmpl_template_;
+
+    django_options_type django_options_;
+    ssi_options_type    ssi_options_;
+    tmpl_options_type   tmpl_options_;
 };
 
 }}} // namespace ajg::synth::detail

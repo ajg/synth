@@ -29,6 +29,7 @@ struct binding : MultiTemplate {
     typedef typename base_type::boolean_type                   boolean_type;
     typedef typename base_type::string_type                    string_type;
     typedef typename base_type::directories_type               directories_type;
+    typedef typename base_type::libraries_type                 libraries_type;
     typedef typename pt::basic_ptree<string_type, string_type> context_type; // TODO: basic_ptree<string_type, value_type>
 
   public:
@@ -39,7 +40,13 @@ struct binding : MultiTemplate {
            , boolean_type     const  autoescape
            , string_type      const& default_value
            , directories_type const& directories
-           ) : base_type(source, engine_name, autoescape, default_value, directories) {}
+           ) : base_type( source
+                        , engine_name
+                        , autoescape
+                        , default_value
+                        , directories
+                        , libraries_type()
+                        ) {}
 
   public:
 

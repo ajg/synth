@@ -368,6 +368,9 @@ Future Work
  - Django:
    * Named arguments (e.g. for tags and filters)
    * Option to pre-load libraries, tags and filters
+ - Command-line:
+   * Allow using arbitrary programs as tags
+   * Allow using arbitrary programs as filters
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
@@ -402,4 +405,3 @@ This library is distributed under the Boost [LICENSE](./LICENSE_1_0.txt).
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ajg/synth/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-

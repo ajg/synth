@@ -77,6 +77,20 @@ struct missing_library : public std::invalid_argument {
 };
 
 //
+// missing_filter exception
+////////////////////////////////////////////////////////////////////////////////
+
+struct missing_filter : public std::invalid_argument {
+    std::string const name;
+
+    missing_filter(std::string const& name)
+        : std::invalid_argument("missing filter `" + name + "'")
+        , name(name) {}
+
+    ~missing_filter() throw () {}
+};
+
+//
 // invalid_attribute exception
 ////////////////////////////////////////////////////////////////////////////////
 

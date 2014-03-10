@@ -214,7 +214,13 @@ struct definition : base_definition< BidirectionalIterator
                            , options_type const& options
                            ) const {
         process_filter const processor = { *this, value, name, args, context, options };
-        return detail::find_by_index(*this, filters_.definition, filters_.index, name, processor);
+        if (optional<value_type> result = detail::may_find_by_index(*this,
+                filters_.definition, filters_.index, name, processor)) {
+            return *result;
+        }
+        else {
+            throw_exception(missing_filter(this->template convert<char>(name)));
+        }
     }
 
     template <char_type Delimiter>
@@ -322,7 +328,7 @@ struct definition : base_definition< BidirectionalIterator
         // "nest" the match, so we use it directly instead.
         match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
+        must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
 
     void render_match( stream_type&        stream

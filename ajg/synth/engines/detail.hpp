@@ -662,20 +662,46 @@ inline String escape_entities(String const& string, bool const ascii = false) {
 }
 
 //
-// find_by_index
+// may_find_by_index
+//     TODO: Rename may_find_filter
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine, class Sequence, class Index, class Needle, class Functor>
-inline typename Functor::result_type find_by_index( Engine   const& engine
-                                                  , Sequence const& sequence
-                                                  , Index    const& index
-                                                  , Needle   const& needle
-                                                  , Functor  const& functor
-                                                  ) {
+inline optional<typename Functor::result_type> may_find_by_index( Engine   const& engine
+                                                                , Sequence const& sequence
+                                                                , Index    const& index
+                                                                , Needle   const& needle
+                                                                , Functor  const& functor
+                                                                ) {
     typename Index::const_iterator const it =
         std::find(index.begin(), index.end(), needle);
 
     if (it == index.end()) {
+        return none;
+    }
+
+    typename Engine::size_type const distance = std::distance(index.begin(), it);
+    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
+    return detail::template apply_at<size>::fn(distance, sequence, functor);
+}
+
+//
+// must_find_by_index
+//     TODO: Rename must_find_tag
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Engine, class Sequence, class Index, class Needle, class Functor>
+inline typename Functor::result_type must_find_by_index( Engine   const& engine
+                                                       , Sequence const& sequence
+                                                       , Index    const& index
+                                                       , Needle   const& needle
+                                                       , Functor  const& functor
+                                                       ) {
+    typename Index::const_iterator const it =
+        std::find(index.begin(), index.end(), needle);
+
+    if (it == index.end()) {
+        // TODO: Factor out missing_tag exception.
         std::string const name = engine.template convert<char>(
             lexical_cast<typename Engine::string_type>(needle));
         std::string const message = name + " not found";

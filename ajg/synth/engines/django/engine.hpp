@@ -218,6 +218,9 @@ struct definition : base_definition< BidirectionalIterator
                 filters_.definition, filters_.index, name, processor)) {
             return *result;
         }
+        else if (typename options_type::filter_type const& filter = options.loaded_filter[name]) {
+            return filter(options, &context, value, args);
+        }
         else {
             throw_exception(missing_filter(this->template convert<char>(name)));
         }

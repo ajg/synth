@@ -29,23 +29,25 @@ inline char const* version()
    return AJG_SYNTH_VERSION_STRING;
 }
 
+//
+// library
+////////////////////////////////////////////////////////////////////////////////
+
 template <class Options>
-struct library : django::abstract_library<Options> {
-    typedef django::abstract_library<Options>   base_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::value_type      value_type;
-    typedef typename base_type::array_type      array_type;
-    typedef typename base_type::names_type      names_type;
-    typedef typename base_type::tag_type        tag_type;
-    typedef typename base_type::filter_type     filter_type;
-    typedef typename base_type::context_type    context_type;
-    typedef typename base_type::options_type    options_type;
-    typedef typename base_type::tags_type       tags_type;
-    typedef typename base_type::filters_type    filters_type;
+struct library : Options::abstract_library_type {
+    typedef Options                                      options_type;
+    typedef typename options_type::boolean_type          boolean_type;
+    typedef typename options_type::string_type           string_type;
+    typedef typename options_type::value_type            value_type;
+    typedef typename options_type::array_type            array_type;
+    typedef typename options_type::names_type            names_type;
+    typedef typename options_type::tag_type              tag_type;
+    typedef typename options_type::filter_type           filter_type;
+    typedef typename options_type::context_type          context_type;
+    typedef typename options_type::tags_type             tags_type;
+    typedef typename options_type::filters_type          filters_type;
 
-    explicit library(boost::python::object lib) {
-        namespace py = boost::python;
-
+    explicit library(py::object lib) {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {
             py::stl_input_iterator<string_type> begin(tags.keys()), end;
             tag_names_ = names_type(begin, end);
@@ -77,7 +79,7 @@ struct library : django::abstract_library<Options> {
         throw_exception(not_implemented("call_tag"));
     }
 
-    static value_type call_filter(py::object filter, options_type&, context_type*, value_type&, array_type&) {
+    static value_type call_filter(py::object filter, options_type const&, context_type const*, value_type const&, array_type const&) {
         throw_exception(not_implemented("call_filter"));
     }
 
@@ -90,6 +92,28 @@ struct library : django::abstract_library<Options> {
     filters_type /*const*/ filters_;
 };
 
+//
+// loader
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Options>
+struct loader : Options::abstract_loader_type {
+    typedef Options                                      options_type;
+    typedef typename options_type::string_type           string_type;
+    typedef typename options_type::library_type          library_type;
+
+    explicit loader(py::object ldr) : ldr_(ldr) {}
+
+    virtual library_type load_library(string_type const& name) {
+        return library_type(new library<options_type>(ldr_(name)));
+    }
+
+    virtual ~loader() {}
+
+  private:
+
+    py::object /*const*/ ldr_;
+};
 
 template <class MultiTemplate>
 struct binding : MultiTemplate /*, boost::noncopyable*/ {
@@ -103,6 +127,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     typedef typename base_type::options_type     options_type;
     typedef typename base_type::library_type     library_type;
     typedef typename base_type::libraries_type   libraries_type;
+    typedef typename base_type::loader_type      loader_type;
+    typedef typename base_type::loaders_type     loaders_type;
     typedef py::dict                             context_type;
 
     typedef py::init< string_type
@@ -112,6 +138,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                         , string_type
                         , py::list
                         , py::dict
+                        , py::list
                         >
                     > constructor_type;
 
@@ -124,6 +151,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
            , string_type  const& default_value = detail::text("")
            , py::list     const& dirs          = py::list()
            , py::dict     const& libs          = py::dict()
+           , py::list     const& ldrs          = py::list()
            )
         : base_type( source
                    , engine_name
@@ -131,6 +159,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                    , default_value
                    , get_directories(dirs)
                    , get_libraries(libs)
+                   , get_loaders(ldrs)
                    ) {}
 
     void render(py::object file, py::dict dictionary) const {
@@ -145,7 +174,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     }
 
     void render_to_file(py::str filepath, py::dict dictionary) const {
-        string_type const s = boost::python::extract<string_type>(filepath);
+        string_type const s = py::extract<string_type>(filepath);
         return base_type::template render_to_file<binding>(s, dictionary);
     }
 
@@ -170,37 +199,16 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
         return libraries;
     }
 
-    /*
-    inline static libraries_type get_libraries(py::dict libs) {
-        libraries_type libraries;
-        py::list const items = libs.items();
+    inline static loaders_type get_loaders(py::list ldrs) {
+        py::stl_input_iterator<py::object> begin(ldrs), end;
+        loaders_type loaders;
 
-        // TODO: Replace with stl_input_iterator version.
-        for (std::size_t i = 0, n = len(items); i < n; ++i) {
-            py::tuple const item = py::extract<py::tuple>(items[i]);
-            py::extract<string_type> key(item[0]);
-            py::object value(item[1]);
-
-            if (key.check()) {
-                libraries[string_type(key)] = new library<options_type>(lib);
-            }
-        }
-    }
-    */
-
-    /*
-    inline static libraries_type get_libraries(py::list libs) {
-        py::stl_input_iterator<py::object> begin(libs), end;
-        libraries_type libraries;
-        libraries.reserve(py::len(libs));
-
-        BOOST_FOREACH(py::object const& lib, std::make_pair(begin, end)) {
-            libraries.push_back(new library<options_type>(lib));
+        BOOST_FOREACH(py::object const& ldr, std::make_pair(begin, end)) {
+            loaders.push_back(loader_type(new loader<options_type>(ldr)));
         }
 
-        return libraries;
+        return loaders;
     }
-    */
 
   public: // TODO[c++11]: Replace with `friend MultiTemplate;`
 

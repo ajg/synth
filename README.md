@@ -378,11 +378,11 @@ Future Work
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
      + Remove needlessly configurable (especially defaulted) template parameters
-     + Consider switching to unordered_map/unordered_set where possible
    * Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
      + Consider making `context`s top-level `value`s instead of `map`s
+     + Consider switching to unordered_map/unordered_set where possible
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
    * Hygienicize and prefix all macros (and #undef private ones after use)
    * Rename `this_type` to `self_type` unless it's actually a pointer

@@ -73,5 +73,5 @@ context = {
 }
 template = synth.Template(source, 'django')
 
+print('template: ' + str(template))
 print(template.render_to_string(context))
-

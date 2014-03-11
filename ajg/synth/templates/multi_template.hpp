@@ -49,6 +49,8 @@ struct multi_template {
     typedef django_options_type                          options_type;
     typedef typename django_options_type::library_type   library_type;
     typedef typename django_options_type::libraries_type libraries_type;
+    typedef typename django_options_type::loader_type    loader_type;
+    typedef typename django_options_type::loaders_type   loaders_type;
 
   public:
 
@@ -59,11 +61,12 @@ struct multi_template {
                   , string_type      const& default_value
                   , directories_type const& directories
                   , libraries_type   const& libraries
+                  , loaders_type     const& loaders
                   )
         : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, directories, libraries)
+        , django_options_(autoescape, default_value, directories, libraries, loaders)
         , ssi_options_(default_value, directories) // TODO: size_format, time_format, error_message
         , tmpl_options_() { // TODO: directories
 

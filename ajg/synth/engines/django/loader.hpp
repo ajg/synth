@@ -27,15 +27,25 @@ struct default_loader {
         typedef typename Engine::options_type       options_type;
         typedef typename options_type::string_type  string_type;
         typedef typename options_type::value_type   value_type;
-        typedef typename options_type::library_type library_type;
         typedef typename options_type::tag_type     tag_type;
-        typedef typename options_type::filter_type  filter_type;
+        typedef typename options_type::filter_type  filter_type;;
+        typedef typename options_type::library_type library_type;
+        typedef typename options_type::loader_type  loader_type;
 
         // AJG_PRINT("load");
         // AJG_DUMP(library_name);
         // if (names) AJG_DUMP(value_type(*names));
 
-        library_type const library = options.libraries[library_name];
+        library_type library = options.libraries[library_name];
+
+        if (!library) {
+            BOOST_FOREACH(loader_type const& loader, options.loaders) {
+                if ((library = loader->load_library(library_name))) {
+                    options.libraries[library_name] = library;
+                    break;
+                }
+            }
+        }
 
         if (!library) {
             throw_exception(missing_library(library_name));

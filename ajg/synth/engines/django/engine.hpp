@@ -6,6 +6,9 @@
 #ifndef AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 
+#include <ajg/synth/config.hpp>
+#include <ajg/synth/vector.hpp>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -214,13 +217,14 @@ struct definition : base_definition< BidirectionalIterator
                            , options_type const& options
                            ) const {
         process_filter const processor = { *this, value, name, args, context, options };
-        if (optional<value_type> const& result = detail::may_find_by_index(*this,
-                filters_.definition, filters_.index, name, processor)) {
-            return *result;
-        }
-        else if (optional<typename options_type::filter_type const> const& filter
+        // Let library filters override built-in ones:
+        if (optional<typename options_type::filter_type const> const& filter
                 = detail::find_mapped_value(name, options.loaded_filters)) {
             return (*filter)(options, &context, value, args);
+        }
+        else if (optional<value_type> const& result = detail::may_find_by_index(*this,
+                filters_.definition, filters_.index, name, processor)) {
+            return *result;
         }
         else {
             throw_exception(missing_filter(this->template convert<char>(name)));

@@ -123,6 +123,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     typedef MultiTemplate                        base_type;
     typedef typename base_type::boolean_type     boolean_type;
     typedef typename base_type::string_type      string_type;
+    typedef typename base_type::formats_type     formats_type;
     typedef typename base_type::directories_type directories_type;
     typedef typename base_type::options_type     options_type;
     typedef typename base_type::library_type     library_type;
@@ -136,6 +137,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                     , py::optional
                         < boolean_type
                         , string_type
+                        , py::dict
+                        , boolean_type
                         , py::list
                         , py::dict
                         , py::list
@@ -151,6 +154,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true
            , string_type  const& default_value = detail::text("")
+           , py::dict     const& fmts          = py::dict()
+           , boolean_type const  debug         = false
            , py::list     const& dirs          = py::list()
            , py::dict     const& libs          = py::dict()
            , py::list     const& ldrs          = py::list()
@@ -159,6 +164,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                    , engine_name
                    , autoescape
                    , default_value
+                   , get_formats(fmts)
+                   , debug
                    , get_directories(dirs)
                    , get_libraries(libs)
                    , get_loaders(ldrs)
@@ -181,6 +188,20 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     }
 
   private:
+
+    inline static formats_type get_formats(py::dict fmts) {
+        py::stl_input_iterator<py::tuple> begin(fmts.items()), end;
+        formats_type formats;
+
+        BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
+            string_type const& key = py::extract<string_type>(py::str(item[0]));
+            string_type const& fmt = py::extract<string_type>(py::str(item[1]));
+            typedef typename formats_type::value_type pair_type;
+            formats.insert(pair_type(key, fmt));
+        }
+
+        return formats;
+    }
 
     inline static directories_type get_directories(py::list dirs) {
         py::stl_input_iterator<string_type> begin(dirs), end;

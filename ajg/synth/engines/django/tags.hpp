@@ -801,8 +801,7 @@ struct now_tag {
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
             String const format = engine.extract_string(match[1]);
-            // TODO: Support abbreviated formats. (e.g. "r" => "%r")
-            out << detail::format_current_time<String>(format);
+            out << engine.format_datetime(options, format);
         }
     };
 };

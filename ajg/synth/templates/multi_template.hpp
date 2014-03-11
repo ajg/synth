@@ -47,6 +47,7 @@ struct multi_template {
     typedef std::vector<string_type>      directories_type;
 
     typedef django_options_type                          options_type;
+    typedef typename django_options_type::formats_type   formats_type;
     typedef typename django_options_type::library_type   library_type;
     typedef typename django_options_type::libraries_type libraries_type;
     typedef typename django_options_type::loader_type    loader_type;
@@ -59,6 +60,8 @@ struct multi_template {
                   , string_type      const& engine_name
                   , boolean_type     const  autoescape
                   , string_type      const& default_value
+                  , formats_type     const& formats
+                  , boolean_type     const& debug
                   , directories_type const& directories
                   , libraries_type   const& libraries
                   , loaders_type     const& loaders
@@ -66,10 +69,9 @@ struct multi_template {
         : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, directories, libraries, loaders)
-        , ssi_options_(default_value, directories) // TODO: size_format, time_format, error_message
-        , tmpl_options_() { // TODO: directories
-
+        , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders)
+        , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message
+        , tmpl_options_() {                        // TODO: directories, debug
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine_name");
         }

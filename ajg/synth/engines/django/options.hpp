@@ -74,6 +74,7 @@ struct options {
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
     typedef std::vector<string_type>               names_type;
     typedef std::vector<value_type>                array_type;
+    typedef std::map<string_type, string_type>     formats_type;
     typedef std::vector<string_type>               directories_type;
     typedef abstract_library<options_type>         abstract_library_type;
     typedef abstract_loader<options_type>          abstract_loader_type;
@@ -97,6 +98,8 @@ struct options {
 
     boolean_type      autoescape;
     value_type        default_value;
+    formats_type      formats;
+    boolean_type      debug;
     directories_type  directories;
     tags_type         loaded_tags;
     filters_type      loaded_filters;
@@ -107,12 +110,16 @@ struct options {
 
     options( boolean_type     const  autoescape    = true
            , value_type       const& default_value = detail::text("")
+           , formats_type     const& formats       = formats_type()
+           , boolean_type     const  debug         = false
            , directories_type const& directories   = directories_type()
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
            )
         : autoescape(autoescape)
         , default_value(default_value)
+        , formats(default_formats(formats))
+        , debug(debug)
         , directories(directories)
         , libraries(libraries)
         , loaders(loaders)
@@ -122,7 +129,24 @@ struct options {
         , cycles()
         , registry() {}
 
-    // TODO: Make the below private and friend specific tags.
+  public:
+
+    inline static formats_type default_formats(formats_type formats) {
+        if (!formats.empty()) {
+            return formats;
+        }
+
+        formats[detail::text("DATE_FORMAT")]           = detail::text("%N %j, %Y");
+        formats[detail::text("DATETIME_FORMAT")]       = detail::text("%N %j, %Y, %P");
+        formats[detail::text("MONTH_DAY_FORMAT")]      = detail::text("%F %j");
+        formats[detail::text("SHORT_DATE_FORMAT")]     = detail::text("%m/%d/%Y");
+        formats[detail::text("SHORT_DATETIME_FORMAT")] = detail::text("%m/%d/%Y %P");
+        formats[detail::text("TIME_FORMAT")]           = detail::text("%P");
+        formats[detail::text("YEAR_MONTH_FORMAT")]     = detail::text("%F %Y");
+        return formats;
+    }
+
+  // private: // TODO: Make the below private and friend specific tags.
 
     typedef size_type marker_type; // FIXME: pair<filename, size_type>
 

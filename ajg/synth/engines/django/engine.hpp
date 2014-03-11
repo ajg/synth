@@ -576,13 +576,30 @@ struct definition : base_definition< BidirectionalIterator
                 value = *attr;
             }
             else {
-                std::string const name = this->template
-                    convert<char>(attribute.to_string());
-                throw_exception(missing_attribute(name));
+                throw_exception(missing_attribute(this->template
+                    convert<char>(attribute.to_string())));
             }
         }
 
         return value;
+    }
+
+    // TODO: Support abbreviated formats. (e.g. "r" => "%r")
+    string_type format_datetime( options_type  const& options
+                               , string_type          format
+                               , optional<value_type> value   = none
+                               ) const {
+        if (optional<string_type const> const& fmt
+                = detail::find_mapped_value(format, options.formats)) {
+            format = *fmt;
+        }
+
+        if (value) {
+            return detail::format_time<string_type>(format, value->to_datetime());
+        }
+        else {
+            return detail::format_current_time<string_type>(format);
+        }
     }
 
     void load_library( context_type&      context
@@ -606,7 +623,7 @@ struct definition : base_definition< BidirectionalIterator
         typedef value_type result_type;
 
         template <class Filter>
-        value_type operator ()(Filter const& filter) const {
+        value_type operator()(Filter const& filter) const {
             options_type& options = const_cast<options_type&>(options_);
             return filter.process(value_, self, name_, context_, args_, options);
         }

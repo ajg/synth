@@ -247,7 +247,7 @@ Django Engine
  - `django::capfirst_filter`
  - `django::center_filter`
  - `django::cut_filter`
- - `django::date_filter` (TODO)
+ - `django::date_filter`
  - `django::default_filter`
  - `django::default_if_none_filter`
  - `django::dictsort_filter` (TODO)
@@ -284,7 +284,7 @@ Django Engine
  - `django::slugify_filter`
  - `django::stringformat_filter`
  - `django::striptags_filter`
- - `django::time_filter` (TODO)
+ - `django::time_filter`
  - `django::timesince_filter` (TODO)
  - `django::timeuntil_filter` (TODO)
  - `django::title_filter`

@@ -36,6 +36,8 @@ struct value : value_facade<Char, value<Char> > {
     typedef typename base_type::string_type    string_type;
     typedef typename base_type::string_type    token_type;
     typedef typename base_type::boolean_type   boolean_type;
+    typedef typename base_type::number_type    number_type;
+    typedef typename base_type::datetime_type  datetime_type;
     typedef typename base_type::const_iterator const_iterator;
 
   public:
@@ -91,6 +93,10 @@ struct value : value_facade<Char, value<Char> > {
 
     inline string_type to_string() const {
         return lexical_cast<string_type>(*this);
+    }
+
+    inline datetime_type to_datetime() const {
+        throw_exception(not_implemented("to_datetime"));
     }
 
     this_type escape() const {

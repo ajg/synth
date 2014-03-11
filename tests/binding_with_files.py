@@ -25,7 +25,6 @@ context = {
     'messages': ["Foo", "Bar", "Qux"],
 }
 
-template = synth.Template(source, 'django', True, 'INVALID_VALUE', [directory])
+template = synth.Template(source, 'django', True, 'INVALID_VALUE', {}, False, [directory])
 
 print(template.render_to_string(context))
-

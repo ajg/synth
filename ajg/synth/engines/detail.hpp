@@ -484,6 +484,7 @@ inline String abbreviate_size(uintmax_t const size) {
 
 //
 // format_current_time
+//     TODO: Fold into format_time.
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
@@ -702,7 +703,7 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
         std::find(index.begin(), index.end(), needle);
 
     if (it == index.end()) {
-        // TODO: Factor out missing_tag exception.
+        // TODO: Throw missing_tag exception.
         std::string const name = engine.template convert<char>(
             lexical_cast<typename Engine::string_type>(needle));
         std::string const message = name + " not found";

@@ -28,6 +28,7 @@ struct binding : MultiTemplate {
     typedef typename base_type::stream_type                    stream_type;
     typedef typename base_type::boolean_type                   boolean_type;
     typedef typename base_type::string_type                    string_type;
+    typedef typename base_type::formats_type                   formats_type;
     typedef typename base_type::directories_type               directories_type;
     typedef typename base_type::libraries_type                 libraries_type;
     typedef typename base_type::loaders_type                   loaders_type;
@@ -45,6 +46,8 @@ struct binding : MultiTemplate {
                         , engine_name
                         , autoescape
                         , default_value
+                        , formats_type()
+                        , boolean_type()
                         , directories
                         , libraries_type()
                         , loaders_type()

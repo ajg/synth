@@ -77,6 +77,20 @@ struct missing_library : public std::invalid_argument {
 };
 
 //
+// missing_tag exception
+////////////////////////////////////////////////////////////////////////////////
+
+struct missing_tag : public std::invalid_argument {
+    std::string const name;
+
+    missing_tag(std::string const& name)
+        : std::invalid_argument("missing tag `" + name + "'")
+        , name(name) {}
+
+    ~missing_tag() throw () {}
+};
+
+//
 // missing_filter exception
 ////////////////////////////////////////////////////////////////////////////////
 

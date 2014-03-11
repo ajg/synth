@@ -7,6 +7,7 @@
 #define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
 #include <ajg/synth/config.hpp>
+#include <ajg/synth/vector.hpp>
 
 #include <map>
 #include <ctime>

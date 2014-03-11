@@ -6,9 +6,10 @@
 #ifndef AJG_SYNTH_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DJANGO_LIBRARY_HPP_INCLUDED
 
-#include <boost/mpl/pair.hpp>
+#include <ajg/synth/config.hpp>
+#include <ajg/synth/vector.hpp>
 
-#include <boost/fusion/include/vector.hpp>
+#include <boost/mpl/pair.hpp>
 
 #include <ajg/synth/engines/django/tags.hpp>
 #include <ajg/synth/engines/django/filters.hpp>

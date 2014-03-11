@@ -6,6 +6,8 @@
 #ifndef AJG_SYNTH_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATE_HPP_INCLUDED
 
+#include <ajg/synth/config.hpp>
+
 #include <ajg/synth/templates/file_template.hpp>
 #include <ajg/synth/templates/multi_template.hpp>
 #include <ajg/synth/templates/stream_template.hpp>

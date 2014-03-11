@@ -1085,8 +1085,9 @@ struct library_tag {
             Context context_copy = context;
             Options options_copy = options;
 
-            if (typename Options::tag_type const& tag = options_copy.loaded_tags[name]) {
-                if (Value const& value = tag(options_copy, &context_copy, arguments)) {
+            if (optional<typename Options::tag_type const> const& tag
+                    = detail::find_mapped_value(name, options_copy.loaded_tags)) {
+                if (Value const& value = (*tag)(options_copy, &context_copy, arguments)) {
                     out << value;
                 }
                 engine.render_block(out, body, context_copy, options_copy);

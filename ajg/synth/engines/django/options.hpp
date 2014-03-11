@@ -43,8 +43,8 @@ struct abstract_library {
     virtual boolean_type has_filter(string_type const& name) const = 0;
     virtual names_type   list_tags() const                         = 0;
     virtual names_type   list_filters() const                      = 0;
-    virtual tag_type     load_tag(string_type const& name)         = 0;
-    virtual filter_type  load_filter(string_type const& name)      = 0;
+    virtual tag_type     get_tag(string_type const& name)          = 0;
+    virtual filter_type  get_filter(string_type const& name)       = 0;
     virtual ~abstract_library() {}
 };
 

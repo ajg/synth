@@ -31,9 +31,9 @@ struct default_loader {
         typedef typename options_type::tag_type     tag_type;
         typedef typename options_type::filter_type  filter_type;
 
-        AJG_PRINT("load");
-        AJG_DUMP(library_name);
-        if (names) AJG_DUMP(value_type(*names));
+        // AJG_PRINT("load");
+        // AJG_DUMP(library_name);
+        // if (names) AJG_DUMP(value_type(*names));
 
         library_type const library = options.libraries[library_name];
 
@@ -42,8 +42,8 @@ struct default_loader {
         }
         else if (names) {
             BOOST_FOREACH(string_type const& name, *names) {
-                tag_type    const& tag    = library->load_tag(name);
-                filter_type const& filter = library->load_filter(name);
+                tag_type    const& tag    = library->get_tag(name);
+                filter_type const& filter = library->get_filter(name);
 
                 if (!tag && !filter) {
                     throw_exception(missing_variable(name));
@@ -58,7 +58,7 @@ struct default_loader {
         }
         else {
             BOOST_FOREACH(string_type const& name, library->list_tags()) {
-                if (tag_type const& tag = library->load_tag(name)) {
+                if (tag_type const& tag = library->get_tag(name)) {
                     options.loaded_tags[name] = tag;
                 }
                 else {
@@ -66,7 +66,7 @@ struct default_loader {
                 }
             }
             BOOST_FOREACH(string_type const& name, library->list_filters()) {
-                if (filter_type const& filter = library->load_filter(name)) {
+                if (filter_type const& filter = library->get_filter(name)) {
                     options.loaded_filters[name] = filter;
                 }
                 else {

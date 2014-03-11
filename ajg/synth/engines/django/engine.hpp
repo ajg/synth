@@ -77,15 +77,15 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
-    typedef Library                            library_type;
-    typedef Loader                             loader_type;
-    typedef typename library_type::first       tags_type;
-    typedef typename library_type::second      filters_type;
-    typedef django::value<char_type>           value_type;
-    typedef options<value_type>                options_type;
-    typedef std::map<string_type, value_type>  context_type; // TODO: value_type keys.
-    typedef std::vector<value_type>            array_type;
-    typedef std::vector<string_type>           names_type;
+    typedef Library                             library_type;
+    typedef Loader                              loader_type;
+    typedef typename library_type::first        tags_type;
+    typedef typename library_type::second       filters_type;
+    typedef django::value<char_type>            value_type;
+    typedef options<value_type>                 options_type;
+    typedef typename options_type::context_type context_type;
+    typedef typename options_type::array_type   array_type;
+    typedef typename options_type::names_type   names_type;
 
     typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions_extended>      tag_sequence_type;

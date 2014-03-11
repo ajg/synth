@@ -22,7 +22,7 @@ namespace django {
 // default_tags
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_tags : fusion::vector27
+struct default_tags : fusion::vector
     < django::autoescape_tag
     , django::block_tag
     , django::comment_tag
@@ -58,13 +58,13 @@ struct default_tags : fusion::vector27
 // default_filters
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_filters : fusion::vector50
+struct default_filters : fusion::vector
     < django::add_filter
     , django::addslashes_filter
     , django::capfirst_filter
     , django::center_filter
     , django::cut_filter
- // , django::date_filter
+    , django::date_filter
     , django::default_filter
     , django::default_if_none_filter
  // , django::dictsort_filter
@@ -101,7 +101,7 @@ struct default_filters : fusion::vector50
     , django::slugify_filter
     , django::stringformat_filter
     , django::striptags_filter
- // , django::time_filter
+    , django::time_filter
  // , django::timesince_filter
  // , django::timeuntil_filter
     , django::title_filter

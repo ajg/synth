@@ -193,6 +193,30 @@ struct cut_filter {
 };
 
 //
+// date_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct date_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("date"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            String format = "DATE_FORMAT";
+
+            if (args.size() > 1) throw_exception(superfluous_argument());
+            if (args.size() > 0) format = args[0].to_string();
+
+            return engine.format_datetime(options, format, value);
+        }
+    };
+};
+
+//
 // default_filter
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1157,6 +1181,30 @@ struct striptags_filter {
       private:
 
         typename Engine::string_regex_type tag_;
+    };
+};
+
+//
+// time_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct time_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("time"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            String format = "TIME_FORMAT";
+
+            if (args.size() > 1) throw_exception(superfluous_argument());
+            if (args.size() > 0) format = args[0].to_string();
+
+            return engine.format_datetime(options, format, value);
+        }
     };
 };
 

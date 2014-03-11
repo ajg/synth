@@ -13,9 +13,9 @@
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/value_iterator.hpp>
 #include <ajg/synth/adapters/abstract.hpp>
@@ -89,6 +89,7 @@ struct default_value_traits {
     typedef Value                    value_type;
     typedef bool                     boolean_type;
     typedef double                   number_type;
+    typedef posix_time::ptime        datetime_type;
     typedef std::basic_string<Char>  string_type;
     typedef std::basic_istream<Char> istream_type;
     typedef std::basic_ostream<Char> ostream_type;
@@ -116,14 +117,15 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     typedef Traits                   traits_type;
     typedef abstract_adapter<Traits> abstract_type;
 
-    typedef typename traits_type::size_type    size_type;
-    typedef typename traits_type::char_type    char_type;
-    typedef typename traits_type::range_type   range_type;
-    typedef typename traits_type::string_type  string_type;
-    typedef typename traits_type::number_type  number_type;
-    typedef typename traits_type::boolean_type boolean_type;
-    typedef typename traits_type::istream_type istream_type;
-    typedef typename traits_type::ostream_type ostream_type;
+    typedef typename traits_type::size_type     size_type;
+    typedef typename traits_type::char_type     char_type;
+    typedef typename traits_type::range_type    range_type;
+    typedef typename traits_type::string_type   string_type;
+    typedef typename traits_type::number_type   number_type;
+    typedef typename traits_type::datetime_type datetime_type;
+    typedef typename traits_type::boolean_type  boolean_type;
+    typedef typename traits_type::istream_type  istream_type;
+    typedef typename traits_type::ostream_type  ostream_type;
 
     typedef typename traits_type::iterator       iterator;
     typedef typename traits_type::const_iterator const_iterator;

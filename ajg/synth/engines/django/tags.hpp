@@ -1091,6 +1091,9 @@ struct library_tag {
                 }
                 engine.render_block(out, body, context_copy, options_copy);
             }
+            else {
+                throw_exception(missing_tag(engine.template convert<char>(name)));
+            }
         }
     };
 };

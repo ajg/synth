@@ -214,12 +214,13 @@ struct definition : base_definition< BidirectionalIterator
                            , options_type const& options
                            ) const {
         process_filter const processor = { *this, value, name, args, context, options };
-        if (optional<value_type> result = detail::may_find_by_index(*this,
+        if (optional<value_type> const& result = detail::may_find_by_index(*this,
                 filters_.definition, filters_.index, name, processor)) {
             return *result;
         }
-        else if (typename options_type::filter_type const& filter = options.loaded_filter[name]) {
-            return filter(options, &context, value, args);
+        else if (optional<typename options_type::filter_type const> const& filter
+                = detail::find_mapped_value(name, options.loaded_filters)) {
+            return (*filter)(options, &context, value, args);
         }
         else {
             throw_exception(missing_filter(this->template convert<char>(name)));

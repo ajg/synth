@@ -305,7 +305,11 @@ Django Engine
 
  - `django::options::autoescape`
  - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
+ - `django::options::formats` (for `TIME_FORMAT`, `DATE_FORMAT`, etc.)
+ - `django::options::debug` (for `TEMPLATE_DEBUG`)
  - `django::options::directories` (for `TEMPLATE_DIRS`)
+ - `django::options::libraries` (for external tags & filters)
+ - `django::options::loaders` (for dynamically loading libraries)
 
 SSI Engine
 ----------
@@ -321,6 +325,14 @@ SSI Engine
  - `ssi::include_directive`
  - `ssi::printenv_directive`
  - `ssi::set_directive`
+
+### Options
+
+ - `ssi::options::echo_message`
+ - `ssi::options::directories`
+ - `ssi::options::size_format`
+ - `ssi::options::time_format`
+ - `ssi::options::error_message`
 
 TMPL Engine
 -----------
@@ -344,7 +356,6 @@ Future Work
    * Pre-built OS X binaries
    * Pre-built Windows binaries
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
-   * Django template loaders
    * Create Visual Studio solution & project using Scons
  - Bindings:
    * `ruby` binding based on [Rice](http://rice.rubyforge.org/)

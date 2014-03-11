@@ -369,6 +369,8 @@ Future Work
    * Named arguments (e.g. for tags and filters)
    * Option to pre-load libraries, tags and filters
  - Command-line:
+   * Allow specifying formats option
+   * Allow specifying debug option
    * Allow using arbitrary programs as tags
    * Allow using arbitrary programs as filters
  - Refactoring:
@@ -386,6 +388,7 @@ Future Work
    * Test or drop support for non-`char` types (e.g. `wchar_t`)
    * Hygienicize and prefix all macros (and #undef private ones after use)
    * Rename `this_type` to `self_type` unless it's actually a pointer
+   * Reformat all operator _()'s to operator_()
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

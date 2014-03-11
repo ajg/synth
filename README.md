@@ -378,6 +378,7 @@ Future Work
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
      + Remove needlessly configurable (especially defaulted) template parameters
+     + Consider switching to unordered_map/unordered_set where possible
    * Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s

@@ -65,10 +65,12 @@ struct library : django::abstract_library<Options> {
         }
     }
 
-    virtual names_type  list_tags() const { return tag_names_; }
-    virtual names_type  list_filters() const { return filter_names_; }
-    virtual tag_type    load_tag(string_type const& name) { return tags_[name]; }
-    virtual filter_type load_filter(string_type const& name) { return filters_[name]; }
+    virtual boolean_type has_tag(string_type const& name) const { return tags_.find(name) != tags_.end(); }
+    virtual boolean_type has_filter(string_type const& name) const { return filters_.find(name) != filters_.end(); }
+    virtual names_type   list_tags() const { return tag_names_; }
+    virtual names_type   list_filters() const { return filter_names_; }
+    virtual tag_type     load_tag(string_type const& name) { return tags_[name]; }
+    virtual filter_type  load_filter(string_type const& name) { return filters_[name]; }
     virtual ~library() {}
 
     static value_type call_tag(py::object tag, options_type&, context_type*, array_type&) {

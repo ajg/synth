@@ -858,6 +858,28 @@ struct pluralize_filter {
     };
 };
 
+//
+// pprint_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct pprint_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("pprint"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (!args.empty()) throw_exception(superfluous_argument());
+            // NOTE: Since this filter is for debugging, we don't normally try
+            //       to do anything fancy. However, in the Python binding,
+            //       this filter is overridden with a call to the real pprint.
+            return value.to_string();
+        }
+    };
+};
 
 //
 // random_filter

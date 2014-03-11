@@ -274,7 +274,7 @@ Django Engine
  - `django::make_list_filter`
  - `django::phone2numeric_filter`
  - `django::pluralize_filter`
- - `django::pprint_filter` (TODO)
+ - `django::pprint_filter`
  - `django::random_filter`
  - `django::removetags_filter`
  - `django::rjust_filter`

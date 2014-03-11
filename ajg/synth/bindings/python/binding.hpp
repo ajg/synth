@@ -145,6 +145,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
   public:
 
     // TODO: Support passing either a string or a file-like object.
+    // TODO: Override filters like pprint with Python's own pprint.pprint,
+    //       perhaps using a passed-in "overrides" library.
     binding( string_type  const& source
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true

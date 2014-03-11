@@ -58,7 +58,7 @@ struct default_tags : fusion::vector27
 // default_filters
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_filters : fusion::vector49
+struct default_filters : fusion::vector50
     < django::add_filter
     , django::addslashes_filter
     , django::capfirst_filter
@@ -91,7 +91,7 @@ struct default_filters : fusion::vector49
     , django::make_list_filter
     , django::phone2numeric_filter
     , django::pluralize_filter
- // , django::pprint_filter
+    , django::pprint_filter
     , django::random_filter
     , django::removetags_filter
     , django::rjust_filter

@@ -55,7 +55,6 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     TODO:
 ///     django::autoescape_tag
 ///     django::block_tag
-///     django::comment_tag
 ///     django::csrf_token_tag
 ///     django::cycle_tag
 ///     django::debug_tag
@@ -70,7 +69,6 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     django::load_from_tag
 ///     django::now_tag
 ///     django::regroup_tag
-///     django::spaceless_tag
 ///     django::ssi_tag
 ///     django::url_tag
 ///     django::widthratio_tag
@@ -95,6 +93,27 @@ DJANGO_TEST(for_tag with key and value,
     "[0| age: 23, name: joe][1| age: 55, name: bob][2| age: 41, name: lou]")
 */
 
+DJANGO_TEST(spaceless_tag A,
+        "{% spaceless %}\n"
+        "    <p>\n"
+        "        <a href=\"foo/\">Foo</a>\n"
+        "    </p>\n"
+        "{% endspaceless %}\n",
+            "\n"
+            "    <p><a href=\"foo/\">Foo</a></p>\n"
+            "\n")
+
+DJANGO_TEST(spaceless_tag B,
+        "{% spaceless %}\n"
+        "    <strong>\n"
+        "        Hello\n"
+        "    </strong>\n"
+        "{% endspaceless %}\n",
+            "\n"
+            "    <strong>\n"
+            "        Hello\n"
+            "    </strong>\n"
+            "\n")
 
 DJANGO_TEST(templatetag_tag openbrace,     "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag closevariable, "{% templatetag closevariable %}", "}}")
@@ -103,9 +122,9 @@ DJANGO_TEST(verbatim_tag,
         "{% verbatim %}{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
         "{% endfor %}{% endverbatim %}\n",
-        "{% for v in friends %}\n"
-        "    <p>{{ v }}</p>\n"
-        "{% endfor %}\n")
+            "{% for v in friends %}\n"
+            "    <p>{{ v }}</p>\n"
+            "{% endfor %}\n")
 
 DJANGO_TEST(comment_tag short, "A{# Foo Bar Qux #}B", "AB")
 DJANGO_TEST(comment_tag long,  "A{% comment %} Foo\n Bar\n Qux\n {% endcomment %}B", "AB")
@@ -237,22 +256,7 @@ TODO:
 
 /*
 TODO:
-
-{# Bad Bad Bad #}
 {% if not 0 %} IF Good {% else %} IF Bad {% endif %}
-
-
-{% spaceless %}
-     <p>
-        <a href="foo/">Foo</a>
-    </p>
-{% endspaceless %}
-
-{% spaceless %}
-    <strong>
-        Hello
-    </strong>
-{% endspaceless %}
 
 {% filter upper %}
 {% debug %}

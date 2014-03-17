@@ -74,7 +74,6 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     django::ssi_tag
 ///     django::url_tag
 ///     django::widthratio_tag
-///     django::with_tag
 ///     django::library_tag
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -108,6 +107,7 @@ DJANGO_TEST(verbatim_tag,
         "    <p>{{ v }}</p>\n"
         "{% endfor %}\n")
 
+DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters
 ///     TODO:
@@ -238,7 +238,6 @@ TODO:
 {# Bad Bad Bad #}
 {% if not 0 %} IF Good {% else %} IF Bad {% endif %}
 
-{% with "this_is_a_long_string" as ls %} {{ls}} {% endwith %}
 
 {% spaceless %}
      <p>

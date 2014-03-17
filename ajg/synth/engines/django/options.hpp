@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 
+#include <boost/optional.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -18,6 +19,8 @@ namespace ajg {
 namespace synth {
 namespace django {
 
+using boost::optional;
+
 template <class Options>
 struct abstract_loader {
     typedef abstract_loader                     this_type;
@@ -26,7 +29,29 @@ struct abstract_loader {
     typedef typename options_type::library_type library_type;
 
     virtual library_type load_library(string_type const& name) = 0;
+
     virtual ~abstract_loader() {}
+};
+
+template <class Options>
+struct abstract_resolver {
+    typedef abstract_resolver                     this_type;
+    typedef Options                               options_type;
+    typedef typename options_type::string_type    string_type;
+    typedef typename options_type::context_type   context_type;
+    typedef typename options_type::arguments_type arguments_type;
+
+    virtual optional<string_type> resolve( string_type  const& path
+                                         , context_type const& context
+                                         , options_type const& options
+                                         ) = 0;
+    virtual optional<string_type> reverse( string_type    const& name
+                                         , arguments_type const& arguments
+                                         , context_type   const& context
+                                         , options_type   const& options
+                                         ) = 0;
+
+    virtual ~abstract_resolver() {}
 };
 
 template <class Options>
@@ -52,6 +77,7 @@ struct abstract_library {
     virtual names_type   list_filters() const                      = 0;
     virtual tag_type     get_tag(string_type const& name)          = 0;
     virtual filter_type  get_filter(string_type const& name)       = 0;
+
     virtual ~abstract_library() {}
 };
 
@@ -74,13 +100,20 @@ struct options {
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
     typedef std::vector<string_type>               names_type;
     typedef std::vector<value_type>                array_type;
+
+    typedef std::vector<value_type>                sequence_type;
+    typedef std::map<value_type, value_type>       mapping_type;
+    typedef std::pair<sequence_type, mapping_type> arguments_type;
+
     typedef std::map<string_type, string_type>     formats_type;
     typedef std::vector<string_type>               directories_type;
     typedef abstract_library<options_type>         abstract_library_type;
     typedef abstract_loader<options_type>          abstract_loader_type;
+    typedef abstract_resolver<options_type>        abstract_resolver_type;
 
-    typedef shared_ptr<abstract_library_type>      library_type; // TODO[c++11]: Use unique_ptr?
-    typedef shared_ptr<abstract_loader_type>       loader_type;  // TODO[c++11]: Use unique_ptr?
+    typedef shared_ptr<abstract_library_type>      library_type;  // TODO[c++11]: Use unique_ptr?
+    typedef shared_ptr<abstract_loader_type>       loader_type;   // TODO[c++11]: Use unique_ptr?
+    typedef shared_ptr<abstract_resolver_type>     resolver_type; // TODO[c++11]: Use unique_ptr?
 
     typedef value_type (tag_fn_type)(options_type&, context_type*, array_type&);
     typedef value_type (filter_fn_type)(options_type const&, context_type const*, value_type const&, array_type const&);
@@ -93,6 +126,7 @@ struct options {
 
     typedef std::map<string_type, library_type>    libraries_type;
     typedef std::vector<loader_type>               loaders_type;
+    typedef std::vector<resolver_type>             resolvers_type;
 
   public:
 
@@ -105,6 +139,7 @@ struct options {
     filters_type      loaded_filters;
     libraries_type    libraries;
     loaders_type      loaders;
+    resolvers_type    resolvers;
 
   public:
 
@@ -115,6 +150,7 @@ struct options {
            , directories_type const& directories   = directories_type()
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
+           , resolvers_type   const& resolvers     = resolvers_type()
            )
         : autoescape(autoescape)
         , default_value(default_value)
@@ -123,6 +159,7 @@ struct options {
         , directories(directories)
         , libraries(libraries)
         , loaders(loaders)
+        , resolvers(resolvers)
         , loaded_tags()
         , loaded_filters()
         , blocks(0)

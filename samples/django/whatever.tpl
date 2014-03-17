@@ -3,11 +3,6 @@
 
 Char Pointer: {{ char_pointer }}
 
-{% ifequal 6 6 %} THEY EQUAL {% endifequal %}
-{% ifequal 5 6 %} {% else %} THEY DON'T EQUAL {% endifequal %}
-{% ifnotequal 5 6 %} THEY EQUAL {% endifnotequal %}
-{% ifnotequal 6 6 %} {% else %} THEY DON'T EQUAL {% endifnotequal %}
-
 Uh oh {{some_strings}},
 
 {##}

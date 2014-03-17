@@ -51,6 +51,11 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
 DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 
+DJANGO_TEST(ifequal_tag true,             "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
+DJANGO_TEST(ifequal_tag true,             "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
+DJANGO_TEST(ifequal_tag with else false,  "{% ifequal 6 6 %} Yes {% else %} No {% endifequal %}", " Yes ")
+DJANGO_TEST(ifequal_tag with else false,  "{% ifequal 5 6 %} Yes {% else %} No {% endifequal %}", " No ")
+
 DJANGO_TEST(for_tag with value,
     "{% for v in friends %}[{{ v }}]{% endfor %}",
     "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")

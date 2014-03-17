@@ -39,6 +39,9 @@ AJG_TESTING_BEGIN
 #define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
 
 
+/// Sanity checks
+////////////////////////////////////////////////////////////////////////////////
+
 DJANGO_TEST_(empty w/o context,  "", "",)
 DJANGO_TEST_(empty with context, "", "", context)
 
@@ -47,6 +50,33 @@ DJANGO_TEST_(text with context, "ABC", "ABC", context)
 
 DJANGO_TEST_(html w/o context,  "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>",)
 DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
+
+/// Tags
+///     TODO:
+///     django::autoescape_tag
+///     django::block_tag
+///     django::comment_tag
+///     django::csrf_token_tag
+///     django::cycle_tag
+///     django::debug_tag
+///     django::extends_tag
+///     django::filter_tag
+///     django::firstof_tag
+///     django::for_empty_tag
+///     django::if_tag
+///     django::ifchanged_tag
+///     django::include_tag
+///     django::load_tag
+///     django::load_from_tag
+///     django::now_tag
+///     django::regroup_tag
+///     django::spaceless_tag
+///     django::ssi_tag
+///     django::url_tag
+///     django::widthratio_tag
+///     django::with_tag
+///     django::library_tag
+////////////////////////////////////////////////////////////////////////////////
 
 DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
 DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
@@ -66,6 +96,10 @@ DJANGO_TEST(for_tag with key and value,
     "[0| age: 23, name: joe][1| age: 55, name: bob][2| age: 41, name: lou]")
 */
 
+
+DJANGO_TEST(templatetag_tag openbrace,     "{% templatetag openbrace %}",     "{")
+DJANGO_TEST(templatetag_tag closevariable, "{% templatetag closevariable %}", "}}")
+
 DJANGO_TEST(verbatim_tag,
         "{% verbatim %}{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
@@ -73,6 +107,52 @@ DJANGO_TEST(verbatim_tag,
         "{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"
         "{% endfor %}\n")
+
+
+/// Filters
+///     TODO:
+///     django::add_filter
+///     django::addslashes_filter
+///     django::capfirst_filter
+///     django::center_filter
+///     django::cut_filter
+///     django::date_filter
+///     django::default_filter
+///     django::default_if_none_filter
+///     django::dictsort_filter
+///     django::dictsortreversed_filter
+///     django::escape_filter
+///     django::escapejs_filter
+///     django::filesizeformat_filter
+///     django::first_filter
+///     django::fix_ampersands_filter
+///     django::force_escape_filter
+///     django::get_digit_filter
+///     django::iriencode_filter
+///     django::join_filter
+///     django::last_filter
+///     django::length_filter
+///     django::length_is_filter
+///     django::linebreaks_filter
+///     django::linebreaksbr_filter
+///     django::linenumbers_filter
+///     django::make_list_filter
+///     django::pluralize_filter
+///     django::pprint_filter
+///     django::random_filter
+///     django::safe_filter
+///     django::safeseq_filter
+///     django::slice_filter
+///     django::slugify_filter
+///     django::stringformat_filter
+///     django::striptags_filter
+///     django::time_filter
+///     django::timesince_filter
+///     django::timeuntil_filter
+///     django::unordered_list_filter
+///     django::wordcount_filter
+///     django::wordwrap_filter
+////////////////////////////////////////////////////////////////////////////////
 
 DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 
@@ -153,95 +233,34 @@ TODO:
 */
 
 /*
-Tested:
+TODO:
 
-// django::autoescape_tag
-// django::block_tag
-// django::comment_tag
-// django::csrf_token_tag
-// django::cycle_tag
-// django::debug_tag
-// django::extends_tag
-// django::filter_tag
-// django::firstof_tag
-django::for_tag
-// django::for_empty_tag
-// django::if_tag
-// django::ifchanged_tag
-django::ifequal_tag
-django::ifnotequal_tag
-// django::include_tag
-// django::load_tag
-// django::load_from_tag
-// django::now_tag
-// django::regroup_tag
-// django::spaceless_tag
-// django::ssi_tag
-// django::templatetag_tag
-// django::url_tag
-django::variable_tag
-django::verbatim_tag
-// django::widthratio_tag
-// django::with_tag
-// django::library_tag
+{# Bad Bad Bad #}
+{% if not 0 %} IF Good {% else %} IF Bad {% endif %}
 
-// django::add_filter
-// django::addslashes_filter
-// django::capfirst_filter
-// django::center_filter
-// django::cut_filter
-// django::date_filter
-// django::default_filter
-// django::default_if_none_filter
-// django::dictsort_filter
-// django::dictsortreversed_filter
-django::divisibleby_filter
-// django::escape_filter
-// django::escapejs_filter
-// django::filesizeformat_filter
-// django::first_filter
-// django::fix_ampersands_filter
-django::floatformat_filter
-// django::force_escape_filter
-// django::get_digit_filter
-// django::iriencode_filter
-// django::join_filter
-// django::last_filter
-// django::length_filter
-// django::length_is_filter
-// django::linebreaks_filter
-// django::linebreaksbr_filter
-// django::linenumbers_filter
-django::ljust_filter
-django::lower_filter
-// django::make_list_filter
-django::phone2numeric_filter
-// django::pluralize_filter
-// django::pprint_filter
-// django::random_filter
-django::removetags_filter
-django::rjust_filter
-// django::safe_filter
-// django::safeseq_filter
-// django::slice_filter
-// django::slugify_filter
-// django::stringformat_filter
-// django::striptags_filter
-// django::time_filter
-// django::timesince_filter
-// django::timeuntil_filter
-django::title_filter
-django::truncatechars_filter
-django::truncatechars_html_filter
-django::truncatewords_filter
-django::truncatewords_html_filter
-// django::unordered_list_filter
-django::upper_filter
-django::urlencode_filter
-django::urlize_filter
-django::urlizetrunc_filter
-// django::wordcount_filter
-// django::wordwrap_filter
-django::yesno_filter
+{% with "this_is_a_long_string" as ls %} {{ls}} {% endwith %}
+
+{% spaceless %}
+     <p>
+        <a href="foo/">Foo</a>
+    </p>
+{% endspaceless %}
+
+{% spaceless %}
+    <strong>
+        Hello
+    </strong>
+{% endspaceless %}
+
+{% filter upper %}
+{% debug %}
+{% endfilter %}
+
+<img src="bar.gif" height="10" width="{% widthratio this_value max_value 100 %}" />
+
+{#% ssi /etc/adjtime parsed % -- unavailable on Windows #}
+{#% ssi /etc/adjtime % -- unavailable on Windows #}
+
+
 
 */

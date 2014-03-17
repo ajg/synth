@@ -176,6 +176,11 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////
 
+unit_test(name) {
+    string_template const t("{{ 42 | xyz }}");
+    ensure_throws(s::missing_filter, t.render_to_string(context));
+}}}
+
 DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 
 DJANGO_TEST(float,                                 "{{3.3}}",   "3.3")
@@ -266,7 +271,4 @@ TODO:
 
 {#% ssi /etc/adjtime parsed % -- unavailable on Windows #}
 {#% ssi /etc/adjtime % -- unavailable on Windows #}
-
-
-
 */

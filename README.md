@@ -233,7 +233,8 @@ Django Engine
  - `django::spaceless_tag`
  - `django::ssi_tag`
  - `django::templatetag_tag`
- - `django::url_tag` (TODO)
+ - `django::url_tag`
+ - `django::url_as_tag`
  - `django::variable_tag`
  - `django::verbatim_tag`
  - `django::widthratio_tag`

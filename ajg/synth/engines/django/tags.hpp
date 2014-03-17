@@ -199,6 +199,7 @@ struct cycle_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
+        // TODO: Make this part of engine.expression.
         struct not_as {
             bool operator ()(typename Match::value_type const& match) const {
                 return match.str() != lexical_cast<String>("as");
@@ -207,9 +208,8 @@ struct cycle_tag {
 
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            Regex const expressions = +(+_s >> engine.expression[ check(not_as()) ]);
-            return TAG("cycle" >> expressions
-                       >> !(+_s >> "as" >> +_s >> engine.identifier))
+            Regex const expressions = +(+_s >> engine.expression);
+            return TAG("cycle" >> expressions >> !(+_s >> "as" >> +_s >> engine.identifier))
                    >> engine.block;
         }
 
@@ -236,9 +236,9 @@ struct cycle_tag {
             else {
                 // E.g. cycle foo as bar
                 String const name = ident.str();
-                Context copy = context;
-                copy[name] = value;
-                engine.render_block(out, block, copy, options);
+                Context context_copy = context;
+                context_copy[name] = value;
+                engine.render_block(out, block, context_copy, options);
             }
         }
     };
@@ -456,26 +456,26 @@ struct for_tag {
             typename Value::const_iterator it(value.begin()), end(value.end());
 
             if (it != end) { // Not empty.
-                Context copy = context;
+                Context context_copy = context;
                 uintmax_t i = 0;
 
                 for (; it != end; ++it, ++i) {
                     if (second.empty()) { // e.g. for i in ...
-                        copy[first] = boost::ref(*it);
+                        context_copy[first] = boost::ref(*it);
                     }
                     else { // e.g. for k, v in ...
-                        // copy[first] = i;
-                        // copy[second] = boost::ref(*it);
+                        // context_copy[first] = i;
+                        // context_copy[second] = boost::ref(*it);
 
                         Value const item = *it;
 
                         if (item.length() < 2) {
                             throw_exception(std::out_of_range("item"));
                         }
-                        copy[first] = boost::ref(item[0]);
-                        copy[second] = boost::ref(item[1]);
+                        context_copy[first] = boost::ref(item[0]);
+                        context_copy[second] = boost::ref(item[1]);
                     }
-                    engine.render_block(out, for_, copy, options);
+                    engine.render_block(out, for_, context_copy, options);
                 }
             }
             // for ... empty ... endfor case.
@@ -918,6 +918,86 @@ struct templatetag_tag {
             else {
                 out << options.default_value;
             }
+        }
+    };
+};
+
+//
+// url_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct url_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            return TAG("url" >> +_s >> engine.expression >> engine.arguments);
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options&       options
+                   , typename Engine::stream_type& out) const {
+            Match const& expr = match(engine.expression);
+            Match const& args = match(engine.arguments);
+
+            Value const view = engine.evaluate(expr, context, options);
+            Array values;
+
+            BOOST_FOREACH(Match const& arg, args.nested_results()) {
+                values.push_back(engine.evaluate(arg, context, options));
+            }
+
+            if (optional<String> const& url =
+                engine.get_view_url(view, values, context, options)) {
+                out << *url;
+            }
+            else {
+                throw_exception(std::runtime_error("view not found"));
+            }
+        }
+    };
+};
+
+//
+// url_as_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct url_as_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            return TAG("url" >> +_s >> engine.expression >> engine.arguments
+                             >> +_s >> "as" >> +_s >> engine.identifier)
+                   >> engine.block;
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options&       options
+                   , typename Engine::stream_type& out) const {
+            Match const& expr  = match(engine.expression);
+            Match const& args  = match(engine.arguments);
+            Match const& block = match(engine.block);
+            Match const& ident = match(engine.identifier);
+
+            Value const view = engine.evaluate(expr, context, options);
+            Array values;
+
+            BOOST_FOREACH(Match const& arg, args.nested_results()) {
+                values.push_back(engine.evaluate(arg, context, options));
+            }
+
+            String const url = engine.get_view_url(view, values, context, options).
+                get_value_or(String());
+
+            String const name = ident.str();
+            Context context_copy = context;
+            context_copy[name] = url;
+            engine.render_block(out, block, context_copy, options);
         }
     };
 };

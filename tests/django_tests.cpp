@@ -15,14 +15,16 @@
 namespace {
 
 namespace s = ajg::synth;
+using boost::optional;
 
-typedef char                                       char_type;
-typedef s::django::engine<>                        engine_type;
-typedef s::file_template<char_type, engine_type>   file_template;
-typedef s::string_template<char_type, engine_type> string_template;
-typedef string_template::context_type              context_type;
-typedef tests::context_data<context_type>          context_data_type;
-typedef ajg::test_group<context_data_type>         group_type;
+typedef char                                            char_type;
+typedef s::django::engine<>                             engine_type;
+typedef s::file_template<char_type, engine_type>        file_template;
+typedef s::string_template<char_type, engine_type>      string_template;
+typedef string_template::context_type                   context_type;
+typedef string_template::options_type                   options_type;
+typedef tests::context_data<context_type, options_type> context_data_type;
+typedef ajg::test_group<context_data_type>              group_type;
 
 group_type group_object("django tests");
 
@@ -33,7 +35,7 @@ AJG_TESTING_BEGIN
 #define DJANGO_TEST_(name, in, out, context) \
     unit_test(name) { \
         string_template const t(in); \
-        ensure_equals(t.render_to_string(context), out); \
+        ensure_equals(t.render_to_string(context/*, options */), out); \
     }}} \
 
 #define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
@@ -70,10 +72,15 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     django::now_tag
 ///     django::regroup_tag
 ///     django::ssi_tag
-///     django::url_tag
+///     django::url_as_tag
 ///     django::widthratio_tag
 ///     django::library_tag
 ////////////////////////////////////////////////////////////////////////////////
+
+unit_test(missing tag) {
+    string_template const t("{% xyz 42 %}");
+    ensure_throws(s::missing_tag, t.render_to_string(context));
+}}}
 
 DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
 DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
@@ -129,6 +136,70 @@ DJANGO_TEST(verbatim_tag,
 DJANGO_TEST(comment_tag short, "A{# Foo Bar Qux #}B", "AB")
 DJANGO_TEST(comment_tag long,  "A{% comment %} Foo\n Bar\n Qux\n {% endcomment %}B", "AB")
 
+
+//
+// test_resolver
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Options>
+struct test_resolver : Options::abstract_resolver_type {
+    typedef Options                               options_type;
+    typedef typename options_type::string_type    string_type;
+    typedef typename options_type::value_type     value_type;
+    typedef typename options_type::context_type   context_type;
+    typedef typename options_type::arguments_type arguments_type;
+    typedef std::map<string_type, string_type>    urls_type;
+
+    virtual optional<string_type> resolve( string_type  const& path
+                                         , context_type const& context
+                                         , options_type const& options
+                                         ) {
+        return boost::none;
+    }
+
+    virtual optional<string_type> reverse( string_type    const& name
+                                         , arguments_type const& arguments
+                                         , context_type   const& context
+                                         , options_type   const& options
+                                         ) {
+        typename urls_type::const_iterator it = urls_.find(name);
+        if (it == urls_.end()) {
+            return boost::none;
+        }
+
+        string_type suffix;
+        BOOST_FOREACH(value_type const& arg, arguments.first) {
+            suffix += "/" + arg.to_string();
+        }
+        return it->second + suffix;
+    }
+
+    explicit test_resolver(urls_type urls) : urls_(urls) {}
+    virtual ~test_resolver() {}
+
+  private:
+
+    urls_type urls_;
+};
+
+
+unit_test(url_tag) {
+    string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
+    test_resolver<options_type>::urls_type urls;
+    urls["foo.bar.qux"] = "/foo-bar-qux";
+    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+
+    ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/2/3");
+}}}
+
+unit_test(url_tag missing) {
+    string_template const t("{% url 'x.y.z' 1 2 3 %}");
+    test_resolver<options_type>::urls_type urls;
+    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+
+    ensure_throws(std::runtime_error, t.render_to_string(context, options));
+}}}
+
 DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters
@@ -176,7 +247,7 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////
 
-unit_test(name) {
+unit_test(missing filter) {
     string_template const t("{{ 42 | xyz }}");
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}

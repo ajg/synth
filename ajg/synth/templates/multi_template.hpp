@@ -52,6 +52,7 @@ struct multi_template {
     typedef typename django_options_type::libraries_type libraries_type;
     typedef typename django_options_type::loader_type    loader_type;
     typedef typename django_options_type::loaders_type   loaders_type;
+    typedef typename django_options_type::resolvers_type resolvers_type;
 
   public:
 
@@ -65,13 +66,15 @@ struct multi_template {
                   , directories_type const& directories
                   , libraries_type   const& libraries
                   , loaders_type     const& loaders
+                  , resolvers_type   const& resolvers
                   )
         : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders)
+        , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders, resolvers)
         , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message
         , tmpl_options_() {                        // TODO: directories, debug
+        AJG_PRINT("multi_template::multi_template()");
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine_name");
         }

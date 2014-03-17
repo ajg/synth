@@ -74,7 +74,7 @@ struct multi_template {
         , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders, resolvers)
         , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message
         , tmpl_options_() {                        // TODO: directories, debug
-        AJG_PRINT("multi_template::multi_template()");
+        // AJG_PRINT("multi_template::multi_template()");
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine_name");
         }

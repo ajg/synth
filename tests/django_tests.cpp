@@ -11,6 +11,7 @@
 #include <ajg/synth/engines/django.hpp>
 
 #include <tests/context_data.hpp>
+#include <tests/test_resolver.hpp>
 
 namespace {
 
@@ -136,83 +137,36 @@ DJANGO_TEST(verbatim_tag,
 DJANGO_TEST(comment_tag short, "A{# Foo Bar Qux #}B", "AB")
 DJANGO_TEST(comment_tag long,  "A{% comment %} Foo\n Bar\n Qux\n {% endcomment %}B", "AB")
 
-
-//
-// test_resolver
-////////////////////////////////////////////////////////////////////////////////
-
-template <class Options>
-struct test_resolver : Options::abstract_resolver_type {
-    typedef Options                               options_type;
-    typedef typename options_type::string_type    string_type;
-    typedef typename options_type::value_type     value_type;
-    typedef typename options_type::context_type   context_type;
-    typedef typename options_type::arguments_type arguments_type;
-    typedef std::map<string_type, string_type>    urls_type;
-
-    virtual optional<string_type> resolve( string_type  const& path
-                                         , context_type const& context
-                                         , options_type const& options
-                                         ) {
-        return boost::none;
-    }
-
-    virtual optional<string_type> reverse( string_type    const& name
-                                         , arguments_type const& arguments
-                                         , context_type   const& context
-                                         , options_type   const& options
-                                         ) {
-        typename urls_type::const_iterator it = urls_.find(name);
-        if (it == urls_.end()) {
-            return boost::none;
-        }
-
-        string_type suffix;
-        BOOST_FOREACH(value_type const& arg, arguments.first) {
-            suffix += "/" + arg.to_string();
-        }
-        return it->second + suffix;
-    }
-
-    explicit test_resolver(urls_type urls) : urls_(urls) {}
-    virtual ~test_resolver() {}
-
-  private:
-
-    urls_type urls_;
-};
-
-
 unit_test(url_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
-    test_resolver<options_type>::urls_type urls;
-    urls["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+    tests::test_resolver<options_type>::patterns_type patterns;
+    patterns["foo.bar.qux"] = "/foo-bar-qux";
+    options.resolvers.push_back(options_type::resolver_type(new tests::test_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_tag missing) {
     string_template const t("{% url 'x.y.z' 1 2 3 %}");
-    test_resolver<options_type>::urls_type urls;
-    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+    tests::test_resolver<options_type>::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new tests::test_resolver<options_type>(patterns)));
 
     ensure_throws(std::runtime_error, t.render_to_string(context, options));
 }}}
 
 unit_test(url_as_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
-    test_resolver<options_type>::urls_type urls;
-    urls["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+    tests::test_resolver<options_type>::patterns_type patterns;
+    patterns["foo.bar.qux"] = "/foo-bar-qux";
+    options.resolvers.push_back(options_type::resolver_type(new tests::test_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_as_tag missing) {
     string_template const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
-    test_resolver<options_type>::urls_type urls;
-    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+    tests::test_resolver<options_type>::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new tests::test_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_");
 }}}

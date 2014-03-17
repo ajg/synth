@@ -80,6 +80,8 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
+    typedef typename base_type::string_regex_type string_regex_type;
+
     typedef Library                             library_type;
     typedef Loader                              loader_type;
     typedef typename library_type::first        tags_type;
@@ -89,6 +91,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename options_type::context_type context_type;
     typedef typename options_type::array_type   array_type;
     typedef typename options_type::names_type   names_type;
+
 
     typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions_extended>      tag_sequence_type;
@@ -197,6 +200,21 @@ struct definition : base_definition< BidirectionalIterator
             ;
         nothing
             = as_xpr('\0') // xpressive isn't liking it default-constructed.
+            ;
+        html_namechar
+            = ~(set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
+            ;
+        html_whitespace
+            = (set = ' ', '\t', '\n', '\v', '\f', '\r')
+            ;
+        html_tag
+            = '<' >> !as_xpr('/')
+                   // The tag's name:
+                   >> (s1 = -+html_namechar)
+                   // Attributes, if any:
+                   >> !(+html_whitespace >> -*~as_xpr('>'))
+               >> !as_xpr('/')
+            >> '>'
             ;
 
         this->initialize_grammar();
@@ -662,6 +680,7 @@ struct definition : base_definition< BidirectionalIterator
     regex_type string_literal, number_literal;
     regex_type none_literal, boolean_literal;
     regex_type variable_literal, literal;
+    string_regex_type html_namechar, html_whitespace, html_tag;
 
   private:
 

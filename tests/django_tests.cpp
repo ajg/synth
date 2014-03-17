@@ -74,11 +74,12 @@ DJANGO_TEST(verbatim_tag,
         "    <p>{{ v }}</p>\n"
         "{% endfor %}\n")
 
+DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 
-DJANGO_TEST(plain float,                            "{{3.3}}",   "3.3")
-DJANGO_TEST(plain float trailing zero,              "{{3.30}}",  "3.3")
-DJANGO_TEST(plain float leading zero,               "{{03.3}}",  "3.3")
-DJANGO_TEST(plain float trailing and leading zero,  "{{03.30}}", "3.3")
+DJANGO_TEST(float,                                 "{{3.3}}",   "3.3")
+DJANGO_TEST(float with trailing zero,              "{{3.30}}",  "3.3")
+DJANGO_TEST(float with leading zero,               "{{03.3}}",  "3.3")
+DJANGO_TEST(float with trailing and leading zero,  "{{03.30}}", "3.3")
 
 DJANGO_TEST(floatformat_filter A, "{{34.23234|floatformat }}", "34.2")
 DJANGO_TEST(floatformat_filter B, "{{34.00000|floatformat }}", "34")
@@ -95,6 +96,8 @@ DJANGO_TEST(floatformat_filter I, "{{34.26000|floatformat:\"-3\" }}", "34.260")
 DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ")
 
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko")
+
+DJANGO_TEST(phone2numeric_filter, "{{ \"1-800-COLLECT\" | phone2numeric }}", "1-800-2655328")
 
 DJANGO_TEST(removetags_filter A, "{{ \"<b>Joel</b> <button>is</button> a <span>slug</span>\" | removetags:\"b span\"|safe }}", "Joel <button>is</button> a slug")
 DJANGO_TEST(removetags_filter B, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")
@@ -132,6 +135,8 @@ DJANGO_TEST(truncatewords_html_filter 3, "{{ \"<p>Joel is a slug</p>\" | truncat
 
 DJANGO_TEST(upper_filter, "{{ \"Joel is a slug\" | upper }}", "JOEL IS A SLUG")
 
+DJANGO_TEST(urlencode_filter, "{{ \"/this should/be encoded ^ because @ is not an option $ ()\" | urlencode }}", "/this%20should/be%20encoded%20%5E%20because%20%40%20is%20not%20an%20option%20%24%20%28%29")
+
 DJANGO_TEST(urlize_filter, "{{ \"This is some text containing a http://www.url.com sir and also another.url.com.\" | urlize }}", "This is some text containing a <a href='http://www.url.com'>http://www.url.com</a> sir and also <a href='http://another.url.com'>another.url.com</a>.")
 
 DJANGO_TEST(urlizetrunc_filter, "{{ \"This is some text containing a http://www.url.com sir and also another.url.com.\" | urlizetrunc:15 }}", "This is some text containing a <a href='http://www.url.com'>http://www.url....</a> sir and also <a href='http://another.url.com'>another.url.com</a>.")
@@ -163,8 +168,8 @@ django::for_tag
 // django::for_empty_tag
 // django::if_tag
 // django::ifchanged_tag
-// django::ifequal_tag
-// django::ifnotequal_tag
+django::ifequal_tag
+django::ifnotequal_tag
 // django::include_tag
 // django::load_tag
 // django::load_from_tag
@@ -190,7 +195,7 @@ django::verbatim_tag
 // django::default_if_none_filter
 // django::dictsort_filter
 // django::dictsortreversed_filter
-// django::divisibleby_filter
+django::divisibleby_filter
 // django::escape_filter
 // django::escapejs_filter
 // django::filesizeformat_filter
@@ -210,7 +215,7 @@ django::floatformat_filter
 django::ljust_filter
 django::lower_filter
 // django::make_list_filter
-// django::phone2numeric_filter
+django::phone2numeric_filter
 // django::pluralize_filter
 // django::pprint_filter
 // django::random_filter
@@ -232,7 +237,7 @@ django::truncatewords_filter
 django::truncatewords_html_filter
 // django::unordered_list_filter
 django::upper_filter
-// django::urlencode_filter
+django::urlencode_filter
 django::urlize_filter
 django::urlizetrunc_filter
 // django::wordcount_filter

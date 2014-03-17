@@ -57,13 +57,8 @@ Included:
 {% firstof aa a_true "FALLBACK" %}
 
 
-{{X|upper}}
 {{X|escape}}
 {# {{X|pluralize:"en"}} #}
-
-{{21|divisibleby:"3"}}
-{{"1-800-COLLECT"|phone2numeric}}
-{{"/this should/be encoded ^ because @ is not an option $ ()"|urlencode}}
 
 {% for a, b in a_string_array %}a: {{a}} b: {{b}} {% endfor %}
 {{ a_string_array|first }}

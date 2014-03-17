@@ -82,21 +82,30 @@ struct definition : base_definition< BidirectionalIterator
 
     typedef typename base_type::string_regex_type string_regex_type;
 
-    typedef Library                             library_type;
-    typedef Loader                              loader_type;
-    typedef typename library_type::first        tags_type;
-    typedef typename library_type::second       filters_type;
-    typedef django::value<char_type>            value_type;
-    typedef options<value_type>                 options_type;
-    typedef typename options_type::context_type context_type;
-    typedef typename options_type::array_type   array_type;
-    typedef typename options_type::names_type   names_type;
+    typedef Library                               library_type;
+    typedef Loader                                loader_type;
+    typedef typename library_type::first          tags_type;
+    typedef typename library_type::second         filters_type;
+    typedef django::value<char_type>              value_type;
+    typedef options<value_type>                   options_type;
+    typedef typename options_type::context_type   context_type;
+    typedef typename options_type::array_type     array_type;
+    typedef typename options_type::names_type     names_type;
+    typedef typename options_type::arguments_type arguments_type;
 
 
     typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions_extended>      tag_sequence_type;
     typedef detail::indexable_sequence<this_type, filters_type,
         string_type, detail::create_definitions_extended>  filter_sequence_type;
+
+  private:
+
+    struct not_as {
+        bool operator ()(typename match_type::value_type const& match) const {
+            return match.str() != boost::lexical_cast<string_type>("as");
+        }
+    };
 
   public:
 
@@ -117,7 +126,7 @@ struct definition : base_definition< BidirectionalIterator
 ////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = (alpha | '_') >> *_w
+            = ((alpha | '_') >> *_w) [ x::check(not_as()) ]
             ;
         package
             = identifier >> *('.' >> identifier)
@@ -187,6 +196,9 @@ struct definition : base_definition< BidirectionalIterator
             = unary_expression
             | binary_expression
             | nested_expression
+            ;
+        arguments
+            = *(+_s >> expression)
             ;
         filter
             = identifier >> !(':' >> *_s >> chain)
@@ -387,9 +399,11 @@ struct definition : base_definition< BidirectionalIterator
         return result;
     }
 
-    value_type evaluate( match_type   const& match
-                       , context_type const& context
-                       , options_type const& options
+    value_type evaluate( match_type    const& match
+                       , context_type  const& context
+                       , options_type  const& options
+              // TODO: , sequence_type const& args    = []
+              // TODO: , mapping_type  const& kwargs  = {}
                        ) const {
         return evaluate_expression(match, context, options);
     }
@@ -620,6 +634,24 @@ struct definition : base_definition< BidirectionalIterator
         }
     }
 
+    optional<string_type> get_view_url( value_type const&   view
+                                      , array_type const&   args
+                                      , context_type const& context
+                                      , options_type const& options
+                                      ) const {
+        string_type    name = view.to_string();
+        arguments_type arguments;
+        arguments.first = args;
+
+        BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
+            if (optional<string_type> const& url
+                    = resolver->reverse(name, arguments, context, options)) {
+                return url;
+            }
+        }
+        return none;
+    }
+
     void load_library( context_type&      context
                      , options_type&      options
                      , string_type const& library
@@ -677,6 +709,7 @@ struct definition : base_definition< BidirectionalIterator
     regex_type unary_operator, binary_operator;
     regex_type unary_expression, binary_expression;
     regex_type nested_expression, expression;
+    regex_type arguments;
     regex_type string_literal, number_literal;
     regex_type none_literal, boolean_literal;
     regex_type variable_literal, literal;

@@ -11,6 +11,8 @@
 #include <utility>
 #include <stdexcept>
 
+#include <boost/optional.hpp>
+
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -66,6 +68,7 @@ struct library : Options::abstract_library_type {
             }
         }
     }
+    virtual ~library() {}
 
     virtual boolean_type has_tag(string_type const& name) const { return tags_.find(name) != tags_.end(); }
     virtual boolean_type has_filter(string_type const& name) const { return filters_.find(name) != filters_.end(); }
@@ -73,7 +76,6 @@ struct library : Options::abstract_library_type {
     virtual names_type   list_filters() const { return filter_names_; }
     virtual tag_type     get_tag(string_type const& name) { return tags_[name]; }
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
-    virtual ~library() {}
 
     static value_type call_tag(py::object tag, options_type&, context_type*, array_type&) {
         throw_exception(not_implemented("call_tag"));
@@ -103,16 +105,60 @@ struct loader : Options::abstract_loader_type {
     typedef typename options_type::library_type          library_type;
 
     explicit loader(py::object ldr) : ldr_(ldr) {}
+    virtual ~loader() {}
 
     virtual library_type load_library(string_type const& name) {
         return library_type(new library<options_type>(ldr_(name)));
     }
 
-    virtual ~loader() {}
 
   private:
 
     py::object /*const*/ ldr_;
+};
+
+//
+// resolver
+////////////////////////////////////////////////////////////////////////////////
+
+template <class Options>
+struct resolver : Options::abstract_resolver_type {
+    typedef Options                               options_type;
+    typedef typename options_type::string_type    string_type;
+    typedef typename options_type::context_type   context_type;
+    typedef typename options_type::arguments_type arguments_type;
+
+    virtual optional<string_type> resolve( string_type  const& path
+                                         , context_type const& context
+                                         , options_type const& options
+                                         ) {
+        try {
+            return rslvr_.attr("resolve")(path);
+        }
+        catch (...) { // TODO: Catch only Resolver404?
+            return none;
+        }
+    }
+
+    virtual optional<string_type> reverse( string_type    const& name
+                                         , arguments_type const& arguments
+                                         , context_type   const& context
+                                         , options_type   const& options
+                                         ) {
+        try {
+            return rslvr_.attr("reverse")(name/*, TODO: arguments.first, arguments.second, current_app */);
+        }
+        catch (...) { // TODO: Catch only NoReverseMatch?
+            return none;
+        }
+    }
+
+    explicit resolver(py::object rslvr) : rslvr_(rslvr) {}
+    virtual ~resolver() {}
+
+  private:
+
+    py::object /*const*/ rslvr_;
 };
 
 template <class MultiTemplate>
@@ -130,6 +176,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     typedef typename base_type::libraries_type   libraries_type;
     typedef typename base_type::loader_type      loader_type;
     typedef typename base_type::loaders_type     loaders_type;
+    typedef typename base_type::resolver_type    resolver_type;
+    typedef typename base_type::resolvers_type   resolvers_type;
     typedef py::dict                             context_type;
 
     typedef py::init< string_type
@@ -141,6 +189,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                         , boolean_type
                         , py::list
                         , py::dict
+                        , py::list
                         , py::list
                         >
                     > constructor_type;
@@ -159,6 +208,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
            , py::list     const& dirs          = py::list()
            , py::dict     const& libs          = py::dict()
            , py::list     const& ldrs          = py::list()
+           , py::list     const& rslvrs        = py::list()
            )
         : base_type( source
                    , engine_name
@@ -169,6 +219,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                    , get_directories(dirs)
                    , get_libraries(libs)
                    , get_loaders(ldrs)
+                   , get_resolvers(rslvrs)
                    ) {}
 
     void render(py::object file, py::dict dictionary) const {
@@ -231,6 +282,17 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
         }
 
         return loaders;
+    }
+
+    inline static loaders_type get_resolvers(py::list rslvrs) {
+        py::stl_input_iterator<py::object> begin(rslvrs), end;
+        loaders_type resolvers;
+
+        BOOST_FOREACH(py::object const& rslvr, std::make_pair(begin, end)) {
+            resolvers.push_back(resolver_type(new resolver<options_type>(rslvr)));
+        }
+
+        return resolvers;
     }
 
   public: // TODO[c++11]: Replace with `friend MultiTemplate;`

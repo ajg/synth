@@ -32,6 +32,7 @@ struct binding : MultiTemplate {
     typedef typename base_type::directories_type               directories_type;
     typedef typename base_type::libraries_type                 libraries_type;
     typedef typename base_type::loaders_type                   loaders_type;
+    typedef typename base_type::resolvers_type                 resolvers_type;
     typedef typename pt::basic_ptree<string_type, string_type> context_type; // TODO: basic_ptree<string_type, value_type>
 
   public:
@@ -51,6 +52,7 @@ struct binding : MultiTemplate {
                         , directories
                         , libraries_type()
                         , loaders_type()
+                        , resolvers_type()
                         ) {}
 
   public:

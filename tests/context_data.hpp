@@ -9,9 +9,11 @@
 #include <map>
 #include <string>
 
+#include <boost/mpl/void.hpp>
+
 namespace tests {
 
-template <class Context>
+template <class Context, class Options = boost::mpl::void_>
 struct context_data {
     context_data() {
         context["foo"] = "A";
@@ -36,6 +38,7 @@ struct context_data {
     }
 
     Context context;
+    Options options;
     std::map<std::string, std::string> friends[3];
 };
 

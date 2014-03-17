@@ -943,20 +943,6 @@ struct removetags_filter {
     struct definition {
         String name() const { return text("removetags"); }
 
-        definition() {
-            using namespace xpressive;
-            typename Engine::string_regex_type const
-                namechar = ~(set = ' ', '\t', '\n', '\v', '\f', '\r', '>'),
-                whitespace = (set = ' ', '\t', '\n', '\v', '\f', '\r');
-            tag_ = '<' >> !as_xpr('/')
-                           // The tag's name:
-                           >> (s1 = -+namechar)
-                           // Attributes, if any:
-                           >> !(+whitespace >> -*~as_xpr('>'))
-                       >> !as_xpr('/')
-                >> '>';
-        }
-
         struct formatter {
             std::vector<String> const& tags;
 
@@ -978,12 +964,8 @@ struct removetags_filter {
             int (*predicate)(int) = std::isspace;
             String const source = args[0].to_string();
             algorithm::split(tags, source, predicate);
-            return xpressive::regex_replace(value.to_string(), tag_, format);
+            return xpressive::regex_replace(value.to_string(), engine.html_tag, format);
         }
-
-      private:
-
-        typename Engine::string_regex_type tag_;
     };
 };
 

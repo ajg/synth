@@ -91,10 +91,14 @@ DJANGO_TEST(floatformat_filter G, "{{34.23234|floatformat:\"-3\" }}", "34.232", 
 DJANGO_TEST(floatformat_filter H, "{{34.00000|floatformat:\"-3\" }}", "34",     context)
 DJANGO_TEST(floatformat_filter I, "{{34.26000|floatformat:\"-3\" }}", "34.260", context)
 
+DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ", context)
+
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko", context)
 
 DJANGO_TEST(removetags_filter A, "{{ \"<b>Joel</b> <button>is</button> a <span>slug</span>\" | removetags:\"b span\"|safe }}", "Joel <button>is</button> a slug", context)
 DJANGO_TEST(removetags_filter B, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End", context)
+
+DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django", context)
 
 DJANGO_TEST(title_filter, "{{ \"my FIRST post\" | title }}", "My First Post", context)
 
@@ -202,7 +206,7 @@ django::floatformat_filter
 // django::linebreaks_filter
 // django::linebreaksbr_filter
 // django::linenumbers_filter
-// django::ljust_filter
+django::ljust_filter
 django::lower_filter
 // django::make_list_filter
 // django::phone2numeric_filter
@@ -210,7 +214,7 @@ django::lower_filter
 // django::pprint_filter
 // django::random_filter
 django::removetags_filter
-// django::rjust_filter
+django::rjust_filter
 // django::safe_filter
 // django::safeseq_filter
 // django::slice_filter

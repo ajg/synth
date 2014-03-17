@@ -1,4 +1,6 @@
 
+{{some_strings[2]}}, {{some_strings[1]}}
+
 Char Pointer: {{ char_pointer }}
 
 {% ifequal 6 6 %} THEY EQUAL {% endifequal %}

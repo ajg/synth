@@ -1212,6 +1212,9 @@ struct title_filter {
                 if (i == 0 || std::isspace(text[i - 1])) {
                     text[i] = std::toupper(text[i]);
                 }
+                else {
+                    text[i] = std::tolower(text[i]);
+                }
             }
 
             return text;

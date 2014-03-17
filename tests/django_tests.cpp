@@ -200,6 +200,23 @@ unit_test(url_tag missing) {
     ensure_throws(std::runtime_error, t.render_to_string(context, options));
 }}}
 
+unit_test(url_as_tag) {
+    string_template const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
+    test_resolver<options_type>::urls_type urls;
+    urls["foo.bar.qux"] = "/foo-bar-qux";
+    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+
+    ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
+}}}
+
+unit_test(url_as_tag missing) {
+    string_template const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
+    test_resolver<options_type>::urls_type urls;
+    options.resolvers.push_back(options_type::resolver_type(new test_resolver<options_type>(urls)));
+
+    ensure_equals(t.render_to_string(context, options), "_");
+}}}
+
 DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters

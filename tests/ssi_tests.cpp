@@ -199,7 +199,7 @@ unit_test(invalid if - multiple expr) {
 }}}
 
 
-/*
+/* TODO:
 unit_test(magic variables) {
     // std::cout << std::endl << string_template("<!--#echo var='DATE_LOCAL' -->").render_to_string() << std::endl;
 }}}*/

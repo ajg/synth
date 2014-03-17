@@ -1300,7 +1300,7 @@ struct truncatechars_html_filter {
                 stream << " " << engine.ellipsis;
             }*/
 
-            return stream.str();
+            return Value(stream.str()).mark_safe();
         }
     };
 };

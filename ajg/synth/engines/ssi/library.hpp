@@ -20,7 +20,7 @@ namespace ssi {
 // default_library
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_library : fusion::vector9
+struct default_library : fusion::vector
     < ssi::config_directive
     , ssi::echo_directive
     , ssi::exec_directive

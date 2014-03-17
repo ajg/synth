@@ -20,7 +20,7 @@ namespace tmpl {
 // default_library
 ////////////////////////////////////////////////////////////////////////////////
 
-struct default_library : fusion::vector6
+struct default_library : fusion::vector
     < tmpl::comment_tag // NOTE: Part of ctpp, not tmpl.
     , tmpl::if_tag
     , tmpl::include_tag

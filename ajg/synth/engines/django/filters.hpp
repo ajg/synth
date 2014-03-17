@@ -1239,11 +1239,18 @@ struct truncatechars_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            Size const limit = args[0].count();
+            Size   const limit = args[0].count();
             String const input = value.to_string();
 
             if (input.length() > limit) {
-                return input.substr(0, limit) + engine.ellipsis;
+                Size const min = engine.ellipsis.length();
+
+                if (min > limit) {
+                    return engine.ellipsis.substr(0, limit);
+                }
+                else {
+                    return input.substr(0, limit - min) + engine.ellipsis;
+                }
             }
             else {
                 return input;

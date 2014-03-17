@@ -200,7 +200,7 @@ Components
  - `json`
  - `xml`
 
-### Extesibility
+### Bases
 
  - `base_template`
  - `abstract_adapter`
@@ -364,15 +364,15 @@ Future Work
    * `node` binding
    * `php` binding
    * `c` binding
-   * `haskell` binding
+   * [v1+] `haskell` binding
  - Engines:
-   * `cheetah` engine
+   * [v1+] `cheetah` engine
    * `ctpp` engine
    * `multi_engine`
  - Adapters:
    * `tribool` adapter
-   * `c++11` type adapters
-   * `c++14` type adapters
+   * [v2] `c++11` type adapters
+   * [v2] `c++14` type adapters
  - Templates:
    * `descriptor_template`
    * Clean up and make `multi_template` public
@@ -382,24 +382,26 @@ Future Work
  - Command-line:
    * Allow specifying formats option
    * Allow specifying debug option
-   * Allow using arbitrary programs as tags
-   * Allow using arbitrary programs as filters
+   * Allow named input files
+   * Allow named output files
+   * [v1+] Allow using arbitrary programs as tags
+   * [v1+] Allow using arbitrary programs as filters
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
-   * Create `c++11`/`c++14` branch
+   * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
      + Remove needlessly configurable (especially defaulted) template parameters
-   * Sort `#include`s alphabetically
+   * [v1+] Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
-     + Consider making `context`s top-level `value`s instead of `map`s
-     + Consider switching to unordered_map/unordered_set where possible
-   * Test or drop support for non-`char` types (e.g. `wchar_t`)
-   * Hygienicize and prefix all macros (and #undef private ones after use)
-   * Rename `this_type` to `self_type` unless it's actually a pointer
-   * Reformat all operator _()'s to operator_()
+     + [v1+] Consider making `context`s top-level `value`s instead of `map`s
+     + [v1+] Consider switching to unordered_map/unordered_set where possible
+   * [v2] Test or drop support for non-`char` types (e.g. `wchar_t`)
+   * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
+   * [v1] Rename `this_type` to `self_type` unless it's actually a pointer
+   * [v1] Reformat all operator _()'s to operator_()
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

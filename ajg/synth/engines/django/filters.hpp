@@ -1260,6 +1260,52 @@ struct truncatechars_filter {
 };
 
 //
+// truncatechars_html_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct truncatechars_html_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("truncatechars_html"); }
+
+        typedef Char                                           char_type;
+        typedef String                                         string_type;
+        typedef typename String::const_iterator                iterator_type;
+        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
+        typedef typename regex_iterator_type::value_type       sub_match_type;
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() < 1) throw_exception(missing_argument());
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            Size   const limit = args[0].count();
+            String const input = value.to_string();
+            std::basic_ostringstream<Char> stream;
+
+            regex_iterator_type begin(input.begin(), input.end(), engine.html_tag), end;
+
+            BOOST_FOREACH(sub_match_type const& tag, std::make_pair(begin, end)) {
+                stream << tag.str();
+            }
+
+            /*for (Size i = 0; i < limit && word != end; ++word, ++i) {
+                stream << (i ? " " : "") << *word;
+            }
+
+            if (word != end) {
+                stream << " " << engine.ellipsis;
+            }*/
+
+            return stream.str();
+        }
+    };
+};
+
+//
 // truncatewords_filter
 ////////////////////////////////////////////////////////////////////////////////
 

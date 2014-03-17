@@ -106,7 +106,7 @@ struct default_filters : fusion::vector
  // , django::timeuntil_filter
     , django::title_filter
     , django::truncatechars_filter
- // , django::truncatechars_html_filter
+    , django::truncatechars_html_filter
     , django::truncatewords_filter
  // , django::truncatewords_html_filter
     , django::unordered_list_filter

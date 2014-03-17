@@ -107,6 +107,9 @@ DJANGO_TEST(verbatim_tag,
         "    <p>{{ v }}</p>\n"
         "{% endfor %}\n")
 
+DJANGO_TEST(comment_tag short, "A{# Foo Bar Qux #}B", "AB")
+DJANGO_TEST(comment_tag long,  "A{% comment %} Foo\n Bar\n Qux\n {% endcomment %}B", "AB")
+
 DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters

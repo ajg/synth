@@ -290,9 +290,9 @@ Django Engine
  - `django::timeuntil_filter`
  - `django::title_filter`
  - `django::truncatechars_filter`
- - `django::truncatechars_html_filter` (TODO)
+ - `django::truncatechars_html_filter`
  - `django::truncatewords_filter`
- - `django::truncatewords_html_filter` (TODO)
+ - `django::truncatewords_html_filter`
  - `django::unordered_list_filter`
  - `django::upper_filter`
  - `django::urlencode_filter`

@@ -68,8 +68,8 @@ struct default_filters : fusion::vector
     , django::date_filter
     , django::default_filter
     , django::default_if_none_filter
- // , django::dictsort_filter
- // , django::dictsortreversed_filter
+    , django::dictsort_filter
+    , django::dictsortreversed_filter
     , django::divisibleby_filter
     , django::escape_filter
     , django::escapejs_filter

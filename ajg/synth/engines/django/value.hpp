@@ -14,6 +14,7 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
 #include <ajg/synth/value_facade.hpp>
@@ -27,18 +28,18 @@ template <class Char>
 struct value : value_facade<Char, value<Char> > {
   public:
 
-    typedef value                              this_type;
-    typedef Char                               char_type;
-    typedef value_facade<char_type, this_type> base_type;
+    typedef value                               value_type;
+    typedef Char                                char_type;
+    typedef value_facade<char_type, value_type> base_type;
 
-    typedef typename base_type::size_type      size_type;
-    typedef typename base_type::traits_type    traits_type;
-    typedef typename base_type::string_type    string_type;
-    typedef typename base_type::string_type    token_type;
-    typedef typename base_type::boolean_type   boolean_type;
-    typedef typename base_type::number_type    number_type;
-    typedef typename base_type::datetime_type  datetime_type;
-    typedef typename base_type::const_iterator const_iterator;
+    typedef typename base_type::size_type       size_type;
+    typedef typename base_type::traits_type     traits_type;
+    typedef typename base_type::string_type     string_type;
+    typedef typename base_type::string_type     token_type;
+    typedef typename base_type::boolean_type    boolean_type;
+    typedef typename base_type::number_type     number_type;
+    typedef typename base_type::datetime_type   datetime_type;
+    typedef typename base_type::const_iterator  const_iterator;
 
   public:
 
@@ -50,21 +51,21 @@ struct value : value_facade<Char, value<Char> > {
     inline void safe(boolean_type const safe) { safe_ = safe; }
     inline boolean_type safe() const { return safe_; }
 
-    inline this_type& mark_unsafe() {
+    inline value_type& mark_unsafe() {
         return this->safe(false), *this;
     }
 
-    inline this_type mark_unsafe() const {
-        this_type copy = *this;
+    inline value_type mark_unsafe() const {
+        value_type copy = *this;
         return copy.mark_unsafe();
     }
 
-    inline this_type& mark_safe() {
+    inline value_type& mark_safe() {
         return this->safe(true), *this;
     }
 
-    inline this_type mark_safe() const {
-        this_type copy = *this;
+    inline value_type mark_safe() const {
+        value_type copy = *this;
         return copy.mark_safe();
     }
 
@@ -95,13 +96,13 @@ struct value : value_facade<Char, value<Char> > {
         return lexical_cast<string_type>(*this);
     }
 
-    this_type escape() const {
+    value_type escape() const {
         // xxx: Should this method escape binary and control characters?
         return detail::escape_entities(this->to_string());
     }
 
     /*
-    const_iterator find_attribute(this_type const& attribute) const {
+    const_iterator find_attribute(value_type const& attribute) const {
         try {
             // First try to find the value itself.
             return this->find(attribute);
@@ -123,7 +124,7 @@ struct value : value_facade<Char, value<Char> > {
     }
     */
 
-    optional<this_type> get_attribute(this_type const& attribute) const {
+    optional<value_type> get_attribute(value_type const& attribute) const {
         try {
             // First try to locate the value as a key.
             return this->index(attribute);
@@ -143,6 +144,18 @@ struct value : value_facade<Char, value<Char> > {
 
             throw;
         }
+    }
+
+    value_type sort_by(value_type const& attribute, boolean_type const reversed) const {
+        namespace algo = boost::algorithm;
+
+        std::vector<string_type> attrs;
+        string_type const source    = attribute.to_string(),
+                          delimiter = detail::text(".");
+        algo::split(attrs, source, algo::is_any_of(delimiter));
+        AJG_DUMP(value_type(attrs));
+
+        throw_exception(not_implemented("sort_by"));
     }
 
   private:

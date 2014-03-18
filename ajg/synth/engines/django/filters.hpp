@@ -261,6 +261,50 @@ struct default_if_none_filter {
 };
 
 //
+// dictsort_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct dictsort_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("dictsort"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() < 1) throw_exception(missing_argument());
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            return value.sort_by(args[0], false);
+        }
+    };
+};
+
+//
+// dictsortreversed_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct dictsortreversed_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("dictsortreversed"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() < 1) throw_exception(missing_argument());
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            return value.sort_by(args[0], true);
+        }
+    };
+};
+
+//
 // divisibleby_filter
 ////////////////////////////////////////////////////////////////////////////////
 

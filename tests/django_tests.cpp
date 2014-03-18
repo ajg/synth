@@ -211,8 +211,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::stringformat_filter
 ///     django::striptags_filter
 ///     django::time_filter
-///     django::timesince_filter
-///     django::timeuntil_filter
 ///     django::unordered_list_filter
 ///     django::wordcount_filter
 ///     django::wordwrap_filter

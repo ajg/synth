@@ -6,9 +6,11 @@
 #ifndef AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED
 
+#include <vector>
 #include <utility>
 #include <algorithm>
 
+#include <boost/bind.hpp>
 #include <boost/config.hpp>
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
@@ -19,6 +21,7 @@
 
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
+#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {
@@ -40,6 +43,8 @@ struct value : value_facade<Char, value<Char> > {
     typedef typename base_type::number_type     number_type;
     typedef typename base_type::datetime_type   datetime_type;
     typedef typename base_type::const_iterator  const_iterator;
+
+    typedef std::vector<value_type>             sequence_type; // TODO: Use the traits' type.
 
   public:
 
@@ -81,19 +86,6 @@ struct value : value_facade<Char, value<Char> > {
 
     inline boolean_type is_literal() const {
         return token_;
-    }
-
-    inline boolean_type is_numeric() const {
-        typedef abstract_numeric_adapter<traits_type> numeric_adapter;
-        return dynamic_cast<numeric_adapter const*>(this->get()) != 0;
-    }
-
-    inline boolean_type is_string() const {
-        return this->template is<string_type>();
-    }
-
-    inline string_type to_string() const {
-        return lexical_cast<string_type>(*this);
     }
 
     value_type escape() const {
@@ -146,16 +138,65 @@ struct value : value_facade<Char, value<Char> > {
         }
     }
 
-    value_type sort_by(value_type const& attribute, boolean_type const reversed) const {
+    value_type must_get_attribute(value_type const& attribute) const {
+        if (optional<value_type> attr = this->get_attribute(attribute)) {
+            return *attr;
+        }
+        else {
+            throw_exception(missing_attribute(traits_type::template
+                transcode<char>(attribute.to_string())));
+        }
+    }
+
+    value_type sort_by(value_type const& attribute, boolean_type const reverse) const {
         namespace algo = boost::algorithm;
 
-        std::vector<string_type> attrs;
+        std::vector<string_type> names;
         string_type const source    = attribute.to_string(),
                           delimiter = detail::text(".");
-        algo::split(attrs, source, algo::is_any_of(delimiter));
-        AJG_DUMP(value_type(attrs));
+        algo::split(names, source, algo::is_any_of(delimiter));
 
-        throw_exception(not_implemented("sort_by"));
+        sequence_type trail;
+        BOOST_FOREACH(string_type const& name, names) {
+            trail.push_back(value_type(name));
+        }
+
+        sequence_type result;
+        result.reserve(this->length());
+        BOOST_FOREACH(value_type const& value, *this) {
+            result.push_back(value);
+        }
+
+        if (reverse) {
+            std::sort(result.rbegin(), result.rend(),
+                boost::bind(deep_less, boost::ref(trail), _1, _2));
+        }
+        else {
+            std::sort(result.begin(), result.end(),
+                boost::bind(deep_less, boost::ref(trail), _1, _2));
+        }
+        return result;
+    }
+
+  private:
+
+    static boolean_type deep_less( sequence_type const& trail
+                                 , value_type           a
+                                 , value_type           b
+                                 ) {
+
+        // AJG_DUMP(value_type(trail));
+        // AJG_DUMP(a);
+        // AJG_DUMP(b);
+
+        BOOST_FOREACH(value_type const& attribute, trail) {
+            a = a.must_get_attribute(attribute);
+            b = b.must_get_attribute(attribute);
+            // AJG_DUMP(a);
+            // AJG_DUMP(b);
+        }
+
+        return a < b;
     }
 
   private:

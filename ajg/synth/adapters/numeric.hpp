@@ -59,6 +59,21 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
         }
     }
 
+    boolean_type less(abstract_type const& that) const {
+        // Exact match; e.g. double < double
+        if (numeric_adapter const *const match
+            = dynamic_cast<numeric_adapter const*>(&that)) {
+            return this->adapted_ < match->adapted_;
+        }
+        // Numeric match; e.g. int < double
+        else if (dynamic_cast<const abstract_numeric_adapter<Traits> *>(&that)) {
+            return this->count() < that.count();
+        }
+        else {
+            return this->to_string() < that.to_string();
+        }
+    }
+
     number_type  count() const { return number_type(adapted_); }
     boolean_type test()  const { return adapted_ != Numeric(0); }
     void input (istream_type& in)        { in  >> adapted_; }
@@ -94,11 +109,11 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
 };
 
 
-#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type)                    \
+#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type)                          \
     template <class Traits>                                                 \
     struct adapter<Traits, type> : public numeric_adapter<Traits, type> {   \
         adapter(type const value) : numeric_adapter<Traits, type>(value) {} \
-    }
+    }                                                                       \
 
 //
 // integrals

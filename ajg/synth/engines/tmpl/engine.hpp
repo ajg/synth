@@ -206,7 +206,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template convert<char>(filepath);
+        std::string const filepath_ = this->template transcode<char>(filepath);
         file_template_type(filepath_).render(stream, context, options);
     }
 

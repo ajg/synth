@@ -64,17 +64,17 @@ struct adapter<Traits, boost::python::object>
     const_iterator begin() const { return const_iterator(stl_iterator_type(adapted_)); }
     const_iterator end()   const { return const_iterator(stl_iterator_type()); }
 
-    optional<value_type> index(value_type const& key) const {
+    optional<value_type> index(value_type const& what) const {
         namespace py = ::boost::python;
         // AJG_DUMP(as_string(adapted_));
-        // AJG_DUMP(key.to_string());
+        // AJG_DUMP(what.to_string());
 
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
 
         PyObject *const o = adapted_.ptr();
-        string_type const k = key.to_string();
+        string_type const k = what.to_string();
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
@@ -97,7 +97,7 @@ struct adapter<Traits, boost::python::object>
 
         // 4. List-index lookup
         if (PySequence_Check(o)) {
-            Py_ssize_t n = key.count();
+            Py_ssize_t n = what.count();
 
             if (n < PySequence_Size(o)) {
                 return value_type(py::object(adapted_[py::long_(n)]));

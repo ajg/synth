@@ -263,7 +263,7 @@ struct definition : base_definition< BidirectionalIterator
             return *result;
         }
         else {
-            throw_exception(missing_filter(this->template convert<char>(name)));
+            throw_exception(missing_filter(this->template transcode<char>(name)));
         }
     }
 
@@ -303,7 +303,7 @@ struct definition : base_definition< BidirectionalIterator
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
 
-                    if (this->template convert<char>(string) != e.name) {
+                    if (this->template transcode<char>(string) != e.name) {
                         throw_exception(e);
                     }
 
@@ -340,7 +340,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template convert<char>(filepath);
+        std::string const filepath_ = this->template transcode<char>(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
 
@@ -451,7 +451,7 @@ struct definition : base_definition< BidirectionalIterator
             }
             else {
                 throw_exception(missing_variable(
-                    this->template convert<char>(string)));
+                    this->template transcode<char>(string)));
             }
         }
         else {
@@ -603,20 +603,14 @@ struct definition : base_definition< BidirectionalIterator
 
             if (it == value.end()) {
                 std::string const name = this->template
-                    convert<char>(attribute.to_string());
+                    transcode<char>(attribute.to_string());
                 throw_exception(missing_attribute(name));
             }
 
             value = *it;
             */
 
-            if (optional<value_type> attr = value.get_attribute(attribute)) {
-                value = *attr;
-            }
-            else {
-                throw_exception(missing_attribute(this->template
-                    convert<char>(attribute.to_string())));
-            }
+            value = value.must_get_attribute(attribute);
         }
 
         return value;
@@ -686,7 +680,7 @@ struct definition : base_definition< BidirectionalIterator
         return result;
     }
 
-    /*static inline string_type nonbreaking(string_type const& s) {
+    /*inline static string_type nonbreaking(string_type const& s) {
         return algorithm::replace_all_copy(s, detail::text(" "), detail::text("\xA0")); options.nonbreaking_space
     }*/
 

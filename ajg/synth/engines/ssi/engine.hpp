@@ -185,8 +185,8 @@ struct definition : base_definition< BidirectionalIterator
         // Third, check the environment.
         else if(optional<typename environment_type::mapped_type const>
                        const value = detail::find_mapped_value(
-                   this->template convert<char>(name), environment)) {
-            return this->template convert<char_type>(*value);
+                   this->template transcode<char>(name), environment)) {
+            return this->template transcode<char_type>(*value);
         }
         // Otherwise, use the undefined echo message.
         else {
@@ -209,7 +209,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template convert<char>(filepath);
+        std::string const filepath_ = this->template transcode<char>(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
 

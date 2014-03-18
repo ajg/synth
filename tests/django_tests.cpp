@@ -253,6 +253,18 @@ DJANGO_TEST(removetags_filter B, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> 
 
 DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django")
 
+DJANGO_TEST(timesince_filter A, "{{ past | timesince:before_past }}",       "0&nbsp;minutes")
+DJANGO_TEST(timesince_filter B, "{{ before_past | timesince:past }}",       "1&nbsp;day, 12&nbsp;hours")
+DJANGO_TEST(timesince_filter C, "{{ before_past | timesince:after_past }}", "1&nbsp;month, 3&nbsp;weeks")
+DJANGO_TEST(timesince_filter D, "{{ past | timesince:after_past }}",        "1&nbsp;month, 2&nbsp;weeks")
+DJANGO_TEST(timesince_filter E, "{{ future | timesince }}",                 "0&nbsp;minutes")
+
+DJANGO_TEST(timeuntil_filter A, "{{ past | timeuntil:before_past }}",       "1&nbsp;day, 12&nbsp;hours")
+DJANGO_TEST(timeuntil_filter B, "{{ after_past | timeuntil:before_past }}", "1&nbsp;month, 3&nbsp;weeks")
+DJANGO_TEST(timeuntil_filter C, "{{ after_past | timeuntil:past }}",        "1&nbsp;month, 2&nbsp;weeks")
+DJANGO_TEST(timeuntil_filter D, "{{ before_past | timeuntil:past }}",       "0&nbsp;minutes")
+DJANGO_TEST(timeuntil_filter E, "{{ past | timeuntil }}",                   "0&nbsp;minutes")
+
 DJANGO_TEST(title_filter, "{{ \"my FIRST post\" | title }}", "My First Post")
 
 DJANGO_TEST(truncatechars_filter  1, "{{ \"Joel is a slug\" | truncatechars: 1 }}", ".")

@@ -84,15 +84,16 @@ template <class Char, class Value>
 struct default_value_traits {
   public:
 
-    typedef Char                     char_type;
-    typedef std::size_t              size_type;
-    typedef Value                    value_type;
-    typedef bool                     boolean_type;
-    typedef double                   number_type;
-    typedef posix_time::ptime        datetime_type;
-    typedef std::basic_string<Char>  string_type;
-    typedef std::basic_istream<Char> istream_type;
-    typedef std::basic_ostream<Char> ostream_type;
+    typedef Char                      char_type;
+    typedef std::size_t               size_type;
+    typedef Value                     value_type;
+    typedef bool                      boolean_type;
+    typedef double                    number_type;
+    typedef posix_time::ptime         datetime_type;
+    typedef posix_time::time_duration duration_type;
+    typedef std::basic_string<Char>   string_type;
+    typedef std::basic_istream<Char>  istream_type;
+    typedef std::basic_ostream<Char>  ostream_type;
 
     typedef value_iterator<value_type const> iterator;
     typedef value_iterator<value_type const> const_iterator;
@@ -123,6 +124,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     typedef typename traits_type::string_type   string_type;
     typedef typename traits_type::number_type   number_type;
     typedef typename traits_type::datetime_type datetime_type;
+    typedef typename traits_type::duration_type duration_type;
     typedef typename traits_type::boolean_type  boolean_type;
     typedef typename traits_type::istream_type  istream_type;
     typedef typename traits_type::ostream_type  ostream_type;

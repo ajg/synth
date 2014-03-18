@@ -286,8 +286,8 @@ Django Engine
  - `django::stringformat_filter`
  - `django::striptags_filter`
  - `django::time_filter`
- - `django::timesince_filter` (TODO)
- - `django::timeuntil_filter` (TODO)
+ - `django::timesince_filter`
+ - `django::timeuntil_filter`
  - `django::title_filter`
  - `django::truncatechars_filter`
  - `django::truncatechars_html_filter` (TODO)

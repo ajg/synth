@@ -223,7 +223,8 @@ unit_test(missing filter) {
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
 
-DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
+DJANGO_TEST(divisibleby_filter 21 by 3, "{{ 21 | divisibleby:\"3\" }}", "True")
+DJANGO_TEST(divisibleby_filter 20 by 3, "{{ 20 | divisibleby:\"3\" }}", "False")
 
 DJANGO_TEST(float,                                 "{{3.3}}",   "3.3")
 DJANGO_TEST(float with trailing zero,              "{{3.30}}",  "3.3")

@@ -209,8 +209,12 @@ struct definition : base_definition< BidirectionalIterator
             = filter >> *(*_s >> '|' >> *_s >> filter)
             ;
         skipper
-            = as_xpr( block_open) | comment_open  | variable_open
-                    | block_close | comment_close | variable_close
+            = as_xpr(block_open)
+            | block_close
+            | comment_open
+            | comment_close
+            | variable_open
+            | variable_close
             ;
         nothing
             = as_xpr('\0') // xpressive isn't liking it default-constructed.
@@ -635,10 +639,6 @@ struct definition : base_definition< BidirectionalIterator
         return detail::format_time<string_type>(format, datetime);
     }
 
-    static inline string_type nonbreaking(string_type const& s) {
-        return algorithm::replace_all_copy(s, detail::text(" "), detail::text("\xA0"));
-    }
-
     // TODO: Proper, localizable formatting.
     string_type format_duration( options_type  const& options
                                , duration_type const& duration
@@ -661,7 +661,7 @@ struct definition : base_definition< BidirectionalIterator
                                             };
 
         if (duration.is_negative()) {
-            return nonbreaking(detail::text("0 minutes"));
+            return pluralize_unit(0, units[N - 1], options);
         }
 
         string_type result;
@@ -674,21 +674,28 @@ struct definition : base_definition< BidirectionalIterator
             }
         }
 
-        result += nonbreaking(pluralize_unit(count, units[i]));
+        result += pluralize_unit(count, units[i], options);
 
         if (i + 1 < N) {
             if ((count = (total - (seconds[i] * count)) / seconds[i + 1])) {
                 result += string_type(detail::text(", "))
-                    + nonbreaking(pluralize_unit(count, units[i + 1]));
+                       +  pluralize_unit(count, units[i + 1], options);
             }
         }
 
         return result;
     }
 
-    inline static string_type pluralize_unit(size_type const n, string_type const& s) {
-        return lexical_cast<string_type>(n) + string_type(detail::text(" "))
-            + s + (n == 1 ? string_type() : string_type(detail::text("s")));
+    /*static inline string_type nonbreaking(string_type const& s) {
+        return algorithm::replace_all_copy(s, detail::text(" "), detail::text("\xA0")); options.nonbreaking_space
+    }*/
+
+    inline static string_type pluralize_unit( size_type    const  n
+                                            , string_type  const& s
+                                            , options_type const& options
+                                            ) {
+        return lexical_cast<string_type>(n) + options.nonbreaking_space + s +
+            (n == 1 ? string_type() : string_type(detail::text("s")));
     }
 
     optional<string_type> get_view_url( value_type const&   view

@@ -10,6 +10,7 @@
 #include <string>
 
 #include <boost/mpl/void.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace tests {
 
@@ -35,6 +36,17 @@ struct context_data {
         friends[2] = lou;
 
         context["friends"] = friends;
+
+        using namespace boost::gregorian;
+        using namespace boost::posix_time;
+
+        ptime const past(date(2002, Jan, 10), time_duration(1, 2, 3));
+        ptime const future(date(2202, Feb, 11), time_duration(3, 2, 1));
+
+        context["past"]        = past;
+        context["before_past"] = past - hours(36);
+        context["after_past"]  = past + hours(1200) + minutes(20);
+        context["future"]      = future;
     }
 
     Context context;

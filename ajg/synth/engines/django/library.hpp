@@ -109,7 +109,7 @@ struct default_filters : fusion::vector
     , django::truncatechars_filter
     , django::truncatechars_html_filter
     , django::truncatewords_filter
- // , django::truncatewords_html_filter
+    , django::truncatewords_html_filter
     , django::unordered_list_filter
     , django::upper_filter
     , django::urlencode_filter

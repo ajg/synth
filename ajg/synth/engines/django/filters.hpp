@@ -211,7 +211,7 @@ struct date_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
             if (args.size() > 0) format = args[0].to_string();
 
-            return engine.format_datetime(options, format, value);
+            return engine.format_datetime(options, format, value.to_datetime());
         }
     };
 };
@@ -1185,7 +1185,57 @@ struct time_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
             if (args.size() > 0) format = args[0].to_string();
 
-            return engine.format_datetime(options, format, value);
+            return engine.format_datetime(options, format, value.to_datetime());
+        }
+    };
+};
+
+//
+// timesince_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct timesince_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("timesince"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            typename Options::datetime_type to = value.to_datetime();
+            typename Options::datetime_type from = args.empty() ?
+                engine.now() : args[0].to_datetime();
+
+            return engine.format_duration(options, to - from);
+        }
+    };
+};
+
+//
+// timeuntil_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct timeuntil_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("timeuntil"); }
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            typename Options::datetime_type to = value.to_datetime();
+            typename Options::datetime_type from = args.empty() ?
+                engine.now() : args[0].to_datetime();
+
+            return engine.format_duration(options, from - to);
         }
     };
 };
@@ -1349,6 +1399,52 @@ struct truncatewords_filter {
             }
 
             return stream.str();
+        }
+    };
+};
+
+//
+// truncatewords_html_filter
+////////////////////////////////////////////////////////////////////////////////
+
+struct truncatewords_html_filter {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        String name() const { return text("truncatewords_html"); }
+
+        typedef Char                                           char_type;
+        typedef String                                         string_type;
+        typedef typename String::const_iterator                iterator_type;
+        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
+        typedef typename regex_iterator_type::value_type       sub_match_type;
+
+        Value process(Value  const& value, Engine  const& engine,
+                      String const& name,  Context const& context,
+                      Array  const& args,  Options const& options) const {
+            if (args.size() < 1) throw_exception(missing_argument());
+            if (args.size() > 1) throw_exception(superfluous_argument());
+
+            Size   const limit = args[0].count();
+            String const input = value.to_string();
+            std::basic_ostringstream<Char> stream;
+
+            regex_iterator_type begin(input.begin(), input.end(), engine.html_tag), end;
+
+            BOOST_FOREACH(sub_match_type const& tag, std::make_pair(begin, end)) {
+                stream << tag.str();
+            }
+
+            /*for (Size i = 0; i < limit && word != end; ++word, ++i) {
+                stream << (i ? " " : "") << *word;
+            }
+
+            if (word != end) {
+                stream << " " << engine.ellipsis;
+            }*/
+
+            return Value(stream.str()).mark_safe();
         }
     };
 };

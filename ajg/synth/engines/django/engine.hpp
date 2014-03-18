@@ -88,6 +88,8 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename library_type::second         filters_type;
     typedef django::value<char_type>              value_type;
     typedef options<value_type>                   options_type;
+    typedef typename value_type::datetime_type    datetime_type;
+    typedef typename value_type::duration_type    duration_type;
     typedef typename options_type::context_type   context_type;
     typedef typename options_type::array_type     array_type;
     typedef typename options_type::names_type     names_type;
@@ -616,22 +618,77 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
+    inline datetime_type now() const {
+        return posix_time::second_clock::local_time(); // universal_time()
+    }
+
     // TODO: Support abbreviated formats. (e.g. "r" => "%r")
     string_type format_datetime( options_type  const& options
                                , string_type          format
-                               , optional<value_type> value   = none
+                               , datetime_type const& datetime
                                ) const {
         if (optional<string_type const> const& fmt
                 = detail::find_mapped_value(format, options.formats)) {
             format = *fmt;
         }
 
-        if (value) {
-            return detail::format_time<string_type>(format, value->to_datetime());
+        return detail::format_time<string_type>(format, datetime);
+    }
+
+    static inline string_type nonbreaking(string_type const& s) {
+        return algorithm::replace_all_copy(s, detail::text(" "), detail::text("\xA0"));
+    }
+
+    // TODO: Proper, localizable formatting.
+    string_type format_duration( options_type  const& options
+                               , duration_type const& duration
+                               ) const {
+        BOOST_STATIC_CONSTANT(size_type, N = 6);
+
+        static size_type const seconds[N] = { 60 * 60 * 24 * 365
+                                            , 60 * 60 * 24 * 30
+                                            , 60 * 60 * 24 * 7
+                                            , 60 * 60 * 24
+                                            , 60 * 60
+                                            , 60
+                                            };
+        static string_type const units[N] = { detail::text("year")
+                                            , detail::text("month")
+                                            , detail::text("week")
+                                            , detail::text("day")
+                                            , detail::text("hour")
+                                            , detail::text("minute")
+                                            };
+
+        if (duration.is_negative()) {
+            return nonbreaking(detail::text("0 minutes"));
         }
-        else {
-            return detail::format_current_time<string_type>(format);
+
+        string_type result;
+        size_type const total = duration.total_seconds();
+        size_type count = 0, i = 0;
+
+        for (; i < N; ++i) {
+            if ((count = total / seconds[i])) {
+                break;
+            }
         }
+
+        result += nonbreaking(pluralize_unit(count, units[i]));
+
+        if (i + 1 < N) {
+            if ((count = (total - (seconds[i] * count)) / seconds[i + 1])) {
+                result += string_type(detail::text(", "))
+                    + nonbreaking(pluralize_unit(count, units[i + 1]));
+            }
+        }
+
+        return result;
+    }
+
+    inline static string_type pluralize_unit(size_type const n, string_type const& s) {
+        return lexical_cast<string_type>(n) + string_type(detail::text(" "))
+            + s + (n == 1 ? string_type() : string_type(detail::text("s")));
     }
 
     optional<string_type> get_view_url( value_type const&   view

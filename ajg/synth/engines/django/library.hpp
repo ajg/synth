@@ -103,8 +103,8 @@ struct default_filters : fusion::vector
     , django::stringformat_filter
     , django::striptags_filter
     , django::time_filter
- // , django::timesince_filter
- // , django::timeuntil_filter
+    , django::timesince_filter
+    , django::timeuntil_filter
     , django::title_filter
     , django::truncatechars_filter
     , django::truncatechars_html_filter

@@ -905,12 +905,12 @@ struct uniform_random_number_generator {
 
 //
 // random_int,
-// random_real:
-//     Precreated convenience objects for random integer and real generation.
+// random_double:
+//     Precreated convenience objects for random int and double generation.
 ////////////////////////////////////////////////////////////////////////////////
 
 uniform_random_number_generator<int>    const random_int;
-uniform_random_number_generator<double> const random_real;
+uniform_random_number_generator<double> const random_double;
 
 //
 // find_*:

@@ -20,29 +20,31 @@ using namespace boost; // FIXME: Delete.
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, thisT)    \
-  public:                                                    \
-                                                             \
-    typedef thisT                    this_type;              \
-    typedef adaptedT                 adapted_type;           \
-    typedef Traits                   traits_type;            \
-    typedef abstract_adapter<Traits> abstract_type;          \
-                                                             \
-    typedef typename traits_type::char_type    char_type;    \
-    typedef typename traits_type::size_type    size_type;    \
-    typedef typename traits_type::range_type   range_type;   \
-    typedef typename traits_type::value_type   value_type;   \
-    typedef typename traits_type::boolean_type boolean_type; \
-    typedef typename traits_type::number_type  number_type;  \
-    typedef typename traits_type::string_type  string_type;  \
-    typedef typename traits_type::istream_type istream_type; \
-    typedef typename traits_type::ostream_type ostream_type; \
-                                                             \
-    typedef typename traits_type::iterator       iterator;   \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, thisT)            \
+  public:                                                      \
+                                                               \
+    typedef thisT                    this_type;                \
+    typedef adaptedT                 adapted_type;             \
+    typedef Traits                   traits_type;              \
+    typedef abstract_adapter<Traits> abstract_type;            \
+                                                               \
+    typedef typename traits_type::char_type     char_type;     \
+    typedef typename traits_type::size_type     size_type;     \
+    typedef typename traits_type::range_type    range_type;    \
+    typedef typename traits_type::value_type    value_type;    \
+    typedef typename traits_type::boolean_type  boolean_type;  \
+    typedef typename traits_type::number_type   number_type;   \
+    typedef typename traits_type::string_type   string_type;   \
+    typedef typename traits_type::datetime_type datetime_type; \
+    typedef typename traits_type::duration_type duration_type; \
+    typedef typename traits_type::istream_type  istream_type;  \
+    typedef typename traits_type::ostream_type  ostream_type;  \
+                                                               \
+    typedef typename traits_type::iterator       iterator;     \
     typedef typename traits_type::const_iterator const_iterator
 
-#define AJG_SYNTH_ADAPTER(adaptedT)                    \
-    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter);     \
+#define AJG_SYNTH_ADAPTER(adaptedT)                             \
+    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter);              \
   public:                                                       \
                                                                 \
     adapter(adapted_type const& adapted) : adapted_(adapted) {} \

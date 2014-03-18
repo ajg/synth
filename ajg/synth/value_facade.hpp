@@ -163,9 +163,10 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
   public:
 
-    inline void         clear()       { return adapter_.reset(); }
-    inline number_type  count() const { return get()->count(); }
-    inline boolean_type empty() const { return !adapter_; }
+    inline void          clear()       { return adapter_.reset(); }
+    inline number_type   count() const { return get()->count(); }
+    inline datetime_type to_datetime() const { return get()->to_datetime(); }
+
     inline std::type_info const& type() const { return get()->type(); }
 
     inline boolean_type equal(value_type const& that) const {
@@ -177,6 +178,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         return !this->find(that).equal(this->end());
     }
 
+    inline boolean_type empty() const { return !adapter_; }
     // TODO: Make overridable by specializations (e.g. map to __len__ in python.)
     inline size_type size() const { return std::distance(begin(), end()); }
     // TODO: Consider getting rid of length() and changing clients to size().

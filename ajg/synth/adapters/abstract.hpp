@@ -50,14 +50,16 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
     typedef abstract_adapter abstract_type;
     typedef Traits           traits_type;
 
-    typedef typename traits_type::char_type    char_type;
-    typedef typename traits_type::size_type    size_type;
-    typedef typename traits_type::value_type   value_type;
-    typedef typename traits_type::boolean_type boolean_type;
-    typedef typename traits_type::number_type  number_type;
-    typedef typename traits_type::string_type  string_type;
-    typedef typename traits_type::istream_type istream_type;
-    typedef typename traits_type::ostream_type ostream_type;
+    typedef typename traits_type::char_type     char_type;
+    typedef typename traits_type::size_type     size_type;
+    typedef typename traits_type::value_type    value_type;
+    typedef typename traits_type::boolean_type  boolean_type;
+    typedef typename traits_type::number_type   number_type;
+    typedef typename traits_type::string_type   string_type;
+    typedef typename traits_type::datetime_type datetime_type;
+    typedef typename traits_type::duration_type duration_type;
+    typedef typename traits_type::istream_type  istream_type;
+    typedef typename traits_type::ostream_type  ostream_type;
 
     typedef typename traits_type::iterator       iterator;
     typedef typename traits_type::const_iterator const_iterator;
@@ -70,8 +72,9 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
     virtual const_iterator begin() const { throw_exception(bad_method("begin")); }
     virtual const_iterator end()   const { throw_exception(bad_method("end")); }
 
-    virtual number_type  count() const { throw_exception(bad_method("count")); }
-    virtual boolean_type test()  const { throw_exception(bad_method("test")); }
+    virtual number_type   count() const { throw_exception(bad_method("count")); } // TODO: Rename to_number
+    virtual boolean_type  test()  const { throw_exception(bad_method("test")); }  // TODO: Rename to_boolean
+    virtual datetime_type to_datetime()  const { throw_exception(bad_method("to_datetime")); }
 
     virtual boolean_type equal(abstract_type const& that) const {
         throw_exception(bad_method("equal"));

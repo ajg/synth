@@ -183,8 +183,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::date_filter
 ///     django::default_filter
 ///     django::default_if_none_filter
-///     django::dictsort_filter
-///     django::dictsortreversed_filter
 ///     django::escape_filter
 ///     django::escapejs_filter
 ///     django::filesizeformat_filter
@@ -220,6 +218,12 @@ unit_test(missing filter) {
     string_template const t("{{ 42 | xyz }}");
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
+
+DJANGO_TEST(dictsort_filter control, "{{ friends }}",                   "age: 23, name: joe, age: 55, name: bob, age: 41, name: lou")
+DJANGO_TEST(dictsort_filter simple,  "{{ friends | dictsort:'name' }}", "age: 55, name: bob, age: 23, name: joe, age: 41, name: lou")
+
+DJANGO_TEST(dictsortreversed_filter control, "{{ friends }}",                           "age: 23, name: joe, age: 55, name: bob, age: 41, name: lou")
+DJANGO_TEST(dictsortreversed_filter simple,  "{{ friends | dictsortreversed:'name' }}", "age: 41, name: lou, age: 23, name: joe, age: 55, name: bob")
 
 DJANGO_TEST(divisibleby_filter 21 by 3, "{{ 21 | divisibleby:\"3\" }}", "True")
 DJANGO_TEST(divisibleby_filter 20 by 3, "{{ 20 | divisibleby:\"3\" }}", "False")

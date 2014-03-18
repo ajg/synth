@@ -133,6 +133,7 @@ struct options {
   public:
 
     boolean_type      autoescape;
+    string_type       nonbreaking_space;
     value_type        default_value;
     formats_type      formats;
     boolean_type      debug;
@@ -155,6 +156,7 @@ struct options {
            , resolvers_type   const& resolvers     = resolvers_type()
            )
         : autoescape(autoescape)
+        , nonbreaking_space(detail::text("&nbsp;"))
         , default_value(default_value)
         , formats(default_formats(formats))
         , debug(debug)

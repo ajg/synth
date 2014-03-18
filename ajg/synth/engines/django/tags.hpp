@@ -101,7 +101,7 @@ struct block_tag {
             String const name = name1.str();
 
             if (name2 && name != name2.str()) {
-                std::string const name_ = engine.template convert<char>(name);
+                std::string const name_ = engine.template transcode<char>(name);
                 std::string const message = "mismatched endblock tag for " + name_;
                 throw_exception(std::logic_error(message));
             }
@@ -879,7 +879,7 @@ struct ssi_tag {
             else {
                 String line;
                 std::string const path_ =
-                    engine.template convert<char>(path);
+                    engine.template transcode<char>(path);
                 std::basic_ifstream<Char> file(path_.c_str());
                 while (std::getline(file, line)) out << line;
             }
@@ -1172,7 +1172,7 @@ struct library_tag {
                 engine.render_block(out, body, context_copy, options_copy);
             }
             else {
-                throw_exception(missing_tag(engine.template convert<char>(name)));
+                throw_exception(missing_tag(engine.template transcode<char>(name)));
             }
         }
     };

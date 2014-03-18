@@ -704,7 +704,7 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
 
     if (it == index.end()) {
         // TODO: Throw missing_tag exception.
-        std::string const name = engine.template convert<char>(
+        std::string const name = engine.template transcode<char>(
             lexical_cast<typename Engine::string_type>(needle));
         std::string const message = name + " not found";
         throw_exception(std::runtime_error(message));

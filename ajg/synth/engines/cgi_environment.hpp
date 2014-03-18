@@ -95,11 +95,11 @@ struct cgi_environment {
   private:
 
     optional<value_type> get(string_type const& name) const {
-        std::string const name_ = engine_.template convert<char>(name);
+        std::string const name_ = engine_.template transcode<char>(name);
      // char const *const value = (*Source)(name_.c_str());
         if (char const *const value = std::getenv(name_.c_str())) {
             return value_type(engine_.template
-                convert<char_type>(std::string(value)));
+                transcode<char_type>(std::string(value)));
         }
         else {
             return none;
@@ -118,10 +118,10 @@ struct standard_environment {
     typename Engine::value_type get( typename Engine::this_type const& engine
                                    , typename Engine::string_type const& name
                                    ) const {
-        std::string const name_ = engine.template convert<char>(name);
+        std::string const name_ = engine.template transcode<char>(name);
         std::string const value = std::getenv(name_.c_str());
         typedef typename Engine::value_type::char_type C;
-        return engine.template convert<C>(value);
+        return engine.template transcode<C>(value);
     }
 
     optional<value_type> get(string_type const& name) const {

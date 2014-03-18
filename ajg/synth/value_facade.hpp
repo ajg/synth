@@ -99,6 +99,45 @@ struct default_value_traits {
     typedef value_iterator<value_type const> const_iterator;
 
     typedef std::pair<const_iterator, const_iterator> range_type;
+
+  public:
+
+    template <class A, class B>
+    inline static B convert(A const& a) {
+        B b;
+        // Very crude conversion method for now:
+        std::stringstream stream;
+        stream << a;
+        stream >> b;
+        return b;
+    }
+
+    /// transcode
+    ///     This function allows us to centralize string conversion
+    ///     in order to properly, yet orthogonally, support Unicode.
+    ////////////////////////////////////////////////////////////////////////////
+    template <class C, class S>
+    inline static std::basic_string<C> transcode(S const& string) {
+        return std::basic_string<C>(string.begin(), string.end());
+    }
+
+/*
+    template <class String>
+    inline string_type transcode(String const& string) const {
+        return lexical_cast<string_type>(string);
+    }
+
+    template <class String>
+    inline std::string narrow(String const& string) const {
+        //return lexical_cast<std::string>(string);
+        return std::string(string.begin(), string.end());
+    }
+
+    template <class String>
+    inline std::wstring widen(String const& string) const {
+        //return lexical_cast<std::wstring>(string);
+        return std::wstring(string.begin(), string.end());
+    }*/
 };
 
 
@@ -162,6 +201,19 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     }*/
 
   public:
+
+    inline boolean_type is_numeric() const {
+        typedef abstract_numeric_adapter<traits_type> numeric_adapter;
+        return dynamic_cast<numeric_adapter const*>(this->get()) != 0;
+    }
+
+    inline boolean_type is_string() const {
+        return this->template is<string_type>();
+    }
+
+    inline string_type to_string() const {
+        return get()->to_string();
+    }
 
     inline void          clear()       { return adapter_.reset(); }
     inline number_type   count() const { return get()->count(); }
@@ -263,7 +315,12 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     }
 
     inline boolean_type operator <(value_type const& that) const {
-        throw_exception(not_implemented("operator <"));
+        if (!this->adapter_ && that.adapter_) {
+            return true;
+        }
+        else {
+            return this->adapter_ && that.adapter_ && this->adapter_->less(*that.adapter_);
+        }
     }
 
     inline boolean_type operator <=(value_type const& that) const {

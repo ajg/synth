@@ -33,14 +33,14 @@ using namespace detail::placeholders;
 
 enum { interpolated = true, raw = false };
 
-#define FOREACH_ATTRIBUTE_IN(x, how, if_statement) do {                    \
-    BOOST_FOREACH( typename Engine::match_type const& attr                 \
-                 , get_nested<1>(x).nested_results()) {                    \
-        typename Engine::string_type name, value;                          \
-        tie(name, value) = args.engine.parse_attribute(attr, args, how);   \
-        if_statement else throw_exception                                  \
-            (invalid_attribute(args.engine.template convert<char>(name))); \
-    }                                                                      \
+#define FOREACH_ATTRIBUTE_IN(x, how, if_statement) do {                      \
+    BOOST_FOREACH( typename Engine::match_type const& attr                   \
+                 , get_nested<1>(x).nested_results()) {                      \
+        typename Engine::string_type name, value;                            \
+        tie(name, value) = args.engine.parse_attribute(attr, args, how);     \
+        if_statement else throw_exception                                    \
+            (invalid_attribute(args.engine.template transcode<char>(name))); \
+    }                                                                        \
 } while (0)
 
 #define NO_ATTRIBUTES_IN(x) FOREACH_ATTRIBUTE_IN(x, raw, if (false) {})
@@ -125,7 +125,7 @@ struct exec_directive {
                     throw_exception(not_implemented("exec cgi"));
                 }
                 else if (name == text("cmd")) {
-                    std::string const command = args.engine.template convert<char>(value);
+                    std::string const command = args.engine.template transcode<char>(value);
                     detail::pipe pipe(command);
                     pipe.read_into(args.stream);
                 }
@@ -443,8 +443,8 @@ struct printenv_directive {
             typedef typename Engine::environment_type::value_type name_value;
 
             BOOST_FOREACH(name_value const& nv, args.engine.environment) {
-                args.stream << args.engine.template convert<char_type>(nv.first) << '='
-                            << args.engine.template convert<char_type>(nv.second) << std::endl;
+                args.stream << args.engine.template transcode<char_type>(nv.first) << '='
+                            << args.engine.template transcode<char_type>(nv.second) << std::endl;
             }
         }
     };

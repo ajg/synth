@@ -85,7 +85,7 @@ struct base_template : noncopyable {
                        , context_type const& context = context_type()
                        , options_type const& options = options_type()
                        ) const {
-        std::string const path = engine_->template convert<char>(filepath);
+        std::string const path = engine_->template transcode<char>(filepath);
         std::basic_ofstream<char_type> file;
 
         try {
@@ -144,7 +144,7 @@ struct base_template : noncopyable {
 
 template <class Char>
 std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
-    std::string const path = engine_.template convert<char>(filepath);
+    std::string const path = engine_.template transcode<char>(filepath);
     std::basic_ifstream<Char> file;
 
     try {

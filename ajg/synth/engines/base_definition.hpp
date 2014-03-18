@@ -49,8 +49,8 @@ struct base_definition : noncopyable {
     typedef xpressive::basic_regex<iterator_type>   regex_type;
     typedef xpressive::match_results<iterator_type> frame_type;
     typedef xpressive::match_results<iterator_type> match_type;
-    typedef std::basic_string<char_type>            string_type;
-    typedef std::basic_ostream<char_type>           stream_type;
+    typedef std::basic_string<char_type>            string_type; // TODO: Use Traits::string_type.
+    typedef std::basic_ostream<char_type>           stream_type; // TODO: Use Traits::stream_type.
 
     // Define string iterators/regexes specifically. This is useful when
     // they are different from the main iterator_type and regex_type (e.g.
@@ -81,31 +81,11 @@ struct base_definition : noncopyable {
 
   public:
 
-    // This function allows us to centralize string conversion
-    // in order to properly, yet orthogonally, support Unicode.
-
+    // TODO: Deprecate in favor of Traits::transcode.
     template <class Char, class String>
-    inline std::basic_string<Char> convert(String const& string) const {
+    inline std::basic_string<Char> transcode(String const& string) const {
         return std::basic_string<Char>(string.begin(), string.end());
     }
-
-/*
-    template <class String>
-    inline string_type convert(String const& string) const {
-        return lexical_cast<string_type>(string);
-    }
-
-    template <class String>
-    inline std::string narrow(String const& string) const {
-        //return lexical_cast<std::string>(string);
-        return std::string(string.begin(), string.end());
-    }
-
-    template <class String>
-    inline std::wstring widen(String const& string) const {
-        //return lexical_cast<std::wstring>(string);
-        return std::wstring(string.begin(), string.end());
-    }*/
 
     template <class Iterator>
     void parse(std::pair<Iterator, Iterator> const& range, frame_type& frame) const {
@@ -130,7 +110,7 @@ struct base_definition : noncopyable {
         size_type   const room(std::distance(furthest, end_)), limit(30);
         string_type const site(furthest, furthest + (std::min)(room, limit));
         string_type const line(site.begin(), detail::find_or('\n', site, site.end()));
-        throw_exception(parsing_error(convert<char>(line)));
+        throw_exception(parsing_error(transcode<char>(line)));
     }
 
   protected:

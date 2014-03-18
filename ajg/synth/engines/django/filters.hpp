@@ -864,7 +864,7 @@ struct phone2numeric_filter {
     struct definition {
         String name() const { return text("phone2numeric"); }
 
-        inline static int convert(int const c) {
+        inline static int translate(int const c) {
             switch (c) {
                 case 'a': case 'b': case 'c': return '2';
                 case 'd': case 'e': case 'f': return '3';
@@ -886,7 +886,7 @@ struct phone2numeric_filter {
             String phone = value.to_string();
             algorithm::to_lower(phone);
             std::transform(phone.begin(), phone.end(),
-                           phone.begin(), convert);
+                           phone.begin(), translate);
             return phone;
         }
     };

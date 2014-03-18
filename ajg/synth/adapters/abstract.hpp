@@ -76,8 +76,21 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
     virtual boolean_type  test()  const { throw_exception(bad_method("test")); }  // TODO: Rename to_boolean
     virtual datetime_type to_datetime()  const { throw_exception(bad_method("to_datetime")); }
 
+    // TODO: Make virtual?
+    inline string_type to_string() const {
+        // return lexical_cast<string_type>(*this);
+        std::basic_ostringstream<char_type> stream;
+        this->output(stream);
+        return stream.str();
+    }
+
     virtual boolean_type equal(abstract_type const& that) const {
         throw_exception(bad_method("equal"));
+    }
+
+    virtual boolean_type less(abstract_type const& that) const {
+        // Lexicographical ordering by default.
+        return this->to_string() < that.to_string();
     }
 
     virtual void input (istream_type& in)        { throw_exception(bad_method("input")); }
@@ -89,7 +102,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         throw_exception(bad_method("find"));
     }
 
-    virtual optional<value_type> index(value_type const& key) const {
+    virtual optional<value_type> index(value_type const& what) const {
         throw_exception(bad_method("index"));
     }
 

@@ -21,7 +21,8 @@ template <class Traits, class K, class V>
 struct adapter<Traits, std::map<K, V> >
     : public abstract_adapter<Traits> {
 
-    typedef std::map<K, V> map_type;
+    typedef K                     key_type;
+    typedef std::map<key_type, V> map_type;
     AJG_SYNTH_ADAPTER(map_type)
     adapted_type adapted_;
 
@@ -35,6 +36,15 @@ struct adapter<Traits, std::map<K, V> >
 
     const_iterator begin() const { return const_iterator(adapted_.begin()); }
     const_iterator end()   const { return const_iterator(adapted_.end()); }
+
+    optional<value_type> index(value_type const& what) const {
+        key_type const key = traits_type::template convert<value_type, key_type>(what);
+        typename map_type::const_iterator const it = adapted_.find(key);
+        if (it == adapted_.end()) {
+            return boost::none;
+        }
+        return value_type(it->second);
+    }
 };
 
 //
@@ -59,6 +69,17 @@ struct adapter<Traits, std::multimap<K, V> >
 
     const_iterator begin() const { return const_iterator(adapted_.begin()); }
     const_iterator end()   const { return const_iterator(adapted_.end()); }
+
+    /* TODO: Return a sequence or set of values, or the first one?
+    optional<value_type> index(value_type const& what) const {
+        key_type const key = traits_type::convert<value_type, key_type>(what);
+        typename map_type::const_iterator it const = adapted_.find(key);
+        if (it == adapted_.end()) {
+            return boost::none;
+        }
+        return it->second;
+    }
+    */
 };
 
 }} // namespace ajg::synth

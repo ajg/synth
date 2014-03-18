@@ -29,7 +29,7 @@ struct adapter<Traits, boost::python::object>
 
   private:
 
-    typedef typename boost::python::stl_input_iterator<object_type> stl_iterator;
+    typedef typename boost::python::stl_input_iterator<object_type> stl_iterator_type;
 
   public:
 
@@ -38,16 +38,31 @@ struct adapter<Traits, boost::python::object>
     }
 
     boolean_type test() const { return boolean_type(adapted_); }
+    datetime_type to_datetime() const {
+        using namespace boost::gregorian;
+        using namespace boost::posix_time;
+        return datetime_type( date( boost::python::long_(adapted_.attr("year"))
+                                  , boost::python::long_(adapted_.attr("month"))
+                                  , boost::python::long_(adapted_.attr("day"))
+                                  )
+                            , time_duration( boost::python::long_(adapted_.attr("hour"))
+                                           , boost::python::long_(adapted_.attr("minute"))
+                                           , boost::python::long_(adapted_.attr("second"))
+                                           , boost::python::long_(adapted_.attr("microsecond")) * 1000
+                                        // , TODO: adapted_.attr("tzinfo")
+                                           )
+                            );
+    }
 
  // void input (istream_type& in)        { in >> adapted_; }
  // void output(ostream_type& out) const { out << adapted_; }
     void output(ostream_type& out) const { out << as_string(adapted_); }
 
-    iterator begin() { return iterator(stl_iterator(adapted_)); }
-    iterator end()   { return iterator(stl_iterator()); }
+    iterator begin() { return iterator(stl_iterator_type(adapted_)); }
+    iterator end()   { return iterator(stl_iterator_type()); }
 
-    const_iterator begin() const { return const_iterator(stl_iterator(adapted_)); }
-    const_iterator end()   const { return const_iterator(stl_iterator()); }
+    const_iterator begin() const { return const_iterator(stl_iterator_type(adapted_)); }
+    const_iterator end()   const { return const_iterator(stl_iterator_type()); }
 
     optional<value_type> index(value_type const& key) const {
         namespace py = ::boost::python;

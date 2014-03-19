@@ -18,6 +18,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/value_iterator.hpp>
+#include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/abstract.hpp>
 
 // #include <boost/spirit/home/support/safe_bool.hpp>

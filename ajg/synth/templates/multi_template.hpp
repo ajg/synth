@@ -52,6 +52,7 @@ struct multi_template {
     typedef typename django_options_type::libraries_type libraries_type;
     typedef typename django_options_type::loader_type    loader_type;
     typedef typename django_options_type::loaders_type   loaders_type;
+    typedef typename django_options_type::resolver_type  resolver_type;
     typedef typename django_options_type::resolvers_type resolvers_type;
 
   public:

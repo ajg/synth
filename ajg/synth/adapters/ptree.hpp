@@ -21,7 +21,8 @@ template <class Traits, class K, class V>
 struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
     : public abstract_adapter<Traits> {
 
-    typedef boost::property_tree::basic_ptree<K, V> ptree_type;
+    typedef K                                              key_type;
+    typedef boost::property_tree::basic_ptree<key_type, V> ptree_type;
     AJG_SYNTH_ADAPTER(ptree_type)
     adapted_type adapted_;
 
@@ -50,6 +51,15 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
 
     const_iterator begin() const { return const_iterator(adapted_.begin()); }
     const_iterator end()   const { return const_iterator(adapted_.end()); }
+
+    optional<value_type> index(value_type const& what) const {
+        key_type const key = traits_type::template convert<value_type, key_type>(what);
+        typename ptree_type::const_iterator const it = adapted_.find(key);
+        if (it == adapted_.end()) {
+            return boost::none;
+        }
+        return value_type(it->second);
+    }
 };
 
 }} // namespace ajg::synth

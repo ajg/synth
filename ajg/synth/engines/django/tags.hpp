@@ -795,32 +795,56 @@ struct regroup_tag {
     struct definition {
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            return TAG("regroup" >> +_s >> engine.expression  // A
+            return TAG("regroup" >> +_s >> engine.expression
                                  >> +_s >> engine.by_keyword
-                                 >> +_s >> engine.identifier  // B
+                                 >> +_s >> engine.package
                                  >> +_s >> engine.as_keyword
-                                 >> +_s >> engine.identifier) // C
+                                 >> +_s >> engine.identifier)
                    >> engine.block;
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
-            Value  const& value = engine.evaluate(match(engine.expression), context, options);
-            String const& attr  = get_nested<B>(match).str();
-            String const& name  = get_nested<C>(match).str();
+            Match  const& expr  = match(engine.expression);
+            String const& attrs = match(engine.package).str();
+            String const& name  = match(engine.identifier).str();
             Match  const& block = match(engine.block);
-            AJG_DUMP(value);
-            AJG_DUMP(attr);
-            AJG_DUMP(name);
 
+            Value        values;
+            entries_type entries;
+            try {
+                values = engine.evaluate(expr, context, options);
+            }
+            // Fail silently in these cases:
+            catch (missing_variable const&) { goto done; }
+            catch (missing_attribute const&) { goto done; }
+            entries = regroup(values, attrs);
+
+          done:
             Context context_copy = context;
-            context_copy[name] = regroup(value);
+            context_copy[name] = entries;
             engine.render_block(out, block, context_copy, options);
         }
 
-        inline static Value regroup(Value const& value) {
-            return value;
+        typedef std::map<String, Value>         entry_type;
+        typedef std::vector<entry_type>         entries_type;
+
+        inline static entries_type regroup(Value const& values, String const& attrs) {
+            static String const grouper_(detail::text("grouper")),
+                                list_   (detail::text("list"));
+            entries_type entries;
+
+            BOOST_FOREACH(typename Value::group_type const& group, values.group_by(attrs)) {
+                Value const key   = group.first;
+                Value const value = group.second;
+                entry_type entry;
+                entry[grouper_] = key;
+                entry[list_]    = value;
+                entries.push_back(entry);
+            }
+
+            return entries;
         }
     };
 };

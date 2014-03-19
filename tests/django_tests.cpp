@@ -59,7 +59,6 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     django::autoescape_tag
 ///     django::block_tag
 ///     django::csrf_token_tag
-///     django::cycle_tag
 ///     django::debug_tag
 ///     django::extends_tag
 ///     django::filter_tag
@@ -83,9 +82,6 @@ unit_test(missing tag) {
     ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
 
-DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
-DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
-
 DJANGO_TEST(ifequal_tag true,             "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
 DJANGO_TEST(ifequal_tag true,             "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
 DJANGO_TEST(ifequal_tag with else false,  "{% ifequal 6 6 %} Yes {% else %} No {% endifequal %}", " Yes ")
@@ -100,6 +96,54 @@ DJANGO_TEST(for_tag with key and value,
     "{% for k, v in friends %}[{{ k }}| {{ v }}]{% endfor %}",
     "[0| age: 23, name: joe][1| age: 55, name: bob][2| age: 41, name: lou]")
 */
+
+DJANGO_TEST(regroup_tag,
+    "{% regroup cities by country as country_list %}\n"
+    "\n"
+    "<ul>\n"
+    "{% for country in country_list %}\n"
+    "    <li>{{ country.grouper }}\n"
+    "    <ul>\n"
+    "        {% for item in country.list %}\n"
+    "          <li>{{ item.name }}: {{ item.population }}</li>\n"
+    "        {% endfor %}\n"
+    "    </ul>\n"
+    "    </li>\n"
+    "{% endfor %}\n"
+    "</ul>\n",
+        "\n"
+        "\n"
+        "<ul>\n"
+        "\n"
+        "    <li>India\n"
+        "    <ul>\n"
+        "        \n"
+        "          <li>Mumbai: 19,000,000</li>\n"
+        "        \n"
+        "          <li>Calcutta: 15,000,000</li>\n"
+        "        \n"
+        "    </ul>\n"
+        "    </li>\n"
+        "\n"
+        "    <li>USA\n"
+        "    <ul>\n"
+        "        \n"
+        "          <li>New York: 20,000,000</li>\n"
+        "        \n"
+        "          <li>Chicago: 7,000,000</li>\n"
+        "        \n"
+        "    </ul>\n"
+        "    </li>\n"
+        "\n"
+        "    <li>Japan\n"
+        "    <ul>\n"
+        "        \n"
+        "          <li>Tokyo: 33,000,000</li>\n"
+        "        \n"
+        "    </ul>\n"
+        "    </li>\n"
+        "\n"
+        "</ul>\n")
 
 DJANGO_TEST(spaceless_tag A,
         "{% spaceless %}\n"
@@ -125,6 +169,9 @@ DJANGO_TEST(spaceless_tag B,
 
 DJANGO_TEST(templatetag_tag openbrace,     "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag closevariable, "{% templatetag closevariable %}", "}}")
+
+DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
+DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 
 DJANGO_TEST(verbatim_tag,
         "{% verbatim %}{% for v in friends %}\n"

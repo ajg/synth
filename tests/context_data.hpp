@@ -47,11 +47,36 @@ struct context_data {
         context["before_past"] = past - hours(36);
         context["after_past"]  = past + hours(1200) + minutes(20);
         context["future"]      = future;
+
+        std::map<std::string, std::string> mumbai, calcutta, nyc, chicago, tokyo;
+        mumbai["name"]       = "Mumbai";
+        mumbai["population"] = "19,000,000";
+        mumbai["country"]    = "India";
+        calcutta["name"]       = "Calcutta";
+        calcutta["population"] = "15,000,000";
+        calcutta["country"]    = "India";
+        nyc["name"]       = "New York";
+        nyc["population"] = "20,000,000";
+        nyc["country"]    = "USA";
+        chicago["name"]       = "Chicago";
+        chicago["population"] = "7,000,000";
+        chicago["country"]    = "USA";
+        tokyo["name"]       = "Tokyo";
+        tokyo["population"] = "33,000,000";
+        tokyo["country"]    = "Japan";
+
+        cities[0] = mumbai;
+        cities[1] = calcutta;
+        cities[2] = nyc;
+        cities[3] = chicago;
+        cities[4] = tokyo;
+        context["cities"] = cities;
     }
 
     Context context;
     Options options;
     std::map<std::string, std::string> friends[3];
+    std::map<std::string, std::string> cities[5];
 };
 
 } // namespace tests

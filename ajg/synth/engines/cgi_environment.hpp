@@ -125,11 +125,11 @@ struct standard_environment {
     }
 
     optional<value_type> get(string_type const& name) const {
-        std::string const name_ = engine_.template convert<char>(name);
+        std::string const name_ = engine_.template transcode<char>(name);
      // char const *const value = (*Source)(name_.c_str());
         if (char const *const value = std::getenv(name_.c_str())) {
             return value_type(engine_.template
-                convert<char_type>(std::string(value)));
+                transcode<char_type>(std::string(value)));
         }
         else {
             return none;

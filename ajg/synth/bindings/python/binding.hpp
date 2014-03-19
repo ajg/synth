@@ -133,7 +133,7 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type const& options
                                          ) {
         try {
-            return rslvr_.attr("resolve")(path);
+            return as_string(rslvr_.attr("resolve")(path));
         }
         catch (...) { // TODO: Catch only Resolver404?
             return none;
@@ -146,7 +146,8 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            return rslvr_.attr("reverse")(name/*, TODO: arguments.first, arguments.second, current_app */);
+            return as_string(rslvr_.attr("reverse")(name/*,
+                TODO: arguments.first, arguments.second, current_app */));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return none;
@@ -155,6 +156,12 @@ struct resolver : Options::abstract_resolver_type {
 
     explicit resolver(py::object rslvr) : rslvr_(rslvr) {}
     virtual ~resolver() {}
+
+  private:
+
+    inline static string_type as_string(py::object const& obj) {
+        return py::extract<string_type>(py::str(obj));
+    }
 
   private:
 
@@ -284,9 +291,9 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
         return loaders;
     }
 
-    inline static loaders_type get_resolvers(py::list rslvrs) {
+    inline static resolvers_type get_resolvers(py::list rslvrs) {
         py::stl_input_iterator<py::object> begin(rslvrs), end;
-        loaders_type resolvers;
+        resolvers_type resolvers;
 
         BOOST_FOREACH(py::object const& rslvr, std::make_pair(begin, end)) {
             resolvers.push_back(resolver_type(new resolver<options_type>(rslvr)));

@@ -37,21 +37,27 @@ struct adapter<Traits, boost::python::object>
         return boost::python::extract<string_type>(boost::python::str(obj));
     }
 
+    template <class T>
+    inline static T as_numeric(boost::python::object const& obj) {
+        return boost::python::extract<T>(boost::python::long_(obj));
+    }
+
     boolean_type test() const { return boolean_type(adapted_); }
     datetime_type to_datetime() const {
         using namespace boost::gregorian;
         using namespace boost::posix_time;
-        return datetime_type( date( boost::python::long_(adapted_.attr("year"))
-                                  , boost::python::long_(adapted_.attr("month"))
-                                  , boost::python::long_(adapted_.attr("day"))
-                                  )
-                            , time_duration( boost::python::long_(adapted_.attr("hour"))
-                                           , boost::python::long_(adapted_.attr("minute"))
-                                           , boost::python::long_(adapted_.attr("second"))
-                                           , boost::python::long_(adapted_.attr("microsecond")) * 1000
-                                        // , TODO: adapted_.attr("tzinfo")
-                                           )
-                            );
+        return datetime_type
+            ( date( as_numeric<unsigned short>(adapted_.attr("year"))
+                  , as_numeric<unsigned short>(adapted_.attr("month"))
+                  , as_numeric<unsigned short>(adapted_.attr("day"))
+                  )
+            , time_duration( as_numeric<long>(adapted_.attr("hour"))
+                           , as_numeric<long>(adapted_.attr("minute"))
+                           , as_numeric<long>(adapted_.attr("second"))
+                           , as_numeric<long>(adapted_.attr("microsecond")) * 1000
+                        // , TODO: adapted_.attr("tzinfo")
+                           )
+            );
     }
 
  // void input (istream_type& in)        { in >> adapted_; }

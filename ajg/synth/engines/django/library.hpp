@@ -42,7 +42,7 @@ struct default_tags : fusion::vector
     , django::load_tag
     , django::load_from_tag
     , django::now_tag
- // , django::regroup_tag
+    , django::regroup_tag
     , django::spaceless_tag
     , django::ssi_tag
     , django::templatetag_tag

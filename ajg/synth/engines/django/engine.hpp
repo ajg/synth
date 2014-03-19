@@ -77,6 +77,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::frame_type      frame_type;
     typedef typename base_type::string_type     string_type;
     typedef typename base_type::stream_type     stream_type;
+    typedef typename base_type::keywords_type   keywords_type;
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
@@ -103,17 +104,23 @@ struct definition : base_definition< BidirectionalIterator
 
   private:
 
-    struct not_as {
+    struct not_keyword_type {
+        keywords_type keywords;
+
         bool operator ()(typename match_type::value_type const& match) const {
-            return match.str() != boost::lexical_cast<string_type>("as");
+            return keywords.find(match.str()) == keywords.end();
         }
-    };
+    } not_keyword;
 
   public:
 
     definition()
         : newline        (detail::text("\n"))
         , ellipsis       (detail::text("..."))
+        , as_keyword     (detail::text("as"))
+        , by_keyword     (detail::text("by"))
+        , from_keyword   (detail::text("from"))
+        , in_keyword     (detail::text("in"))
         , brace_open     (detail::text("{"))
         , brace_close    (detail::text("}"))
         , block_open     (detail::text("{%"))
@@ -122,13 +129,17 @@ struct definition : base_definition< BidirectionalIterator
         , comment_close  (detail::text("#}"))
         , variable_open  (detail::text("{{"))
         , variable_close (detail::text("}}")) {
+        not_keyword.keywords.insert(as_keyword);
+        not_keyword.keywords.insert(by_keyword);
+        not_keyword.keywords.insert(from_keyword);
+        not_keyword.keywords.insert(in_keyword);
         using namespace xpressive;
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((alpha | '_') >> *_w) [ x::check(not_as()) ]
+            = ((alpha | '_') >> *_w) [ x::check(not_keyword) ]
             ;
         package
             = identifier >> *('.' >> identifier)
@@ -750,6 +761,10 @@ struct definition : base_definition< BidirectionalIterator
 
     string_type const newline;
     string_type const ellipsis;
+    string_type const as_keyword;
+    string_type const by_keyword;
+    string_type const from_keyword;
+    string_type const in_keyword;
     string_type const brace_open;
     string_type const brace_close;
     string_type const block_open;

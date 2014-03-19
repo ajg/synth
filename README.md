@@ -264,7 +264,7 @@ Django Engine
  - `django::load_tag`
  - `django::load_from_tag`
  - `django::now_tag`
- - `django::regroup_tag` (TODO)
+ - `django::regroup_tag`
  - `django::spaceless_tag`
  - `django::ssi_tag`
  - `django::templatetag_tag`
@@ -429,6 +429,7 @@ Future Work
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
+     + Replace `boost::assign` use with aggregate initializers
      + Remove needlessly configurable (especially defaulted) template parameters
    * [v1+] Sort `#include`s alphabetically
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`

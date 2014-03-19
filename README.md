@@ -340,6 +340,7 @@ Django Engine
 ### Options
 
  - `django::options::autoescape`
+ - `django::options::nonbreaking_space`
  - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
  - `django::options::formats` (for `TIME_FORMAT`, `DATE_FORMAT`, etc.)
  - `django::options::debug` (for `TEMPLATE_DEBUG`)

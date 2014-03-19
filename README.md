@@ -407,7 +407,8 @@ Future Work
    * `ctpp` engine
    * `multi_engine`
  - Adapters:
-   * `tribool` adapter
+   * `boost::tribool` adapter
+   * `boost::fusion` sequence adapters
    * [v2] `c++11` type adapters
    * [v2] `c++14` type adapters
  - Templates:

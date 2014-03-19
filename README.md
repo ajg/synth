@@ -96,9 +96,9 @@ Building `synth` from source requires:
 
 Synth is known to compile with:
 
- - `g++` versions `4.2.1` & `4.6.3`
+ - `g++` versions `4.2.1` and `4.6.3`
  - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
- - `boost` versions `1.42`, `1.46` & `1.55`
+ - `boost` versions `1.46` and `1.55`
 
 ### Installing Boost
 

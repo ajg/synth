@@ -130,7 +130,7 @@ struct multi_template {
 
   private:
 
-    // TODO: Use unique_ptr?
+    // TODO[c++11]: Use unique_ptr?
     boost::shared_ptr<django_template_type> django_template_;
     boost::shared_ptr<ssi_template_type>    ssi_template_;
     boost::shared_ptr<tmpl_template_type>   tmpl_template_;

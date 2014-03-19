@@ -169,30 +169,65 @@ Components
 ### Adapters
 
  - `array`
+   * `[N]` (Native static array.)
+   * `[]` (Native dynamic array.)
+   * `boost::array`
  - `bool`
+   * `bool`
  - `complex`
+   * `std::complex`
  - `container`
- - `deque`
- - `list`
- - `map`
+   * `std::deque`
+   * `std::list`
+   * `map`
+     + `std::map`
+     + `std::multimap`
+   * `set`
+     + `std::set`
+     + `std::multiset`
+   * `std::stack`
+   * `std::vector`
  - `memory`
+   * `std::auto_ptr`
  - `numeric`
+   * `char`
+   * `char signed`
+   * `char unsigned`
+   * `short`
+   * `short unsigned`
+   * `int`
+   * `int unsigned`
+   * `long`
+   * `long unsigned`
+   * `wchar_t` (When available.)
+   * `long long` (When available.)
+   * `long long unsigned` (When available.)
+   * `__int64` (MSVC-only.)
+   * `__int64 unsigned` (MSVC-only.)
+   * `float`
+   * `double`
+   * `long double`
  - `optional`
- - `pair`
+   * `boost::optional`
+ - `ptime`
+   * `boost::posix_time::ptime`
  - `ptree`
+   * `boost::property_tree::ptree`
  - `pointer`
+   * `*` (Native pointer.)
  - `ref`
- - `scoped_array`
- - `scoped_ptr`
- - `set`
- - `shared_array`
- - `shared_ptr`
+   * `boost::reference_wrapper`
  - `smart_ptr`
- - `stack`
+   * `boost::scoped_array`
+   * `boost::scoped_ptr`
+   * `boost::shared_array`
+   * `boost::shared_ptr`
  - `string`
+   * `std::basic_string`
  - `utility`
+   * `std::pair`
  - `variant`
- - `vector`
+   * `boost::variant`
 
 ### Formats
 

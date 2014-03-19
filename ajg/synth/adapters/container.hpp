@@ -8,7 +8,6 @@
 
 #include <ajg/synth/adapters/set.hpp>
 #include <ajg/synth/adapters/map.hpp>
-#include <ajg/synth/adapters/pair.hpp>
 #include <ajg/synth/adapters/list.hpp>
 #include <ajg/synth/adapters/deque.hpp>
 #include <ajg/synth/adapters/stack.hpp>

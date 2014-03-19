@@ -166,9 +166,9 @@ struct options {
         , resolvers(resolvers)
         , loaded_tags()
         , loaded_filters()
-        , blocks(0)
-        , cycles()
-        , registry() {}
+        , blocks_(0)
+        , cycles_()
+        , changes_() {}
 
   public:
 
@@ -187,13 +187,21 @@ struct options {
         return formats;
     }
 
-  // private: // TODO: Make the below private and friend specific tags.
+  private:
 
-    typedef size_type marker_type; // FIXME: pair<filename, size_type>
+    typedef size_type                          marker_type; // FIXME: pair<filename, size_type>
+    typedef std::map<string_type, string_type> blocks_type;
+    typedef std::map<marker_type, size_type>   cycles_type;
+    typedef std::map<marker_type, value_type>  changes_type;
 
-    std::map<string_type, string_type>*  blocks;
-    std::map<marker_type, size_type>     cycles;
-    std::map<marker_type, value_type>    registry;
+    friend class block_tag;
+    friend class cycle_tag;
+    friend class extends_tag;
+    friend class ifchanged_tag;
+
+    blocks_type*  blocks_;
+    cycles_type   cycles_;
+    changes_type  changes_;
 };
 
 }}} // namespace ajg::synth::django

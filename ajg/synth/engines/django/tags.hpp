@@ -199,17 +199,10 @@ struct cycle_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        // TODO: Make this part of engine.expression.
-        struct not_as {
-            bool operator ()(typename Match::value_type const& match) const {
-                return match.str() != lexical_cast<String>("as");
-            }
-        };
-
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
             Regex const expressions = +(+_s >> engine.expression);
-            return TAG("cycle" >> expressions >> !(+_s >> "as" >> +_s >> engine.identifier))
+            return TAG("cycle" >> expressions >> !(+_s >> engine.as_keyword >> +_s >> engine.identifier))
                    >> engine.block;
         }
 
@@ -432,10 +425,10 @@ struct for_tag {
             Regex const variables = engine.identifier        // 1
                 >> !(*_s >> ',' >> *_s >> engine.identifier) // 2
                 ;
-            return TAG("for" >> +_s >> variables                  // A
-                       >> +_s >> "in" >> +_s >> engine.expression // B
-                   ) >> engine.block                              // C
-              >> !(TAG("empty") >> engine.block)                  // D
+            return TAG("for" >> +_s >> variables                               // A
+                       >> +_s >> engine.in_keyword >> +_s >> engine.expression // B
+                   ) >> engine.block                                           // C
+              >> !(TAG("empty") >> engine.block)                               // D
                 >> TAG("endfor");
         }
 
@@ -705,15 +698,9 @@ struct load_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        struct not_from {
-            bool operator ()(typename Match::value_type const& match) const {
-                return match.str() != lexical_cast<String>("from");
-            }
-        };
-
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            Regex const packages = +(+_s >> engine.package[ check(not_from()) ]);
+            Regex const packages = +(+_s >> engine.package);
 
             return TAG("load" >> packages)
                    >> engine.block;
@@ -746,16 +733,10 @@ struct load_from_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        struct not_from {
-            bool operator ()(typename Match::value_type const& match) const {
-                return match.str() != lexical_cast<String>("from");
-            }
-        };
-
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            Regex const identifiers = +(+_s >> engine.identifier[ check(not_from()) ]);
-            return TAG("load" >> identifiers >> +_s >> "from" >> +_s >> engine.package)
+            Regex const identifiers = +(+_s >> engine.identifier);
+            return TAG("load" >> identifiers >> +_s >> engine.from_keyword >> +_s >> engine.package)
                    >> engine.block;
         }
 
@@ -799,6 +780,47 @@ struct now_tag {
                    , typename Engine::stream_type& out) const {
             String const format = engine.extract_string(match[1]);
             out << engine.format_datetime(options, format, engine.now());
+        }
+    };
+};
+
+//
+// regroup_tag
+////////////////////////////////////////////////////////////////////////////////
+
+struct regroup_tag {
+    template < class Char, class Regex, class String, class Context, class Value
+             , class Size, class Match, class Engine, class Options, class Array
+             >
+    struct definition {
+        Regex syntax(Engine const& engine) const {
+            using namespace xpressive;
+            return TAG("regroup" >> +_s >> engine.expression  // A
+                                 >> +_s >> engine.by_keyword
+                                 >> +_s >> engine.identifier  // B
+                                 >> +_s >> engine.as_keyword
+                                 >> +_s >> engine.identifier) // C
+                   >> engine.block;
+        }
+
+        void render( Match   const& match,   Engine  const& engine
+                   , Context const& context, Options&       options
+                   , typename Engine::stream_type& out) const {
+            Value  const& value = engine.evaluate(match(engine.expression), context, options);
+            String const& attr  = get_nested<B>(match).str();
+            String const& name  = get_nested<C>(match).str();
+            Match  const& block = match(engine.block);
+            AJG_DUMP(value);
+            AJG_DUMP(attr);
+            AJG_DUMP(name);
+
+            Context context_copy = context;
+            context_copy[name] = regroup(value);
+            engine.render_block(out, block, context_copy, options);
+        }
+
+        inline static Value regroup(Value const& value) {
+            return value;
         }
     };
 };
@@ -969,7 +991,7 @@ struct url_as_tag {
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
             return TAG("url" >> +_s >> engine.expression >> engine.arguments
-                             >> +_s >> "as" >> +_s >> engine.identifier)
+                             >> +_s >> engine.as_keyword >> +_s >> engine.identifier)
                    >> engine.block;
         }
 
@@ -1111,9 +1133,9 @@ struct with_tag {
     struct definition {
         Regex syntax(Engine const& engine) const {
             using namespace xpressive;
-            return TAG("with" >> +_s >> engine.expression  // A
-                >> +_s >> "as" >> +_s >> engine.identifier // B
-                    ) >> engine.block                      // C
+            return TAG("with" >> +_s >> engine.expression               // A
+                >> +_s >> engine.as_keyword >> +_s >> engine.identifier // B
+                    ) >> engine.block                                   // C
                 >> TAG("endwith");
         }
 

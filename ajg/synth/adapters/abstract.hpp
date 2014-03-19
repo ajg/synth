@@ -85,12 +85,41 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
     }
 
     virtual boolean_type equal(abstract_type const& that) const {
-        throw_exception(bad_method("equal"));
+        // Try comparing as a sequence by default.
+        // XXX: Should this behavior go in value or value_facade?
+        const_iterator i1, i2, e1, e2;
+        try {
+            i1 = begin();
+            i2 = that.begin();
+            e1 = end();
+            e2 = that.end();
+        }
+        catch (bad_method const& method) {
+            if (method.name == "begin" || method.name == "end") {
+                throw_exception(bad_method("equal"));
+            }
+            else {
+                throw;
+            }
+        }
+
+        return this->compare_range(i1, i2, e1, e2);
     }
 
     virtual boolean_type less(abstract_type const& that) const {
-        // Lexicographical ordering by default.
-        return this->to_string() < that.to_string();
+        // Try lexicographical ordering by default.
+        // XXX: Should this behavior go in value or value_facade?
+        try {
+            return this->to_string() < that.to_string();
+        }
+        catch (bad_method const& method) {
+            if (method.name == "output") {
+                throw_exception(bad_method("less"));
+            }
+            else {
+                throw;
+            }
+        }
     }
 
     virtual void input (istream_type& in)        { throw_exception(bad_method("input")); }
@@ -112,6 +141,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
 
   protected:
 
+    // TODO: Rename to something like is_equal
     template <class This, class That>
     inline static boolean_type compare(This const& this_, That const& that) {
         // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
@@ -130,11 +160,16 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         }
     }
 
+    // TODO: Rename to something like is_equal_sequence
     boolean_type compare_sequence(abstract_type const& that) const {
-        // TODO: See if we can refactor this using std::equal.
-        const_iterator i1 = begin(), i2 = that.begin();
-        const_iterator const e1 = end(), e2 = that.end();
+        return this->compare_range(begin(), that.begin(), end(), that.end());
+    }
 
+    // TODO: Rename to something like is_equal_range
+    boolean_type compare_range( const_iterator i1, const_iterator i2
+                              , const_iterator e1, const_iterator e2
+                              ) const {
+        // TODO: See if we can refactor this using std::equal.
         for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
             if (!i1->equal(*i2)) {
                 return false;

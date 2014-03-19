@@ -106,16 +106,16 @@ struct block_tag {
                 throw_exception(std::logic_error(message));
             }
 
-            if (options.blocks) { // We're being inherited from.
+            if (options.blocks_) { // We're being inherited from.
                 if (optional<String const&> const overriden =
-                    detail::find_value(name, *options.blocks)) {
+                    detail::find_value(name, *options.blocks_)) {
                     out << *overriden;
                 }
                 else {
                     std::basic_ostringstream<Char> stream;
                     engine.render_block(stream, block, context, options);
                     String const result = stream.str();
-                    (*options.blocks)[name] = result;
+                    (*options.blocks_)[name] = result;
                     out << result;
                 }
             }
@@ -222,11 +222,11 @@ struct cycle_tag {
             Match const& ident = match(engine.identifier);
             Match const& block = match(engine.block);
             Size const total   = exprs.nested_results().size();
-            Size const current = options.cycles[position];
+            Size const current = options.cycles_[position];
 
             Match const& expr = *detail::advance(exprs.nested_results(), current);
             Value const value = engine.evaluate(expr, context, options);
-            options.cycles[position] = (current + 1) % total;
+            options.cycles_[position] = (current + 1) % total;
             out << value;
 
             if (!ident) {
@@ -297,57 +297,54 @@ struct extends_tag {
                 >> engine.block;              // B
         }
 
-        /*struct blocks_type :  {
-
-
-        };*/
-
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& string = get_nested<A>(match);
-            Match const& body   = get_nested<B>(match);
-            String const filepath = engine.extract_string(string);
+            typedef typename Options::blocks_type    blocks_type;
+            typedef typename blocks_type::value_type block_type;
+
+            Match  const& string   = get_nested<A>(match);
+            Match  const& body     = get_nested<B>(match);
+            String const  filepath = engine.extract_string(string);
+
             std::basic_ostream<Char> null_stream(0);
-            std::map<String, String> blocks, supers;
-            typedef std::pair<String, String> block_type;
+            blocks_type blocks, supers;
+            Options options_copy = options;
+            Context context_copy = context;
 
-            Options copy = options;
-            copy.blocks = &blocks;
-
-            Context __xxx__ = context;
+            options_copy.blocks_ = &blocks; // Set it.
 
             // First, we render the parent template as if it were
             // stand-alone, so that we can make block.super
             // available to the derived template. We don't care
             // about non-block content, so it is discarded.
-            engine.render_file(null_stream, filepath, context, copy);
+            engine.render_file(null_stream, filepath, context, options_copy);
             String const suffix = text("_super");
 
             BOOST_FOREACH(block_type const& block, blocks) {
-                __xxx__[block.first + suffix] = block.second;
+                context_copy[block.first + suffix] = block.second;
             }
 
             // We only care about the supers; any other
             // modifications to the options are discarded.
-            copy = options; // Reset copy.
-            copy.blocks = &supers;
+            options_copy = options; // Reset it.
+            options_copy.blocks_ = &supers;
 
             // Second, we "extract" the blocks that the derived
             // template will be overriding, while at the same time
             // making the parent template's versions available
             // for the derivee to use as block.super. The derivee's
             // non-block content is irrelevant so it is discarded.
-            engine.render_block(null_stream, body, __xxx__, copy);
+            engine.render_block(null_stream, body, context_copy, options_copy);
 
             // We only care about the blocks; any other
             // modifications to the options are discarded.
-            copy = options; // Reset copy.
-            copy.blocks = &supers; //blocks;
+            options_copy = options; // Reset it.
+            options_copy.blocks_ = &supers; //blocks;
 
             // Finally, we render the parent template with the
             // potentially overriden blocks already rendered.
-            engine.render_file(out, filepath, context, copy);
+            engine.render_file(out, filepath, context, options_copy);
         }
     };
 };
@@ -564,7 +561,7 @@ struct ifchanged_tag {
             Match const& else_ = get_nested<C>(match);
 
             typename Engine::size_type const position = match.position();
-            optional<Value const&> const value = detail::find_value(position, options.registry);
+            optional<Value const&> const value = detail::find_value(position, options.changes_);
 
             // This is the case with no variables (compare contents).
             if (vars.nested_results().empty()) {
@@ -578,7 +575,7 @@ struct ifchanged_tag {
                     }
                 }
                 else {
-                    options.registry[position] = result;
+                    options.changes_[position] = result;
                     out << result;
                 }
             }
@@ -597,7 +594,7 @@ struct ifchanged_tag {
                     }
                 }
                 else {
-                    options.registry[position] = values;
+                    options.changes_[position] = values;
                     engine.render_block(out, if_, context, options);
                 }
             }

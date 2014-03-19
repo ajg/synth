@@ -148,20 +148,44 @@ struct value : value_facade<Char, value<Char> > {
         }
     }
 
-    value_type sort_by(value_type const& attribute, boolean_type const reverse) const {
-        namespace algo = boost::algorithm;
+    value_type must_get_trail(sequence_type const& trail) const {
+        value_type value = *this;
 
-        std::vector<string_type> names;
-        string_type const source    = attribute.to_string(),
-                          delimiter = detail::text(".");
-        algo::split(names, source, algo::is_any_of(delimiter));
-
-        sequence_type trail;
-        BOOST_FOREACH(string_type const& name, names) {
-            trail.push_back(value_type(name));
+        BOOST_FOREACH(value_type const& attribute, trail) {
+            value = value.must_get_attribute(attribute);
         }
 
-        sequence_type result;
+        return value;
+    }
+
+    typedef std::pair<value_type, sequence_type> group_type;
+    typedef std::vector<group_type>              groups_type;
+
+    groups_type group_by(value_type const& attrs) const {
+        groups_type groups;
+        value_type current_key;
+        size_type i = 0;
+
+        BOOST_FOREACH(value_type const& value, *this) {
+            value_type const& key = value.must_get_trail(make_trail(attrs));
+
+            // New group (either it's the first one or it has a different key.)
+            if (!i++ || current_key != key) {
+                current_key = key;
+                groups.push_back(group_type(key, sequence_type(1, value)));
+            }
+            // Add to the current group.
+            else {
+                groups.back().second.push_back(value);
+            }
+        }
+
+        return groups;
+    }
+
+    value_type sort_by(value_type const& attrs, boolean_type const reverse) const {
+        sequence_type result, trail = make_trail(attrs);
+
         result.reserve(this->length());
         BOOST_FOREACH(value_type const& value, *this) {
             result.push_back(value);
@@ -184,19 +208,22 @@ struct value : value_facade<Char, value<Char> > {
                                  , value_type           a
                                  , value_type           b
                                  ) {
+        return a.must_get_trail(trail) < b.must_get_trail(trail);
+    }
 
-        // AJG_DUMP(value_type(trail));
-        // AJG_DUMP(a);
-        // AJG_DUMP(b);
+    static sequence_type make_trail(value_type const& value) {
+        namespace algo = boost::algorithm;
 
-        BOOST_FOREACH(value_type const& attribute, trail) {
-            a = a.must_get_attribute(attribute);
-            b = b.must_get_attribute(attribute);
-            // AJG_DUMP(a);
-            // AJG_DUMP(b);
+        std::vector<string_type> names;
+        string_type const source    = value.to_string(),
+                          delimiter = detail::text(".");
+        algo::split(names, source, algo::is_any_of(delimiter));
+
+        sequence_type trail;
+        BOOST_FOREACH(string_type const& name, names) {
+            trail.push_back(value_type(name));
         }
-
-        return a < b;
+        return trail;
     }
 
   private:

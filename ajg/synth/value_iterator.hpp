@@ -21,7 +21,7 @@ struct clone_ptr : scoped_ptr<T> {
     clone_ptr(clone_ptr const& c) : scoped_ptr<T>(c ? &c->clone() : 0) {}
 
     clone_ptr& operator =(clone_ptr const& c) {
-        reset(c ? &c->clone() : 0);
+        this->reset(c ? &c->clone() : 0);
         return *this;
     }
 };

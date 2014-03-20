@@ -12,4 +12,3 @@ Base content: {{ an_int_vector }}.
 {% block footer %}
 The footer.
 {% endblock footer %}
-

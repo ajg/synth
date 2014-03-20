@@ -5,17 +5,7 @@ Char Pointer: {{ char_pointer }}
 
 Uh oh {{some_strings}},
 
-{##}
-{# a #}
-{# {# #}
 {% if 0 %}{% else %}HEYA!{% endif %}
-
-{# foo #}
-
-{% comment %} a
-multiline
-comment
-whoo {% endcomment %}
 
 {% autoescape on %}
 

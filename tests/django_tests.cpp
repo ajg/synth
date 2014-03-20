@@ -70,7 +70,6 @@ DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\
 ///     django::load_tag
 ///     django::load_from_tag
 ///     django::now_tag
-///     django::regroup_tag
 ///     django::ssi_tag
 ///     django::url_as_tag
 ///     django::widthratio_tag
@@ -81,6 +80,11 @@ unit_test(missing tag) {
     string_template const t("{% xyz 42 %}");
     ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
+
+DJANGO_TEST(comment_tag short A, "0{# Foo Bar Qux #}1",                                "01")
+DJANGO_TEST(comment_tag short B, "0{##}1",                                             "01")
+DJANGO_TEST(comment_tag short C, "0{# {# #}1",                                         "01")
+DJANGO_TEST(comment_tag long,    "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
 DJANGO_TEST(ifequal_tag true,             "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
 DJANGO_TEST(ifequal_tag true,             "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
@@ -170,20 +174,6 @@ DJANGO_TEST(spaceless_tag B,
 DJANGO_TEST(templatetag_tag openbrace,     "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag closevariable, "{% templatetag closevariable %}", "}}")
 
-DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
-DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
-
-DJANGO_TEST(verbatim_tag,
-        "{% verbatim %}{% for v in friends %}\n"
-        "    <p>{{ v }}</p>\n"
-        "{% endfor %}{% endverbatim %}\n",
-            "{% for v in friends %}\n"
-            "    <p>{{ v }}</p>\n"
-            "{% endfor %}\n")
-
-DJANGO_TEST(comment_tag short, "A{# Foo Bar Qux #}B", "AB")
-DJANGO_TEST(comment_tag long,  "A{% comment %} Foo\n Bar\n Qux\n {% endcomment %}B", "AB")
-
 unit_test(url_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
     tests::test_resolver<options_type>::patterns_type patterns;
@@ -218,6 +208,17 @@ unit_test(url_as_tag missing) {
     ensure_equals(t.render_to_string(context, options), "_");
 }}}
 
+DJANGO_TEST_(variable_tag w/o context,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
+DJANGO_TEST_(variable_tag with context, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
+
+DJANGO_TEST(verbatim_tag,
+        "{% verbatim %}{% for v in friends %}\n"
+        "    <p>{{ v }}</p>\n"
+        "{% endfor %}{% endverbatim %}\n",
+            "{% for v in friends %}\n"
+            "    <p>{{ v }}</p>\n"
+            "{% endfor %}\n")
+
 DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters
@@ -228,8 +229,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::center_filter
 ///     django::cut_filter
 ///     django::date_filter
-///     django::default_filter
-///     django::default_if_none_filter
 ///     django::escape_filter
 ///     django::escapejs_filter
 ///     django::filesizeformat_filter
@@ -257,7 +256,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::striptags_filter
 ///     django::time_filter
 ///     django::unordered_list_filter
-///     django::wordcount_filter
 ///     django::wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -265,6 +263,14 @@ unit_test(missing filter) {
     string_template const t("{{ 42 | xyz }}");
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
+
+DJANGO_TEST(default_filter True,  "{{ True  |default:\"default\" }}", "True")
+DJANGO_TEST(default_filter False, "{{ False |default:\"default\" }}", "default")
+DJANGO_TEST(default_filter None,  "{{ None  |default:\"default\" }}", "default")
+
+DJANGO_TEST(default_if_none_filter True,  "{{ True  |default_if_none:\"default\" }}", "True")
+DJANGO_TEST(default_if_none_filter False, "{{ False |default_if_none:\"default\" }}", "False")
+DJANGO_TEST(default_if_none_filter None,  "{{ None  |default_if_none:\"default\" }}", "default")
 
 DJANGO_TEST(dictsort_filter control, "{{ friends }}",                   "age: 23, name: joe, age: 55, name: bob, age: 41, name: lou")
 DJANGO_TEST(dictsort_filter simple,  "{{ friends | dictsort:'name' }}", "age: 55, name: bob, age: 23, name: joe, age: 41, name: lou")
@@ -315,7 +321,8 @@ DJANGO_TEST(timeuntil_filter C, "{{ after_past | timeuntil:past }}",        "1&n
 DJANGO_TEST(timeuntil_filter D, "{{ before_past | timeuntil:past }}",       "0&nbsp;minutes")
 DJANGO_TEST(timeuntil_filter E, "{{ past | timeuntil }}",                   "0&nbsp;minutes")
 
-DJANGO_TEST(title_filter, "{{ \"my FIRST post\" | title }}", "My First Post")
+DJANGO_TEST(title_filter A, "{{ \"my FIRST post\" | title }}", "My First Post")
+DJANGO_TEST(title_filter B, "{{ 'joel is a slug' | title }}", "Joel Is A Slug")
 
 DJANGO_TEST(truncatechars_filter  1, "{{ \"Joel is a slug\" | truncatechars: 1 }}", ".")
 DJANGO_TEST(truncatechars_filter  2, "{{ \"Joel is a slug\" | truncatechars: 2 }}", "..")
@@ -352,9 +359,14 @@ DJANGO_TEST(urlize_filter, "{{ \"This is some text containing a http://www.url.c
 
 DJANGO_TEST(urlizetrunc_filter, "{{ \"This is some text containing a http://www.url.com sir and also another.url.com.\" | urlizetrunc:15 }}", "This is some text containing a <a href='http://www.url.com'>http://www.url....</a> sir and also <a href='http://another.url.com'>another.url.com</a>.")
 
-DJANGO_TEST(yesno_filter yes, "{{ true_var|yesno:'Yes,No' }}", "Yes")
-DJANGO_TEST(yesno_filter no, "{{ false_var|yesno:'Yes,No' }}", "No")
-// DJANGO_TEST(yesno_filter maybe, "{{ no_var|yesno:'Yes,No,Maybe' }}", "Maybe")
+DJANGO_TEST(wordcount_filter, "{{ 'joel is a slug' | wordcount }}", "4")
+
+DJANGO_TEST(yesno_filter yes,    "{{ true_var|yesno:'Yes,No' }}",        "Yes")
+DJANGO_TEST(yesno_filter no,     "{{ false_var|yesno:'Yes,No' }}",       "No")
+DJANGO_TEST(yesno_filter True,   "{{ True  |yesno:\"yeah,no,maybe\" }}", "yeah")
+DJANGO_TEST(yesno_filter False,  "{{ False |yesno:\"yeah,no,maybe\" }}", "no")
+DJANGO_TEST(yesno_filter None A, "{{ None  |yesno:\"yeah,no,maybe\" }}", "maybe")
+DJANGO_TEST(yesno_filter None B, "{{ None  |yesno:\"yeah,no\" }}",       "no")
 
 /*
 TODO:

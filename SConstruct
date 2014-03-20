@@ -8,7 +8,6 @@ import subprocess
 from distutils import sysconfig
 
 # TODO: Add environments with '-std=c++11' and eventually '-std=c++14'
-# TODO: Add '-O'/'-O2'/'-O3'/'-Ofast' and '-DNDEBUG' to default environment.
 
 debug = int(ARGUMENTS.get('debug', 0))
 

@@ -386,8 +386,6 @@ TMPL Engine
 Future Work
 -----------
 
- - Core:
-   * Expand documentation
  - Distribution:
    * [Homebrew](http://brew.sh/) formula
    * Pre-built OS X binaries
@@ -424,6 +422,13 @@ Future Work
    * Allow named output files
    * [v1+] Allow using arbitrary programs as tags
    * [v1+] Allow using arbitrary programs as filters
+ - Documentation:
+   * Produce Boost-compatible documentation
+   * Create `conf.py` (et al.) to enable ReadTheDocs
+ - Testing:
+   * Rewrite the majority of unit tests as a set of .in/.out files
+   * Move everything in `samples/django/whatever.tpl` into unit tests
+   * Add unit tests from Cjango
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

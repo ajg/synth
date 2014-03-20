@@ -87,23 +87,6 @@ cris{{ " " | pluralize:"is,es" }}
 ferr{{ "" | pluralize:"y,ies" }}
 ferr{{ " " | pluralize:"y,ies" }}
 
-{{ "joel is a slug" | title }}
-
-{{ True  |yesno:"yeah,no,maybe" }}
-{{ False |yesno:"yeah,no,maybe" }}
-{{ None  |yesno:"yeah,no,maybe" }}
-{{ None  |yesno:"yeah,no" }}
-
-{{ "joel is a slug" | wordcount }}
-
-{{ True  |default:"default" }}
-{{ False |default:"default" }}
-{{ None  |default:"default" }}
-
-{{ True  |default_if_none:"default" }}
-{{ False |default_if_none:"default" }}
-{{ None  |default_if_none:"default" }}
-
 {{123456789|filesizeformat}}
 
 {% csrf_token %}

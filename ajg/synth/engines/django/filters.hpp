@@ -1333,18 +1333,15 @@ struct truncatechars_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            Size   const limit = args[0].count();
+            long const limit = args[0].count();
+            if (limit <= 0) return String();
+
+            Size   const ellip = engine.ellipsis.length();
             String const input = value.to_string();
 
             if (input.length() > limit) {
-                Size const min = engine.ellipsis.length();
-
-                if (min > limit) {
-                    return engine.ellipsis.substr(0, limit);
-                }
-                else {
-                    return input.substr(0, limit - min) + engine.ellipsis;
-                }
+                Size const trunc = ellip < limit ? limit - ellip : 0;
+                return input.substr(0, trunc) + engine.ellipsis;
             }
             else {
                 return input;
@@ -1376,23 +1373,61 @@ struct truncatechars_html_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            Size   const limit = args[0].count();
+            long const limit = args[0].count();
+            if (limit <= 0) return String();
+
+            Size   const ellip = engine.ellipsis.length();
             String const input = value.to_string();
             std::basic_ostringstream<Char> stream;
 
-            regex_iterator_type begin(input.begin(), input.end(), engine.html_tag), end;
+            typename String::const_iterator last = input.begin(), done = input.end();
+            regex_iterator_type begin(last, done, engine.html_tag), end;
+            std::stack<String> open_tags;
+            Size length = 0;
 
-            BOOST_FOREACH(sub_match_type const& tag, std::make_pair(begin, end)) {
-                stream << tag.str();
+            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
+                String const tag  = match.str();
+                String const name = tag.substr(1, tag.find_first_of(detail::text(" \t\n\v\f\r>"), 1) - 1);
+                String const text = String(last, match.first);
+
+                last = match.second;
+                Size current = length;
+
+                if ((length += text.length()) > limit) {
+                    Size const trunc = current + ellip < limit ? limit - (current + ellip) : 0;
+                    stream << text.substr(0, trunc) + engine.ellipsis;
+                    break;
+                }
+                else {
+                    if (name[0] == Char('/')) {
+                        if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
+                            open_tags.pop();
+                        }
+                    }
+                    else {
+                        open_tags.push(name);
+                    }
+
+                    stream << text << tag;
+                }
             }
 
-            /*for (Size i = 0; i < limit && word != end; ++word, ++i) {
-                stream << (i ? " " : "") << *word;
+            if (last != done && length <= limit) {
+                String const text = String(last, done);
+
+                if ((length += text.length()) > limit) {
+                    Size const trunc = ellip < limit ? limit - ellip : 0;
+                    stream << text.substr(0, trunc) + engine.ellipsis;
+                }
+                else {
+                    stream << text;
+                }
             }
 
-            if (word != end) {
-                stream << " " << engine.ellipsis;
-            }*/
+            while (!open_tags.empty()) {
+                stream << "</" << open_tags.top() << ">";
+                open_tags.pop();
+            }
 
             return Value(stream.str()).mark_safe();
         }
@@ -1424,7 +1459,9 @@ struct truncatewords_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            Size const limit = args[0].count();
+            long const limit = args[0].count();
+            if (limit <= 0) return String();
+
             String const input = value.to_string();
             String const delimiters = text(word_delimiters);
             separator_type const separator(delimiters.c_str());
@@ -1470,7 +1507,9 @@ struct truncatewords_html_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            Size   const limit = args[0].count();
+            long const limit = args[0].count();
+            if (limit <= 0) return String();
+
             String const input = value.to_string();
             std::basic_ostringstream<Char> stream;
 

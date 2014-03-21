@@ -628,17 +628,65 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
-    // TODO: Support abbreviated formats. (e.g. "r" => "%r")
     string_type format_datetime( options_type  const& options
-                               , string_type          format
+                               , string_type   const& format
                                , datetime_type const& datetime
                                ) const {
-        if (optional<string_type const> const& fmt
-                = detail::find_mapped_value(format, options.formats)) {
-            format = *fmt;
+        typedef std::map<char_type, string_type> mappings_type;
+        typedef typename mappings_type::value_type mapping_type;
+
+        static mappings_type const mappings = boost::assign::list_of<mapping_type>
+            (char_type('%'), detail::text("%%"))
+            (char_type('a'), detail::text("%P")) // TODO: Periods
+            (char_type('A'), detail::text("%p"))
+            (char_type('b'), detail::text("%b")) // TODO: Lowercase
+            (char_type('B'), detail::text(""))   // "Not implemented" per spec.
+            (char_type('c'), detail::text("%Y-%m-%dT%H:%M:%S%z"))
+            (char_type('d'), detail::text("%d"))
+            (char_type('D'), detail::text("%a"))
+            (char_type('e'), detail::text("%z"))    // TODO: Ignored with ptimes
+            (char_type('E'), detail::text("%B"))    // TODO: Make locale-aware
+            (char_type('f'), detail::text("%l:%M")) // TODO: No leading blank, no zero minutes
+            (char_type('F'), detail::text("%B"))
+            (char_type('g'), detail::text("%l"))    // TODO: No leading blank
+            (char_type('G'), detail::text("%k"))    // TODO: No leading blank
+            (char_type('h'), detail::text("%I"))
+            (char_type('H'), detail::text("%H"))
+            (char_type('i'), detail::text("%M"))
+            (char_type('I'), detail::text(""))   // TODO: Implement
+            (char_type('j'), detail::text("%e")) // TODO: No leading blank
+            (char_type('l'), detail::text("%A"))
+            (char_type('L'), detail::text(""))   // TODO: Implement
+            (char_type('m'), detail::text("%m"))
+            (char_type('M'), detail::text("%b"))
+            (char_type('n'), detail::text("%m")) // TODO: No leading zeros
+            (char_type('N'), detail::text("%b")) // TODO: Abbreviations/periods
+            (char_type('o'), detail::text("%G"))
+            (char_type('O'), detail::text(""))   // TODO: Implement
+            (char_type('P'), detail::text("%r")) // TODO: Periods, no zero minutes, "midnight"/"noon"
+            (char_type('r'), detail::text("%a, %d %b %Y %T %z"))
+            (char_type('s'), detail::text("%S"))
+            (char_type('S'), detail::text(""))   // TODO: Implement
+            (char_type('t'), detail::text(""))   // TODO: Implement
+            (char_type('T'), detail::text(""))   // TODO: Implement
+            (char_type('u'), detail::text("%f")) // TODO: No leading period
+            (char_type('U'), detail::text(""))   // TODO: Implement
+            (char_type('w'), detail::text("%w"))
+            (char_type('W'), detail::text("%V")) // TODO: No leading zeros
+            (char_type('y'), detail::text("%y"))
+            (char_type('Y'), detail::text("%Y"))
+            (char_type('z'), detail::text("%j")) // TODO: No leading zeros
+            (char_type('Z'), detail::text(""))   // TODO: Implement
+            ;
+
+        std::basic_ostringstream<char_type> stream;
+
+        // TODO: This might not be UTF8-safe; consider using a utf8_iterator.
+        BOOST_FOREACH(char_type const c, find_mapped_value(format, options.formats).get_value_or(format)) {
+            stream << find_mapped_value(c, mappings).get_value_or(string_type(1, c));
         }
 
-        return detail::format_time<string_type>(format, datetime);
+        return detail::format_time<string_type>(stream.str(), datetime);
     }
 
     // TODO: Proper, localizable formatting.

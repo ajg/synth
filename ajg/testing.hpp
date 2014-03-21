@@ -20,7 +20,7 @@
 #define AJG_TESTING 1
 
 #ifndef AJG_TESTING_MAX_TESTS_PER_FILE
-#define AJG_TESTING_MAX_TESTS_PER_FILE 150
+#define AJG_TESTING_MAX_TESTS_PER_FILE 200
 #endif
 
 namespace ajg {

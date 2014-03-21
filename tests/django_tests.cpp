@@ -357,41 +357,40 @@ DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars
 DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars_html:14 }}", "<p>Joel is a slug</p>")
 DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars_html:15 }}", "<p>Joel is a slug</p>")
 
-/* TODO: Add once we know the right behavior:
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:0 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:1 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:2 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:3 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:4 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:5 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:6 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:7 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:8 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:9 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:10 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:11 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:12 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:13 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:14 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:15 }}", "")
+// TODO: Complete once we know the right behavior:
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:0 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:1 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:2 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:3 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:4 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:5 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:6 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:7 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:8 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:9 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:10 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:11 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:12 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:13 }}", "")
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:14 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:15 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
 
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:0 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:1 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:2 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:3 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:4 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:5 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:6 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:7 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:8 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:9 }}",  "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:10 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:11 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:12 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:13 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:14 }}", "")
-DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:15 }}", "")
-*/
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:0 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:1 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:2 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:3 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:4 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:5 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:6 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:7 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:8 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:9 }}",  "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:10 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:11 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:12 }}", "")
+// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:13 }}", "")
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:14 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:15 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
 
 DJANGO_TEST(truncatewords_filter, "{{ \"Joel is a slug\" | truncatewords:0 }}", "")
 DJANGO_TEST(truncatewords_filter, "{{ \"Joel is a slug\" | truncatewords:1 }}", "Joel ...")
@@ -400,7 +399,13 @@ DJANGO_TEST(truncatewords_filter, "{{ \"Joel is a slug\" | truncatewords:3 }}", 
 DJANGO_TEST(truncatewords_filter, "{{ \"Joel is a slug\" | truncatewords:4 }}", "Joel is a slug")
 DJANGO_TEST(truncatewords_filter, "{{ \"Joel is a slug\" | truncatewords:5 }}", "Joel is a slug")
 
-/* TODO:
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:0 }}", "")
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:1 }}", "Joel ...")
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:2 }}", "Joel is ...")
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:3 }}", "Joel is a ...")
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:4 }}", "Joel is a slug")
+DJANGO_TEST(truncatewords_filter, "{{ \"  Joel  is  a  slug  \" | truncatewords:5 }}", "Joel is a slug")
+
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug</p>\" | truncatewords_html:0 }}", "")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug</p>\" | truncatewords_html:1 }}", "<p>Joel ...</p>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug</p>\" | truncatewords_html:2 }}", "<p>Joel is ...</p>")
@@ -421,7 +426,20 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatewords_html:3 }}", "Joel <a href='#'>is <i>a ...</i></a>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatewords_html:4 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatewords_html:5 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
-*/
+
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:0 }}", "")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:1 }}", "Joel ...")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:2 }}", "Joel <a href='#'>is ...</a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:3 }}", "Joel <a href='#'>is <i>a ...</i></a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:4 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:5 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
+
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:0 }}", "")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:1 }}", "  Joel ...")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:2 }}", "  Joel  <a href='#'>  is ...</a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:3 }}", "  Joel  <a href='#'>  is  <i>  a ...</i></a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:4 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  ")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:5 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  ")
 
 DJANGO_TEST(upper_filter, "{{ \"Joel is a slug\" | upper }}", "JOEL IS A SLUG")
 
@@ -457,6 +475,6 @@ TODO:
 
 <img src="bar.gif" height="10" width="{% widthratio this_value max_value 100 %}" />
 
-{#% ssi /etc/adjtime parsed % -- unavailable on Windows #}
-{#% ssi /etc/adjtime % -- unavailable on Windows #}
+{#% ssi /etc/adjtime parsed % -- normally unavailable on Windows and OS X #}
+{#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}
 */

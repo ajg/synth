@@ -23,7 +23,6 @@ Uh oh {{some_strings}},
    for: Bad
 {% endfor %}
 
-Date: {% now "Y-m-d H:M:SFQ" %}
 Hello {{X}} ; {{an_int_vector}} ; {{a_shared_ptr}} ; {{a_scoped_ptr}},
     {% if True %} Good {% endif %}{% if False %} Bad {% endif %}
     {% if True %} Good {% else %} Bad {% endif %}

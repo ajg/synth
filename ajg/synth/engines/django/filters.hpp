@@ -1252,7 +1252,7 @@ struct timesince_filter {
 
             typename Options::datetime_type to = value.to_datetime();
             typename Options::datetime_type from = args.empty() ?
-                engine.now() : args[0].to_datetime();
+                detail::local_now() : args[0].to_datetime();
 
             return Value(engine.format_duration(options, from - to)).mark_safe();
         }
@@ -1277,7 +1277,7 @@ struct timeuntil_filter {
 
             typename Options::datetime_type to = value.to_datetime();
             typename Options::datetime_type from = args.empty() ?
-                engine.now() : args[0].to_datetime();
+                detail::local_now() : args[0].to_datetime();
 
             return Value(engine.format_duration(options, to - from)).mark_safe();
         }

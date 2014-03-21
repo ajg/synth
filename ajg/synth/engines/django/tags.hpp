@@ -779,7 +779,7 @@ struct now_tag {
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
             String const format = engine.extract_string(match[1]);
-            out << engine.format_datetime(options, format, engine.now());
+            out << engine.format_datetime(options, format, detail::utc_now());
         }
     };
 };

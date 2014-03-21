@@ -44,6 +44,7 @@ namespace synth {
 namespace django {
 
 using detail::operator ==;
+using detail::find_mapped_value;
 namespace x = boost::xpressive;
 
 template < class Library = django::default_library
@@ -266,7 +267,7 @@ struct definition : base_definition< BidirectionalIterator
         process_filter const processor = { *this, value, name, args, context, options };
         // Let library filters override built-in ones:
         if (optional<typename options_type::filter_type const> const& filter
-                = detail::find_mapped_value(name, options.loaded_filters)) {
+                = find_mapped_value(name, options.loaded_filters)) {
             return (*filter)(options, &context, value, args);
         }
         else if (optional<value_type> const& result = detail::may_find_by_index(*this,
@@ -625,10 +626,6 @@ struct definition : base_definition< BidirectionalIterator
         }
 
         return value;
-    }
-
-    inline datetime_type now() const {
-        return posix_time::second_clock::local_time(); // universal_time()
     }
 
     // TODO: Support abbreviated formats. (e.g. "r" => "%r")

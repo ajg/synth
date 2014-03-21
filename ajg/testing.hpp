@@ -85,7 +85,7 @@ struct check_test_number {
 #define unit_test(name) \
     namespace tut { template<> template<> \
     void group_type::object::test<ajg::detail::check_test_number<TEST_NUMBER()>::value>() { \
-        set_test_name(#name "/" BOOST_PP_STRINGIZE(__LINE__));
+        set_test_name(#name ":" BOOST_PP_STRINGIZE(__LINE__));
 
 namespace {
     struct empty {};

@@ -390,7 +390,6 @@ Future Work
    * [Homebrew](http://brew.sh/) formula
    * Pre-built OS X binaries
    * Pre-built Windows binaries
-   * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Create Visual Studio solution & project using Scons
  - Bindings:
    * `ruby` binding based on [Rice](http://rice.rubyforge.org/)
@@ -429,6 +428,9 @@ Future Work
    * Rewrite the majority of unit tests as a set of .in/.out files
    * Move everything in `samples/django/whatever.tpl` into unit tests
    * Add unit tests from Cjango
+ - Optimization:
+   * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
+   * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`.
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

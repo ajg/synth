@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/assign/list_of.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
 
@@ -148,7 +149,7 @@ struct options {
 
     options( boolean_type     const  autoescape    = true
            , value_type       const& default_value = detail::text("")
-           , formats_type     const& formats       = formats_type()
+           , formats_type     const& formats       = merge_default_formats(formats)
            , boolean_type     const  debug         = false
            , directories_type const& directories   = directories_type()
            , libraries_type   const& libraries     = libraries_type()
@@ -172,18 +173,24 @@ struct options {
 
   public:
 
-    inline static formats_type default_formats(formats_type formats) {
-        if (!formats.empty()) {
-            return formats;
+    inline static formats_type merge_default_formats(formats_type formats) {
+        typedef typename formats_type::value_type format_type;
+        static formats_type const defaults = boost::assign::list_of<format_type>
+            (detail::text("DATE_FORMAT"),           detail::text("%N %j, %Y"))
+            (detail::text("DATETIME_FORMAT"),       detail::text("%N %j, %Y, %P"))
+            (detail::text("MONTH_DAY_FORMAT"),      detail::text("%F %j"))
+            (detail::text("SHORT_DATE_FORMAT"),     detail::text("%m/%d/%Y"))
+            (detail::text("SHORT_DATETIME_FORMAT"), detail::text("%m/%d/%Y %P"))
+            (detail::text("TIME_FORMAT"),           detail::text("%P"))
+            (detail::text("YEAR_MONTH_FORMAT"),     detail::text("%F %Y"))
+            ;
+
+        BOOST_FOREACH(format_type const& format, defaults) {
+            if (formats.find(format.first) == formats.end()) {
+                formats.insert(format);
+            }
         }
 
-        formats[detail::text("DATE_FORMAT")]           = detail::text("%N %j, %Y");
-        formats[detail::text("DATETIME_FORMAT")]       = detail::text("%N %j, %Y, %P");
-        formats[detail::text("MONTH_DAY_FORMAT")]      = detail::text("%F %j");
-        formats[detail::text("SHORT_DATE_FORMAT")]     = detail::text("%m/%d/%Y");
-        formats[detail::text("SHORT_DATETIME_FORMAT")] = detail::text("%m/%d/%Y %P");
-        formats[detail::text("TIME_FORMAT")]           = detail::text("%P");
-        formats[detail::text("YEAR_MONTH_FORMAT")]     = detail::text("%F %Y");
         return formats;
     }
 

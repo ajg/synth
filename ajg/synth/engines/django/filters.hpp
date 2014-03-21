@@ -1327,6 +1327,11 @@ struct truncatechars_filter {
     struct definition {
         String name() const { return text("truncatechars"); }
 
+        typedef Char                                           char_type;
+        typedef Size                                           size_type;
+        typedef String                                         string_type;
+        typedef Value                                          value_type;
+
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
                       Array  const& args,  Options const& options) const {
@@ -1334,17 +1339,17 @@ struct truncatechars_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             long const limit = args[0].count();
-            if (limit <= 0) return String();
+            if (limit <= 0) return string_type();
 
-            Size   const ellip = engine.ellipsis.length();
-            String const input = value.to_string();
+            size_type   const ellip = engine.ellipsis.length();
+            string_type const text  = value.to_string();
 
-            if (input.length() > limit) {
-                Size const trunc = ellip < limit ? limit - ellip : 0;
-                return input.substr(0, trunc) + engine.ellipsis;
+            if (text.length() > limit) {
+                size_type const trunc = ellip < limit ? limit - ellip : 0;
+                return text.substr(0, trunc) + engine.ellipsis;
             }
             else {
-                return input;
+                return text;
             }
         }
     };
@@ -1362,8 +1367,10 @@ struct truncatechars_html_filter {
         String name() const { return text("truncatechars_html"); }
 
         typedef Char                                           char_type;
+        typedef Size                                           size_type;
         typedef String                                         string_type;
-        typedef typename String::const_iterator                iterator_type;
+        typedef Value                                          value_type;
+        typedef typename string_type::const_iterator           iterator_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
         typedef typename regex_iterator_type::value_type       sub_match_type;
 
@@ -1374,32 +1381,33 @@ struct truncatechars_html_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             long const limit = args[0].count();
-            if (limit <= 0) return String();
+            if (limit <= 0) return string_type();
 
-            Size   const ellip = engine.ellipsis.length();
-            String const input = value.to_string();
-            std::basic_ostringstream<Char> stream;
+            size_type   const ellip = engine.ellipsis.length();
+            string_type const input = value.to_string();
+            std::basic_ostringstream<char_type> stream;
 
-            typename String::const_iterator last = input.begin(), done = input.end();
+            iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
-            std::stack<String> open_tags;
-            Size length = 0;
+            std::stack<string_type> open_tags;
+            size_type length = 0;
+            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
-                String const tag  = match.str();
-                String const name = tag.substr(1, tag.find_first_of(detail::text(" \t\n\v\f\r>"), 1) - 1);
-                String const text = String(last, match.first);
+                string_type const tag  = match.str();
+                string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
+                string_type const text = string_type(last, match.first);
 
                 last = match.second;
-                Size current = length;
+                size_type current = length;
 
                 if ((length += text.length()) > limit) {
-                    Size const trunc = current + ellip < limit ? limit - (current + ellip) : 0;
+                    size_type const trunc = current + ellip < limit ? limit - (current + ellip) : 0;
                     stream << text.substr(0, trunc) + engine.ellipsis;
                     break;
                 }
                 else {
-                    if (name[0] == Char('/')) {
+                    if (name[0] == char_type('/')) {
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
                             open_tags.pop();
                         }
@@ -1413,10 +1421,10 @@ struct truncatechars_html_filter {
             }
 
             if (last != done && length <= limit) {
-                String const text = String(last, done);
+                string_type const text = string_type(last, done);
 
                 if ((length += text.length()) > limit) {
-                    Size const trunc = ellip < limit ? limit - ellip : 0;
+                    size_type const trunc = ellip < limit ? limit - ellip : 0;
                     stream << text.substr(0, trunc) + engine.ellipsis;
                 }
                 else {
@@ -1429,7 +1437,7 @@ struct truncatechars_html_filter {
                 open_tags.pop();
             }
 
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
     };
 };
@@ -1445,13 +1453,16 @@ struct truncatewords_filter {
     struct definition {
         String name() const { return text("truncatewords"); }
 
-        typedef Char                            char_type;
-        typedef String                          string_type;
-        typedef typename String::const_iterator iterator_type;
-        typedef char_separator<Char>            separator_type;
+        typedef Char                                           char_type;
+        typedef Size                                           size_type;
+        typedef String                                         string_type;
+        typedef Value                                          value_type;
+        typedef typename string_type::const_iterator           iterator_type;
+        typedef char_separator<char_type>                      separator_type;
         typedef tokenizer < separator_type
                           , iterator_type
-                          , String >            tokenizer_type;
+                          , string_type
+                          >                                    tokenizer_type;
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
@@ -1460,19 +1471,23 @@ struct truncatewords_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             long const limit = args[0].count();
-            if (limit <= 0) return String();
+            if (limit <= 0) return string_type();
 
-            String const input = value.to_string();
-            String const delimiters = text(word_delimiters);
-            separator_type const separator(delimiters.c_str());
-            tokenizer_type const tokenizer(input, separator);
+            string_type           const text = value.to_string();
+            static string_type    const delimiters = detail::text(word_delimiters);
+            static separator_type const separator(delimiters.c_str());
+            tokenizer_type        const tokenizer(text, separator);
 
-            std::basic_ostringstream<Char> stream;
+            std::basic_ostringstream<char_type> stream;
+            size_type count = 0;
+
             typename tokenizer_type::const_iterator word = tokenizer.begin();
             typename tokenizer_type::const_iterator const end = tokenizer.end();
 
-            for (Size i = 0; i < limit && word != end; ++word, ++i) {
-                stream << (i ? " " : "") << *word;
+            for (; count < limit && word != end; ++word, ++count) {
+                // Intra-word whitespace is collapsed to a single space;
+                // leading and trailing whitespace is elided.
+                stream << (count ? " " : "") << *word;
             }
 
             if (word != end) {
@@ -1496,10 +1511,18 @@ struct truncatewords_html_filter {
         String name() const { return text("truncatewords_html"); }
 
         typedef Char                                           char_type;
+        typedef Size                                           size_type;
         typedef String                                         string_type;
-        typedef typename String::const_iterator                iterator_type;
+        typedef Value                                          value_type;
+        typedef typename string_type::const_iterator           iterator_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
         typedef typename regex_iterator_type::value_type       sub_match_type;
+        typedef char_separator<char_type>                      separator_type;
+        typedef tokenizer < separator_type
+                          , iterator_type
+                          , string_type
+                          >                                    tokenizer_type;
+
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
@@ -1508,26 +1531,103 @@ struct truncatewords_html_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             long const limit = args[0].count();
-            if (limit <= 0) return String();
+            if (limit <= 0) return string_type();
 
-            String const input = value.to_string();
-            std::basic_ostringstream<Char> stream;
+            size_type   const ellip = engine.ellipsis.length();
+            string_type const input = value.to_string();
+            std::basic_ostringstream<char_type> stream;
+            size_type count = 0;
 
-            regex_iterator_type begin(input.begin(), input.end(), engine.html_tag), end;
+            iterator_type last = input.begin(), done = input.end();
+            regex_iterator_type begin(last, done, engine.html_tag), end;
+            std::stack<string_type> open_tags;
 
-            BOOST_FOREACH(sub_match_type const& tag, std::make_pair(begin, end)) {
-                stream << tag.str();
+            static string_type    const delimiters = detail::text(word_delimiters);
+            static separator_type const separator(delimiters.c_str());
+            static string_type    const boundaries = detail::text(" \t\n\v\f\r>");
+
+            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
+                string_type const tag  = match.str();
+                string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
+                string_type const text = string_type(last, match.first);
+
+                tokenizer_type const tokenizer(text, separator);
+                typename tokenizer_type::const_iterator word = tokenizer.begin();
+                typename tokenizer_type::const_iterator const end = tokenizer.end();
+
+                last = match.second;
+                iterator_type it = text.begin();
+
+                for (; count < limit && word != end; ++word, ++count) {
+                    string_type const lead = string_type(it, word.base() - word->length());
+
+                    AJG_DUMP(lead);
+                    AJG_DUMP(*word);
+
+                    stream << lead << *word;
+                    it = word.base();
+                }
+
+                if (word != end || count >= limit) {
+                    // if (count >= limit) {
+                        stream << " " << engine.ellipsis;
+                    // }
+                    break;
+                }
+                else {
+                    string_type const trail = string_type(it, word.end());
+                    // AJG_DUMP(trail);
+
+                    if (name[0] == char_type('/')) {
+                        if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
+                            open_tags.pop();
+                        }
+                    }
+                    else {
+                        open_tags.push(name);
+                    }
+
+                    stream << trail << tag;
+                }
             }
 
-            /*for (Size i = 0; i < limit && word != end; ++word, ++i) {
-                stream << (i ? " " : "") << *word;
+            if (last != done && count < limit) {
+                // stream << "|";
+                string_type const text = string_type(last, done);
+
+                tokenizer_type const tokenizer(text, separator);
+                typename tokenizer_type::const_iterator word = tokenizer.begin();
+                typename tokenizer_type::const_iterator const end = tokenizer.end();
+                iterator_type it = text.begin();
+                AJG_DUMP(string_type(text.begin(), word.end()));
+                AJG_DUMP(string_type(it, word.end()));
+                AJG_DUMP(string_type(it, text.end()));
+
+                for (; count < limit && word != end; ++word, ++count) {
+                    string_type const lead = string_type(it, word.base() - word->length());
+
+                    AJG_DUMP(lead);
+                    AJG_DUMP(*word);
+
+                    stream << lead << *word;
+                    it = word.base();
+                }
+
+                if (word != end) {
+                    stream << " " << engine.ellipsis;
+                }
+                else {
+                    string_type const trail = string_type(it, word.end());
+                    stream << trail;
+                }
             }
 
-            if (word != end) {
-                stream << " " << engine.ellipsis;
-            }*/
+            while (!open_tags.empty()) {
+                stream << "</" << open_tags.top() << ">";
+                open_tags.pop();
+            }
 
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
     };
 };

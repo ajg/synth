@@ -483,12 +483,38 @@ inline String abbreviate_size(uintmax_t const size) {
 }
 
 //
+// prefix_format_characters
+//     FIXME: This is probably not UTF8-safe; consider using a utf8_iterator.
+////////////////////////////////////////////////////////////////////////////////
+
+template <class String>
+inline String prefix_format_characters(String format) {
+    static String const specials = text("aAbBcdDeEfFgGhHiIjlLmMnNoOPQrsStTuUwWyYzZ");
+    typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
+    char_type last = 0;
+
+    BOOST_FOREACH(char_type const c, format) {
+        if (last != char_type('%') && specials.find(c) != String::npos) {
+            stream << "%" << c;
+        }
+        else {
+            stream << c;
+        }
+        last = c;
+    }
+
+    return stream.str();
+}
+
+//
 // format_current_time
 //     TODO: Fold into format_time.
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
-inline String format_current_time(String const& format) {
+inline String format_current_time(String format, bool const autoprefix = true) {
+    if (autoprefix) format = prefix_format_characters(format);
     typedef typename String::value_type char_type;
     typedef typename local_time::local_date_time time_type;
     typedef typename date_time::time_facet<time_type, char_type> facet_type;
@@ -509,7 +535,8 @@ inline String format_current_time(String const& format) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
-inline String format_time(String const& format, posix_time::ptime const& time) {
+inline String format_time(String format, posix_time::ptime const& time, bool const autoprefix = true) {
+    if (autoprefix) format = prefix_format_characters(format);
     typedef typename posix_time::ptime time_type;
     typedef typename String::value_type char_type;
     typedef typename date_time::time_facet<time_type, char_type> facet_type;

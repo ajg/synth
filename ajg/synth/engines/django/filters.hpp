@@ -1561,14 +1561,15 @@ struct truncatewords_html_filter {
                 for (; count < limit && word != end; ++word, ++count) {
                     string_type const lead = string_type(it, word.base() - word->length());
 
-                    AJG_DUMP(lead);
-                    AJG_DUMP(*word);
-
                     stream << lead << *word;
                     it = word.base();
                 }
 
                 if (word != end || count >= limit) {
+                    AJG_DUMP((count - 0));
+                    AJG_DUMP((limit - 0));
+                    AJG_DUMP(it == word.end());
+                    AJG_DUMP(it == text.end());
                     // if (count >= limit) {
                         stream << " " << engine.ellipsis;
                     // }
@@ -1576,7 +1577,6 @@ struct truncatewords_html_filter {
                 }
                 else {
                     string_type const trail = string_type(it, word.end());
-                    // AJG_DUMP(trail);
 
                     if (name[0] == char_type('/')) {
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
@@ -1599,15 +1599,9 @@ struct truncatewords_html_filter {
                 typename tokenizer_type::const_iterator word = tokenizer.begin();
                 typename tokenizer_type::const_iterator const end = tokenizer.end();
                 iterator_type it = text.begin();
-                AJG_DUMP(string_type(text.begin(), word.end()));
-                AJG_DUMP(string_type(it, word.end()));
-                AJG_DUMP(string_type(it, text.end()));
 
                 for (; count < limit && word != end; ++word, ++count) {
                     string_type const lead = string_type(it, word.base() - word->length());
-
-                    AJG_DUMP(lead);
-                    AJG_DUMP(*word);
 
                     stream << lead << *word;
                     it = word.base();
@@ -1620,9 +1614,14 @@ struct truncatewords_html_filter {
                     string_type const trail = string_type(it, word.end());
                     stream << trail;
                 }
+
+                AJG_DUMP(it == word.end());
+                AJG_DUMP(it == text.end());
             }
 
-            while (!open_tags.empty()) {
+            AJG_DUMP((count + 0));
+            AJG_DUMP((limit + 0));
+            while (count >= limit && !open_tags.empty()) {
                 stream << "</" << open_tags.top() << ">";
                 open_tags.pop();
             }

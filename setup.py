@@ -3,6 +3,7 @@
 ##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
+import re
 # from setuptools import setup
 from distutils.core import setup, Extension
 from glob import glob
@@ -45,9 +46,13 @@ classifiers = [
     'Topic :: Scientific/Engineering',
 ]
 
+def get_synth_version():
+    config = open('ajg/synth/config.hpp').read()
+    return re.search('AJG_SYNTH_VERSION\\s+(\\S+)', config).group(1)
+
 setup(
     name = 'synth',
-    version = '0.7.0',
+    version = get_synth_version(),
     description = 'A Python binding to the Synth C++ Template Framework',
     long_description = long_description,
     keywords = 'django, tmpl, ssi, template, framework',

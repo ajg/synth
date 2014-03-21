@@ -228,7 +228,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::capfirst_filter
 ///     django::center_filter
 ///     django::cut_filter
-///     django::date_filter
 ///     django::escape_filter
 ///     django::escapejs_filter
 ///     django::filesizeformat_filter
@@ -254,7 +253,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::slugify_filter
 ///     django::stringformat_filter
 ///     django::striptags_filter
-///     django::time_filter
 ///     django::unordered_list_filter
 ///     django::wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////
@@ -264,13 +262,17 @@ unit_test(missing-filter) {
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
 
-DJANGO_TEST(default_filter,  "{{ True  |default:\"default\" }}", "True")
-DJANGO_TEST(default_filter, "{{ False |default:\"default\" }}", "default")
-DJANGO_TEST(default_filter,  "{{ None  |default:\"default\" }}", "default")
+DJANGO_TEST(date_filter, "{{ past        | date }}",                     "Jan 10, 2002")
+DJANGO_TEST(date_filter, "{{ before_past | date:'r' }}",                 "Tue, 08 Jan 2002 13:02:03")
+DJANGO_TEST(date_filter, "{{ after_past  | date:'SHORT_DATE_FORMAT' }}", "03/01/2002")
 
-DJANGO_TEST(default_if_none_filter,  "{{ True  |default_if_none:\"default\" }}", "True")
+DJANGO_TEST(default_filter, "{{ True  |default:\"default\" }}", "True")
+DJANGO_TEST(default_filter, "{{ False |default:\"default\" }}", "default")
+DJANGO_TEST(default_filter, "{{ None  |default:\"default\" }}", "default")
+
+DJANGO_TEST(default_if_none_filter, "{{ True  |default_if_none:\"default\" }}", "True")
 DJANGO_TEST(default_if_none_filter, "{{ False |default_if_none:\"default\" }}", "False")
-DJANGO_TEST(default_if_none_filter,  "{{ None  |default_if_none:\"default\" }}", "default")
+DJANGO_TEST(default_if_none_filter, "{{ None  |default_if_none:\"default\" }}", "default")
 
 DJANGO_TEST(dictsort_filter, "{{ friends }}",                   "age: 23, name: joe, age: 55, name: bob, age: 41, name: lou")
 DJANGO_TEST(dictsort_filter, "{{ friends | dictsort:'name' }}", "age: 55, name: bob, age: 23, name: joe, age: 41, name: lou")
@@ -308,6 +310,10 @@ DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slu
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")
 
 DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django")
+
+DJANGO_TEST(time_filter, "{{ past        | time }}",                     "01:02:03 AM")
+DJANGO_TEST(time_filter, "{{ before_past | time:'c' }}",                 "2002-01-08T13:02:03")
+DJANGO_TEST(time_filter, "{{ after_past  | time:'YEAR_MONTH_FORMAT' }}", "March 2002")
 
 DJANGO_TEST(timesince_filter, "{{ past | timesince:before_past }}",       "0&nbsp;minutes")
 DJANGO_TEST(timesince_filter, "{{ before_past | timesince:past }}",       "1&nbsp;day, 12&nbsp;hours")
@@ -358,7 +364,7 @@ DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars
 DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars_html:15 }}", "<p>Joel is a slug</p>")
 
 // TODO: Complete once we know the right behavior:
-// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:0 }}",  "")
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:0 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:1 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:2 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:3 }}",  "")
@@ -375,7 +381,8 @@ DJANGO_TEST(truncatechars_html_filter, "{{ \"<p>Joel is a slug\" | truncatechars
 DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:14 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
 DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatechars_html:15 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
 
-// DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:0 }}",  "")
+// TODO: Complete once we know the right behavior:
+DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:0 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:1 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:2 }}",  "")
 // DJANGO_TEST(truncatechars_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatechars_html:3 }}",  "")
@@ -417,8 +424,8 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:1 }}", "<p>Joel ...</p>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:2 }}", "<p>Joel is ...</p>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:3 }}", "<p>Joel is a ...</p>")
-DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:4 }}", "<p>Joel is a slug</p>")
-DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:5 }}", "<p>Joel is a slug</p>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:4 }}", "<p>Joel is a slug")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"<p>Joel is a slug\" | truncatewords_html:5 }}", "<p>Joel is a slug")
 
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatewords_html:0 }}", "")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug</a>\" | truncatewords_html:1 }}", "Joel ...")
@@ -431,8 +438,8 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\"
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:1 }}", "Joel ...")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:2 }}", "Joel <a href='#'>is ...</a>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:3 }}", "Joel <a href='#'>is <i>a ...</i></a>")
-DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:4 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
-DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:5 }}", "Joel <a href='#'>is <i>a</i> slug</a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:4 }}", "Joel <a href='#'>is <i>a</i> slug")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"Joel <a href='#'>is <i>a</i> slug\" | truncatewords_html:5 }}", "Joel <a href='#'>is <i>a</i> slug")
 
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:0 }}", "")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:1 }}", "  Joel ...")
@@ -440,6 +447,13 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  <
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:3 }}", "  Joel  <a href='#'>  is  <i>  a ...</i></a>")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:4 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  ")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  \" | truncatewords_html:5 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  </a>  ")
+
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:0 }}", "")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:1 }}", "  Joel ...")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:2 }}", "  Joel  <a href='#'>  is ...</a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:3 }}", "  Joel  <a href='#'>  is  <i>  a ...</i></a>")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:4 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
+DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:5 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
 
 DJANGO_TEST(upper_filter, "{{ \"Joel is a slug\" | upper }}", "JOEL IS A SLUG")
 

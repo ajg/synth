@@ -32,10 +32,6 @@ struct default_loader {
         typedef typename options_type::library_type library_type;
         typedef typename options_type::loader_type  loader_type;
 
-        // AJG_PRINT("load");
-        // AJG_DUMP(library_name);
-        // if (names) AJG_DUMP(value_type(*names));
-
         library_type library = options.libraries[library_name];
 
         if (!library) {

@@ -43,7 +43,6 @@
 
 #include <boost/date_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/local_time/local_time.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 
@@ -482,34 +481,9 @@ inline String abbreviate_size(uintmax_t const size) {
     return stream.str();
 }
 
-//
-// prefix_format_characters
-//     FIXME: This is probably not UTF8-safe; consider using a utf8_iterator.
-////////////////////////////////////////////////////////////////////////////////
-
-template <class String>
-inline String prefix_format_characters(String format) {
-    static String const specials = text("aAbBcdDeEfFgGhHiIjlLmMnNoOPQrsStTuUwWyYzZ");
-    typedef typename String::value_type char_type;
-    std::basic_ostringstream<char_type> stream;
-    char_type last = 0;
-
-    BOOST_FOREACH(char_type const c, format) {
-        if (last != char_type('%') && specials.find(c) != String::npos) {
-            stream << "%" << c;
-        }
-        else {
-            stream << c;
-        }
-        last = c;
-    }
-
-    return stream.str();
-}
-
+/*
 //
 // format_current_time
-//     TODO: Fold into format_time.
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
@@ -529,16 +503,35 @@ inline String format_current_time(String format, bool const autoprefix = true) {
     // Finally, stream out the time, properly formatted.
     return (stream << t), stream.str();
 }
+*/
+
+//
+// local_now
+//     TODO: Offer a local_time::local_date_time version; e.g.
+//           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
+////////////////////////////////////////////////////////////////////////////////
+
+inline posix_time::ptime local_now() {
+    return posix_time::second_clock::local_time();
+}
+
+//
+// utc_now
+////////////////////////////////////////////////////////////////////////////////
+
+inline posix_time::ptime utc_now() {
+    return posix_time::second_clock::universal_time();
+}
 
 //
 // format_time
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class String>
-inline String format_time(String format, posix_time::ptime const& time, bool const autoprefix = true) {
-    if (autoprefix) format = prefix_format_characters(format);
-    typedef typename posix_time::ptime time_type;
-    typedef typename String::value_type char_type;
+template <class String, class Time>
+inline String format_time(String format, Time const& time) {
+    typedef String                                               string_type;
+    typedef Time                                                 time_type;
+    typedef typename string_type::value_type                     char_type;
     typedef typename date_time::time_facet<time_type, char_type> facet_type;
 
     std::basic_ostringstream<char_type> stream;

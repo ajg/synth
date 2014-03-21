@@ -174,10 +174,10 @@ struct definition : base_definition< BidirectionalIterator
             throw_exception(not_implemented("DOCUMENT_URI"));
         }
         else if (name == detail::text("DATE_LOCAL")) {
-            return detail::format_current_time(options.time_format);
+            return detail::format_time(options.time_format, detail::local_now());
         }
         else if (name == detail::text("DATE_GMT")) {
-            throw_exception(not_implemented("DATE_GMT"));
+            return detail::format_time(options.time_format, detail::utc_now());
         }
         else if (name == detail::text("LAST_MODIFIED")) {
             throw_exception(not_implemented("LAST_MODIFIED"));

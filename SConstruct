@@ -7,9 +7,8 @@ import os
 import subprocess
 from distutils import sysconfig
 
-# TODO: Add environments with '-std=c++11' and eventually '-std=c++14'
-
 debug = int(ARGUMENTS.get('debug', 0))
+group = str(ARGUMENTS.get('group', ''))
 
 cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
 cxx_version = subprocess.check_output([cxx, '--version'])
@@ -38,10 +37,15 @@ if debug:
 else:
     env.Append(CPPFLAGS = ['-O3', '-DNDEBUG'])
 
+if group:
+    test_sources = ['tests/%s_tests.cpp' % group]
+else:
+    test_sources = Glob('tests/*_tests.cpp')
+
 test = env.Clone()
 test.Program(
     target = 'test',
-    source = ['tests/test.cpp'] + Glob('tests/*_tests.cpp'),
+    source = ['tests/test.cpp'] + test_sources,
 )
 
 command_line = env.Clone()

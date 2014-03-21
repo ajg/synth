@@ -645,6 +645,7 @@ struct definition : base_definition< BidirectionalIterator
     }
 
     // TODO: Proper, localizable formatting.
+    // TODO: Factor out to detail.
     string_type format_duration( options_type  const& options
                                , duration_type const& duration
                                ) const {

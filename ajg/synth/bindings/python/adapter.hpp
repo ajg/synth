@@ -72,8 +72,6 @@ struct adapter<Traits, boost::python::object>
 
     optional<value_type> index(value_type const& what) const {
         namespace py = ::boost::python;
-        // AJG_DUMP(as_string(adapted_));
-        // AJG_DUMP(what.to_string());
 
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.

@@ -12,14 +12,15 @@
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-// Disable long long for gcc's -pedantic.
 #include <boost/config.hpp>
-// #undef BOOST_HAS_LONG_LONG
+// #undef BOOST_HAS_LONG_LONG // Disable long long for gcc's -pedantic.
+#include <boost/static_assert.hpp>
+#include <boost/preprocessor/stringize.hpp>
 
 #define AJG_TESTING 1
 
-#ifndef AJG_TESTING_MAX_TESTS
-#define AJG_TESTING_MAX_TESTS 100
+#ifndef AJG_TESTING_MAX_TESTS_PER_FILE
+#define AJG_TESTING_MAX_TESTS_PER_FILE 150
 #endif
 
 namespace ajg {
@@ -49,12 +50,24 @@ namespace detail {
     }}
   #define TEST_NUMBER() (__COUNTER__ - ajg::detail::counter_start)
 
-#else // no __COUNTER__, so use __LINE__ / 4 instead:
+#else // !__COUNTER__
 
+  // Use line numbers in this case, which require a much higher
+  // maximum template recursion depth from the compiler.
   #define AJG_TESTING_BEGIN // Nothing.
-  #define TEST_NUMBER() (__LINE__ >> 2)
+  #define TEST_NUMBER() (__LINE__)
 
 #endif
+
+//
+// check_test_number
+////////////////////////////////////////////////////////////////////////////////
+
+template <int N>
+struct check_test_number {
+    BOOST_STATIC_ASSERT(N <= AJG_TESTING_MAX_TESTS_PER_FILE);
+    BOOST_STATIC_CONSTANT(int, value = N);
+};
 
 //
 // ensure_throws
@@ -71,8 +84,8 @@ namespace detail {
 
 #define unit_test(name) \
     namespace tut { template<> template<> \
-    void group_type::object::test<TEST_NUMBER()>() { \
-        set_test_name(#name);
+    void group_type::object::test<ajg::detail::check_test_number<TEST_NUMBER()>::value>() { \
+        set_test_name(#name "/" BOOST_PP_STRINGIZE(__LINE__));
 
 namespace {
     struct empty {};
@@ -85,8 +98,8 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <class T = detail::empty>
-struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS> {
-    typedef tut::test_group<T, AJG_TESTING_MAX_TESTS> base_type;
+struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> {
+    typedef tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> base_type;
     template <class U> test_group(U const& u) : base_type(u) {}
 };
 

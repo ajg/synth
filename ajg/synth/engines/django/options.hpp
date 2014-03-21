@@ -149,7 +149,7 @@ struct options {
 
     options( boolean_type     const  autoescape    = true
            , value_type       const& default_value = detail::text("")
-           , formats_type     const& formats       = merge_default_formats(formats)
+           , formats_type     const& formats       = formats_type()
            , boolean_type     const  debug         = false
            , directories_type const& directories   = directories_type()
            , libraries_type   const& libraries     = libraries_type()
@@ -159,7 +159,7 @@ struct options {
         : autoescape(autoescape)
         , nonbreaking_space(detail::text("&nbsp;"))
         , default_value(default_value)
-        , formats(default_formats(formats))
+        , formats(merge_default_formats(formats))
         , debug(debug)
         , directories(directories)
         , libraries(libraries)
@@ -176,13 +176,13 @@ struct options {
     inline static formats_type merge_default_formats(formats_type formats) {
         typedef typename formats_type::value_type format_type;
         static formats_type const defaults = boost::assign::list_of<format_type>
-            (detail::text("DATE_FORMAT"),           detail::text("%N %j, %Y"))
-            (detail::text("DATETIME_FORMAT"),       detail::text("%N %j, %Y, %P"))
-            (detail::text("MONTH_DAY_FORMAT"),      detail::text("%F %j"))
-            (detail::text("SHORT_DATE_FORMAT"),     detail::text("%m/%d/%Y"))
-            (detail::text("SHORT_DATETIME_FORMAT"), detail::text("%m/%d/%Y %P"))
-            (detail::text("TIME_FORMAT"),           detail::text("%P"))
-            (detail::text("YEAR_MONTH_FORMAT"),     detail::text("%F %Y"))
+            (detail::text("DATE_FORMAT"),           detail::text("N j, Y"))
+            (detail::text("DATETIME_FORMAT"),       detail::text("N j, Y, P"))
+            (detail::text("MONTH_DAY_FORMAT"),      detail::text("F j"))
+            (detail::text("SHORT_DATE_FORMAT"),     detail::text("m/d/Y"))
+            (detail::text("SHORT_DATETIME_FORMAT"), detail::text("m/d/Y P"))
+            (detail::text("TIME_FORMAT"),           detail::text("P"))
+            (detail::text("YEAR_MONTH_FORMAT"),     detail::text("F Y"))
             ;
 
         BOOST_FOREACH(format_type const& format, defaults) {

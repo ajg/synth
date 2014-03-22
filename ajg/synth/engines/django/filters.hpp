@@ -1482,15 +1482,15 @@ struct truncatewords_filter {
             size_type count = 0;
 
             typename tokenizer_type::const_iterator word = tokenizer.begin();
-            typename tokenizer_type::const_iterator const end = tokenizer.end();
+            typename tokenizer_type::const_iterator const stop = tokenizer.end();
 
-            for (; count < limit && word != end; ++word, ++count) {
+            for (; count < limit && word != stop; ++word, ++count) {
                 // Intra-word whitespace is collapsed to a single space;
                 // leading and trailing whitespace is elided.
                 stream << (count ? " " : "") << *word;
             }
 
-            if (word != end) {
+            if (word != stop) {
                 stream << " " << engine.ellipsis;
             }
 
@@ -1527,6 +1527,7 @@ struct truncatewords_html_filter {
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
                       Array  const& args,  Options const& options) const {
+            AJG_PRINT("\n\n\n####################################################################");
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
@@ -1553,32 +1554,39 @@ struct truncatewords_html_filter {
 
                 tokenizer_type const tokenizer(text, separator);
                 typename tokenizer_type::const_iterator word = tokenizer.begin();
-                typename tokenizer_type::const_iterator const end = tokenizer.end();
+                typename tokenizer_type::const_iterator const stop = tokenizer.end();
 
                 last = match.second;
                 iterator_type it = text.begin();
 
-                for (; count < limit && word != end; ++word, ++count) {
+                for (; count < limit && word != stop; ++word, ++count) {
                     string_type const lead = string_type(it, word.base() - word->length());
 
                     stream << lead << *word;
                     it = word.base();
                 }
 
-                if (word != end || count >= limit) {
-                    AJG_DUMP((count - 0));
-                    AJG_DUMP((limit - 0));
-                    AJG_DUMP(it == word.end());
-                    AJG_DUMP(it == text.end());
-                    // if (count >= limit) {
+                bool const unfinished_a = word != stop || it != text.end();
+                AJG_PRINT("=== A0 ===");
+                AJG_DUMP(unfinished_a);
+                AJG_DUMP(word != stop);
+                AJG_DUMP(it == text.end());
+
+                if (word != stop || count >= limit) {
+                    AJG_PRINT("=== A1 ===");
+
+                    if (unfinished_a) {
                         stream << " " << engine.ellipsis;
-                    // }
+                    }
                     break;
                 }
                 else {
+                    AJG_PRINT("=== A2 ===");
                     string_type const trail = string_type(it, word.end());
 
                     if (name[0] == char_type('/')) {
+                        AJG_PRINT("=== A3 ===");
+
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
                             open_tags.pop();
                         }
@@ -1591,39 +1599,54 @@ struct truncatewords_html_filter {
                 }
             }
 
+            bool unfinished_b = true;
+
             if (last != done && count < limit) {
                 // stream << "|";
                 string_type const text = string_type(last, done);
 
                 tokenizer_type const tokenizer(text, separator);
                 typename tokenizer_type::const_iterator word = tokenizer.begin();
-                typename tokenizer_type::const_iterator const end = tokenizer.end();
+                typename tokenizer_type::const_iterator const stop = tokenizer.end();
                 iterator_type it = text.begin();
 
-                for (; count < limit && word != end; ++word, ++count) {
+                for (; count < limit && word != stop; ++word, ++count) {
                     string_type const lead = string_type(it, word.base() - word->length());
 
                     stream << lead << *word;
                     it = word.base();
                 }
 
-                if (word != end) {
+                unfinished_b = word != stop; // &&/|| it != text.end() ?
+                AJG_PRINT("=== B0 ===");
+                AJG_DUMP(unfinished_b);
+                AJG_DUMP(word != stop);
+                AJG_DUMP(it == text.end());
+
+                if (word != stop) {
+                    AJG_PRINT("=== B1 ===");
                     stream << " " << engine.ellipsis;
                 }
                 else {
+                    AJG_PRINT("=== B2 ===");
+
                     string_type const trail = string_type(it, word.end());
                     stream << trail;
                 }
-
-                AJG_DUMP(it == word.end());
-                AJG_DUMP(it == text.end());
             }
 
-            AJG_DUMP((count + 0));
-            AJG_DUMP((limit + 0));
-            while (count >= limit && !open_tags.empty()) {
-                stream << "</" << open_tags.top() << ">";
-                open_tags.pop();
+            AJG_PRINT("=== C0 ===");
+
+            if (unfinished_b && count >= limit) {
+                AJG_PRINT("=== C1 ===");
+
+                while (!open_tags.empty()) {
+                    stream << "</" << open_tags.top() << ">";
+                    open_tags.pop();
+                }
+            }
+            else {
+                AJG_PRINT("=== C2 ===");
             }
 
             return value_type(stream.str()).mark_safe();

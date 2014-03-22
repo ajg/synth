@@ -414,6 +414,7 @@ Future Work
  - Django:
    * Named arguments (e.g. for tags and filters)
    * Option to pre-load libraries, tags and filters
+   * Implement missing date/time format specifiers
  - Command-line:
    * Allow specifying formats option
    * Allow specifying debug option

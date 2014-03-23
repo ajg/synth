@@ -1531,6 +1531,7 @@ struct truncatewords_html_filter {
         typedef std::basic_ostringstream<char_type>            stream_type;
         typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
+        typedef std::stack<string_type>                        stack_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
         typedef typename regex_iterator_type::value_type       sub_match_type;
         typedef char_separator<char_type>                      separator_type;
@@ -1592,15 +1593,14 @@ struct truncatewords_html_filter {
 
             iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
-            std::stack<string_type> open_tags;
+            stack_type open_tags;
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
                 string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
                 string_type const text = string_type(last, match.first); last = match.second;
-                boolean_type const xxx = this->process_words(stream, text, count, limit, engine.ellipsis);
 
-                if (!xxx) {
+                if (!this->process_words(stream, text, count, limit, engine.ellipsis)) {
                     break;
                 }
                 else {
@@ -1617,18 +1617,17 @@ struct truncatewords_html_filter {
                 }
             }
 
-            boolean_type yyy = false;
-
             if (last != done && count < limit) {
                 string_type const text = string_type(last, done); last = done;
-                yyy = this->process_words(stream, text, count, limit, engine.ellipsis);
+
+                if (this->process_words(stream, text, count, limit, engine.ellipsis)) {
+                    open_tags = stack_type(); // Ignore any remaining tags.
+                }
             }
 
-            if (!yyy) {
-                while (!open_tags.empty()) {
-                    stream << "</" << open_tags.top() << ">";
-                    open_tags.pop();
-                }
+            while (!open_tags.empty()) {
+                stream << "</" << open_tags.top() << ">";
+                open_tags.pop();
             }
 
             return value_type(stream.str()).mark_safe();

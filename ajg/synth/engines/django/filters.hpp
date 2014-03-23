@@ -1561,16 +1561,17 @@ struct truncatewords_html_filter {
             }
 
             boolean_type const finished = word == stop/* || it != text.end()*/;
+            boolean_type const under    = count < limit;
 
-            if (!finished || count >= limit) {
+            if (!finished || !under) {
                 stream << " " << ellipsis;
             }
-            else if (finished && count < limit) {
+            else if (finished && under) {
                 string_type const trail = string_type(it, word.end());
                 stream << trail;
             }
 
-            return finished;
+            return finished && under;
         }
 
         Value process(Value  const& value, Engine  const& engine,
@@ -1599,7 +1600,7 @@ struct truncatewords_html_filter {
                 string_type const text = string_type(last, match.first); last = match.second;
                 boolean_type const xxx = this->process_words(stream, text, count, limit, engine.ellipsis);
 
-                if (!xxx || count >= limit) {
+                if (!xxx) {
                     break;
                 }
                 else {
@@ -1616,14 +1617,14 @@ struct truncatewords_html_filter {
                 }
             }
 
-            bool yyy = false;
+            boolean_type yyy = false;
 
             if (last != done && count < limit) {
                 string_type const text = string_type(last, done); last = done;
                 yyy = this->process_words(stream, text, count, limit, engine.ellipsis);
             }
 
-            if (!yyy && count >= limit) {
+            if (!yyy) {
                 while (!open_tags.empty()) {
                     stream << "</" << open_tags.top() << ">";
                     open_tags.pop();

@@ -1408,6 +1408,8 @@ struct truncatechars_html_filter {
                     break;
                 }
                 else {
+                    stream << text << tag;
+
                     if (name[0] == char_type('/')) {
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
                             open_tags.pop();
@@ -1416,8 +1418,6 @@ struct truncatechars_html_filter {
                     else {
                         open_tags.push(name);
                     }
-
-                    stream << text << tag;
                 }
             }
 
@@ -1467,16 +1467,17 @@ struct truncatewords_filter {
                           , string_type
                           >                                    tokenizer_type;
 
-        inline static boolean_type process_words( stream_type&       stream
-                                                , string_type const& text
-                                                , size_type&         count
-                                                , size_type   const  limit
-                                                , string_type const& ellipsis
+        inline static boolean_type process_words( stream_type&         stream
+                                                , iterator_type const& from
+                                                , iterator_type const& to
+                                                , size_type&           count
+                                                , size_type     const  limit
+                                                , string_type   const& ellipsis
                                                 ) {
             static string_type    const delimiters = detail::text(word_delimiters);
             static separator_type const separator(delimiters.c_str());
 
-            tokenizer_type const tokenizer(text, separator);
+            tokenizer_type const tokenizer(from, to, separator);
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
 
@@ -1508,7 +1509,8 @@ struct truncatewords_filter {
             size_type count = 0;
             stream_type stream;
 
-            this->process_words(stream, text, count, limit, engine.ellipsis);
+            this->process_words(stream, text.begin(), text.end(),
+                                    count, limit, engine.ellipsis);
             return stream.str();
         }
     };
@@ -1541,19 +1543,20 @@ struct truncatewords_html_filter {
                           , string_type
                           >                                    tokenizer_type;
 
-        inline static boolean_type process_words( stream_type&       stream
-                                                , string_type const& text
-                                                , size_type&         count
-                                                , size_type   const  limit
-                                                , string_type const& ellipsis
+        inline static boolean_type process_words( stream_type&         stream
+                                                , iterator_type const& from
+                                                , iterator_type const& to
+                                                , size_type&           count
+                                                , size_type     const  limit
+                                                , string_type   const& ellipsis
                                                 ) {
             static string_type    const delimiters = detail::text(word_delimiters);
             static separator_type const separator(delimiters.c_str());
 
-            tokenizer_type const tokenizer(text, separator);
+            tokenizer_type const tokenizer(from, to, separator);
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
-            iterator_type it = text.begin();
+            iterator_type it = from;
 
             for (; count < limit && word != stop; ++word, ++count) {
                 string_type const lead = string_type(it, word.base() - word->length());
@@ -1562,7 +1565,7 @@ struct truncatewords_html_filter {
                 it = word.base();
             }
 
-            boolean_type const finished = word == stop/* || it != text.end()*/;
+            boolean_type const finished = word == stop/* || it != to*/;
             boolean_type const under    = count < limit;
 
             if (!finished || !under) {
@@ -1599,9 +1602,8 @@ struct truncatewords_html_filter {
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
                 string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
-                string_type const text = string_type(last, match.first); last = match.second;
 
-                if (!this->process_words(stream, text, count, limit, engine.ellipsis)) {
+                if (!this->process_words(stream, last, match.first, count, limit, engine.ellipsis)) {
                     break;
                 }
                 else {
@@ -1616,12 +1618,12 @@ struct truncatewords_html_filter {
                         open_tags.push(name);
                     }
                 }
+
+                last = match.second;
             }
 
             if (last != done && count < limit) {
-                string_type const text = string_type(last, done); last = done;
-
-                if (this->process_words(stream, text, count, limit, engine.ellipsis)) {
+                if (this->process_words(stream, last, done, count, limit, engine.ellipsis)) {
                     open_tags = stack_type(); // Ignore any remaining tags.
                 }
             }

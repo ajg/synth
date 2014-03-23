@@ -7,6 +7,7 @@
 #define AJG_SYNTH_ENGINES_DJANGO_FILTERS_HPP_INCLUDED
 
 #include <cmath>
+#include <stack>
 #include <cctype>
 #include <sstream>
 #include <iomanip>

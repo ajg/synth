@@ -15,11 +15,11 @@ a simple binding to Synth in the form of a Template class.
 '''
 
 # TODO: Find a more elegant way to do this:
-headers = (
-    glob('ajg/synth/*.hpp') +
-    glob('ajg/synth/*/*.hpp') +
-    glob('ajg/synth/*/*/*.hpp') +
-    glob('ajg/synth/*/*/*/*.hpp')
+cpp_files = (
+    glob('ajg/synth/*.?pp') +
+    glob('ajg/synth/*/*.?pp') +
+    glob('ajg/synth/*/*/*.?pp') +
+    glob('ajg/synth/*/*/*/*.?pp')
 )
 
 extension = Extension(
@@ -61,8 +61,7 @@ setup(
     license = 'Boost Software License V1',
     url = 'https://github.com/ajg/synth',
     ext_modules = [extension],
-    data_files = [('', headers)],
-    # headers = headers,
-    # test_suite = 'your.module.tests',
+    data_files = [('', cpp_files)],
     classifiers = classifiers,
+    # TODO: test_suite = 'synth.tests',
 )

@@ -13,7 +13,7 @@
 #include <tut/tut_reporter.hpp>
 
 #include <boost/config.hpp>
-// #undef BOOST_HAS_LONG_LONG // Disable long long for gcc's -pedantic.
+// XXX: #undef BOOST_HAS_LONG_LONG // Disable long long for gcc's -pedantic.
 #include <boost/static_assert.hpp>
 #include <boost/preprocessor/stringize.hpp>
 

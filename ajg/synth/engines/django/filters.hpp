@@ -1565,7 +1565,7 @@ struct truncatewords_html_filter {
             if (!finished) {
                 stream << " " << ellipsis;
             }
-            else if (!(!finished || count >= limit)) { // TODO: Demorgan
+            else if (count < limit) {
                 string_type const trail = string_type(it, word.end());
                 stream << trail;
             }

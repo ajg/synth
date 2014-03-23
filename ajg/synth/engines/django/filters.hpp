@@ -1565,10 +1565,10 @@ struct truncatewords_html_filter {
                 it = word.base();
             }
 
-            boolean_type const finished = word == stop/* || it != to*/;
+            boolean_type const finished = word == stop;
             boolean_type const under    = count < limit;
 
-            if (!finished || !under) {
+            if (!finished) {
                 stream << " " << ellipsis;
             }
             else if (finished && under) {
@@ -1600,10 +1600,11 @@ struct truncatewords_html_filter {
             stack_type open_tags;
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
-                string_type const tag  = match.str();
-                string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
+                string_type   const tag  = match.str();
+                string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
+                iterator_type const prev = last; last = match.second;
 
-                if (!this->process_words(stream, last, match.first, count, limit, engine.ellipsis)) {
+                if (!this->process_words(stream, prev, match.first, count, limit, engine.ellipsis)) {
                     break;
                 }
                 else {
@@ -1618,19 +1619,13 @@ struct truncatewords_html_filter {
                         open_tags.push(name);
                     }
                 }
-
-                last = match.second;
             }
 
-            if (last != done && count < limit) {
-                if (this->process_words(stream, last, done, count, limit, engine.ellipsis)) {
-                    open_tags = stack_type(); // Ignore any remaining tags.
+            if (!this->process_words(stream, last, done, count, limit, engine.ellipsis)) {
+                while (!open_tags.empty()) {
+                    stream << "</" << open_tags.top() << ">";
+                    open_tags.pop();
                 }
-            }
-
-            while (!open_tags.empty()) {
-                stream << "</" << open_tags.top() << ">";
-                open_tags.pop();
             }
 
             return value_type(stream.str()).mark_safe();

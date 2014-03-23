@@ -1562,10 +1562,10 @@ struct truncatewords_html_filter {
 
             boolean_type const finished = word == stop/* || it != text.end()*/;
 
-            if (!finished) {
+            if (!finished || count >= limit) {
                 stream << " " << ellipsis;
             }
-            else if (count < limit) {
+            else if (finished && count < limit) {
                 string_type const trail = string_type(it, word.end());
                 stream << trail;
             }

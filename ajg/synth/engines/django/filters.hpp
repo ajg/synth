@@ -1457,12 +1457,42 @@ struct truncatewords_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef std::basic_ostringstream<char_type>            stream_type;
+        typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
         typedef char_separator<char_type>                      separator_type;
         typedef tokenizer < separator_type
                           , iterator_type
                           , string_type
                           >                                    tokenizer_type;
+
+        inline static boolean_type process_words( stream_type&       stream
+                                                , string_type const& text
+                                                , size_type&         count
+                                                , size_type   const  limit
+                                                , string_type const& ellipsis
+                                                ) {
+            static string_type    const delimiters = detail::text(word_delimiters);
+            static separator_type const separator(delimiters.c_str());
+
+            tokenizer_type const tokenizer(text, separator);
+            typename tokenizer_type::const_iterator       word = tokenizer.begin();
+            typename tokenizer_type::const_iterator const stop = tokenizer.end();
+
+            for (; count < limit && word != stop; ++word, ++count) {
+                // Intra-word whitespace is collapsed to a single space;
+                // leading and trailing whitespace is elided.
+                stream << (count ? " " : "") << *word;
+            }
+
+            boolean_type const finished = word == stop;
+
+            if (!finished) {
+                stream << " " << ellipsis;
+            }
+
+            return word == stop;
+        }
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
@@ -1473,27 +1503,11 @@ struct truncatewords_filter {
             long const limit = args[0].count();
             if (limit <= 0) return string_type();
 
-            string_type           const text = value.to_string();
-            static string_type    const delimiters = detail::text(word_delimiters);
-            static separator_type const separator(delimiters.c_str());
-            tokenizer_type        const tokenizer(text, separator);
-
-            std::basic_ostringstream<char_type> stream;
+            string_type const text = value.to_string();
             size_type count = 0;
+            stream_type stream;
 
-            typename tokenizer_type::const_iterator word = tokenizer.begin();
-            typename tokenizer_type::const_iterator const stop = tokenizer.end();
-
-            for (; count < limit && word != stop; ++word, ++count) {
-                // Intra-word whitespace is collapsed to a single space;
-                // leading and trailing whitespace is elided.
-                stream << (count ? " " : "") << *word;
-            }
-
-            if (word != stop) {
-                stream << " " << engine.ellipsis;
-            }
-
+            this->process_words(stream, text, count, limit, engine.ellipsis);
             return stream.str();
         }
     };
@@ -1514,6 +1528,8 @@ struct truncatewords_html_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef std::basic_ostringstream<char_type>            stream_type;
+        typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
         typedef typename regex_iterator_type::value_type       sub_match_type;
@@ -1523,6 +1539,39 @@ struct truncatewords_html_filter {
                           , string_type
                           >                                    tokenizer_type;
 
+        inline static boolean_type process_words( stream_type&       stream
+                                                , string_type const& text
+                                                , size_type&         count
+                                                , size_type   const  limit
+                                                , string_type const& ellipsis
+                                                ) {
+            static string_type    const delimiters = detail::text(word_delimiters);
+            static separator_type const separator(delimiters.c_str());
+
+            tokenizer_type const tokenizer(text, separator);
+            typename tokenizer_type::const_iterator       word = tokenizer.begin();
+            typename tokenizer_type::const_iterator const stop = tokenizer.end();
+            iterator_type it = text.begin();
+
+            for (; count < limit && word != stop; ++word, ++count) {
+                string_type const lead = string_type(it, word.base() - word->length());
+
+                stream << lead << *word;
+                it = word.base();
+            }
+
+            boolean_type const finished = word == stop/* || it != text.end()*/;
+
+            if (!finished) {
+                stream << " " << ellipsis;
+            }
+            else if (!(!finished || count >= limit)) { // TODO: Demorgan
+                string_type const trail = string_type(it, word.end());
+                stream << trail;
+            }
+
+            return finished;
+        }
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
@@ -1534,59 +1583,29 @@ struct truncatewords_html_filter {
             long const limit = args[0].count();
             if (limit <= 0) return string_type();
 
+            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
             size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
-            std::basic_ostringstream<char_type> stream;
             size_type count = 0;
+            stream_type stream;
 
             iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
             std::stack<string_type> open_tags;
 
-            static string_type    const delimiters = detail::text(word_delimiters);
-            static separator_type const separator(delimiters.c_str());
-            static string_type    const boundaries = detail::text(" \t\n\v\f\r>");
-
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
                 string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
-                string_type const text = string_type(last, match.first);
+                string_type const text = string_type(last, match.first); last = match.second;
+                boolean_type const xxx = this->process_words(stream, text, count, limit, engine.ellipsis);
 
-                tokenizer_type const tokenizer(text, separator);
-                typename tokenizer_type::const_iterator word = tokenizer.begin();
-                typename tokenizer_type::const_iterator const stop = tokenizer.end();
-
-                last = match.second;
-                iterator_type it = text.begin();
-
-                for (; count < limit && word != stop; ++word, ++count) {
-                    string_type const lead = string_type(it, word.base() - word->length());
-
-                    stream << lead << *word;
-                    it = word.base();
-                }
-
-                bool const unfinished_a = word != stop || it != text.end();
-                AJG_PRINT("=== A0 ===");
-                AJG_DUMP(unfinished_a);
-                AJG_DUMP(word != stop);
-                AJG_DUMP(it == text.end());
-
-                if (word != stop || count >= limit) {
-                    AJG_PRINT("=== A1 ===");
-
-                    if (unfinished_a) {
-                        stream << " " << engine.ellipsis;
-                    }
+                if (!xxx || count >= limit) {
                     break;
                 }
                 else {
-                    AJG_PRINT("=== A2 ===");
-                    string_type const trail = string_type(it, word.end());
+                    stream << tag;
 
                     if (name[0] == char_type('/')) {
-                        AJG_PRINT("=== A3 ===");
-
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
                             open_tags.pop();
                         }
@@ -1594,59 +1613,21 @@ struct truncatewords_html_filter {
                     else {
                         open_tags.push(name);
                     }
-
-                    stream << trail << tag;
                 }
             }
 
-            bool unfinished_b = true;
+            bool yyy = false;
 
             if (last != done && count < limit) {
-                // stream << "|";
-                string_type const text = string_type(last, done);
-
-                tokenizer_type const tokenizer(text, separator);
-                typename tokenizer_type::const_iterator word = tokenizer.begin();
-                typename tokenizer_type::const_iterator const stop = tokenizer.end();
-                iterator_type it = text.begin();
-
-                for (; count < limit && word != stop; ++word, ++count) {
-                    string_type const lead = string_type(it, word.base() - word->length());
-
-                    stream << lead << *word;
-                    it = word.base();
-                }
-
-                unfinished_b = word != stop; // &&/|| it != text.end() ?
-                AJG_PRINT("=== B0 ===");
-                AJG_DUMP(unfinished_b);
-                AJG_DUMP(word != stop);
-                AJG_DUMP(it == text.end());
-
-                if (word != stop) {
-                    AJG_PRINT("=== B1 ===");
-                    stream << " " << engine.ellipsis;
-                }
-                else {
-                    AJG_PRINT("=== B2 ===");
-
-                    string_type const trail = string_type(it, word.end());
-                    stream << trail;
-                }
+                string_type const text = string_type(last, done); last = done;
+                yyy = this->process_words(stream, text, count, limit, engine.ellipsis);
             }
 
-            AJG_PRINT("=== C0 ===");
-
-            if (unfinished_b && count >= limit) {
-                AJG_PRINT("=== C1 ===");
-
+            if (!yyy && count >= limit) {
                 while (!open_tags.empty()) {
                     stream << "</" << open_tags.top() << ">";
                     open_tags.pop();
                 }
-            }
-            else {
-                AJG_PRINT("=== C2 ===");
             }
 
             return value_type(stream.str()).mark_safe();

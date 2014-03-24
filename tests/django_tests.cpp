@@ -239,7 +239,7 @@ unit_test(url_as_tag) {
     ensure_equals(t.render_to_string(context, options), "_");
 }}}
 
-DJANGO_TEST_(variable_tag,  "{{ foo }} {{ bar }} {{ qux }}", "  ",)
+DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 
 DJANGO_TEST(verbatim_tag,
@@ -254,18 +254,11 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 
 /// Filters
 ///     TODO:
-///     django::add_filter
-///     django::addslashes_filter
-///     django::capfirst_filter
 ///     django::center_filter
-///     django::cut_filter
 ///     django::escape_filter
 ///     django::escapejs_filter
-///     django::filesizeformat_filter
 ///     django::first_filter
-///     django::fix_ampersands_filter
 ///     django::force_escape_filter
-///     django::get_digit_filter
 ///     django::iriencode_filter
 ///     django::join_filter
 ///     django::last_filter
@@ -274,23 +267,26 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 ///     django::linebreaks_filter
 ///     django::linebreaksbr_filter
 ///     django::linenumbers_filter
-///     django::make_list_filter
 ///     django::pprint_filter
 ///     django::random_filter
 ///     django::safe_filter
 ///     django::safeseq_filter
 ///     django::slice_filter
-///     django::slugify_filter
-///     django::stringformat_filter
-///     django::striptags_filter
-///     django::unordered_list_filter
-///     django::wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
     string_template const t("{{ 42 | xyz }}");
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
+
+DJANGO_TEST(add_filter, "{{ '5'|add:6 }}", "11")
+DJANGO_TEST(add_filter, "{{ 3|add:'8' }}", "11")
+
+DJANGO_TEST(addslashes_filter, "{{ \"String with 'quotes'.\" |addslashes }}", "String with \\'quotes\\'.")
+
+DJANGO_TEST(capfirst_filter, "{{ 'foo fa fa'|capfirst }}", "Foo fa fa")
+
+DJANGO_TEST(cut_filter, "{{ 'String with spaces' | cut:' ' }}", "Stringwithspaces")
 
 DJANGO_TEST(date_filter, "{{ past        | date }}",                     "Jan 10, 2002")
 DJANGO_TEST(date_filter, "{{ before_past | date:'r' }}",                 "Tue, 08 Jan 2002 13:02:03")
@@ -313,6 +309,11 @@ DJANGO_TEST(dictsortreversed_filter, "{{ friends | dictsortreversed:'name' }}", 
 DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 DJANGO_TEST(divisibleby_filter, "{{ 20 | divisibleby:\"3\" }}", "False")
 
+DJANGO_TEST(filesizeformat_filter, "{{ 123456789|filesizeformat }}", "117.7 MB")
+
+DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;' |fix_ampersands }}",
+                "String &amp; with &amp; ampersands, but not &apos; or &#1234;")
+
 DJANGO_TEST(floatformat_filter, "{{34.23234|floatformat }}", "34.2")
 DJANGO_TEST(floatformat_filter, "{{34.00000|floatformat }}", "34")
 DJANGO_TEST(floatformat_filter, "{{34.26000|floatformat }}", "34.3")
@@ -325,9 +326,15 @@ DJANGO_TEST(floatformat_filter, "{{34.23234|floatformat:\"-3\" }}", "34.232")
 DJANGO_TEST(floatformat_filter, "{{34.00000|floatformat:\"-3\" }}", "34")
 DJANGO_TEST(floatformat_filter, "{{34.26000|floatformat:\"-3\" }}", "34.260")
 
+DJANGO_TEST(getdigit_filter, "{{ 123456789|get_digit:'2' }}",  "8")
+DJANGO_TEST(getdigit_filter, "{{ -123456789|get_digit:'2' }}", "-123456789")
+DJANGO_TEST(getdigit_filter, "{{ 'foobar'|get_digit:'2' }}",   "foobar")
+
 DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ")
 
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko")
+
+DJANGO_TEST(make_list_filter, "{{ 12345|make_list }}", "[1, 2, 3, 4, 5]")
 
 DJANGO_TEST(phone2numeric_filter, "{{ \"1-800-COLLECT\" | phone2numeric }}", "1-800-2655328")
 
@@ -348,6 +355,10 @@ DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slu
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")
 
 DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django")
+
+DJANGO_TEST(striptags_filter, "{{ '<b>Joel</b> <button>is</button> a <span>slug</span>'|striptags }}", "Joel is a slug")
+
+DJANGO_TEST(stringformat_filter, "{{ 255|stringformat:'x' }}", "ff")
 
 DJANGO_TEST(time_filter, "{{ past        | time }}",                     "01:02:03 AM")
 DJANGO_TEST(time_filter, "{{ before_past | time:'c' }}",                 "2002-01-08T13:02:03")
@@ -493,6 +504,25 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  <
 // FIXME: DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:4 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \" | truncatewords_html:5 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
 
+DJANGO_TEST(unordered_list_filter, "{{ 'abc'|unordered_list }}", "<li>abc</li>\n")
+DJANGO_TEST(unordered_list_filter, "{{ places|unordered_list }}",
+                "<li>Parent\n"
+                "<ul>\n"
+                "\t<li>States\n"
+                "\t<ul>\n"
+                "\t\t<li>Kansas\n"
+                "\t\t<ul>\n"
+                "\t\t\t<li>Lawrence</li>\n"
+                "\t\t\t<li>Topeka</li>\n"
+                "\t\t</ul>\n"
+                "\t\t</li>\n"
+                "\t\t<li>Illinois1</li>\n"
+                "\t\t<li>Illinois2</li>\n"
+                "\t</ul>\n"
+                "\t</li>\n"
+                "</ul>\n"
+                "</li>\n")
+
 DJANGO_TEST(upper_filter, "{{ \"Joel is a slug\" | upper }}", "JOEL IS A SLUG")
 
 DJANGO_TEST(urlencode_filter, "{{ \"/this should/be encoded ^ because @ is not an option $ ()\" | urlencode }}", "/this%20should/be%20encoded%20%5E%20because%20%40%20is%20not%20an%20option%20%24%20%28%29")
@@ -502,6 +532,8 @@ DJANGO_TEST(urlize_filter, "{{ \"This is some text containing a http://www.url.c
 DJANGO_TEST(urlizetrunc_filter, "{{ \"This is some text containing a http://www.url.com sir and also another.url.com.\" | urlizetrunc:15 }}", "This is some text containing a <a href='http://www.url.com'>http://www.url....</a> sir and also <a href='http://another.url.com'>another.url.com</a>.")
 
 DJANGO_TEST(wordcount_filter, "{{ 'joel is a slug' | wordcount }}", "4")
+
+DJANGO_TEST(wordwrap_filter, "{{ 'Joel is a slug'|wordwrap:5 }}", "\nJoel\nis a\nslug")
 
 DJANGO_TEST(yesno_filter, "{{ true_var|yesno:'Yes,No' }}",        "Yes")
 DJANGO_TEST(yesno_filter, "{{ false_var|yesno:'Yes,No' }}",       "No")

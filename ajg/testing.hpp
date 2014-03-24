@@ -19,8 +19,12 @@
 
 #define AJG_TESTING 1
 
+#ifndef TEMPLATE_DEPTH
+#define TEMPLATE_DEPTH 256
+#endif
+
 #ifndef AJG_TESTING_MAX_TESTS_PER_FILE
-#define AJG_TESTING_MAX_TESTS_PER_FILE 200
+#define AJG_TESTING_MAX_TESTS_PER_FILE (TEMPLATE_DEPTH - 5)
 #endif
 
 namespace ajg {

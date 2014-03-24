@@ -18,18 +18,15 @@ namespace {
 namespace s = ajg::synth;
 using boost::optional;
 
-typedef char                                                char_type;
-typedef s::django::engine<>                                 engine_type;
-typedef s::file_template<char_type, engine_type>            file_template;
-typedef s::string_template<char_type, engine_type>          string_template;
-typedef string_template::traits_type                        traits_type;
-typedef string_template::context_type                       context_type;
-typedef string_template::options_type                       options_type;
-typedef tests::context_data< context_type
-                           , traits_type
-                           , options_type
-                           >                                context_data_type;
-typedef ajg::test_group<context_data_type>                  group_type;
+typedef char                                                                    char_type;
+typedef s::django::engine<>                                                     engine_type;
+typedef s::file_template<char_type, engine_type>                                file_template;
+typedef s::string_template<char_type, engine_type>                              string_template;
+typedef string_template::traits_type                                            traits_type;
+typedef string_template::context_type                                           context_type;
+typedef string_template::options_type                                           options_type;
+typedef tests::context_data<context_type, traits_type, options_type>            context_data_type;
+typedef ajg::test_group<context_data_type>                                      group_type;
 
 group_type group_object("django tests");
 
@@ -355,6 +352,9 @@ DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slu
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")
 
 DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django")
+
+DJANGO_TEST(slugify_filter, "{{ ' Joel is a slug '|slugify }}", "joel-is-a-slug")
+DJANGO_TEST(slugify_filter, "{{ '\tJoel\v is\n a\r slug\x01'|slugify }}", "joel-is-a-slug")
 
 DJANGO_TEST(striptags_filter, "{{ '<b>Joel</b> <button>is</button> a <span>slug</span>'|striptags }}", "Joel is a slug")
 

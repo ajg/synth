@@ -432,7 +432,8 @@ Future Work
    * Add way to specify expected failures; re-enable commented out tests
  - Optimization:
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
-   * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`.
+   * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`
+   * Enable Xpressive's `syntax_option_type::optimize` or make configurable
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
@@ -442,6 +443,7 @@ Future Work
      + Replace `boost::assign` use with aggregate initializers
      + Remove needlessly configurable (especially defaulted) template parameters
    * [v1+] Sort `#include`s alphabetically
+   * Change `class` in template signatures to `typename`
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
      + [v1+] Consider making `context`s top-level `value`s instead of `map`s

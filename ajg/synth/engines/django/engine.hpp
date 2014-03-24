@@ -90,6 +90,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename library_type::second         filters_type;
     typedef django::value<char_type>              value_type;
     typedef options<value_type>                   options_type;
+    typedef typename value_type::boolean_type     boolean_type;
     typedef typename value_type::datetime_type    datetime_type;
     typedef typename value_type::duration_type    duration_type;
     typedef typename options_type::context_type   context_type;
@@ -148,9 +149,15 @@ struct definition : base_definition< BidirectionalIterator
         none_literal
             = as_xpr("None")
             ;
-        boolean_literal
+        true_literal
             = as_xpr("True")
-            | as_xpr("False")
+            ;
+        false_literal
+            = as_xpr("False")
+            ;
+        boolean_literal
+            = true_literal
+            | false_literal
             ;
         number_literal
             = !(set= '-','+') >> +_d // integral part
@@ -308,9 +315,7 @@ struct definition : base_definition< BidirectionalIterator
             else if (xpressive::regex_match(token.begin(),
                      token.end(), match, tokenizable_definition.chain)) {
                 try {
-                    value_type const arg = tokenizable_definition.
-                        evaluate_chain(match, context, options);
-                    args.push_back(arg);
+                    args.push_back(tokenizable_definition.evaluate_chain(match, context, options));
                 }
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
@@ -439,21 +444,22 @@ struct definition : base_definition< BidirectionalIterator
             value = value_type();
             value.token(literal[0]);
         }
-        else if (literal == boolean_literal) {
-            value = typename value_type::boolean_type
-                (string == detail::text("True"));
+        else if (literal == true_literal) {
+            value = boolean_type(true);
+            value.token(literal[0]);
+        }
+        else if (literal == false_literal) {
+            value = boolean_type(false);
             value.token(literal[0]);
         }
         else if (literal == number_literal) {
-            value = lexical_cast<typename
-                value_type::number_type>(string);
+            value = boost::lexical_cast<typename value_type::number_type>(string);
             value.token(literal[0]);
         }
         else if (literal == string_literal) {
             value = extract_string(literal);
             // Adjust the token by trimming the quotes.
-            value.token(std::make_pair(literal[0].first + 1,
-                                       literal[0].second - 1));
+            value.token(std::make_pair(literal[0].first + 1, literal[0].second - 1));
         }
         else if (literal == variable_literal) {
             if (optional<value_type const&> const
@@ -745,7 +751,7 @@ struct definition : base_definition< BidirectionalIterator
                                             , string_type  const& s
                                             , options_type const& options
                                             ) {
-        return lexical_cast<string_type>(n) + options.nonbreaking_space + s +
+        return boost::lexical_cast<string_type>(n) + options.nonbreaking_space + s +
             (n == 1 ? string_type() : string_type(detail::text("s")));
     }
 
@@ -830,7 +836,8 @@ struct definition : base_definition< BidirectionalIterator
     regex_type nested_expression, expression;
     regex_type arguments;
     regex_type string_literal, number_literal;
-    regex_type none_literal, boolean_literal;
+    regex_type none_literal;
+    regex_type true_literal, false_literal, boolean_literal;
     regex_type variable_literal, literal;
     string_regex_type html_namechar, html_whitespace, html_tag;
 

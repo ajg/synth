@@ -58,7 +58,7 @@ struct multi_template {
   public:
 
     template <class Source>
-    multi_template( Source&                 source
+    multi_template( Source           const& source
                   , string_type      const& engine_name
                   , boolean_type     const  autoescape
                   , string_type      const& default_value
@@ -69,13 +69,13 @@ struct multi_template {
                   , loaders_type     const& loaders
                   , resolvers_type   const& resolvers
                   )
-        : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
-        , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
-        , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders, resolvers)
-        , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message
-        , tmpl_options_() {                        // TODO: directories, debug
-        // AJG_PRINT("multi_template::multi_template()");
+        : django_template_(((AJG_PRINT("1"), (AJG_DUMP(source))), (engine_name == "django" ? new django_template_type(source) : 0)))
+        , ssi_template_   (((AJG_PRINT("2")), (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)))
+        , tmpl_template_  (((AJG_PRINT("3")), (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)))
+        , django_options_(((AJG_PRINT("4")), autoescape), default_value, formats, debug, directories, libraries, loaders, resolvers)
+        , ssi_options_(((AJG_PRINT("5")), default_value), directories) // TODO: size_format, time_format, formats, debug, error_message
+        , tmpl_options_() {                         // TODO: directories, debug
+        AJG_PRINT("multi_template::multi_template()");
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw std::invalid_argument("engine_name");
         }

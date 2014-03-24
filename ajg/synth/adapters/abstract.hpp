@@ -20,7 +20,6 @@
 namespace ajg {
 namespace synth {
 
-using boost::lexical_cast;
 using boost::optional;
 using boost::throw_exception;
 
@@ -78,7 +77,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
 
     // TODO: Make virtual?
     inline string_type to_string() const {
-        // return lexical_cast<string_type>(*this);
+        // return boost::lexical_cast<string_type>(*this);
         std::basic_ostringstream<char_type> stream;
         this->output(stream);
         return stream.str();
@@ -150,7 +149,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
     }
 
     void list( ostream_type&      out
-             , string_type const& delimiter = lexical_cast<string_type>(", ")
+             , string_type const& delimiter = boost::lexical_cast<string_type>(", ")
              ) const {
         size_type i = 0;
 

@@ -69,8 +69,21 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
+using boost::disable_if;
+using boost::disable_if_c;
+using boost::enable_if;
+using boost::enable_if_c;
+using boost::noncopyable;
+using boost::none;
+using boost::optional;
 using boost::throw_exception;
-namespace fusion = boost::fusion;
+
+namespace algorithm  = boost::algorithm;
+namespace date_time  = boost::date_time;
+namespace fusion     = boost::fusion;
+namespace mpl        = boost::mpl;
+namespace posix_time = boost::posix_time;
+namespace xpressive  = boost::xpressive;
 
 //
 // lit [Deprecated]:
@@ -725,7 +738,7 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
     if (it == index.end()) {
         // TODO: Throw missing_tag exception.
         std::string const name = engine.template transcode<char>(
-            lexical_cast<typename Engine::string_type>(needle));
+            boost::lexical_cast<typename Engine::string_type>(needle));
         std::string const message = name + " not found";
         throw_exception(std::runtime_error(message));
     }
@@ -869,23 +882,25 @@ struct insensitive_less : std::binary_function<T, T, bool> {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template < class Output = int
-         , class Source = mt19937
+         , class Source = boost::mt19937
          >
 struct uniform_random_number_generator {
   private:
 
     template <class T>
-    struct select_distribution;
+    struct select_distribution : mpl::identity<typename mpl::if_< boost::is_integral<T>
+                                                                , boost::uniform_int<T>
+                                                                , boost::uniform_real<T>
+                                                                >::type> {};
 
   public:
 
-    typedef Source                                     source_type;
-    typedef typename source_type::result_type          seed_type;
-    typedef typename select_distribution<Output>::type distribution_type;
-    typedef typename distribution_type::input_type     input_type;
-    typedef typename distribution_type::result_type    result_type;
-    typedef variate_generator < source_type
-                              , distribution_type >    generator_type;
+    typedef Source                                                              source_type;
+    typedef typename source_type::result_type                                   seed_type;
+    typedef typename select_distribution<Output>::type                          distribution_type;
+    typedef typename distribution_type::input_type                              input_type;
+    typedef typename distribution_type::result_type                             result_type;
+    typedef boost::variate_generator<source_type, distribution_type>            generator_type;
 
   public:
 
@@ -907,12 +922,6 @@ struct uniform_random_number_generator {
     }
 
   private:
-
-    template <class T>
-    struct select_distribution {
-        typedef typename mpl::if_<is_integral<T>,
-            uniform_int<T>, uniform_real<T> >::type type;
-    };
 
     inline static seed_type generate_seed() {
         using namespace posix_time;
@@ -1000,23 +1009,23 @@ struct nonconstructible {
 struct standard_environment {
   public:
 
-    typedef environment_iterator    iterator;
-    typedef environment_iterator    const_iterator;
-    typedef iterator::value_type    value_type;
-    typedef value_type::first_type  key_type;
-    typedef value_type::second_type mapped_type;
+    typedef boost::environment_iterator         iterator;
+    typedef boost::environment_iterator         const_iterator;
+    typedef iterator::value_type                value_type;
+    typedef value_type::first_type              key_type;
+    typedef value_type::second_type             mapped_type;
 
   public:
 
-    environment_iterator begin() const {
-        return environment_iterator(environ);
+    const_iterator begin() const {
+        return const_iterator(environ);
     }
 
-    environment_iterator end() const {
-        return environment_iterator();
+    const_iterator end() const {
+        return const_iterator();
     }
 
-    environment_iterator find(key_type const& name) const {
+    const_iterator find(key_type const& name) const {
         const_iterator const end = this->end();
 
         for (const_iterator it = begin(); it != end; ++it) {

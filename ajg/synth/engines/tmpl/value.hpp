@@ -29,7 +29,7 @@ struct value : value_facade<Char, value<Char> > {
   public:
 
     inline typename base_type::string_type to_string() const {
-        return lexical_cast<typename base_type::string_type>(*this);
+        return boost::lexical_cast<typename base_type::string_type>(*this);
     }
 };
 

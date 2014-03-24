@@ -535,7 +535,7 @@ struct get_digit_filter {
                 if (position > 0) {
                     // Ensure the number operated on is whole.
                     if (number == integer && integer >= 1) {
-                        String const text = lexical_cast<String>(integer);
+                        String const text = boost::lexical_cast<String>(integer);
 
                         if (Size(position) <= text.length()) {
                             return *(text.end() - position);
@@ -543,8 +543,8 @@ struct get_digit_filter {
                     }
                 }
             }
-            catch (bad_method       const&) {} // Do nothing.
-            catch (bad_lexical_cast const&) {} // Do nothing.
+            catch (bad_method              const&) {} // Do nothing.
+            catch (boost::bad_lexical_cast const&) {} // Do nothing.
             // Otherwise, (e.g. if any of the above failed):
             return value;
         }
@@ -765,7 +765,7 @@ struct linenumbers_filter {
             String const pattern = text("%%0%dd. %%s");
             bool const safe = !options.autoescape || value.safe();
             algorithm::split(lines, input, algorithm::is_any_of("\n"));
-            Size const width = lexical_cast<String>(lines.size()).size();
+            Size const width = boost::lexical_cast<String>(lines.size()).size();
             String const spec = (format(pattern) % width).str();
 
             BOOST_FOREACH(Value const& line, lines) {

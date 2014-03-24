@@ -922,7 +922,7 @@ struct pluralize_filter {
                     plural   = params[1].to_string();
             }
 
-            return value.length() ? plural : singular;
+            return value.count() == 1 ? singular : plural;
         }
     };
 };

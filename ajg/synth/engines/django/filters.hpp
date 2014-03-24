@@ -1147,11 +1147,12 @@ struct slugify_filter {
 
             struct invalid {
                 inline static bool fn(Char const c) {
-                    return std::isalnum(c) || c == '_' || c == '-';
+                    return !std::isalnum(c) && c != '_' && c != '-';
                 }
             };
 
-            String slug = algorithm::trim_copy(value.to_string());
+            String slug = value.to_string();
+            algorithm::trim(slug);
             std::replace(slug.begin(), slug.end(), Char(' '), Char('-'));
             slug.erase(std::remove_if(slug.begin(), slug.end(), invalid::fn), slug.end());
             algorithm::to_lower(slug);

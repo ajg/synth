@@ -43,6 +43,7 @@ struct base_template : noncopyable {
     typedef typename engine_type::context_type  context_type;
     typedef typename engine_type::options_type  options_type;
     typedef typename engine_type::iterator_type iterator_type;
+    typedef typename value_type::traits_type    traits_type;
 
     typedef std::pair<iterator_type, iterator_type> range_type;
 

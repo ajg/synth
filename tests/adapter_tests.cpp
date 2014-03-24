@@ -126,11 +126,4 @@ unit_test(assignments) {
     string_type sss = STRING("This should be a string.");
     char_type const *const ccc = sss.c_str();
     context[STRING("char_pointer")] = ccc;
-
-    array_type
-        list1 = assign::list_of<value_type>(STRING("Lawrence"))(STRING("Topeka")),
-        list2 = assign::list_of<value_type>(STRING("Kansas"))(list1)(STRING("Illinois1"))(STRING("Illinois2")),
-        list3 = assign::list_of<value_type>(STRING("States"))(list2),
-        list4 = assign::list_of<value_type>(STRING("Parent"))(list3);
-    context[STRING("places")] = list4;
 }}}

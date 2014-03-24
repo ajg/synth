@@ -11,13 +11,14 @@
 namespace {
 namespace s = ajg::synth;
 
-typedef char                                       char_type;
-typedef s::ssi::engine<>                           engine_type;
-typedef s::file_template<char_type, engine_type>   file_template;
-typedef s::string_template<char_type, engine_type> string_template;
-typedef string_template::string_type               string_type;
-typedef string_template::options_type              options_type;
-typedef ajg::test_group<>                          group_type;
+typedef char                                                char_type;
+typedef s::ssi::engine<>                                    engine_type;
+typedef s::file_template<char_type, engine_type>            file_template;
+typedef s::string_template<char_type, engine_type>          string_template;
+typedef string_template::string_type                        string_type;
+typedef string_template::options_type                       options_type;
+typedef string_template::traits_type                        traits_type;
+typedef ajg::test_group<>                                   group_type;
 
 static options_type const default_options;
 group_type group_object("ssi tests");

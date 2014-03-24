@@ -1487,13 +1487,11 @@ struct truncatewords_filter {
                 stream << (count ? " " : "") << *word;
             }
 
-            boolean_type const finished = word == stop;
-
-            if (!finished) {
+            boolean_type const words_left = word != stop;
+            if (words_left) {
                 stream << " " << ellipsis;
             }
-
-            return word == stop;
+            return !words_left;
         }
 
         Value process(Value  const& value, Engine  const& engine,
@@ -1560,29 +1558,27 @@ struct truncatewords_html_filter {
 
             for (; count < limit && word != stop; ++word, ++count) {
                 string_type const lead = string_type(it, word.base() - word->length());
-
                 stream << lead << *word;
                 it = word.base();
             }
 
-            boolean_type const finished = word == stop;
-            boolean_type const under    = count < limit;
+            boolean_type const words_left  = word != stop;
+            boolean_type const under_limit = count < limit;
 
-            if (!finished) {
+            if (words_left) {
                 stream << " " << ellipsis;
             }
-            else if (finished && under) {
+            else if (under_limit) {
                 string_type const trail = string_type(it, word.end());
                 stream << trail;
             }
 
-            return finished && under;
+            return !words_left;
         }
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
                       Array  const& args,  Options const& options) const {
-            AJG_PRINT("\n\n\n####################################################################");
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
@@ -1604,24 +1600,22 @@ struct truncatewords_html_filter {
                 string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
                 iterator_type const prev = last; last = match.second;
 
-                if (!this->process_words(stream, prev, match.first, count, limit, engine.ellipsis)) {
+                if (!this->process_words(stream, prev, match.first, count, limit, engine.ellipsis) || count >= limit) {
                     break;
                 }
-                else {
-                    stream << tag;
+                stream << tag;
 
-                    if (name[0] == char_type('/')) {
-                        if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
-                            open_tags.pop();
-                        }
+                if (name[0] == char_type('/')) {
+                    if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
+                        open_tags.pop();
                     }
-                    else {
-                        open_tags.push(name);
-                    }
+                }
+                else {
+                    open_tags.push(name);
                 }
             }
 
-            if (!this->process_words(stream, last, done, count, limit, engine.ellipsis)) {
+            if (!this->process_words(stream, last, done, count, limit, engine.ellipsis) || count >= limit) {
                 while (!open_tags.empty()) {
                     stream << "</" << open_tags.top() << ">";
                     open_tags.pop();

@@ -22,10 +22,12 @@ template < class Char
          , class Iterator = typename String::const_iterator
          >
 struct string_template
-    : private base_from_member<String>
+    : private ::boost::base_from_member<String>
     , public base_template<Engine, Iterator> {
 
   public:
+
+    typedef ::boost::base_from_member<String> base_member_type;
 
     // Do this in case String happens to be a reference type
     // e.g. to eliminate copies, in which case we want to avoid
@@ -39,17 +41,19 @@ struct string_template
   public:
 
     string_template(string_type const& string)
-        : base_from_member<string_type>(string)
-        , base_type(this->member.begin(), this->member.end()) {}
+        : base_member_type((AJG_DUMP(string), string))
+        , base_type((AJG_PRINT("begin"), base_member_type::member.begin()), (AJG_PRINT("end"), base_member_type::member.end())) {
+            AJG_DUMP(base_member_type::member);
+        }
 
     template <class I>
     string_template(I const& begin, I const& end)
-        : base_from_member<string_type>(string_type(begin, end))
-        , base_type(this->member.begin(), this->member.end()) {}
+        : base_member_type(begin, end)
+        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
 
   public:
 
-    string_type const& str() const { return this->member(); }
+    string_type const& str() const { return base_member_type::member; }
 };
 
 template < class Char

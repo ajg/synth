@@ -271,7 +271,7 @@ struct if_directive {
                 = Engine::string_regex_type::compile(right);
 
             for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
-                args.context.erase(lexical_cast<typename Engine::string_type>(i));
+                args.context.erase(boost::lexical_cast<typename Engine::string_type>(i));
             }
 
             if (xpressive::regex_search(left, match, pattern)) {
@@ -279,7 +279,7 @@ struct if_directive {
 
                 for (std::size_t i = 0; i <= limit; ++i) {
                     typename Engine::string_type const key =
-                        lexical_cast<typename Engine::string_type>(i);
+                        boost::lexical_cast<typename Engine::string_type>(i);
                     args.context.insert(std::make_pair(key, match[i].str()));
                 }
             }

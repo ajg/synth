@@ -19,6 +19,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
@@ -53,7 +54,8 @@ struct base_template : noncopyable {
                  , iterator_type const& end
               // ,  bool const cache = false
                  )
-            : engine_(&shared_engine()) {
+            : engine_(((AJG_DUMP(string_type(begin, end))), &shared_engine())) {
+        AJG_DUMP(string_type(begin, end));
         reset(begin, end);
     }
 

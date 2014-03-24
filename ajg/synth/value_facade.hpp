@@ -127,18 +127,18 @@ struct default_value_traits {
 /*
     template <class String>
     inline string_type transcode(String const& string) const {
-        return lexical_cast<string_type>(string);
+        return boost::lexical_cast<string_type>(string);
     }
 
     template <class String>
     inline std::string narrow(String const& string) const {
-        //return lexical_cast<std::string>(string);
+        //return boost::lexical_cast<std::string>(string);
         return std::string(string.begin(), string.end());
     }
 
     template <class String>
     inline std::wstring widen(String const& string) const {
-        //return lexical_cast<std::wstring>(string);
+        //return boost::lexical_cast<std::wstring>(string);
         return std::wstring(string.begin(), string.end());
     }*/
 };
@@ -363,7 +363,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         if (value.empty()) {
-            return output << lexical_cast<string_type>("<empty>");
+            return output << boost::lexical_cast<string_type>("<empty>");
         }
         else {
             return value.get()->output(output), output;

@@ -12,6 +12,7 @@ group = str(ARGUMENTS.get('group', ''))
 
 cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
 cxx_version = subprocess.check_output([cxx, '--version'])
+cxx_template_depth = 1024
 
 env = Environment(
     CXX      = cxx,
@@ -20,7 +21,8 @@ env = Environment(
         # TODO: '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        '-ftemplate-depth=256',
+        '-ftemplate-depth=' + str(cxx_template_depth),
+        '-DTEMPLATE_DEPTH=' + str(cxx_template_depth),
         '-Wno-unsequenced',
         '-Wno-unused-function',
         '-Wno-unused-value',

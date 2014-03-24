@@ -27,7 +27,7 @@ using boost::throw_exception;
 //         - istreams only provide InputIterators
 //         - spirit's multi_pass can only upgrade them to ForwardIterators
 //         - xpressive requires BidirectionalIterators in order to backtrack
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Stream, class Char = typename Stream::char_type>
 struct bidirectional_istream_iterator

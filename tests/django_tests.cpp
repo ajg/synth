@@ -114,7 +114,7 @@ DJANGO_TEST(comment_tag-short, "0{# {{ x | y:'z' }} #}1",                       
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "",)
-DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "ABCDEF123456", context)
+DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
 DJANGO_TEST(ifequal_tag,  "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
 DJANGO_TEST(ifequal_tag,  "{% ifequal 5 6 %} Yes {% endifequal %}",               "")

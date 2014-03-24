@@ -444,13 +444,20 @@ struct definition : base_definition< BidirectionalIterator
             value = value_type();
             value.token(literal[0]);
         }
-        else if (literal == true_literal) {
-            value = boolean_type(true);
-            value.token(literal[0]);
-        }
-        else if (literal == false_literal) {
-            value = boolean_type(false);
-            value.token(literal[0]);
+        else if (literal == boolean_literal) {
+            match_type const& boolean = detail::get_nested<1>(literal);
+
+            if (boolean == true_literal) {
+                value = boolean_type(true);
+                value.token(literal[0]);
+            }
+            else if (boolean == false_literal) {
+                value = boolean_type(false);
+                value.token(literal[0]);
+            }
+            else {
+                throw_exception(std::logic_error("invalid boolean literal"));
+            }
         }
         else if (literal == number_literal) {
             value = boost::lexical_cast<typename value_type::number_type>(string);

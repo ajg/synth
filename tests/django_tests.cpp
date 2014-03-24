@@ -85,7 +85,6 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 ///     TODO:
 ///     django::autoescape_tag
 ///     django::block_tag
-///     django::csrf_token_tag
 ///     django::debug_tag
 ///     django::extends_tag
 ///     django::filter_tag
@@ -113,6 +112,9 @@ DJANGO_TEST(comment_tag-short, "0{##}1",                                        
 DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                         "01")
 DJANGO_TEST(comment_tag-short, "0{# {{ x | y:'z' }} #}1",                            "01")
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
+
+DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "",)
+DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "ABCDEF123456", context)
 
 DJANGO_TEST(ifequal_tag,  "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
 DJANGO_TEST(ifequal_tag,  "{% ifequal 5 6 %} Yes {% endifequal %}",               "")

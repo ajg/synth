@@ -50,7 +50,6 @@ Included:
 {% firstof aa bb cc 'FALLBACK' %}
 {% firstof aa a_true 'FALLBACK' %}
 
-{% csrf_token %}
 {% for a, b in a_string_array %}a: {{a}} b: {{b}} {% endfor %}
 
 {{X|escape}}

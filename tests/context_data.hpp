@@ -93,6 +93,8 @@ struct context_data {
             list3 = list_of<value_type>(text("States"))(list2),
             list4 = list_of<value_type>(text("Parent"))(list3);
         context[text("places")] = list4;
+
+        context[text("csrf_token")] = "ABCDEF123456";
     }
 
     Context context;

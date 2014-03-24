@@ -14,11 +14,11 @@ namespace synth {
 namespace detail {
 
 template <class T>
-struct clone_ptr : scoped_ptr<T> {
+struct clone_ptr : boost::scoped_ptr<T> {
   public:
 
-    clone_ptr(T *const t = 0) : scoped_ptr<T>(t) {}
-    clone_ptr(clone_ptr const& c) : scoped_ptr<T>(c ? &c->clone() : 0) {}
+    clone_ptr(T *const t = 0) : boost::scoped_ptr<T>(t) {}
+    clone_ptr(clone_ptr const& c) : boost::scoped_ptr<T>(c ? &c->clone() : 0) {}
 
     clone_ptr& operator =(clone_ptr const& c) {
         this->reset(c ? &c->clone() : 0);
@@ -34,11 +34,11 @@ struct clone_ptr : scoped_ptr<T> {
 
 template <class Value>
 struct value_iterator
-    : iterator_facade< value_iterator<Value>
-                     , Value
-                     , forward_traversal_tag
-                     , Value // This forces the 'reference' type to be
-                     > {     // a real Value, not an actual reference.
+    : boost::iterator_facade< value_iterator<Value>
+                            , Value
+                            , boost::forward_traversal_tag
+                            , Value // This forces the 'reference' type to be
+                            > {     // a real Value, not an actual reference.
   public:
 
  // typedef std::size_t size_type;
@@ -103,7 +103,7 @@ struct value_iterator
 
   private:
 
-    friend class iterator_core_access;
+    friend class boost::iterator_core_access;
     template <class> friend struct value_iterator;
     detail::clone_ptr<virtual_iterator> iterator_;
 };

@@ -1075,7 +1075,7 @@ void read_file(FILE *const file, Stream& stream) {
   #define AJG_SYNTH_PCLOSE /*std::*/pclose
 #endif
 
-struct pipe : noncopyable {
+struct pipe : boost::noncopyable {
   public:
 
     explicit pipe(std::string const& command, bool const reading = true) {

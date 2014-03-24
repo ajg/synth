@@ -25,28 +25,26 @@
 namespace ajg {
 namespace synth {
 
-using namespace boost; // FIXME: Delete.
+using boost::throw_exception;
 
 template < class Engine
          , class Iterator
          >
-struct base_template : noncopyable {
+struct base_template : boost::noncopyable {
   public:
 
-    typedef typename Engine::template definition<Iterator>
-                                                engine_type;
-    typedef typename engine_type::char_type     char_type;
-    typedef typename engine_type::array_type    array_type;
-    typedef typename engine_type::value_type    value_type;
-    typedef typename engine_type::string_type   string_type;
-    typedef typename engine_type::stream_type   stream_type;
-    typedef typename engine_type::frame_type    frame_type;
-    typedef typename engine_type::context_type  context_type;
-    typedef typename engine_type::options_type  options_type;
-    typedef typename engine_type::iterator_type iterator_type;
-    typedef typename value_type::traits_type    traits_type;
-
-    typedef std::pair<iterator_type, iterator_type> range_type;
+    typedef typename Engine::template definition<Iterator>                      engine_type;
+    typedef typename engine_type::char_type                                     char_type;
+    typedef typename engine_type::array_type                                    array_type;
+    typedef typename engine_type::value_type                                    value_type;
+    typedef typename engine_type::string_type                                   string_type;
+    typedef typename engine_type::stream_type                                   stream_type;
+    typedef typename engine_type::frame_type                                    frame_type;
+    typedef typename engine_type::context_type                                  context_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename engine_type::iterator_type                                 iterator_type;
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef std::pair<iterator_type, iterator_type>                             range_type;
 
   public:
 
@@ -54,8 +52,7 @@ struct base_template : noncopyable {
                  , iterator_type const& end
               // ,  bool const cache = false
                  )
-            : engine_(((AJG_DUMP(string_type(begin, end))), &shared_engine())) {
-        AJG_DUMP(string_type(begin, end));
+            : engine_(&shared_engine()) {
         reset(begin, end);
     }
 
@@ -136,10 +133,10 @@ struct base_template : noncopyable {
 
   private:
 
-    scoped_ptr<engine_type> local_engine_;
-    engine_type* engine_;
-    frame_type   frame_;
-    range_type   range_;
+    boost::scoped_ptr<engine_type>      local_engine_;
+    engine_type*                        engine_;
+    frame_type                          frame_;
+    range_type                          range_;
 };
 
 

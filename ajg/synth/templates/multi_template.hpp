@@ -69,7 +69,7 @@ struct multi_template {
                   , loaders_type     const& loaders
                   , resolvers_type   const& resolvers
                   )
-        : django_template_(((AJG_PRINT("1"), (AJG_DUMP(source))), (engine_name == "django" ? new django_template_type(source) : 0)))
+        : django_template_(((AJG_PRINT("1")), (engine_name == "django" ? new django_template_type(source) : 0)))
         , ssi_template_   (((AJG_PRINT("2")), (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)))
         , tmpl_template_  (((AJG_PRINT("3")), (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)))
         , django_options_(((AJG_PRINT("4")), autoescape), default_value, formats, debug, directories, libraries, loaders, resolvers)

@@ -33,8 +33,10 @@
 namespace ajg {
 namespace synth {
 
+namespace xpressive = boost::xpressive;
+
 template <class BidirectionalIterator, class Definition>
-struct base_definition : noncopyable {
+struct base_definition : boost::noncopyable {
   public:
 
     // Parametrized types:
@@ -60,6 +62,10 @@ struct base_definition : noncopyable {
     typedef typename string_type::const_iterator           string_iterator_type;
     typedef xpressive::basic_regex<string_iterator_type>   string_regex_type;
     typedef xpressive::match_results<string_iterator_type> string_match_type;
+
+  public:
+
+    BOOST_STATIC_CONSTANT(size_type, error_line_limit = 30);
 
   protected:
 
@@ -97,21 +103,31 @@ struct base_definition : noncopyable {
     template <class Iterator>
     void parse(Iterator const& begin, Iterator const& end, frame_type& frame) const {
         definition_type const& self = static_cast<definition_type const&>(*this);
+        AJG_PRINT(11);
         iterator_type const begin_ = begin;
+        AJG_PRINT(22);
         iterator_type const end_ = end;
+        AJG_PRINT(33);
         iterator_type furthest = begin_;
+        AJG_PRINT(44);
         frame.let(self.iterator_ = furthest);
+        AJG_PRINT(55);
 
         if (xpressive::regex_match(begin_, end_, frame, self.block)) {
+            AJG_PRINT(66);
             // On success, all input should have been consumed.
             BOOST_ASSERT(furthest == end_);
             return;
         }
+        AJG_PRINT(77);
 
         // On failure, throw a semi-informative exception.
-        size_type   const room(std::distance(furthest, end_)), limit(30);
+        size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
+        AJG_PRINT(88);
         string_type const site(furthest, furthest + (std::min)(room, limit));
+        AJG_PRINT(99);
         string_type const line(site.begin(), detail::find_or('\n', site, site.end()));
+        AJG_PRINT("AA");
         throw_exception(parsing_error(transcode<char>(line)));
     }
 

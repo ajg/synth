@@ -22,17 +22,19 @@ template < class Char
          , class Iterator = typename String::const_iterator
          >
 struct string_template
-    : private ::boost::base_from_member<String>
+    : private boost::base_from_member<String>
     , public base_template<Engine, Iterator> {
 
-  public:
+  private:
 
-    typedef ::boost::base_from_member<String> base_member_type;
+    typedef boost::base_from_member<String>                                     base_member_type;
+
+  public:
 
     // Do this in case String happens to be a reference type
     // e.g. to eliminate copies, in which case we want to avoid
     // creating references to references, which are illegal.
-    typedef typename remove_reference<String>::type string_type;
+    typedef typename boost::remove_reference<String>::type string_type;
 
   private:
 
@@ -41,10 +43,8 @@ struct string_template
   public:
 
     string_template(string_type const& string)
-        : base_member_type((AJG_DUMP(string), string))
-        , base_type((AJG_PRINT("begin"), base_member_type::member.begin()), (AJG_PRINT("end"), base_member_type::member.end())) {
-            AJG_DUMP(base_member_type::member);
-        }
+        : base_member_type(string)
+        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
 
     template <class I>
     string_template(I const& begin, I const& end)

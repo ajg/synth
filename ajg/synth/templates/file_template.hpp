@@ -32,15 +32,16 @@ namespace synth {
 
 template < class Char
          , class Engine
-         , class Iterator = spirit::classic::file_iterator<Char>
+         , class Iterator = boost::spirit::classic::file_iterator<Char>
          >
 struct file_template
-    : private base_from_member<Iterator>
+    : private boost::base_from_member<Iterator>
     , public  base_template<Engine, Iterator> {
 
   private:
 
-    typedef base_template<Engine, Iterator> base_type;
+    typedef boost::base_from_member<Iterator>                                   base_member_type;
+    typedef base_template<Engine, Iterator>                                     base_type;
 
   public:
 
@@ -52,8 +53,8 @@ struct file_template
     file_template( filepath_type    const& filepath
                  , directories_type const& directories = directories_type(/*1, "."*/)
                  )
-        : base_from_member<Iterator>(find_path(filepath, directories)) // (check_exists(filepath))
-        , base_type(this->member, this->member.make_end())
+        : base_member_type(find_path(filepath, directories)) // (check_exists(filepath))
+        , base_type(base_member_type::member, base_member_type::member.make_end())
         , filepath_(filepath) {}
 
   public:

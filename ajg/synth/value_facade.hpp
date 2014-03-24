@@ -6,6 +6,7 @@
 #ifndef AJG_SYNTH_VALUE_HPP_INCLUDED
 #define AJG_SYNTH_VALUE_HPP_INCLUDED
 
+#include <vector>
 #include <cstddef>
 #include <utility>
 #include <iterator>
@@ -95,6 +96,7 @@ struct default_value_traits {
     typedef std::basic_string<Char>   string_type;
     typedef std::basic_istream<Char>  istream_type;
     typedef std::basic_ostream<Char>  ostream_type;
+    typedef std::vector<value_type>   sequence_type;
 
     typedef value_iterator<value_type const> iterator;
     typedef value_iterator<value_type const> const_iterator;

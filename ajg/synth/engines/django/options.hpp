@@ -94,15 +94,16 @@ struct options {
 
     typedef options                                options_type;
     typedef Value                                  value_type;
-    typedef typename value_type::char_type         char_type;
-    typedef typename value_type::string_type       string_type;
-    typedef typename value_type::boolean_type      boolean_type;
-    typedef typename value_type::size_type         size_type;
-    typedef typename value_type::datetime_type     datetime_type;
-    typedef typename value_type::duration_type     duration_type;
+    typedef typename value_type::traits_type       traits_type;
+    typedef typename traits_type::char_type        char_type;
+    typedef typename traits_type::string_type      string_type;
+    typedef typename traits_type::boolean_type     boolean_type;
+    typedef typename traits_type::size_type        size_type;
+    typedef typename traits_type::datetime_type    datetime_type;
+    typedef typename traits_type::duration_type    duration_type;
+    typedef typename traits_type::sequence_type    array_type;
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
     typedef std::vector<string_type>               names_type;
-    typedef std::vector<value_type>                array_type;
 
     typedef std::vector<value_type>                sequence_type;
     typedef std::map<value_type, value_type>       mapping_type;

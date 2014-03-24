@@ -57,7 +57,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::definition_type definition_type;
 
     typedef null_value<char_type>             value_type;
-    typedef std::vector<value_type>           array_type;
+    typedef std::vector<value_type>           array_type; // TODO: Use Traits::sequence_type
     typedef std::map<string_type, value_type> context_type;
     typedef boost::mpl::void_                 options_type;
 

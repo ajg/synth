@@ -45,9 +45,7 @@ Included:
 {% firstof aa bb cc "FALLBACK" %}
 {% firstof aa a_true "FALLBACK" %}
 
-
 {{X|escape}}
-{# {{X|pluralize:"en"}} #}
 
 {% for a, b in a_string_array %}a: {{a}} b: {{b}} {% endfor %}
 {{ a_string_array|first }}
@@ -63,18 +61,6 @@ Included:
 {{ 3|add:"8" }}
 {{ "String with spaces" | cut:" "}}
 {{ "String with 'quotes'." |addslashes }}
-
-ox{{ "" | pluralize:"en" }}
-ox{{ " " | pluralize:"en" }}
-
-tank{{ "" | pluralize }}
-tank{{ " " | pluralize }}
-
-cris{{ "" | pluralize:"is,es" }}
-cris{{ " " | pluralize:"is,es" }}
-
-ferr{{ "" | pluralize:"y,ies" }}
-ferr{{ " " | pluralize:"y,ies" }}
 
 {{123456789|filesizeformat}}
 

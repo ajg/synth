@@ -54,6 +54,32 @@ DJANGO_TEST_(text with context, "ABC", "ABC", context)
 DJANGO_TEST_(html w/o context,  "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>",)
 DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
 
+/// Literal tests
+////////////////////////////////////////////////////////////////////////////////
+
+// FIXME: DJANGO_TEST(boolean, "{{None}}",   "None")
+
+DJANGO_TEST(boolean, "{{True}}",   "True")
+DJANGO_TEST(boolean, "{{False}}",  "False")
+
+DJANGO_TEST(number integral zero, "{{0}}",   "0")
+// FIXME: DJANGO_TEST(number integral zero, "{{-0}}",  "0")
+
+DJANGO_TEST(number integral, "{{42}}",   "42")
+DJANGO_TEST(number integral, "{{-42}}",  "-42")
+
+DJANGO_TEST(number floating zero, "{{0.0}}",   "0")
+DJANGO_TEST(number floating zero, "{{-0.0}}",  "-0")
+
+DJANGO_TEST(number floating, "{{3.3}}",   "3.3")
+DJANGO_TEST(number floating, "{{3.30}}",  "3.3")
+DJANGO_TEST(number floating, "{{03.3}}",  "3.3")
+DJANGO_TEST(number floating, "{{03.30}}", "3.3")
+
+DJANGO_TEST(string, "{{'Foo'}}",   "Foo")
+DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
+
+
 /// Tags
 ///     TODO:
 ///     django::autoescape_tag
@@ -84,6 +110,7 @@ unit_test(missing tag) {
 DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
 DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")
 DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                         "01")
+DJANGO_TEST(comment_tag-short, "0{# {{ x | y:'z' }} #}1",                            "01")
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
 DJANGO_TEST(ifequal_tag,  "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
@@ -219,7 +246,7 @@ DJANGO_TEST(verbatim_tag,
             "    <p>{{ v }}</p>\n"
             "{% endfor %}\n")
 
-DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
+DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filters
 ///     TODO:
@@ -244,7 +271,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with \"this is a long string\" as ls %} {{ls}
 ///     django::linebreaksbr_filter
 ///     django::linenumbers_filter
 ///     django::make_list_filter
-///     django::pluralize_filter
 ///     django::pprint_filter
 ///     django::random_filter
 ///     django::safe_filter
@@ -283,11 +309,6 @@ DJANGO_TEST(dictsortreversed_filter, "{{ friends | dictsortreversed:'name' }}", 
 DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 DJANGO_TEST(divisibleby_filter, "{{ 20 | divisibleby:\"3\" }}", "False")
 
-DJANGO_TEST(float, "{{3.3}}",   "3.3")
-DJANGO_TEST(float, "{{3.30}}",  "3.3")
-DJANGO_TEST(float, "{{03.3}}",  "3.3")
-DJANGO_TEST(float, "{{03.30}}", "3.3")
-
 DJANGO_TEST(floatformat_filter, "{{34.23234|floatformat }}", "34.2")
 DJANGO_TEST(floatformat_filter, "{{34.00000|floatformat }}", "34")
 DJANGO_TEST(floatformat_filter, "{{34.26000|floatformat }}", "34.3")
@@ -305,6 +326,19 @@ DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ")
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko")
 
 DJANGO_TEST(phone2numeric_filter, "{{ \"1-800-COLLECT\" | phone2numeric }}", "1-800-2655328")
+
+DJANGO_TEST(pluralize_filter, "ox{{ 0 | pluralize:'en' }}",       "oxen")
+DJANGO_TEST(pluralize_filter, "ox{{ 1 | pluralize:'en' }}",       "ox")
+DJANGO_TEST(pluralize_filter, "ox{{ 2 | pluralize:'en' }}",       "oxen")
+DJANGO_TEST(pluralize_filter, "tank{{ 0 | pluralize }}",          "tanks")
+DJANGO_TEST(pluralize_filter, "tank{{ 1 | pluralize }}",          "tank")
+DJANGO_TEST(pluralize_filter, "tank{{ 2 | pluralize }}",          "tanks")
+DJANGO_TEST(pluralize_filter, "cris{{ 0 | pluralize:'is,es' }}",  "crises")
+DJANGO_TEST(pluralize_filter, "cris{{ 1 | pluralize:'is,es' }}",  "crisis")
+DJANGO_TEST(pluralize_filter, "cris{{ 2 | pluralize:'is,es' }}",  "crises")
+DJANGO_TEST(pluralize_filter, "ferr{{ 0 | pluralize:'y,ies' }}",  "ferries")
+DJANGO_TEST(pluralize_filter, "ferr{{ 1 | pluralize:'y,ies' }}",  "ferry")
+DJANGO_TEST(pluralize_filter, "ferr{{ 2 | pluralize:'y,ies' }}",  "ferries")
 
 DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slug</span>\" | removetags:\"b span\"|safe }}", "Joel <button>is</button> a slug")
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")

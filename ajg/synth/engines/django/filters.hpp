@@ -369,8 +369,7 @@ struct escapejs_filter {
             result.reserve(string.size()); // Assume no escapes.
 
             BOOST_FOREACH(Char const c, string) {
-                result += c < 32 ? String(text("\\x")) + detail::to_hex<2>(c)
-                                 : String(1, c);
+                result += c < 32 ? String(text("\\x")) + detail::to_hex<2>(c) : String(1, c);
             }
 
             return result;
@@ -687,7 +686,7 @@ struct linebreaks_filter {
         definition() {
             using namespace xpressive;
             newlines_ = _n >> +_n;
-            regex_ = '\r' >> !as_xpr('\n');
+            regex_ = '\r' >> !as_xpr('\n'); // TODO: Use xpressive::{_n,_nl} instead.
         }
 
         Value process(Value  const& value, Engine  const& engine,
@@ -696,8 +695,7 @@ struct linebreaks_filter {
             if (!args.empty()) throw_exception(superfluous_argument());
 
             std::basic_ostringstream<Char> stream;
-            String const input = xpressive::regex_replace(
-                value.to_string(), regex_, engine.newline);
+            String const input = xpressive::regex_replace(value.to_string(), regex_, engine.newline);
 
             xpressive::regex_token_iterator<typename String::const_iterator>
                 begin(input.begin(), input.end(), newlines_, -1), end;

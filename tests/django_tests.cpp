@@ -88,14 +88,12 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 ///     django::extends_tag
 ///     django::filter_tag
 ///     django::firstof_tag
-///     django::for_empty_tag
 ///     django::ifchanged_tag
 ///     django::include_tag
 ///     django::load_tag
 ///     django::load_from_tag
 ///     django::now_tag
 ///     django::ssi_tag
-///     django::url_as_tag
 ///     django::widthratio_tag
 ///     django::library_tag
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +132,14 @@ DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %} Yes {% else %} No {% endifequal %}",
 DJANGO_TEST(for_tag-value,
     "{% for v in friends %}[{{ v }}]{% endfor %}",
     "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
+
+DJANGO_TEST(for_empty_tag-value,
+    "{% for v in friends %}[{{ v }}]{% empty %} Bad {% endfor %}",
+    "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
+
+DJANGO_TEST(for_empty_tag-none,
+    "{% for v in '' %} Bad {% empty %} It's empty, Jim {% endfor %}",
+    " It's empty, Jim ")
 
 /*
 DJANGO_TEST(for_tag-key-value,
@@ -329,6 +335,7 @@ DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ")
 
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko")
 
+DJANGO_TEST(make_list_filter, "{{ numbers|make_list}}", "[1, 2, 3, 4, 5, 6, 7, 8, 9]")
 DJANGO_TEST(make_list_filter, "{{ 12345|make_list }}", "[1, 2, 3, 4, 5]")
 
 DJANGO_TEST(phone2numeric_filter, "{{ \"1-800-COLLECT\" | phone2numeric }}", "1-800-2655328")
@@ -558,20 +565,18 @@ unit_test(random_filter) {
 
 DJANGO_TEST(join_filter, "{{ 'abcde'|join:'_' }}", "a_b_c_d_e")
 
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:9'}}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:':9'}}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:':'}}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}", "3, 4, 5, 6")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "4, 5, 6, 7")
+
 /*
 DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
 DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
 DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
 DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
-
-DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:9'}}", "")
-DJANGO_TEST(slice_filter, "{{ numbers|slice:':9'}}", "")
-DJANGO_TEST(slice_filter, "{{ numbers|slice:':'}}", "")
-DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}", "")
-DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}", "")
-DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "")
-
-DJANGO_TEST(make_list_filter, "{{ numbers|make_list}}", "")
 
 DJANGO_TEST(join_filter, "{{tags|join:', '}}", "")
 DJANGO_TEST(safe_filter+join_filter, "{{tags|safe|join:', '}}", "")

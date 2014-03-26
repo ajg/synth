@@ -1,0 +1,69 @@
+{
+    "build_systems":
+    [
+        {
+            "cmd": "scons",
+            "shell": true,
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "name": "Synth: Build All (release)",
+            "path": "/usr/local/bin:$PATH",
+            "working_dir": "${project_path}"
+        },
+        {
+            "cmd": "scons debug=1 synth",
+            "shell": true,
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "name": "Synth: Build Command-Line Tool (debug)",
+            "path": "/usr/local/bin:$PATH",
+            "working_dir": "${project_path}"
+        },
+        {
+            "cmd": "scons debug=1 test && ./test",
+            "shell": true,
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "name": "Synth: Build & Run Tests (debug)",
+            "path": "/usr/local/bin:$PATH",
+            "working_dir": "${project_path}"
+        },
+        {
+            "cmd":
+            [
+                "scons",
+                "debug=1",
+                /* "j=2", */
+                /* "CXX=g++-4.2", */
+                "python-synth.so"
+            ],
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "name": "Synth: Build Python Module (debug)",
+            "path": "/usr/local/bin:$PATH",
+            "working_dir": "${project_path}"
+        },
+    ],
+    "folders":
+    [
+        {
+            "file_exclude_patterns":
+            [
+                ".sconsign.dblite",
+                "synth",
+                "test",
+                "*.o",
+                "*.os",
+                "*.so"
+            ],
+            "folder_exclude_patterns":
+            [
+                "build",
+                "dist"
+            ],
+            "follow_symlinks": true,
+            "path": "."
+        }
+    ],
+    "settings":
+    {
+        "tab_size": 4,
+        "word_wrap": false
+    }
+}

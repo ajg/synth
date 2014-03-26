@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 #include <exception>
 #include <stdexcept>
 #include <algorithm>
@@ -40,6 +41,8 @@
 #include <boost/xpressive/match_results.hpp>
 
 #include <boost/type_traits/is_integral.hpp>
+
+#include <boost/iterator/filter_iterator.hpp>
 
 #include <boost/date_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -758,8 +761,8 @@ inline static Match const& get_nested(Match const& match) {
     BOOST_STATIC_ASSERT(Index != 0);
     std::size_t i = 0;
 
-    BOOST_FOREACH( Match const& nested
-                 , match.nested_results()) {
+    // TODO: Use std::advance or the like.
+    BOOST_FOREACH(Match const& nested, match.nested_results()) {
         if (++i == Index) return nested;
     }
 
@@ -767,6 +770,28 @@ inline static Match const& get_nested(Match const& match) {
     return empty;
 }
 
+//
+// select_nested
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template < class Match
+         , class Regex
+         >
+inline std::pair
+        < boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        , boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        >
+select_nested(Match const& match, Regex const& regex) {
+    typename Match::nested_results_type::const_iterator
+        begin(match.nested_results().begin()),
+        end(match.nested_results().end());
+    boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>
+        predicate(regex.regex_id());
+    return std::make_pair
+        ( boost::make_filter_iterator(predicate, begin, end)
+        , boost::make_filter_iterator(predicate, end,   end)
+        );
+}
 
 //
 // advance:

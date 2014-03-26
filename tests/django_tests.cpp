@@ -83,7 +83,6 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 
 /// Tags
 ///     TODO:
-///     django::autoescape_tag
 ///     django::block_tag
 ///     django::debug_tag
 ///     django::extends_tag
@@ -106,6 +105,11 @@ unit_test(missing tag) {
     string_template const t("{% xyz 42 %}");
     ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
+
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
+// TODO: DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var | escape }}{% endautoescape %}", "???")
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var | safe }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
 
 DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
 DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")

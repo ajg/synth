@@ -264,23 +264,9 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 /// Filters
 ///     TODO:
 ///     django::center_filter
-///     django::escape_filter
-///     django::escapejs_filter
-///     django::first_filter
 ///     django::force_escape_filter
 ///     django::iriencode_filter
-///     django::join_filter
-///     django::last_filter
-///     django::length_filter
-///     django::length_is_filter
-///     django::linebreaks_filter
-///     django::linebreaksbr_filter
-///     django::linenumbers_filter
 ///     django::pprint_filter
-///     django::random_filter
-///     django::safe_filter
-///     django::safeseq_filter
-///     django::slice_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
@@ -553,6 +539,44 @@ DJANGO_TEST(yesno_filter, "{{ True  |yesno:\"yeah,no,maybe\" }}", "yeah")
 DJANGO_TEST(yesno_filter, "{{ False |yesno:\"yeah,no,maybe\" }}", "no")
 DJANGO_TEST(yesno_filter, "{{ None  |yesno:\"yeah,no,maybe\" }}", "maybe")
 DJANGO_TEST(yesno_filter, "{{ None  |yesno:\"yeah,no\" }}",       "no")
+
+DJANGO_TEST(escape_filter, "{{xml_var|escape}}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+
+DJANGO_TEST(first_filter, "{{ 'abcde'|first }}", "a")
+DJANGO_TEST(last_filter, "{{ 'abcde'|last }}", "e")
+DJANGO_TEST(length_filter, "{{ 'abcde'|length }}", "5")
+DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'4' }}", "False")
+DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'5' }}", "True")
+DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'6' }}", "False")
+
+// TODO: Better test for random_filter.
+unit_test(random_filter) {
+    string_template const t("{{ 'abcde'|random }}");
+    string_type s = t.render_to_string(context);
+    ensure(s == "a" || s == "b" || s == "c" || s == "d" || s == "e");
+}}}
+
+DJANGO_TEST(join_filter, "{{ 'abcde'|join:'_' }}", "a_b_c_d_e")
+
+/*
+DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
+DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
+DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
+DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
+
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:9'}}", "")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:':9'}}", "")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:':'}}", "")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}", "")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}", "")
+DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "")
+
+DJANGO_TEST(make_list_filter, "{{ numbers|make_list}}", "")
+
+DJANGO_TEST(join_filter, "{{tags|join:', '}}", "")
+DJANGO_TEST(safe_filter+join_filter, "{{tags|safe|join:', '}}", "")
+DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
+*/
 
 /*
 TODO:

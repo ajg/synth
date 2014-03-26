@@ -437,6 +437,7 @@ Future Work
  - Refactoring:
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
+   * Replace all remaining get_nested uses with s1, s2, ... or named patterns
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop

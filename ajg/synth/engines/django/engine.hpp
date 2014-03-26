@@ -22,7 +22,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/fusion/include/vector.hpp>
@@ -103,80 +102,157 @@ struct definition : base_definition< BidirectionalIterator
 
   private:
 
-    symbols_type keywords_, names_;
+    symbols_type keywords_, reserved_;
 
     struct not_in {
         symbols_type const& symbols;
         explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
 
         bool operator ()(typename match_type::value_type const& match) const {
+            AJG_DUMP(match.str());
             return this->symbols.find(match.str()) == this->symbols.end();
         }
     };
 
   public:
 
-    regex_type name(string_type const& s) {
+    std::map<string_type, string_type> markers;
+
+    inline regex_type word(string_type const& n) {
         namespace x = boost::xpressive;
-        names_.insert(s);
-        return x::as_xpr(s)/* TODO: >> x::_b*/;
+        return x::as_xpr(n) >> x::_b;
     }
 
-    regex_type keyword(string_type const& s) {
+    inline regex_type reserved(string_type const& n) {
         namespace x = boost::xpressive;
-        keywords_.insert(s);
-        return x::as_xpr(s)/* TODO: >> x::_b*/;
+        this->reserved_.insert(n);
+        return x::as_xpr(n) >> x::_b >> *x::_s;
     }
+
+    inline regex_type keyword(string_type const& k) {
+        namespace x = boost::xpressive;
+        this->keywords_.insert(k);
+        return x::as_xpr(k) >> x::_b >> *x::_s;
+    }
+
+    inline regex_type xxx(string_type const& k) {
+        namespace x = boost::xpressive;
+        this->keywords_.insert(k);
+        return x::as_xpr(k) >> x::_b;
+    }
+
+    inline regex_type yyy(string_type const& k) {
+        namespace x = boost::xpressive;
+        return x::as_xpr(k) >> x::_b;
+    }
+
+    template <char_type C>
+    inline static regex_type token() {
+        namespace x = boost::xpressive;
+        return x::as_xpr(C) >> *x::_s;
+    }
+
+    /*
+    template <char_type C, char_type D>
+    inline static regex_type token() {
+        namespace x = boost::xpressive;
+        return x::as_xpr(C) >> x::as_xpr(D) >> *x::_s;
+    }
+    */
+
+    template <typename Char, size_type M, size_type N>
+    inline regex_type marker(Char const (&m)[M], Char const (&n)[N]) {
+        this->markers[detail::text(n)] = detail::text(m);
+        return x::as_xpr(m);
+    }
+
+    /*
+    inline static regex_type token(char_type const* const s) {
+        namespace x = boost::xpressive;
+        return x::as_xpr(s) >> *x::_s;
+    }
+    */
+
+    /*inline static regex_type token(string_type const& t) {
+        namespace x = boost::xpressive;
+        return x::as_xpr(t) >> *x::_s;
+    }*/
 
     definition()
         : newline        (detail::text("\n"))
         , ellipsis       (detail::text("..."))
-        , brace_open     (detail::text("{"))
-        , brace_close    (detail::text("}"))
-        , block_open     (detail::text("{%"))
-        , block_close    (detail::text("%}"))
-        , comment_open   (detail::text("{#"))
-        , comment_close  (detail::text("#}"))
-        , variable_open  (detail::text("{{"))
-        , variable_close (detail::text("}}")) {
+
+        /*
+        , brace_open     (token<'{'>())
+        , brace_close    (token<'}'>())
+        , block_open     (token<'{', '%'>())
+        , block_close    (token<'%', '}'>())
+        , comment_open   (token<'{', '#'>())
+        , comment_close  (token<'#', '}'>())
+        , variable_open  (token<'{', '{'>())
+        , variable_close (token<'}', '}'>())
+        */
+        , brace_open     (marker("{",  "openbrace"))
+        , brace_close    (marker("}",  "closebrace"))
+        , block_open     (marker("{%", "openblock"))
+        , block_close    (marker("%}", "closeblock"))
+        , comment_open   (marker("{#", "opencomment"))
+        , comment_close  (marker("#}", "closecomment"))
+        , variable_open  (marker("{{", "openvariable"))
+        , variable_close (marker("}}", "closevariable")) {
         using namespace xpressive;
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((alpha | '_') >> *_w >> _b)[ x::check(not_in(keywords_)) ]
+            = ((alpha | '_') >> *_w >> _b)
+            ;
+        restricted_identifier
+            = identifier[ check(not_in(keywords_)) ]
+            ;
+        unreserved_identifier
+            = restricted_identifier[ check(not_in(reserved_)) ]
+            ;
+        name
+            = (id = restricted_identifier) >> *_s
+            ;
+        names
+            = +name
             ;
         unreserved_name
-            = identifier[ x::check(not_in(names_)) ]
+            = (id = unreserved_identifier) >> *_s
             ;
         package
-            = identifier >> *('.' >> identifier)
+            = (id = (restricted_identifier >> *('.' >> identifier))) >> *_s
+            ;
+        packages
+            = +package
             ;
         none_literal
-            = as_xpr("None") >> _b
+            = word("None")
             ;
         true_literal
-            = as_xpr("True") >> _b
+            = word("True")
             ;
         false_literal
-            = as_xpr("False") >> _b
+            = word("False")
             ;
         boolean_literal
             = true_literal
             | false_literal
             ;
         number_literal
-            = !(set= '-','+') >> +_d // integral part
-                >> !('.' >> +_d)     // floating part
-                >> !('e' >> +_d)     // exponent part
+            = !(set= '-','+') >> +_d // Integral part.
+                >> !('.' >> +_d)     // Floating part.
+                >> !('e' >> +_d)     // Exponent part.
             ;
         string_literal
-            = '"'  >> *~as_xpr('"')  >> '"'  // >> _b
-            | '\'' >> *~as_xpr('\'') >> '\'' // >> _b
+            = '"'  >> *~as_xpr('"')  >> '"'
+            | '\'' >> *~as_xpr('\'') >> '\''
             ;
         variable_literal
-            = identifier
+            = restricted_identifier
             ;
         literal
             = none_literal
@@ -186,37 +262,38 @@ struct definition : base_definition< BidirectionalIterator
             | variable_literal
             ;
         attribution
-            = '.' >> *_s >> identifier
+            = '.' >> identifier
             ;
         subscription
-            = '[' >> *_s >> x::ref(expression) >> *_s >> ']'
+            = token<'['>() >> x::ref(expression) >> ']' // token<']'>()
             ;
         chain
-            = literal >> *(*_s >> (attribution | subscription))
+            // TODO: Consider generalizing literal to expression
+            = literal >> /* *_s >>*/ *(attribution | subscription) >> *_s
             ;
         unary_operator
-            = as_xpr("not") >> _b
+            = xxx("not")
             ;
         binary_operator
-            = as_xpr("==")
-            | as_xpr("!=")
-            | as_xpr("<")
-            | as_xpr(">")
-            | as_xpr("<=")
-            | as_xpr(">=")
-            | as_xpr("and") >> _b
-            | as_xpr("or")  >> _b
-            | as_xpr("in")  >> _b
-            | as_xpr("not") >> +_s >> "in" >> _b
+            = yyy("==")
+            | yyy("!=")
+            | yyy("<=")
+            | yyy(">=")
+            | yyy("<")
+            | yyy(">")
+            | xxx("and")
+            | xxx("or")
+            | xxx("in")
+            | xxx("not") >> *_s >> xxx("in")
             ;
         binary_expression
-            = chain >> *(binary_operator >> x::ref(expression))
+            = chain >> *(binary_operator >> *_s >> x::ref(expression))
             ;
         unary_expression
-            = unary_operator >> x::ref(expression)
+            = unary_operator >> *_s >> x::ref(expression)
             ;
         nested_expression
-            = '(' >> *_s >> x::ref(expression) >> *_s >> ')'
+            = token<'('>() >> x::ref(expression) >> token<')'>()
             ;
         expression
             = unary_expression
@@ -224,21 +301,27 @@ struct definition : base_definition< BidirectionalIterator
             | nested_expression
             ;
         arguments
-            = *(+_s >> expression)
+            = *expression
+            ;
+        variables
+            = name >> !(token<','>() >> name) // TODO: Generalize to N variables.
             ;
         filter
-            = identifier >> !(':' >> *_s >> chain)
+            = name >> !(token<':'>() >> chain)
             ;
-        pipe
-            = filter >> *(*_s >> '|' >> *_s >> filter)
+        filters
+            = *(token<'|'>() >> filter)
+            ;
+        pipeline
+            = filter >> *(token<'|'>() >> filter)
             ;
         skipper
-            = as_xpr(block_open)
-            | as_xpr(block_close)
-            | as_xpr(comment_open)
-            | as_xpr(comment_close)
-            | as_xpr(variable_open)
-            | as_xpr(variable_close)
+            = block_open
+            | block_close
+            | comment_open
+            | comment_close
+            | variable_open
+            | variable_close
             ;
         nothing
             = as_xpr('\0') // Xpressive barfs when default-constructed.
@@ -340,6 +423,7 @@ struct definition : base_definition< BidirectionalIterator
         // TODO: Escape sequences, etc.
         // Handles "string" or 'string'.
         string_type const string = from.str();
+        AJG_DUMP(string);
         return string.substr(1, string.size() - 2);
     }
 
@@ -402,22 +486,26 @@ struct definition : base_definition< BidirectionalIterator
         else throw_exception(std::logic_error("invalid template state"));
     }
 
-    value_type apply_pipe( value_type   const& value
-                         , match_type   const& pipe
-                         , context_type const& context
-                         , options_type const& options
-                         ) const {
+    value_type apply_filters( value_type   const& value
+                            , match_type   const& filters
+                            , context_type const& context
+                            , options_type const& options
+                            ) const {
         value_type result = value;
 
-        BOOST_FOREACH(match_type const& filter, pipe.nested_results()) {
-            match_type const& name  = filter(this->identifier);
-            match_type const& chain = filter(this->chain);
+        BOOST_FOREACH(match_type const& filter, detail::select_nested(filters, this->filter)) {
+            AJG_DUMP(filter.str());
+            BOOST_ASSERT(filter == this->filter);
+            string_type const& name  = filter(this->name)[id].str();
+            match_type  const& chain = filter(this->chain);
+            AJG_DUMP(name);
+            AJG_DUMP(chain.str());
 
             arguments_type arguments;
             if (chain) {
-                arguments.first.push_back(evaluate_chain(chain, context, options));
+                arguments.first.push_back(this->evaluate_chain(chain, context, options));
             }
-            result = apply_filter(result, name.str(), arguments, context, options);
+            result = this->apply_filter(result, name, arguments, context, options);
         }
 
         return result;
@@ -448,8 +536,8 @@ struct definition : base_definition< BidirectionalIterator
                                ) const {
         value_type value;
         BOOST_ASSERT(match == this->literal);
-        string_type const string = match.str();
-        match_type const& literal = detail::get_nested<1>(match);
+        string_type const  string  = match.str();
+        match_type  const& literal = detail::get_nested<1>(match);
 
         if (literal == none_literal) {
             value = value_type();
@@ -480,14 +568,12 @@ struct definition : base_definition< BidirectionalIterator
             value.token(std::make_pair(literal[0].first + 1, literal[0].second - 1));
         }
         else if (literal == variable_literal) {
-            if (optional<value_type const&> const
-                    variable = detail::find_value(string, context)) {
+            if (optional<value_type const&> const variable = detail::find_value(string, context)) {
                 value = *variable;
                 value.token(literal[0]);
             }
             else {
-                throw_exception(missing_variable(
-                    this->template transcode<char>(string)));
+                throw_exception(missing_variable(this->template transcode<char>(string)));
             }
         }
         else {
@@ -501,6 +587,8 @@ struct definition : base_definition< BidirectionalIterator
                                   , context_type const& context
                                   , options_type const& options
                                   ) const {
+        BOOST_ASSERT(match);
+        AJG_DUMP(match.str());
         BOOST_ASSERT(match == this->expression);
         match_type const& expr = detail::get_nested<1>(match);
 
@@ -524,10 +612,10 @@ struct definition : base_definition< BidirectionalIterator
                              , options_type const& options
                              ) const {
         BOOST_ASSERT(unary == unary_expression);
-        string_type const op = algorithm::trim_copy(detail::get_nested<1>(unary).str());
-        match_type const& operand = detail::get_nested<2>(unary);
+        string_type const  op      = detail::get_nested<1>(unary).str();
+        match_type  const& operand = detail::get_nested<2>(unary);
 
-        if (op == "not") {
+        if (op == detail::text("not")) {
             return !evaluate_expression(operand, context, options);
         }
         else {
@@ -552,42 +640,43 @@ struct definition : base_definition< BidirectionalIterator
                      ) {
             if (!i++) continue; // Skip the first segment (the chain.)
             else if (segment == binary_operator) {
-                op = algorithm::trim_copy(segment.str());
+                op = segment.str();
                 continue;
             }
             else if (!(segment == expression)) {
                 throw_exception(std::logic_error("invalid binary expression"));
             }
 
-            if (op == "==") {
+            if (op == detail::text("==")) {
                 value = value == evaluate_expression(segment, context, options);
             }
-            else if (op == "!=") {
+            else if (op == detail::text("!=")) {
                 value = value != evaluate_expression(segment, context, options);
             }
-            else if (op == "<") {
+            else if (op == detail::text("<")) {
                 value = value < evaluate_expression(segment, context, options);
             }
-            else if (op == ">") {
+            else if (op == detail::text(">")) {
                 value = value > evaluate_expression(segment, context, options);
             }
-            else if (op == "<=") {
+            else if (op == detail::text("<=")) {
                 value = value <= evaluate_expression(segment, context, options);
             }
-            else if (op == ">=") {
+            else if (op == detail::text(">=")) {
                 value = value >= evaluate_expression(segment, context, options);
             }
-            else if (op == "and") {
+            else if (op == detail::text("and")) {
                 value = value ? evaluate_expression(segment, context, options) : value;
             }
-            else if (op == "or") {
+            else if (op == detail::text("or")) {
                 value = value ? value : evaluate_expression(segment, context, options);
             }
-            else if (op == "in") {
+            else if (op == detail::text("in")) {
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (algorithm::starts_with(op, "not") && algorithm::ends_with(op, "in")) {
+            else if (algorithm::starts_with(op, detail::text("not"))
+                  && algorithm::ends_with(op, detail::text("in"))) {
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }
@@ -762,7 +851,7 @@ struct definition : base_definition< BidirectionalIterator
     }
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return algorithm::replace_all_copy(s, detail::text(" "), detail::text("\xA0")); options.nonbreaking_space
+        return algorithm::replace_all_copy(s, detail::text(" "), options.nonbreaking_space);
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n
@@ -829,25 +918,34 @@ struct definition : base_definition< BidirectionalIterator
 
     string_type const newline;
     string_type const ellipsis;
-    string_type const brace_open;
-    string_type const brace_close;
-    string_type const block_open;
-    string_type const block_close;
-    string_type const comment_open;
-    string_type const comment_close;
-    string_type const variable_open;
-    string_type const variable_close;
 
-  public:
+    regex_type const brace_open;
+    regex_type const brace_close;
+    regex_type const block_open;
+    regex_type const block_close;
+    regex_type const comment_open;
+    regex_type const comment_close;
+    regex_type const variable_open;
+    regex_type const variable_close;
 
+    // TODO: Parallelize the formatting:
     regex_type tag, text, block, skipper, nothing;
-    regex_type identifier, unreserved_name, package;
-    regex_type arguments, filter, pipe, chain, subscription, attribution;
+    regex_type identifier, restricted_identifier, unreserved_identifier;
+    regex_type unreserved_name, name, names;
+    regex_type package, packages;
+    regex_type arguments;
+    regex_type variables;
+    regex_type filter, filters, pipeline;
+    regex_type chain, subscription, attribution;
     regex_type unary_operator, binary_operator;
     regex_type unary_expression, binary_expression, nested_expression, expression;
-    regex_type none_literal, true_literal, false_literal, boolean_literal;
+    regex_type none_literal;
+    regex_type true_literal, false_literal, boolean_literal;
     regex_type string_literal, number_literal, variable_literal, literal;
-    string_regex_type html_namechar, html_whitespace, html_tag;
+
+    string_regex_type html_namechar;
+    string_regex_type html_whitespace;
+    string_regex_type html_tag;
 
   private:
 

@@ -12,6 +12,9 @@
 /synth
 /test
 
+# Sublime Text
+*.sublime-workspace
+
 # Code::Blocks
 *.depend
 *.layout

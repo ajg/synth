@@ -468,9 +468,8 @@ struct definition : base_definition< BidirectionalIterator
                    , options_type const& options
                    ) const {
         using namespace detail;
-        // If there's only _one_ tag, xpressive will not
-        // "nest" the match, so we use it directly instead.
-        match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
+        // If there's only _one_ tag, xpressive will not nest the match, so we use it directly.
+        match_type const& tag = tags_type::size::value == 1 ? match : detail::unnest(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
         must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
@@ -537,14 +536,14 @@ struct definition : base_definition< BidirectionalIterator
         value_type value;
         BOOST_ASSERT(match == this->literal);
         string_type const  string  = match.str();
-        match_type  const& literal = detail::get_nested<1>(match);
+        match_type  const& literal = detail::unnest(match);
 
         if (literal == none_literal) {
             value = value_type();
             value.token(literal[0]);
         }
         else if (literal == boolean_literal) {
-            match_type const& boolean = detail::get_nested<1>(literal);
+            match_type const& boolean = detail::unnest(literal);
 
             if (boolean == true_literal) {
                 value = boolean_type(true);
@@ -587,10 +586,7 @@ struct definition : base_definition< BidirectionalIterator
                                   , context_type const& context
                                   , options_type const& options
                                   ) const {
-        BOOST_ASSERT(match);
-        AJG_DUMP(match.str());
-        BOOST_ASSERT(match == this->expression);
-        match_type const& expr = detail::get_nested<1>(match);
+        match_type const& expr = detail::unnest(match);
 
         if (expr == unary_expression) {
             return evaluate_unary(expr, context, options);
@@ -599,7 +595,7 @@ struct definition : base_definition< BidirectionalIterator
             return evaluate_binary(expr, context, options);
         }
         else if (expr == nested_expression) {
-            match_type const& nested = detail::get_nested<1>(expr);
+            match_type const& nested = expr(this->expression);
             return evaluate_expression(nested, context, options);
         }
         else {
@@ -607,13 +603,13 @@ struct definition : base_definition< BidirectionalIterator
         }
     }
 
-    value_type evaluate_unary( match_type   const& unary
+    value_type evaluate_unary( match_type   const& match
                              , context_type const& context
                              , options_type const& options
                              ) const {
-        BOOST_ASSERT(unary == unary_expression);
-        string_type const  op      = detail::get_nested<1>(unary).str();
-        match_type  const& operand = detail::get_nested<2>(unary);
+        BOOST_ASSERT(match == unary_expression);
+        string_type const& op      = match(unary_operator).str();
+        match_type  const& operand = match(expression);
 
         if (op == detail::text("not")) {
             return !evaluate_expression(operand, context, options);
@@ -623,21 +619,19 @@ struct definition : base_definition< BidirectionalIterator
         }
     }
 
-    value_type evaluate_binary( match_type   const& binary
+    value_type evaluate_binary( match_type   const& match
                               , context_type const& context
                               , options_type const& options
                               ) const {
-        BOOST_ASSERT(binary == binary_expression);
+        BOOST_ASSERT(match == binary_expression);
         // First, evaluate the first segment, which is
         // always present, and which is always a chain.
-        match_type const& chain = detail::get_nested<1>(binary);
+        match_type const& chain = match(this->chain);
         value_type value = evaluate_chain(chain, context, options);
         size_type i = 0;
         string_type op;
 
-        BOOST_FOREACH( match_type const& segment
-                     , binary.nested_results()
-                     ) {
+        BOOST_FOREACH(match_type const& segment, match.nested_results()) {
             if (!i++) continue; // Skip the first segment (the chain.)
             else if (segment == binary_operator) {
                 op = segment.str();
@@ -688,29 +682,19 @@ struct definition : base_definition< BidirectionalIterator
         return value;
     }
 
-    value_type evaluate_chain( match_type   const& chain
+    value_type evaluate_chain( match_type   const& match
                              , context_type const& context
                              , options_type const& options
                              ) const {
-        BOOST_ASSERT(chain == this->chain);
-        // Handle singly-nested expressions.
-        /*if (chain == expression) {
-            match_type const& nested = detail::get_nested<1>(chain);
-            return evaluate(nested, context, options);
-        }*/
-
+        BOOST_ASSERT(match == this->chain);
         // First, evaluate the first segment, which is
         // always present, and which is always a literal.
-        match_type const& literal = detail::get_nested<1>(chain);
-        value_type value = evaluate_literal(literal, context, options);
-        size_type i = 0;
+        match_type const& lit = match(this->literal);
+        value_type value = evaluate_literal(lit, context, options);
 
-        BOOST_FOREACH( match_type const& segment
-                     , chain.nested_results()
-                     ) {
-            if (!i++) continue; // Skip the first segment (the literal.)
+        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
+            match_type const& nested = detail::unnest(segment);
             value_type attribute;
-            match_type const& nested = detail::get_nested<1>(segment);
 
             if (segment == subscription) { // i.e. value [ attribute ]
                 attribute = evaluate(nested, context, options);
@@ -721,19 +705,6 @@ struct definition : base_definition< BidirectionalIterator
             else {
                 throw_exception(std::logic_error("invalid chain"));
             }
-
-            /*
-            typename value_type::const_iterator const
-                it = value.find_attribute(attribute);
-
-            if (it == value.end()) {
-                std::string const name = this->template
-                    transcode<char>(attribute.to_string());
-                throw_exception(missing_attribute(name));
-            }
-
-            value = *it;
-            */
 
             value = value.must_get_attribute(attribute);
         }

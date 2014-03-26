@@ -182,8 +182,8 @@ struct cycle_tag {
             Size const total   = args.nested_results().size();
             Size const current = options.cycles_[position];
 
-            Match const& arg = *detail::advance(args.nested_results(), current);
-            Value const value = engine.evaluate(arg, context, options);
+            Match const& arg   = *detail::advance(args.nested_results(), current);
+            Value const  value = engine.evaluate(arg, context, options);
             options.cycles_[position] = (current + 1) % total;
             out << value;
 

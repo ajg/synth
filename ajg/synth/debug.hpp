@@ -15,6 +15,7 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <cstring>
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -40,13 +41,15 @@ namespace debug {
 // Debugging macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DUMP(e) ((std::cerr << std::boolalpha) << "  " << #e << " = `" << (e) << "`" << std::endl)
-#define AJG_PRINT(e)  ((std::cerr << std::boolalpha) << "  " << (e) << std::endl)
+#define AJG_DUMP(e)  ((std::cerr << std::boolalpha) << "  " << #e << " = `" << (e) << "`" << std::endl)
+#define AJG_PRINT(e) ((std::cerr << std::boolalpha) << "  " << (e) << std::endl)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline std::string abbreviate(char const* s) {
     std::string result;
+    result.reserve(std::strlen(s));
+
     bool empty = true;
     int n = 0;
     while (char const c = *s++) {
@@ -57,7 +60,7 @@ inline std::string abbreviate(char const* s) {
             empty = true;
         }
         else if (empty) {
-            result += "...";
+            result += '_';
             empty = false;
         }
     }

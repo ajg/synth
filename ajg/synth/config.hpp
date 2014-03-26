@@ -24,6 +24,16 @@
 #define FUSION_MAX_MAP_SIZE            AJG_SYNTH_SEQUENCE_LIMIT
 #define FUSION_MAX_VECTOR_SIZE         AJG_SYNTH_SEQUENCE_LIMIT
 
+#ifndef NDEBUG
+
+#ifndef AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT
+#define AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT 1024
+#endif
+
+#include <ajg/synth/debug.hpp>
+
+#endif // NDEBUG
+
 #include <boost/preprocessor/stringize.hpp>
 
 #endif // AJG_SYNTH_CONFIG_HPP_INCLUDED

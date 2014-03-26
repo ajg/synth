@@ -705,7 +705,7 @@ inline optional<typename Functor::result_type> may_find_by_index( Engine   const
         std::find(index.begin(), index.end(), needle);
 
     if (it == index.end()) {
-        return none;
+        return boost::none;
     }
 
     typename Engine::size_type const distance = std::distance(index.begin(), it);

@@ -488,8 +488,8 @@ struct if_tag {
     struct definition {
         Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG(engine.name("if") >> engine.expression) >> engine.block // _, B, C
-              >> !(TAG(engine.name("else")) >> engine.block)                   // _, E
+            return TAG(engine.name("if") >> *_s >> engine.expression) >> engine.block // _, B, C
+              >> !(TAG(engine.name("else")) >> engine.block)                          // _, E
                 >> TAG(engine.name("endif"));
         }
 

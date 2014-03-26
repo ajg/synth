@@ -210,7 +210,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
         // TODO: This behavior is specific to sequential containers
         //       (e.g. lists) not associative ones (like maps).
         if (index < 0) {
-            index = this->length() - index;
+            index += this->length();
         }
 
         // For now, we must use this O(n) method:

@@ -735,8 +735,7 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
                                                        , Needle   const& needle
                                                        , Functor  const& functor
                                                        ) {
-    typename Index::const_iterator const it =
-        std::find(index.begin(), index.end(), needle);
+    typename Index::const_iterator const it = std::find(index.begin(), index.end(), needle);
 
     if (it == index.end()) {
         // TODO: Throw missing_tag exception.
@@ -749,48 +748,6 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
     typename Engine::size_type const distance = std::distance(index.begin(), it);
     BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
     return detail::template apply_at<size>::fn(distance, sequence, functor);
-}
-
-
-//
-// get_nested
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <std::size_t Index, class Match>
-inline static Match const& get_nested(Match const& match) {
-    BOOST_STATIC_ASSERT(Index != 0);
-    std::size_t i = 0;
-
-    // TODO: Use std::advance or the like.
-    BOOST_FOREACH(Match const& nested, match.nested_results()) {
-        if (++i == Index) return nested;
-    }
-
-    static const Match empty;
-    return empty;
-}
-
-//
-// select_nested
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template < class Match
-         , class Regex
-         >
-inline std::pair
-        < boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
-        , boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
-        >
-select_nested(Match const& match, Regex const& regex) {
-    typename Match::nested_results_type::const_iterator
-        begin(match.nested_results().begin()),
-        end(match.nested_results().end());
-    boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>
-        predicate(regex.regex_id());
-    return std::make_pair
-        ( boost::make_filter_iterator(predicate, begin, end)
-        , boost::make_filter_iterator(predicate, end,   end)
-        );
 }
 
 //
@@ -820,8 +777,75 @@ inline bool operator == ( xpressive::match_results<Iterator> const& match
 }
 
 //
+// get_nested
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <std::size_t Index, class Match>
+inline static Match const& get_nested(Match const& match) {
+    BOOST_STATIC_ASSERT(Index != 0);
+    std::size_t i = 0;
+
+    // TODO: Use advance or the like.
+    BOOST_FOREACH(Match const& nested, match.nested_results()) {
+        if (++i == Index) return nested;
+    }
+
+    static const Match empty;
+    return empty;
+}
+
+//
+// unnest
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Match>
+inline static Match const& unnest(Match const& match) {
+    BOOST_ASSERT(match);
+    BOOST_ASSERT(match.size() == 1);
+    return *match.nested_results().begin();
+}
+
+//
+// select_nested
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Match, class Regex>
+inline std::pair
+        < boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        , boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        >
+select_nested(Match const& match, Regex const& regex) {
+    typename Match::nested_results_type::const_iterator
+        begin(match.nested_results().begin()),
+        end(match.nested_results().end());
+    boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>
+        predicate(regex.regex_id());
+    return std::make_pair
+        ( boost::make_filter_iterator(predicate, begin, end)
+        , boost::make_filter_iterator(predicate, end,   end)
+        );
+}
+
+//
+// drop
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Container, class Number>
+inline std::pair
+        < typename Container::const_iterator
+        , typename Container::const_iterator
+        >
+drop(Container const& container, Number const number) {
+    return std::make_pair
+        ( advance(container, number)
+        , container.end()
+        );
+}
+
+//
 // placeholders:
 //     A symbolic way to refer to subresults within a match result object.
+//     TODO: Deprecate.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace placeholders {

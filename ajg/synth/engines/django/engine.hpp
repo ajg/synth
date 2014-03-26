@@ -78,7 +78,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::frame_type      frame_type;
     typedef typename base_type::string_type     string_type;
     typedef typename base_type::stream_type     stream_type;
-    typedef typename base_type::keywords_type   keywords_type;
+    typedef typename base_type::symbols_type    symbols_type;
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
@@ -94,35 +94,43 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename value_type::datetime_type    datetime_type;
     typedef typename value_type::duration_type    duration_type;
     typedef typename options_type::context_type   context_type;
-    typedef typename options_type::array_type     array_type;
     typedef typename options_type::names_type     names_type;
+    typedef typename options_type::sequence_type  sequence_type;
     typedef typename options_type::arguments_type arguments_type;
 
-
-    typedef detail::indexable_sequence<this_type, tags_type,
-        id_type, detail::create_definitions_extended>      tag_sequence_type;
-    typedef detail::indexable_sequence<this_type, filters_type,
-        string_type, detail::create_definitions_extended>  filter_sequence_type;
+    typedef detail::indexable_sequence<this_type, tags_type,    id_type,     detail::create_definitions_extended> tag_sequence_type;
+    typedef detail::indexable_sequence<this_type, filters_type, string_type, detail::create_definitions_extended> filter_sequence_type;
 
   private:
 
-    struct not_keyword_type {
-        keywords_type keywords;
+    symbols_type keywords_, names_;
+
+    struct not_in {
+        symbols_type const& symbols;
+        explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
 
         bool operator ()(typename match_type::value_type const& match) const {
-            return keywords.find(match.str()) == keywords.end();
+            return this->symbols.find(match.str()) == this->symbols.end();
         }
-    } not_keyword;
+    };
 
   public:
+
+    regex_type name(string_type const& s) {
+        namespace x = boost::xpressive;
+        names_.insert(s);
+        return x::as_xpr(s)/* TODO: >> x::_b*/;
+    }
+
+    regex_type keyword(string_type const& s) {
+        namespace x = boost::xpressive;
+        keywords_.insert(s);
+        return x::as_xpr(s)/* TODO: >> x::_b*/;
+    }
 
     definition()
         : newline        (detail::text("\n"))
         , ellipsis       (detail::text("..."))
-        , as_keyword     (detail::text("as"))
-        , by_keyword     (detail::text("by"))
-        , from_keyword   (detail::text("from"))
-        , in_keyword     (detail::text("in"))
         , brace_open     (detail::text("{"))
         , brace_close    (detail::text("}"))
         , block_open     (detail::text("{%"))
@@ -131,29 +139,28 @@ struct definition : base_definition< BidirectionalIterator
         , comment_close  (detail::text("#}"))
         , variable_open  (detail::text("{{"))
         , variable_close (detail::text("}}")) {
-        not_keyword.keywords.insert(as_keyword);
-        not_keyword.keywords.insert(by_keyword);
-        not_keyword.keywords.insert(from_keyword);
-        not_keyword.keywords.insert(in_keyword);
         using namespace xpressive;
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((alpha | '_') >> *_w) [ x::check(not_keyword) ]
+            = ((alpha | '_') >> *_w >> _b)[ x::check(not_in(keywords_)) ]
+            ;
+        unreserved_name
+            = identifier[ x::check(not_in(names_)) ]
             ;
         package
             = identifier >> *('.' >> identifier)
             ;
         none_literal
-            = as_xpr("None")
+            = as_xpr("None") >> _b
             ;
         true_literal
-            = as_xpr("True")
+            = as_xpr("True") >> _b
             ;
         false_literal
-            = as_xpr("False")
+            = as_xpr("False") >> _b
             ;
         boolean_literal
             = true_literal
@@ -165,8 +172,8 @@ struct definition : base_definition< BidirectionalIterator
                 >> !('e' >> +_d)     // exponent part
             ;
         string_literal
-            = '"'  >> *~as_xpr('"')  >> '"'
-            | '\'' >> *~as_xpr('\'') >> '\''
+            = '"'  >> *~as_xpr('"')  >> '"'  // >> _b
+            | '\'' >> *~as_xpr('\'') >> '\'' // >> _b
             ;
         variable_literal
             = identifier
@@ -188,7 +195,7 @@ struct definition : base_definition< BidirectionalIterator
             = literal >> *(*_s >> (attribution | subscription))
             ;
         unary_operator
-            = as_xpr("not") >> +_s
+            = as_xpr("not") >> _b
             ;
         binary_operator
             = as_xpr("==")
@@ -197,12 +204,10 @@ struct definition : base_definition< BidirectionalIterator
             | as_xpr(">")
             | as_xpr("<=")
             | as_xpr(">=")
-            | +_s >> ( as_xpr("and")
-                     | as_xpr("or")
-                     | as_xpr("in")
-                     | as_xpr("not") >> +_s >> "in"
-                     )
-              >> +_s
+            | as_xpr("and") >> _b
+            | as_xpr("or")  >> _b
+            | as_xpr("in")  >> _b
+            | as_xpr("not") >> +_s >> "in" >> _b
             ;
         binary_expression
             = chain >> *(binary_operator >> x::ref(expression))
@@ -229,14 +234,14 @@ struct definition : base_definition< BidirectionalIterator
             ;
         skipper
             = as_xpr(block_open)
-            | block_close
-            | comment_open
-            | comment_close
-            | variable_open
-            | variable_close
+            | as_xpr(block_close)
+            | as_xpr(comment_open)
+            | as_xpr(comment_close)
+            | as_xpr(variable_open)
+            | as_xpr(variable_close)
             ;
         nothing
-            = as_xpr('\0') // xpressive isn't liking it default-constructed.
+            = as_xpr('\0') // Xpressive barfs when default-constructed.
             ;
         html_namechar
             = ~(set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
@@ -255,30 +260,27 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct
-            <detail::element_initializer<this_type> >(*this));
-        fusion::for_each(filters_.definition,
-            detail::construct<append_filter>(*this));
-        detail::index_sequence<this_type, tag_sequence_type,
-            &this_type::tags_, tag_sequence_type::size>(*this);
+        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
+        fusion::for_each(filters_.definition, detail::construct<append_filter>(*this));
+        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:
 
-    value_type apply_filter( value_type   const& value
-                           , string_type  const& name
-                           , array_type   const& args
-                           , context_type const& context
-                           , options_type const& options
+    value_type apply_filter( value_type     const& value
+                           , string_type    const& name
+                           , arguments_type const& arguments
+                           , context_type   const& context
+                           , options_type   const& options
                            ) const {
-        process_filter const processor = { *this, value, name, args, context, options };
+        process_filter const processor = { *this, value, name, arguments, context, options };
         // Let library filters override built-in ones:
         if (optional<typename options_type::filter_type const> const& filter
                 = find_mapped_value(name, options.loaded_filters)) {
-            return (*filter)(options, &context, value, args);
+            return (*filter)(options, &context, value, arguments);
         }
-        else if (optional<value_type> const& result = detail::may_find_by_index(*this,
-                filters_.definition, filters_.index, name, processor)) {
+        else if (optional<value_type> const& result = detail::may_find_by_index(
+                    *this, filters_.definition, filters_.index, name, processor)) {
             return *result;
         }
         else {
@@ -287,17 +289,15 @@ struct definition : base_definition< BidirectionalIterator
     }
 
     template <char_type Delimiter>
-    array_type split_argument( value_type   const& argument
-                             , context_type const& context
-                             , options_type const& options
-                             ) const {
-        typedef char_separator<char_type> separator_type;
-        typedef typename value_type::token_type token_type;
-        typedef tokenizer< separator_type
-                         , typename token_type::const_iterator
-                         , token_type
-                         > tokenizer_type;
-        typedef definition<typename token_type::const_iterator> definition_type;
+    sequence_type split_argument( value_type   const& argument
+                                , context_type const& context
+                                , options_type const& options
+                                ) const {
+        typedef boost::char_separator<char_type>                                separator_type;
+        typedef typename value_type::token_type                                 token_type;
+        typedef typename token_type::const_iterator                             iterator_type;
+        typedef boost::tokenizer<separator_type, iterator_type, token_type>     tokenizer_type;
+        typedef definition<iterator_type>                                       definition_type;
 
         BOOST_ASSERT(argument.is_literal());
         token_type const& source = argument.token();
@@ -306,16 +306,15 @@ struct definition : base_definition< BidirectionalIterator
         tokenizer_type const tokenizer(source.begin(), source.end(), separator);
         static definition_type const tokenizable_definition;
         typename definition_type::match_type match;
-        array_type args;
+        sequence_type sequence;
 
         BOOST_FOREACH(token_type const& token, tokenizer) {
             if (std::distance(token.begin(), token.end()) == 0) {
-                args.push_back(value_type());
+                sequence.push_back(value_type());
             }
-            else if (xpressive::regex_match(token.begin(),
-                     token.end(), match, tokenizable_definition.chain)) {
+            else if (xpressive::regex_match(token.begin(), token.end(), match, tokenizable_definition.chain)) {
                 try {
-                    args.push_back(tokenizable_definition.evaluate_chain(match, context, options));
+                    sequence.push_back(tokenizable_definition.evaluate_chain(match, context, options));
                 }
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
@@ -328,12 +327,12 @@ struct definition : base_definition< BidirectionalIterator
                     // argument was meant as a string literal.
                     value_type value = string;
                     value.token(match[0]);
-                    args.push_back(value);
+                    sequence.push_back(value);
                 }
             }
         }
 
-        return args;
+        return sequence;
     }
 
     template <class T>
@@ -411,22 +410,34 @@ struct definition : base_definition< BidirectionalIterator
         value_type result = value;
 
         BOOST_FOREACH(match_type const& filter, pipe.nested_results()) {
-            match_type const& name = filter(identifier);
-            match_type const& arg  = filter(chain);
+            match_type const& name  = filter(this->identifier);
+            match_type const& chain = filter(this->chain);
 
-            array_type const args = !arg ? array_type()
-                : array_type(1, evaluate_chain(arg, context, options));
-            result = apply_filter(result, name.str(), args, context, options);
+            arguments_type arguments;
+            if (chain) {
+                arguments.first.push_back(evaluate_chain(chain, context, options));
+            }
+            result = apply_filter(result, name.str(), arguments, context, options);
         }
 
         return result;
     }
 
-    value_type evaluate( match_type    const& match
-                       , context_type  const& context
-                       , options_type  const& options
-              // TODO: , sequence_type const& args    = []
-              // TODO: , mapping_type  const& kwargs  = {}
+    arguments_type evaluate_arguments( match_type    const& args
+                                     , context_type  const& context
+                                     , options_type  const& options
+                                     ) const {
+        arguments_type arguments;
+        BOOST_FOREACH(match_type const& arg, args.nested_results()) {
+            arguments.first.push_back(this->evaluate_expression(arg, context, options));
+        }
+        return arguments;
+    }
+
+    value_type evaluate( match_type     const& match
+                       , context_type   const& context
+                       , options_type   const& options
+              // TODO: , arguments_type const& arguments = arguments_type()
                        ) const {
         return evaluate_expression(match, context, options);
     }
@@ -645,10 +656,10 @@ struct definition : base_definition< BidirectionalIterator
                                , string_type   const& format
                                , datetime_type const& datetime
                                ) const {
-        typedef std::map<char_type, string_type> mappings_type;
-        typedef typename mappings_type::value_type mapping_type;
+        typedef std::map<char_type, string_type>            transliterations_type;
+        typedef typename transliterations_type::value_type  transliteration_type;
 
-        static mappings_type const mappings = boost::assign::list_of<mapping_type>
+        static transliterations_type const transliterations = boost::assign::list_of<transliteration_type>
             (char_type('%'), detail::text("%%"))
             (char_type('a'), detail::text("%P")) // TODO: Periods
             (char_type('A'), detail::text("%p"))
@@ -696,7 +707,7 @@ struct definition : base_definition< BidirectionalIterator
 
         // TODO: This might not be UTF8-safe; consider using a utf8_iterator.
         BOOST_FOREACH(char_type const c, find_mapped_value(format, options.formats).get_value_or(format)) {
-            stream << find_mapped_value(c, mappings).get_value_or(string_type(1, c));
+            stream << find_mapped_value(c, transliterations).get_value_or(string_type(1, c));
         }
 
         return detail::format_time<string_type>(stream.str(), datetime);
@@ -762,18 +773,15 @@ struct definition : base_definition< BidirectionalIterator
             (n == 1 ? string_type() : string_type(detail::text("s")));
     }
 
-    optional<string_type> get_view_url( value_type const&   view
-                                      , array_type const&   args
-                                      , context_type const& context
-                                      , options_type const& options
+    optional<string_type> get_view_url( value_type     const& view
+                                      , arguments_type const& arguments
+                                      , context_type   const& context
+                                      , options_type   const& options
                                       ) const {
-        string_type    name = view.to_string();
-        arguments_type arguments;
-        arguments.first = args;
+        string_type name = view.to_string();
 
         BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
-            if (optional<string_type> const& url
-                    = resolver->reverse(name, arguments, context, options)) {
+            if (optional<string_type> const& url = resolver->reverse(name, arguments, context, options)) {
                 return url;
             }
         }
@@ -783,7 +791,7 @@ struct definition : base_definition< BidirectionalIterator
     void load_library( context_type&      context
                      , options_type&      options
                      , string_type const& library
-                     , names_type const*  names   = 0
+                     , names_type  const* names   = 0
                      ) const {
         loader_.template load<this_type>(context, options, library, names);
     }
@@ -791,19 +799,20 @@ struct definition : base_definition< BidirectionalIterator
   private:
 
     struct process_filter {
-        this_type    const& self;
-        value_type   const& value_;
-        string_type  const& name_;
-        array_type   const& args_;
-        context_type const& context_;
-        options_type const& options_;
+        this_type      const& self;
+        value_type     const& value_;
+        string_type    const& name_;
+        arguments_type const& arguments_;
+        context_type   const& context_;
+        options_type   const& options_;
 
         typedef value_type result_type;
 
         template <class Filter>
         value_type operator()(Filter const& filter) const {
             options_type& options = const_cast<options_type&>(options_);
-            return filter.process(value_, self, name_, context_, args_, options);
+            // TODO: Pass the full arguments_, not just the sequential (.first) ones.
+            return filter.process(value_, self, name_, context_, arguments_.first, options);
         }
     };
 
@@ -820,10 +829,6 @@ struct definition : base_definition< BidirectionalIterator
 
     string_type const newline;
     string_type const ellipsis;
-    string_type const as_keyword;
-    string_type const by_keyword;
-    string_type const from_keyword;
-    string_type const in_keyword;
     string_type const brace_open;
     string_type const brace_close;
     string_type const block_open;
@@ -836,16 +841,12 @@ struct definition : base_definition< BidirectionalIterator
   public:
 
     regex_type tag, text, block, skipper, nothing;
-    regex_type identifier, package, filter, pipe;
-    regex_type chain, subscription, attribution;
+    regex_type identifier, unreserved_name, package;
+    regex_type arguments, filter, pipe, chain, subscription, attribution;
     regex_type unary_operator, binary_operator;
-    regex_type unary_expression, binary_expression;
-    regex_type nested_expression, expression;
-    regex_type arguments;
-    regex_type string_literal, number_literal;
-    regex_type none_literal;
-    regex_type true_literal, false_literal, boolean_literal;
-    regex_type variable_literal, literal;
+    regex_type unary_expression, binary_expression, nested_expression, expression;
+    regex_type none_literal, true_literal, false_literal, boolean_literal;
+    regex_type string_literal, number_literal, variable_literal, literal;
     string_regex_type html_namechar, html_whitespace, html_tag;
 
   private:

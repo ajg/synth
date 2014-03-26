@@ -73,7 +73,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef Environment                       environment_type;
     typedef ssi::value<char_type>             value_type;
     typedef std::vector<string_type>          whitelist_type;
-    typedef std::vector<value_type>           array_type;
+    typedef std::vector<value_type>           sequence_type;
     typedef std::map<string_type, value_type> context_type;
     typedef library_type                      tags_type;
     typedef options<string_type>              options_type;

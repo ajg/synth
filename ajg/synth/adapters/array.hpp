@@ -85,7 +85,7 @@ struct adapter<Traits, T[]>
 
     const_iterator begin() const { return adapted_ + 0; }
     const_iterator end()   const { return adapted_ + length_; }
-    std::type_info const& type() const { return typeid(T[]); }
+    std::type_info const& type() const { return typeid(T*); } // XXX: return typeid(T[]);
 };
 
 //

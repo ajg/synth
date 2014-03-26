@@ -55,7 +55,7 @@ def get_synth_version():
 
 setup(
     name = 'synth',
-    version = '.'.join(get_synth_version()),
+    version = '.'.join(map(str, get_synth_version())),
     description = 'A Python binding to the Synth C++ Template Framework',
     long_description = long_description,
     keywords = 'django, tmpl, ssi, template, framework',

@@ -89,7 +89,6 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 ///     django::filter_tag
 ///     django::firstof_tag
 ///     django::for_empty_tag
-///     django::if_tag
 ///     django::ifchanged_tag
 ///     django::include_tag
 ///     django::load_tag
@@ -120,10 +119,17 @@ DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "",)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
-DJANGO_TEST(ifequal_tag,  "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
-DJANGO_TEST(ifequal_tag,  "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
-DJANGO_TEST(ifequal_tag,  "{% ifequal 6 6 %} Yes {% else %} No {% endifequal %}", " Yes ")
-DJANGO_TEST(ifequal_tag,  "{% ifequal 5 6 %} Yes {% else %} No {% endifequal %}", " No ")
+DJANGO_TEST(if_tag, "{% if True %} Good {% endif %}{% if False %} Bad {% endif %}", " Good ")
+DJANGO_TEST(if_tag, "{% if True %} Good {% else %} Bad {% endif %}",                " Good ")
+DJANGO_TEST(if_tag, "{% if False %} Bad {% else %} Good {% endif %}",               " Good ")
+DJANGO_TEST(if_tag, "{% if 1 %} Good {% endif %}{% if False %} Bad {% endif %}",    " Good ")
+DJANGO_TEST(if_tag, "{% if 1 %} Good {% else %} Bad {% endif %}",                   " Good ")
+DJANGO_TEST(if_tag, "{% if 0 %} Bad {% else %} Good {% endif %}",                   " Good ")
+
+DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
+DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
+DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %} Yes {% else %} No {% endifequal %}", " Yes ")
+DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %} Yes {% else %} No {% endifequal %}", " No ")
 
 DJANGO_TEST(for_tag-value,
     "{% for v in friends %}[{{ v }}]{% endfor %}",

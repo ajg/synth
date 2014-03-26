@@ -20,11 +20,17 @@
 #include <sstream>
 #include <string>
 
+#if HAS_CXXABI_H
 #include <cxxabi.h>
+#endif
+#if HAS_EXECINFO_H
 #include <execinfo.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/replace.hpp>
+
+// TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
 
 namespace ajg {
 namespace synth {
@@ -68,29 +74,57 @@ inline std::string abbreviate(char const* s) {
     return result;
 }
 
-// TODO: Eliminate dynamic allocations and minimize potential runtime failures.
+inline std::string unmangle(std::string const& mangled) {
+
+#if HAS_CXXABI_H
+
+    // TODO[c++11]: unique_ptr.
+    int status = 0;
+    boost::shared_ptr<char> unmangled(abi::__cxa_demangle(mangled.c_str(), 0, 0, &status), std::free);
+    return unmangled && status == 0 ? abbreviate(unmangled.get()) : mangled;
+
+#else
+
+    return mangled;
+
+#endif // HAS_CXXABI_H
+
+}
+
+
 inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
+
+#if HAS_EXECINFO_H
+
     void* frames[AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT]; // TODO: Make a "thread-local static global".
     std::size_t const n = backtrace(frames, AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT);
 
     boost::shared_ptr<char*> symbols(backtrace_symbols(frames, n), std::free);
-    if (symbols) {
+    if (symbols) { // TODO[c++11]: auto const& symbols = make_unique_ptr().
         for (std::size_t i = frames_skipped; i < n; ++i) {
-            int index = 0, status = 0;
+            int index = 0;
             std::string module, address, mangled;
             std::istringstream in(symbols.get()[i]);
 
-            in >> index >> module >> address >> mangled;
-            if (mangled == "start") break;
-
-            std::string function = mangled;
-            boost::shared_ptr<char> demangled(abi::__cxa_demangle(mangled.c_str(), 0, 0, &status), std::free);
-            if (demangled && status == 0) {
-                function = abbreviate(demangled.get());
+            if (!(in >> index >> module >> address >> mangled)) {
+                continue;
             }
-            std::fprintf(file, "%d\t%s\t%s\n", index, module.c_str(), function.c_str());
+            else if (mangled == "start") {
+                break;
+            }
+            else {
+                std::string const signature = unmangle(mangled);
+                std::fprintf(file, "%d\t%s\t%s\n", index, module.c_str(), signature.c_str());
+            }
         }
     }
+
+#else
+
+    std::fprintf(file, "Backtrace unavailable\n");
+
+#endif // HAS_EXECINFO_H
+
 }
 
 inline void signal_handler(int signum, siginfo_t* info, void* context) {

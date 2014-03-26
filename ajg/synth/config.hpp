@@ -35,6 +35,22 @@
 #define AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT 1024
 #endif
 
+#if defined(__clang__) || defined(__GNUC__)
+#    ifndef HAS_CXXABI_H
+#    define HAS_CXXABI_H 1
+#    endif
+#    ifndef HAS_EXECINFO_H
+#    define HAS_EXECINFO_H 1
+#    endif
+#else
+#    ifndef HAS_CXXABI_H
+#    define HAS_CXXABI_H 0
+#    endif
+#    ifndef HAS_EXECINFO_H
+#    define HAS_EXECINFO_H 0
+#    endif
+#endif
+
 #include <ajg/synth/debug.hpp>
 
 #endif // NDEBUG

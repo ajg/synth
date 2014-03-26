@@ -4,6 +4,7 @@
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
 import os
+import re
 import subprocess
 from distutils import sysconfig
 
@@ -21,23 +22,52 @@ env = Environment(
         # TODO: '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        '-ftemplate-depth=' + str(cxx_template_depth), # XXX: g++ v?+
-        '-DTEMPLATE_DEPTH=' + str(cxx_template_depth), # XXX: g++ v?+
-        '-Wno-unsequenced',                            # XXX: g++ v?+
         '-Wno-unused-function',
         '-Wno-unused-value',
     ],
 )
 
-if 'clang' in cxx_version:
-    env.Append(CPPFLAGS = ['-ferror-limit=1'])
-elif 'g++' in cxx_version:
-    env.Append(CPPFLAGS = ['-fmax-errors=1'])
+def get_conditional_cpp_flags():
+    cpp_flags = []
 
-if debug:
-    env.Append(CPPFLAGS = ['-g'])
-else:
-    env.Append(CPPFLAGS = ['-O3', '-DNDEBUG'])
+    if 'clang' in cxx_version:
+        cpp_flags += ['-Wno-unsequenced']
+        cpp_flags += ['-ferror-limit=1']
+        cpp_flags += ['-ftemplate-backtrace-limit=1']
+        cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
+        cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+
+    elif 'g++' in cxx_version:
+        cpp_flags += ['-Wno-sequence-point']
+        cpp_flags += ['-Wfatal-errors']
+
+        triple = re.search(r'\s(\d+)[.](\d+)[.](\d+)\s', cxx_version)
+        if triple:
+            major = int(triple.group(1))
+            minor = int(triple.group(2))
+            patch = int(triple.group(3))
+            gcc_version = (major, minor, patch)
+            print gcc_version
+
+            if gcc_version < (4, 5):
+                cpp_flags += ['-ftemplate-depth-' + str(cxx_template_depth)] # Note the dash
+                cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+            else:
+                cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
+                cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+
+            if gcc_version >= (4, 8):
+                cpp_flags += ['-fmax-errors=1']
+                cpp_flags += ['-ftemplate-backtrace-limit=1']
+
+    if debug:
+        cpp_flags += ['-g']
+    else:
+        cpp_flags += ['-O3', '-DNDEBUG']
+
+    return cpp_flags
+
+env.Append(CPPFLAGS = get_conditional_cpp_flags())
 
 if group:
     test_sources = ['tests/%s_tests.cpp' % group]

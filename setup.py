@@ -48,11 +48,14 @@ classifiers = [
 
 def get_synth_version():
     config = open('ajg/synth/config.hpp').read()
-    return re.search('AJG_SYNTH_VERSION\\s+(\\S+)', config).group(1)
+    major  = int(re.search('AJG_SYNTH_VERSION_MAJOR\\s+(\\S+)', config).group(1))
+    minor  = int(re.search('AJG_SYNTH_VERSION_MINOR\\s+(\\S+)', config).group(1))
+    patch  = int(re.search('AJG_SYNTH_VERSION_PATCH\\s+(\\S+)', config).group(1))
+    return (major, minor, patch)
 
 setup(
     name = 'synth',
-    version = get_synth_version(),
+    version = '.'.join(get_synth_version()),
     description = 'A Python binding to the Synth C++ Template Framework',
     long_description = long_description,
     keywords = 'django, tmpl, ssi, template, framework',

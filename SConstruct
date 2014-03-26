@@ -21,9 +21,9 @@ env = Environment(
         # TODO: '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        '-ftemplate-depth=' + str(cxx_template_depth),
-        '-DTEMPLATE_DEPTH=' + str(cxx_template_depth),
-        '-Wno-unsequenced',
+        '-ftemplate-depth=' + str(cxx_template_depth), # XXX: g++ v?+
+        '-DTEMPLATE_DEPTH=' + str(cxx_template_depth), # XXX: g++ v?+
+        '-Wno-unsequenced',                            # XXX: g++ v?+
         '-Wno-unused-function',
         '-Wno-unused-value',
     ],

@@ -441,8 +441,10 @@ Future Work
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
      + Replace `boost::assign` use with aggregate initializers
-     + Remove needlessly configurable (especially defaulted) template parameters
+     + Remove needlessly configurable (especially defaulted) `template` parameters
+     + Remove complex redundant `typedef`s in favor of `auto`
    * [v1+] Sort `#include`s alphabetically
+   * [v1+] Run entire C++ codebase through clang-format
    * Change `class` in template signatures to `typename`
    * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s

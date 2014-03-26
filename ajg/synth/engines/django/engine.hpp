@@ -109,7 +109,6 @@ struct definition : base_definition< BidirectionalIterator
         explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
 
         bool operator ()(typename match_type::value_type const& match) const {
-            AJG_DUMP(match.str());
             return this->symbols.find(match.str()) == this->symbols.end();
         }
     };
@@ -181,17 +180,6 @@ struct definition : base_definition< BidirectionalIterator
     definition()
         : newline        (detail::text("\n"))
         , ellipsis       (detail::text("..."))
-
-        /*
-        , brace_open     (token<'{'>())
-        , brace_close    (token<'}'>())
-        , block_open     (token<'{', '%'>())
-        , block_close    (token<'%', '}'>())
-        , comment_open   (token<'{', '#'>())
-        , comment_close  (token<'#', '}'>())
-        , variable_open  (token<'{', '{'>())
-        , variable_close (token<'}', '}'>())
-        */
         , brace_open     (marker("{",  "openbrace"))
         , brace_close    (marker("}",  "closebrace"))
         , block_open     (marker("{%", "openblock"))
@@ -423,7 +411,6 @@ struct definition : base_definition< BidirectionalIterator
         // TODO: Escape sequences, etc.
         // Handles "string" or 'string'.
         string_type const string = from.str();
-        AJG_DUMP(string);
         return string.substr(1, string.size() - 2);
     }
 
@@ -493,12 +480,9 @@ struct definition : base_definition< BidirectionalIterator
         value_type result = value;
 
         BOOST_FOREACH(match_type const& filter, detail::select_nested(filters, this->filter)) {
-            AJG_DUMP(filter.str());
             BOOST_ASSERT(filter == this->filter);
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
-            AJG_DUMP(name);
-            AJG_DUMP(chain.str());
 
             arguments_type arguments;
             if (chain) {

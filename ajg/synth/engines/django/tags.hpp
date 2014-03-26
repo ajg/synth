@@ -176,25 +176,25 @@ struct cycle_tag {
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
             typename Engine::size_type const position = match.position();
-            Match const& args  = match(engine.arguments);
-            Match const& name  = match(engine.name);
-            Match const& block = match(engine.block);
-            Size const total   = args.nested_results().size();
-            Size const current = options.cycles_[position];
+            Match  const& args    = match(engine.arguments);
+            Match  const& block   = match(engine.block);
+            String const& name    = match(engine.name)[id].str();
+            Size   const  total   = args.nested_results().size();
+            Size   const  current = options.cycles_[position];
 
             Match const& arg   = *detail::advance(args.nested_results(), current);
             Value const  value = engine.evaluate(arg, context, options);
             options.cycles_[position] = (current + 1) % total;
             out << value;
 
-            if (!name) {
+            if (name.empty()) {
                 // E.g. cycle foo
                 engine.render_block(out, block, context, options);
             }
             else {
                 // E.g. cycle foo as bar
                 Context context_copy = context;
-                context_copy[name[id].str()] = value;
+                context_copy[name] = value;
                 engine.render_block(out, block, context_copy, options);
             }
         }
@@ -589,20 +589,10 @@ struct ifequal_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            AJG_DUMP(bool(match));
-            AJG_DUMP(match.str());
             Match const& left  = match(engine.expression, 0);
             Match const& right = match(engine.expression, 1);
             Match const& if_   = match(engine.block, 0);
             Match const& else_ = match(engine.block, 1);
-            AJG_DUMP(bool(left));
-            AJG_DUMP(bool(right));
-            AJG_DUMP(bool(if_));
-            AJG_DUMP(bool(else_));
-            AJG_DUMP(left.str());
-            AJG_DUMP(right.str());
-            AJG_DUMP(if_.str());
-            AJG_DUMP(else_.str());
             bool  const  cond_ = engine.evaluate(left, context, options)
                               == engine.evaluate(right, context, options);
 
@@ -684,11 +674,11 @@ struct load_tag {
                    , typename Engine::stream_type& out) const {
             Match const& packages = match(engine.packages);
             Match const& block    = match(engine.block);
-            Options options_copy = options;
-            Context context_copy = context;
+            Options options_copy  = options;
+            Context context_copy  = context;
 
-            BOOST_FOREACH(Match const& package, packages.nested_results()) {
-                String const library = package[id].str();
+            BOOST_FOREACH(Match const& package, detail::select_nested(packages, engine.package)) {
+                String const& library = package[id].str();
                 engine.load_library(context_copy, options_copy, library);
             }
 
@@ -713,18 +703,18 @@ struct load_from_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match  const& package = match(engine.package);
+            Match  const& names   = match(engine.names);
             Match  const& block   = match(engine.block);
-            String const  library = package[id].str();
-            std::vector<String> names;
+            String const& library = match(engine.package)[id].str();
+            std::vector<String> components;
 
-            BOOST_FOREACH(Match const& name, match(engine.names).nested_results()) {
-                names.push_back(name[id].str());
+            BOOST_FOREACH(Match const& name, detail::select_nested(names, engine.name)) {
+                components.push_back(name[id].str());
             }
 
             Options options_copy = options;
             Context context_copy = context;
-            engine.load_library(context_copy, options_copy, library, &names);
+            engine.load_library(context_copy, options_copy, library, &components);
             engine.render_block(out, block, context_copy, options_copy);
         }
     };
@@ -773,8 +763,8 @@ struct regroup_tag {
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
             Match  const& expr  = match(engine.expression);
-            String const& attrs = match(engine.package[id]).str();
-            String const& name  = match(engine.name[id]).str();
+            String const& attrs = match(engine.package)[id].str();
+            String const& name  = match(engine.name)[id].str();
             Match  const& block = match(engine.block);
 
             Value        values;
@@ -908,7 +898,7 @@ struct templatetag_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            String const name = match(engine.name[id]).str();
+            String const name = match(engine.name)[id].str();
 
             if (optional<String const> const& marker = detail::find_mapped_value(name, engine.markers)) {
                 out << *marker;
@@ -1005,10 +995,10 @@ struct url_as_tag {
                    , options_type&       options
                    , output_type&        output
                    ) const {
-            match_type const& expr  = match(engine.expression);
-            match_type const& args  = match(engine.arguments);
-            match_type const& block = match(engine.block);
-            match_type const& name  = match(engine.name);
+            match_type  const& expr  = match(engine.expression);
+            match_type  const& args  = match(engine.arguments);
+            match_type  const& block = match(engine.block);
+            string_type const& name  = match(engine.name)[id].str();
 
             value_type     const view      = engine.evaluate(expr, context, options);
             arguments_type const arguments = engine.evaluate_arguments(args, context, options);
@@ -1016,7 +1006,7 @@ struct url_as_tag {
                                                    .get_value_or(string_type());
 
             context_type context_copy = context;
-            context_copy[name[id].str()] = url;
+            context_copy[name] = url;
             engine.render_block(output, block, context_copy, options);
         }
     };
@@ -1130,12 +1120,12 @@ struct with_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& expr  = match(engine.expression);
-            Match const& name  = match(engine.name);
-            Match const& body  = match(engine.block);
+            Match  const& expr = match(engine.expression);
+            Match  const& body = match(engine.block);
+            String const& name = match(engine.name)[id].str();
 
             Context context_copy = context;
-            context_copy[name[id].str()] = engine.evaluate(expr, context, options);
+            context_copy[name] = engine.evaluate(expr, context, options);
             engine.render_block(out, body, context_copy, options);
         }
     };

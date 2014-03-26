@@ -89,7 +89,7 @@ struct base_definition : boost::noncopyable {
 
   public:
 
-    // TODO: Deprecate in favor of Traits::transcode.
+    /// [deprecated] Prefer Traits::transcode.
     template <class Char, class String>
     inline std::basic_string<Char> transcode(String const& string) const {
         return std::basic_string<Char>(string.begin(), string.end());

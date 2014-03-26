@@ -89,7 +89,7 @@ namespace posix_time = boost::posix_time;
 namespace xpressive  = boost::xpressive;
 
 //
-// lit [Deprecated]:
+// [deprecated] lit:
 //     String literal helper.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -777,7 +777,7 @@ inline bool operator == ( xpressive::match_results<Iterator> const& match
 }
 
 //
-// get_nested
+// [deprecated] get_nested
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <std::size_t Index, class Match>
@@ -843,9 +843,8 @@ drop(Container const& container, Number const number) {
 }
 
 //
-// placeholders:
+// [deprecated] placeholders:
 //     A symbolic way to refer to subresults within a match result object.
-//     TODO: Deprecate.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace placeholders {

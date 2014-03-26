@@ -15,4 +15,7 @@ before_install:
 script:
   # Prevent slow builds from dying by echoing something every 5 minutes.
   - (while true; do echo "I am a little teapot."; sleep 300; done)&
-  - scons && ./test
+  - scons
+  - ./test
+  - mv python-synth.so tests/
+  - python tests/binding.py

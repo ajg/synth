@@ -572,14 +572,16 @@ DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}", "1, 2, 3, 4, 5, 6, 7, 8, 9"
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}", "3, 4, 5, 6")
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "4, 5, 6, 7")
 
-/*
+/* TODO:
 DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
 DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
 DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
 DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
 
 DJANGO_TEST(join_filter, "{{tags|join:', '}}", "")
+DJANGO_TEST(safe_filter, "{{tags|safe}}", "")
 DJANGO_TEST(safe_filter+join_filter, "{{tags|safe|join:', '}}", "")
+DJANGO_TEST(safeseq_filter, "{{tags|safeseq}}", "")
 DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 */
 
@@ -588,11 +590,6 @@ TODO:
 {% for k, v in a_string_array %}
     {% cycle k v as ttt %} hello. {{ttt}}
 {% endfor %}
-*/
-
-/*
-TODO:
-{% if not 0 %} IF Good {% else %} IF Bad {% endif %}
 
 {% filter upper %}
 {% debug %}
@@ -602,4 +599,17 @@ TODO:
 
 {#% ssi /etc/adjtime parsed % -- normally unavailable on Windows and OS X #}
 {#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}
+
+{% block a_block %}
+This is a block
+{% endblock a_block %}
+
+{% include 'samples/django/empty.tpl' %}
+
+Included:
+{% include 'samples/django/included.tpl' %}
+
+{% firstof nonextant a_false a_pair a_deque %}
+{% firstof aa bb cc 'FALLBACK' %}
+{% firstof aa a_true 'FALLBACK' %}
 */

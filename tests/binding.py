@@ -56,7 +56,9 @@ dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 {{ "foo" and 0 }}
 {{ "foo" or "bar" }}
 {{ "foo" and "bar" }}
+
 {% endcomment %}
+
 """.encode('utf-8')
 
 context = {
@@ -73,5 +75,5 @@ context = {
 }
 template = synth.Template(source, 'django')
 
-print('template: ' + str(template))
+print('Parsing succeeded: ' + str(template))
 print(template.render_to_string(context))

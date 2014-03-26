@@ -267,8 +267,8 @@ struct if_directive {
                 left  = parse_string(args, get_nested<A>(expr)),
                 right = get_nested<C>(expr)[xpressive::s1].str();
             typename Engine::string_match_type match;
-            typename Engine::string_regex_type const pattern
-                = Engine::string_regex_type::compile(right);
+            typename Engine::string_regex_type const pattern =
+                Engine::string_regex_type::compile(right/*, xpressive::regex_constants::optimize*/);
 
             for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
                 args.context.erase(boost::lexical_cast<typename Engine::string_type>(i));

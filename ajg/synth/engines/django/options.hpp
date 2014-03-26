@@ -64,7 +64,7 @@ struct abstract_library {
     typedef typename options_type::value_type     value_type;
     typedef typename options_type::context_type   context_type;
     typedef typename options_type::names_type     names_type;
-    typedef typename options_type::array_type     array_type;
+    typedef typename options_type::arguments_type arguments_type;
     typedef typename options_type::tag_type       tag_type;
     typedef typename options_type::tags_type      tags_type;
     typedef typename options_type::filter_type    filter_type;
@@ -101,12 +101,10 @@ struct options {
     typedef typename traits_type::size_type        size_type;
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
-    typedef typename traits_type::sequence_type    array_type;
+    typedef typename traits_type::sequence_type    sequence_type;
+    typedef typename traits_type::mapping_type     mapping_type;
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
     typedef std::vector<string_type>               names_type;
-
-    typedef std::vector<value_type>                sequence_type;
-    typedef std::map<value_type, value_type>       mapping_type;
     typedef std::pair<sequence_type, mapping_type> arguments_type;
 
     typedef std::map<string_type, string_type>     formats_type;
@@ -119,8 +117,8 @@ struct options {
     typedef shared_ptr<abstract_loader_type>       loader_type;   // TODO[c++11]: Use unique_ptr?
     typedef shared_ptr<abstract_resolver_type>     resolver_type; // TODO[c++11]: Use unique_ptr?
 
-    typedef value_type (tag_fn_type)(options_type&, context_type*, array_type&);
-    typedef value_type (filter_fn_type)(options_type const&, context_type const*, value_type const&, array_type const&);
+    typedef value_type (tag_fn_type)(options_type&, context_type*, arguments_type&);
+    typedef value_type (filter_fn_type)(options_type const&, context_type const*, value_type const&, arguments_type const&);
 
     typedef boost::function<tag_fn_type>           tag_type;
     typedef boost::function<filter_fn_type>        filter_type;

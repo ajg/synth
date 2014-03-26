@@ -45,7 +45,7 @@ using detail::operator ==;
 using namespace detail::placeholders;
 
 #define TAG(content) \
-    engine.block_open >> *_s >> content >> *_s >> engine.block_close
+    engine.block_open >> *xpressive::_s >> content >> *xpressive::_s >> engine.block_close
 
 //
 // autoescape_tag
@@ -56,22 +56,21 @@ struct autoescape_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("autoescape" >> +_s >> (s1 = as_xpr("on") | "off"))
-                >> engine.block // A
-                >> TAG("endautoescape");
+            return TAG(engine.name("autoescape") >> *_s >> (s1 = as_xpr("on") | "off")) >> engine.block
+                >> TAG(engine.name("endautoescape"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
             bool const flag = match[1].str() == text("on");
-            Match const& block = get_nested<A>(match);
+            Match const& block = match(engine.block);
 
-            Options copy = options; // NOTE: Don't make the copy const.
-            copy.autoescape = flag;
-            engine.render_block(out, block, context, copy);
+            Options options_copy = options; // NOTE: Don't make the copy const.
+            options_copy.autoescape = flag;
+            engine.render_block(out, block, context, options_copy);
         }
     };
 };
@@ -85,22 +84,19 @@ struct block_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("block" >> +_s >> engine.identifier)        // A
-                >> engine.block                                    // B
-                >> TAG("endblock" >> !(+_s >> engine.identifier)); // C
+            return TAG(engine.name("block") >> *_s >> (s1 = engine.identifier)) >> engine.block
+                >> TAG(engine.name("endblock") >> !(*_s >> (s2 = engine.identifier)));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
-            Match const& name1 = get_nested<A>(match);
-            Match const& block = get_nested<B>(match);
-            Match const& name2 = get_nested<C>(match);
-            String const name = name1.str();
+            Match const& block = match(engine.block);
+            String const name  = match[1].str();
 
-            if (name2 && name != name2.str()) {
+            if (match[2] && name != match[2].str()) {
                 std::string const name_ = engine.template transcode<char>(name);
                 std::string const message = "mismatched endblock tag for " + name_;
                 throw_exception(std::logic_error(message));
@@ -135,17 +131,16 @@ struct csrf_token_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("csrf_token");
+            return TAG(engine.name("csrf_token"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
 
-            if (optional<Value const&> const token
-                     = detail::find_value(text("csrf_token"), context)) {
+            if (optional<Value const&> const token = detail::find_value(text("csrf_token"), context)) {
                 if (token->to_string() != text("NOTPROVIDED")) {
                     out << "<div style='display:none'>";
                     out <<     "<input ";
@@ -162,6 +157,7 @@ struct csrf_token_tag {
 
 //
 // comment_tag
+//     TODO: Split into comment_short_tag and comment_long_tag.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct comment_tag {
@@ -169,7 +165,7 @@ struct comment_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
             return // Short form
                    engine.comment_open
@@ -178,8 +174,8 @@ struct comment_tag {
                                    | as_xpr('\n')) >> _)
                 >> engine.comment_close
                    // Long form
-                |  TAG("comment") >> engine.block
-                >> TAG("endcomment");
+                |  TAG(engine.name("comment")) >> engine.block
+                >> TAG(engine.name("endcomment"));
         }
 
         void render( Match   const& match,   Engine  const& engine
@@ -199,26 +195,23 @@ struct cycle_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            Regex const expressions = +(+_s >> engine.expression);
-            return TAG("cycle" >> expressions >> !(+_s >> engine.as_keyword >> +_s >> engine.identifier))
-                   >> engine.block;
+            return TAG(engine.name("cycle") >> engine.arguments >> !(*_s >> engine.keyword("as") >> *_s >> engine.identifier)) >> engine.block;
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
             typename Engine::size_type const position = match.position();
-            // Alternative style to get_nested<X>(match):
-            Match const& exprs = match.nested_results().front();
+            Match const& args  = match(engine.arguments);
             Match const& ident = match(engine.identifier);
             Match const& block = match(engine.block);
-            Size const total   = exprs.nested_results().size();
+            Size const total   = args.nested_results().size();
             Size const current = options.cycles_[position];
 
-            Match const& expr = *detail::advance(exprs.nested_results(), current);
-            Value const value = engine.evaluate(expr, context, options);
+            Match const& arg = *detail::advance(args.nested_results(), current);
+            Value const value = engine.evaluate(arg, context, options);
             options.cycles_[position] = (current + 1) % total;
             out << value;
 
@@ -246,9 +239,8 @@ struct debug_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
-            using namespace xpressive;
-            return TAG("debug");
+        Regex syntax(Engine& engine) const {
+            return TAG(engine.name("debug"));
         }
 
         void render( Match   const& match,   Engine  const& engine
@@ -283,11 +275,9 @@ struct extends_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("extends" >> +_s
-                    >> engine.string_literal) // A
-                >> engine.block;              // B
+            return TAG(engine.name("extends") >> *_s >> engine.string_literal) >> engine.block;
         }
 
         void render( Match   const& match,   Engine  const& engine
@@ -296,8 +286,8 @@ struct extends_tag {
             typedef typename Options::blocks_type    blocks_type;
             typedef typename blocks_type::value_type block_type;
 
-            Match  const& string   = get_nested<A>(match);
-            Match  const& body     = get_nested<B>(match);
+            Match  const& string   = match(engine.string_literal);
+            Match  const& body     = match(engine.block);
             String const  filepath = engine.extract_string(string);
 
             std::basic_ostream<Char> null_stream(0);
@@ -351,18 +341,15 @@ struct firstof_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("firstof"
-                >> (Regex() = +(+_s >> engine.expression))  // A
-                    >> *_s >> !engine.string_literal        // B
-            );
+            return TAG(engine.name("firstof") >> engine.arguments >> *_s >> !engine.string_literal);
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            BOOST_FOREACH(Match const& var, get_nested<A>(match).nested_results()) {
+            BOOST_FOREACH(Match const& var, match(engine.arguments).nested_results()) {
                 try {
                     if (Value const value = engine.evaluate(var, context, options)) {
                         out << value;
@@ -374,7 +361,7 @@ struct firstof_tag {
             }
 
             // Use the fallback, if there is one.
-            if (Match const& fallback = get_nested<B>(match)) {
+            if (Match const& fallback = match(engine.string_literal)) {
                 out << engine.extract_string(fallback);
             }
         }
@@ -390,18 +377,17 @@ struct filter_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("filter" >> +_s >> engine.pipe) // A
-                    >> engine.block                    // B
-                >> TAG("endfilter");
+            return TAG(engine.name("filter") >> *_s >> engine.pipe) >> engine.block
+                >> TAG(engine.name("endfilter"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& pipe = get_nested<A>(match);
-            Match const& body = get_nested<B>(match);
+            Match const& pipe = match(engine.pipe);
+            Match const& body = match(engine.block);
 
             std::basic_ostringstream<Char> stream;
             engine.render_block(stream, body, context, options);
@@ -420,27 +406,25 @@ struct for_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            Regex const variables = engine.identifier        // 1
-                >> !(*_s >> ',' >> *_s >> engine.identifier) // 2
+            Regex const variables = (s1 = engine.identifier)
+                >> !(*_s >> ',' >> *_s >> (s2 = engine.identifier))
                 ;
-            return TAG("for" >> +_s >> variables                               // A
-                       >> +_s >> engine.in_keyword >> +_s >> engine.expression // B
-                   ) >> engine.block                                           // C
-              >> !(TAG("empty") >> engine.block)                               // D
-                >> TAG("endfor");
+            return TAG(engine.name("for") >> *_s >> variables >> *_s >> engine.keyword("in") >> *_s >> engine.expression) >> engine.block // _, B, _, D, E
+              >> !(TAG(engine.name("empty")) >> engine.block)                                                                             // _, G
+                >> TAG(engine.name("endfor"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match  const& vars   = get_nested<A>(match);
-            Match  const& expr   = get_nested<B>(match);
-            Match  const& for_   = get_nested<C>(match);
-            Match  const& empty  = get_nested<D>(match);
-            String const& first  = get_nested<1>(vars).str();
-            String const& second = get_nested<2>(vars).str();
+            Match  const& vars   = get_nested<B>(match);
+            Match  const& expr   = get_nested<D>(match);
+            Match  const& for_   = get_nested<E>(match);
+            Match  const& empty  = get_nested<G>(match);
+            String const& first  = vars[1].str();
+            String const& second = vars[2].str();
             Value  const& value  = engine.evaluate(expr, context, options);
 
             typename Value::const_iterator it(value.begin()), end(value.end());
@@ -486,7 +470,7 @@ struct for_empty_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const { return engine.nothing; }
+        Regex syntax(Engine& engine) const { return engine.nothing; }
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {}
@@ -502,20 +486,19 @@ struct if_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("if" >> +_s >> engine.expression) // A
-                       >> engine.block                   // B
-              >> !(TAG("else") >> engine.block)          // C
-                >> TAG("endif");
+            return TAG(engine.name("if") >> engine.expression) >> engine.block // _, B, C
+              >> !(TAG(engine.name("else")) >> engine.block)                   // _, E
+                >> TAG(engine.name("endif"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& expr  = get_nested<A>(match);
-            Match const& if_   = get_nested<B>(match);
-            Match const& else_ = get_nested<C>(match);
+            Match const& expr  = get_nested<B>(match);
+            Match const& if_   = get_nested<C>(match);
+            Match const& else_ = get_nested<E>(match);
             bool  const  cond_ = engine.evaluate(expr, context, options);
 
                  if (cond_) engine.render_block(out, if_,   context, options);
@@ -533,13 +516,11 @@ struct ifchanged_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("ifchanged"
-                >> *(+_s >> engine.expression)  // A
-                       ) >> engine.block        // B
-              >> !(TAG("else") >> engine.block) // C
-              >>   TAG("endifchanged");
+            return TAG(engine.name("ifchanged") >> engine.arguments) >> engine.block // _, B, C
+              >> !(TAG(engine.name("else"))     >> engine.block)                     // _, E
+              >>   TAG(engine.name("endifchanged"));
         }
 
         // template <class Parameters>
@@ -549,9 +530,9 @@ struct ifchanged_tag {
                    , Context const& context, Options&       options
                    , typename Engine::stream_type& out) const {
 
-            Match const& vars  = get_nested<A>(match);
-            Match const& if_   = get_nested<B>(match);
-            Match const& else_ = get_nested<C>(match);
+            Match const& vars  = get_nested<B>(match);
+            Match const& if_   = get_nested<C>(match);
+            Match const& else_ = get_nested<E>(match);
 
             typename Engine::size_type const position = match.position();
             optional<Value const&> const value = detail::find_value(position, options.changes_);
@@ -574,6 +555,7 @@ struct ifchanged_tag {
             }
             // Here, we compare variables.
             else {
+                // NOTE: The key is a string (rather than an int) presumably in case variables are repeated.
                 std::map<String, Value> values;
 
                 BOOST_FOREACH(Match const& var, vars.nested_results()) {
@@ -604,23 +586,20 @@ struct ifequal_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("ifequal"
-                    >> +_s >> engine.expression  // A
-                    >> +_s >> engine.expression) // B
-                               >> engine.block   // C
-              >> !(TAG("else") >> engine.block)  // D
-              >>   TAG("endifequal");
+            return TAG(engine.name("ifequal") >> *_s >> engine.expression >> *_s >> engine.expression) >> engine.block // _, B, C, D
+              >> !(TAG(engine.name("else")) >> engine.block)                                                           // _, F
+              >>   TAG(engine.name("endifequal"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& left  = get_nested<A>(match);
-            Match const& right = get_nested<B>(match);
-            Match const& if_   = get_nested<C>(match);
-            Match const& else_ = get_nested<D>(match);
+            Match const& left  = get_nested<B>(match);
+            Match const& right = get_nested<C>(match);
+            Match const& if_   = get_nested<D>(match);
+            Match const& else_ = get_nested<F>(match);
             bool  const  cond_ = engine.evaluate(left, context, options)
                               == engine.evaluate(right, context, options);
 
@@ -640,23 +619,20 @@ struct ifnotequal_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("ifnotequal"
-                    >> +_s >> engine.expression  // A
-                    >> +_s >> engine.expression) // B
-                               >> engine.block   // C
-              >> !(TAG("else") >> engine.block)  // D
-              >>   TAG("endifnotequal");
+            return TAG(engine.name("ifnotequal") >> *_s >> engine.expression >> *_s >> engine.expression) >> engine.block // _, B, C, D
+              >> !(TAG(engine.name("else")) >> engine.block)                                                              // _, F
+              >>   TAG(engine.name("endifnotequal"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& left  = get_nested<A>(match);
-            Match const& right = get_nested<B>(match);
-            Match const& if_   = get_nested<C>(match);
-            Match const& else_ = get_nested<D>(match);
+            Match const& left  = get_nested<B>(match);
+            Match const& right = get_nested<C>(match);
+            Match const& if_   = get_nested<D>(match);
+            Match const& else_ = get_nested<F>(match);
             bool  const  cond_ = engine.evaluate(left, context, options)
                               != engine.evaluate(right, context, options);
 
@@ -675,15 +651,15 @@ struct include_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("include" >> +_s >> (s1 = engine.string_literal));
+            return TAG(engine.name("include") >> *_s >> engine.string_literal);
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            String const path = engine.extract_string(match[1]);
+            String const path = engine.extract_string(match(engine.string_literal));
             engine.render_file(out, path, context, options);
         }
     };
@@ -698,11 +674,11 @@ struct load_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            Regex const packages = +(+_s >> engine.package);
+            Regex const packages = +(*_s >> engine.package);
 
-            return TAG("load" >> packages)
+            return TAG(engine.name("load") >> packages)
                    >> engine.block;
         }
 
@@ -733,10 +709,10 @@ struct load_from_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            Regex const identifiers = +(+_s >> engine.identifier);
-            return TAG("load" >> identifiers >> +_s >> engine.from_keyword >> +_s >> engine.package)
+            Regex const identifiers = +(*_s >> engine.identifier);
+            return TAG(engine.name("load") >> identifiers >> *_s >> engine.keyword("from") >> *_s >> engine.package)
                    >> engine.block;
         }
 
@@ -770,15 +746,15 @@ struct now_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("now" >> +_s >> (s1 = engine.string_literal));
+            return TAG(engine.name("now") >> *_s >> engine.string_literal);
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            String const format = engine.extract_string(match[1]);
+            String const format = engine.extract_string(match(engine.string_literal));
             out << engine.format_datetime(options, format, detail::utc_now());
         }
     };
@@ -793,13 +769,13 @@ struct regroup_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("regroup" >> +_s >> engine.expression
-                                 >> +_s >> engine.by_keyword
-                                 >> +_s >> engine.package
-                                 >> +_s >> engine.as_keyword
-                                 >> +_s >> engine.identifier)
+            return TAG(engine.name("regroup") >> *_s >> engine.expression
+                                              >> *_s >> engine.keyword("by")
+                                              >> *_s >> engine.package
+                                              >> *_s >> engine.keyword("as")
+                                              >> *_s >> engine.identifier)
                    >> engine.block;
         }
 
@@ -866,10 +842,10 @@ struct spaceless_tag {
                 gap_ = (s1 = tag_) >> +_s >> (s2 = tag_);
         }
 
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("spaceless") >> engine.block // A
-                >> TAG("endspaceless");
+            return TAG(engine.name("spaceless")) >> engine.block
+                >> TAG(engine.name("endspaceless"));
         }
 
         void render( Match   const& match,   Engine  const& engine
@@ -879,7 +855,7 @@ struct spaceless_tag {
             std::basic_ostringstream<Char> stream;
             std::ostreambuf_iterator<Char> output(out);
 
-            Match const& body = get_nested<A>(match);
+            Match const& body = match(engine.block);
             engine.render_block(stream, body, context, options);
             // TODO: Figure out how to feed stream directly to regex_replace.
             //       std::istreambuf_iterator is almost good enough for that, but
@@ -904,10 +880,10 @@ struct ssi_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("ssi" >> +_s >> (s1 = '/' >> +~_s) // absolute path
-                           >> !(+_s >> (s2 = "parsed")));
+            return TAG(engine.name("ssi") >> *_s >> (s1 = '/' >> +~_s) // absolute path
+                                        >> !(+_s >> (s2 = "parsed")));
         }
 
         void render( Match   const& match,   Engine  const& engine
@@ -939,15 +915,15 @@ struct templatetag_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("templatetag" >> +_s >> (s1 = engine.identifier));
+            return TAG(engine.name("templatetag") >> *_s >> engine.identifier);
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            String const name = match[1].str();
+            String const name = match(engine.identifier).str();
             Engine const& e = engine;
 
                  if (name == text("openbrace"))     out << e.brace_open;
@@ -974,26 +950,39 @@ struct url_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+      private:
+
+        typedef Context     context_type;
+        typedef Engine      engine_type;
+        typedef Match       match_type;
+        typedef Options     options_type;
+        typedef Regex       regex_type;
+        typedef String      string_type;
+        typedef Value       value_type;
+
+        typedef typename engine_type::arguments_type    arguments_type;
+        typedef typename engine_type::stream_type       stream_type;
+
+      public:
+
+        regex_type syntax(engine_type& engine) const {
             using namespace xpressive;
-            return TAG("url" >> +_s >> engine.expression >> engine.arguments);
+            return TAG(engine.name("url") >> *_s >> engine.expression >> engine.arguments);
         }
 
-        void render( Match   const& match,   Engine  const& engine
-                   , Context const& context, Options&       options
-                   , typename Engine::stream_type& out) const {
-            Match const& expr = match(engine.expression);
-            Match const& args = match(engine.arguments);
+        void render( match_type   const& match
+                   , engine_type  const& engine
+                   , context_type const& context
+                   , options_type&       options
+                   , stream_type&        out
+                   ) const {
+            match_type const& expr = match(engine.expression);
+            match_type const& args = match(engine.arguments);
 
-            Value const view = engine.evaluate(expr, context, options);
-            Array values;
+            value_type     const view      = engine.evaluate(expr, context, options);
+            arguments_type const arguments = engine.evaluate_arguments(args, context, options);
 
-            BOOST_FOREACH(Match const& arg, args.nested_results()) {
-                values.push_back(engine.evaluate(arg, context, options));
-            }
-
-            if (optional<String> const& url =
-                engine.get_view_url(view, values, context, options)) {
+            if (optional<string_type> const& url = engine.get_view_url(view, arguments, context, options)) {
                 out << *url;
             }
             else {
@@ -1012,35 +1001,48 @@ struct url_as_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+      private:
+
+        typedef Context     context_type;
+        typedef Engine      engine_type;
+        typedef Match       match_type;
+        typedef Options     options_type;
+        typedef Regex       regex_type;
+        typedef String      string_type;
+        typedef Value       value_type;
+
+        typedef typename engine_type::arguments_type    arguments_type;
+        typedef typename engine_type::stream_type       output_type;
+
+      public:
+
+        regex_type syntax(engine_type& engine) const {
             using namespace xpressive;
-            return TAG("url" >> +_s >> engine.expression >> engine.arguments
-                             >> +_s >> engine.as_keyword >> +_s >> engine.identifier)
+            return TAG(engine.name("url") >> *_s >> engine.expression >> engine.arguments
+                                          >> *_s >> engine.keyword("as") >> *_s >> engine.identifier)
                    >> engine.block;
         }
 
-        void render( Match   const& match,   Engine  const& engine
-                   , Context const& context, Options&       options
-                   , typename Engine::stream_type& out) const {
-            Match const& expr  = match(engine.expression);
-            Match const& args  = match(engine.arguments);
-            Match const& block = match(engine.block);
-            Match const& ident = match(engine.identifier);
+        void render( match_type   const& match
+                   , engine_type  const& engine
+                   , context_type const& context
+                   , options_type&       options
+                   , output_type&        output
+                   ) const {
+            match_type const& expr  = match(engine.expression);
+            match_type const& args  = match(engine.arguments);
+            match_type const& block = match(engine.block);
+            match_type const& ident = match(engine.identifier);
 
-            Value const view = engine.evaluate(expr, context, options);
-            Array values;
+            value_type     const view      = engine.evaluate(expr, context, options);
+            arguments_type const arguments = engine.evaluate_arguments(args, context, options);
 
-            BOOST_FOREACH(Match const& arg, args.nested_results()) {
-                values.push_back(engine.evaluate(arg, context, options));
-            }
+            string_type const url  = engine.get_view_url(view, arguments, context, options).get_value_or(String());
+            string_type const name = ident.str();
 
-            String const url = engine.get_view_url(view, values, context, options).
-                get_value_or(String());
-
-            String const name = ident.str();
-            Context context_copy = context;
+            context_type context_copy = context;
             context_copy[name] = url;
-            engine.render_block(out, block, context_copy, options);
+            engine.render_block(output, block, context_copy, options);
         }
     };
 };
@@ -1054,26 +1056,24 @@ struct variable_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return engine.variable_open
-                    >> *_s >> engine.expression        // A
-                >> !(*_s >> '|' >> *_s >> engine.pipe) // B
-            >> *_s >> engine.variable_close;
+            return engine.variable_open >> *_s >> engine.expression >> !(*_s >> '|' >> *_s >> engine.pipe) >> *_s
+                >> engine.variable_close;
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& expr = get_nested<A>(match);
-            Match const& pipe = get_nested<B>(match);
+            Match const& expr = match(engine.expression);
+            Match const& pipe = match(engine.pipe);
             Value value;
 
             try {
                 value = engine.evaluate(expr, context, options);
                 if (pipe) value = engine.apply_pipe(value, pipe, context, options);
             }
-            catch (missing_variable const&) { value = options.default_value; }
+            catch (missing_variable  const&) { value = options.default_value; }
             catch (missing_attribute const&) { value = options.default_value; }
 
             bool const safe = !options.autoescape || value.safe();
@@ -1091,17 +1091,16 @@ struct verbatim_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("verbatim") >> engine.block // A
-                >> TAG("endverbatim");
+            return TAG(engine.name("verbatim")) >> engine.block
+                >> TAG(engine.name("endverbatim"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& body = get_nested<A>(match);
-            out << body.str();
+            out << match(engine.block).str();
         }
     };
 };
@@ -1115,12 +1114,12 @@ struct widthratio_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("widthratio"
-                >> +_s >> engine.expression // A
-                >> +_s >> engine.expression // B
-                >> +_s >> engine.expression // C
+            return TAG(engine.name("widthratio") // _
+                >> *_s >> engine.expression      // B
+                >> *_s >> engine.expression      // C
+                >> *_s >> engine.expression      // D
             );
         }
 
@@ -1132,9 +1131,9 @@ struct widthratio_tag {
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& value = get_nested<A>(match);
-            Match const& limit = get_nested<B>(match);
-            Match const& width = get_nested<C>(match);
+            Match const& value = get_nested<B>(match);
+            Match const& limit = get_nested<C>(match);
+            Match const& width = get_nested<D>(match);
 
             typename Value::number_type const ratio
                 = engine.evaluate(value, context, options).count()
@@ -1155,20 +1154,19 @@ struct with_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
+        Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            return TAG("with" >> +_s >> engine.expression               // A
-                >> +_s >> engine.as_keyword >> +_s >> engine.identifier // B
-                    ) >> engine.block                                   // C
-                >> TAG("endwith");
+            return TAG(engine.name("with") >> *_s >> engine.expression >> *_s
+                           >> engine.keyword("as") >> *_s >> engine.identifier) >> engine.block
+                >> TAG(engine.name("endwith"));
         }
 
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
-            Match const& expr  = get_nested<A>(match);
-            Match const& name  = get_nested<B>(match);
-            Match const& body  = get_nested<C>(match);
+            Match const& expr  = match(engine.expression);
+            Match const& name  = match(engine.identifier);
+            Match const& body  = match(engine.block);
 
             Context context_copy = context;
             context_copy[name.str()] = engine.evaluate(expr, context, options);
@@ -1186,33 +1184,45 @@ struct library_tag {
              , class Size, class Match, class Engine, class Options, class Array
              >
     struct definition {
-        Regex syntax(Engine const& engine) const {
-            using namespace xpressive;
-            return TAG(engine.identifier                     // A
-                >> (Regex() = *(+_s >> engine.expression)))  // B
-                >> engine.block;
+      private:
+
+        typedef Context     context_type;
+        typedef Engine      engine_type;
+        typedef Match       match_type;
+        typedef Options     options_type;
+        typedef Regex       regex_type;
+        typedef String      string_type;
+        typedef Value       value_type;
+
+        typedef typename engine_type::arguments_type    arguments_type;
+        typedef typename engine_type::stream_type       output_type;
+        typedef typename options_type::tag_type         tag_type;
+
+      public:
+
+        regex_type syntax(engine_type& engine) const {
+            return TAG(engine.unreserved_name >> engine.arguments) >> engine.block;
         }
 
-        void render( Match   const& match,   Engine  const& engine
-                   , Context const& context, Options const& options
-                   , typename Engine::stream_type& out) const {
-            String const& name  = match(engine.identifier).str();
-            Match  const& body  = match(engine.block);
-            Array arguments;
+        void render( match_type   const& match
+                   , engine_type  const& engine
+                   , context_type const& context
+                   , options_type&       options
+                   , output_type&        output
+                   ) const {
+            string_type const& name = match(engine.unreserved_name).str();
+            match_type  const& args = match(engine.arguments);
+            match_type  const& body = match(engine.block);
 
-            BOOST_FOREACH(Match const& expr, get_nested<B>(match).nested_results()) {
-                arguments.push_back(engine.evaluate(expr, context, options));
-            }
+            arguments_type arguments    = engine.evaluate_arguments(args, context, options);
+            context_type   context_copy = context;
+            options_type   options_copy = options;
 
-            Context context_copy = context;
-            Options options_copy = options;
-
-            if (optional<typename Options::tag_type const> const& tag
-                    = detail::find_mapped_value(name, options_copy.loaded_tags)) {
-                if (Value const& value = (*tag)(options_copy, &context_copy, arguments)) {
-                    out << value;
+            if (optional<tag_type const> const& tag = detail::find_mapped_value(name, options_copy.loaded_tags)) {
+                if (value_type const& value = (*tag)(options_copy, &context_copy, arguments)) {
+                    output << value;
                 }
-                engine.render_block(out, body, context_copy, options_copy);
+                engine.render_block(output, body, context_copy, options_copy);
             }
             else {
                 throw_exception(missing_tag(engine.template transcode<char>(name)));

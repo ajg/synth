@@ -83,7 +83,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef mpl::void_                                   options_type;
     typedef library_type                                 tags_type;
     typedef std::map<string_type, value_type, less_type> context_type;
-    typedef std::vector<value_type>                      array_type;
+    typedef std::vector<value_type>                      sequence_type;
     typedef detail::indexable_sequence<this_type, tags_type,
         id_type, detail::create_definitions>             tag_sequence_type;
 

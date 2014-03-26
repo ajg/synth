@@ -285,8 +285,16 @@ struct create_definitions_extended;
     BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
         value_at_c<Sequence, n>::type::template \
             definition \
-                < typename Engine::char_type, typename Engine::regex_type, typename Engine::string_type, typename Engine::context_type, typename Engine::value_type \
-                , typename Engine::size_type, typename Engine::match_type, typename Engine::this_type,   typename Engine::options_type, typename Engine::array_type \
+                < typename Engine::char_type \
+                , typename Engine::regex_type \
+                , typename Engine::string_type \
+                , typename Engine::context_type \
+                , typename Engine::value_type \
+                , typename Engine::size_type \
+                , typename Engine::match_type \
+                , typename Engine::this_type \
+                , typename Engine::options_type \
+                , typename Engine::sequence_type \
                 >
 
 #define CREATE_DEFINITIONS(z, n, nil) \
@@ -701,8 +709,7 @@ inline optional<typename Functor::result_type> may_find_by_index( Engine   const
                                                                 , Needle   const& needle
                                                                 , Functor  const& functor
                                                                 ) {
-    typename Index::const_iterator const it =
-        std::find(index.begin(), index.end(), needle);
+    typename Index::const_iterator const it = std::find(index.begin(), index.end(), needle);
 
     if (it == index.end()) {
         return boost::none;

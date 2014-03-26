@@ -54,7 +54,7 @@ struct base_definition : boost::noncopyable {
     typedef xpressive::match_results<iterator_type> match_type;
     typedef std::basic_string<char_type>            string_type; // TODO: Use Traits::string_type.
     typedef std::basic_ostream<char_type>           stream_type; // TODO: Use Traits::stream_type.
-    typedef std::set<string_type>                   keywords_type;
+    typedef std::set<string_type>                   symbols_type;
 
     // Define string iterators/regexes specifically. This is useful when
     // they are different from the main iterator_type and regex_type (e.g.

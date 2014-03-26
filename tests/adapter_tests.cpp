@@ -25,7 +25,6 @@ typedef s::string_template<char_type, engine_type> template_type;
 typedef template_type::context_type                context_type;
 typedef template_type::string_type                 string_type;
 typedef template_type::value_type                  value_type;
-typedef template_type::array_type                  array_type;
 typedef ajg::test_group<>                          group_type;
 
 group_type group_object("adapter tests");

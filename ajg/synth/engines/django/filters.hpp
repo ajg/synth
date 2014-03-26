@@ -911,15 +911,15 @@ struct pluralize_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             String singular, plural;
-            Array const params = args.empty() ? Array() : engine.
-                template split_argument<','>(args[0], context, options);
+            Array const sequential_arguments = args.empty() ? Array() :
+                engine.template split_argument<','>(args[0], context, options);
 
-            switch (params.size()) {
+            switch (sequential_arguments.size()) {
                 case 0: plural = text("s");             break;
-                case 1: plural = params[0].to_string(); break;
+                case 1: plural = sequential_arguments[0].to_string(); break;
                 default: // 2+
-                    singular = params[0].to_string();
-                    plural   = params[1].to_string();
+                    singular = sequential_arguments[0].to_string();
+                    plural   = sequential_arguments[1].to_string();
             }
 
             return value.count() == 1 ? singular : plural;
@@ -1110,16 +1110,16 @@ struct slice_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             String singular, plural;
-            Array const params = args.empty() ? Array() : engine.
-                template split_argument<':'>(args[0], context, options);
+            Array const sequential_arguments = args.empty() ? Array() :
+                engine.template split_argument<':'>(args[0], context, options);
 
-            if (params.size() < 2) {
+            if (sequential_arguments.size() < 2) {
                 throw_exception(missing_argument());
             }
 
             Array result;
-            Value const lower = params[0];
-            Value const upper = params[1];
+            Value const lower = sequential_arguments[0];
+            Value const upper = sequential_arguments[1];
             typename Value::range_type range =
                 value.slice(lower ? optional<int>(lower.count()) : none,
                             upper ? optional<int>(upper.count()) : none);
@@ -1937,14 +1937,22 @@ struct yesno_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             Value true_, false_, none_;
-            Array const params = engine.template
-                split_argument<','>(args[0], context, options);
+            Array const sequential_arguments = engine.template split_argument<','>(args[0], context, options);
 
-            switch (params.size()) {
-                case 0: throw_exception(missing_argument()); break;
-                case 1: throw_exception(missing_argument()); break;
-                case 2: true_ = params[0]; false_ = params[1]; none_ = params[1]; break;
-                case 3: true_ = params[0]; false_ = params[1]; none_ = params[2]; break;
+            switch (sequential_arguments.size()) {
+                case 0:
+                case 1:
+                    throw_exception(missing_argument());
+                case 2:
+                    true_  = sequential_arguments[0];
+                    false_ = sequential_arguments[1];
+                    none_  = sequential_arguments[1];
+                    break;
+                case 3:
+                    true_  = sequential_arguments[0];
+                    false_ = sequential_arguments[1];
+                    none_  = sequential_arguments[2];
+                    break;
                 default: throw_exception(superfluous_argument());
             }
 

@@ -41,7 +41,7 @@ struct library : Options::abstract_library_type {
     typedef typename options_type::boolean_type          boolean_type;
     typedef typename options_type::string_type           string_type;
     typedef typename options_type::value_type            value_type;
-    typedef typename options_type::array_type            array_type;
+    typedef typename options_type::arguments_type        arguments_type;
     typedef typename options_type::names_type            names_type;
     typedef typename options_type::tag_type              tag_type;
     typedef typename options_type::filter_type           filter_type;
@@ -77,11 +77,11 @@ struct library : Options::abstract_library_type {
     virtual tag_type     get_tag(string_type const& name) { return tags_[name]; }
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
-    static value_type call_tag(py::object tag, options_type&, context_type*, array_type&) {
+    static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type&) {
         throw_exception(not_implemented("call_tag"));
     }
 
-    static value_type call_filter(py::object filter, options_type const&, context_type const*, value_type const&, array_type const&) {
+    static value_type call_filter(py::object filter, options_type const&, context_type const*, value_type const&, arguments_type const&) {
         throw_exception(not_implemented("call_filter"));
     }
 

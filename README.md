@@ -427,7 +427,6 @@ Future Work
    * Create `conf.py` (et al.) to enable ReadTheDocs
  - Testing:
    * Rewrite the majority of unit tests as a set of .in/.out files
-   * Move everything in `samples/django/whatever.tpl` into unit tests
    * Add unit tests from Cjango
    * Add way to specify expected failures; re-enable commented out tests
  - Optimization:

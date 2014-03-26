@@ -10,6 +10,7 @@
 #include <string>
 
 #include <boost/mpl/void.hpp>
+#include <boost/assign/list_of.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/engines/detail.hpp>

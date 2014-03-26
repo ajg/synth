@@ -1,6 +1,7 @@
 {
     "build_systems":
     [
+        /* TODO: Use variants instead of this mess. */
         {
             "cmd": "scons",
             "shell": true,

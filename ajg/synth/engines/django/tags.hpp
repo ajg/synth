@@ -408,9 +408,7 @@ struct for_tag {
     struct definition {
         Regex syntax(Engine& engine) const {
             using namespace xpressive;
-            Regex const variables = (s1 = engine.identifier)
-                >> !(*_s >> ',' >> *_s >> (s2 = engine.identifier))
-                ;
+            Regex const variables = (s1 = engine.identifier) >> !(*_s >> ',' >> *_s >> (s2 = engine.identifier));
             return TAG(engine.name("for") >> *_s >> variables >> *_s >> engine.keyword("in") >> *_s >> engine.expression) >> engine.block // _, B, _, D, E
               >> !(TAG(engine.name("empty")) >> engine.block)                                                                             // _, G
                 >> TAG(engine.name("endfor"));
@@ -517,7 +515,6 @@ struct ifchanged_tag {
              >
     struct definition {
         Regex syntax(Engine& engine) const {
-            using namespace xpressive;
             return TAG(engine.name("ifchanged") >> engine.arguments) >> engine.block // _, B, C
               >> !(TAG(engine.name("else"))     >> engine.block)                     // _, E
               >>   TAG(engine.name("endifchanged"));

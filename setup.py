@@ -48,9 +48,9 @@ classifiers = [
 
 def get_synth_version():
     config = open('ajg/synth/config.hpp').read()
-    major  = int(re.search('AJG_SYNTH_VERSION_MAJOR\\s+(\\S+)', config).group(1))
-    minor  = int(re.search('AJG_SYNTH_VERSION_MINOR\\s+(\\S+)', config).group(1))
-    patch  = int(re.search('AJG_SYNTH_VERSION_PATCH\\s+(\\S+)', config).group(1))
+    major  = int(re.search(r'AJG_SYNTH_VERSION_MAJOR\s+(\S+)', config).group(1))
+    minor  = int(re.search(r'AJG_SYNTH_VERSION_MINOR\s+(\S+)', config).group(1))
+    patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
     return (major, minor, patch)
 
 setup(

@@ -96,6 +96,8 @@ struct context_data {
         context[text("places")] = list4;
 
         context[text("csrf_token")] = "ABCDEF123456";
+
+        context[text("xml_var")] = "<foo><bar><qux /></bar></foo>";
     }
 
     Context context;

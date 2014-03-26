@@ -3,10 +3,9 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_VALUE_HPP_INCLUDED
-#define AJG_SYNTH_VALUE_HPP_INCLUDED
+#ifndef AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED
+#define AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED
 
-#include <vector>
 #include <cstddef>
 #include <utility>
 #include <iterator>
@@ -18,7 +17,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <ajg/synth/value_iterator.hpp>
+#include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/abstract.hpp>
 
@@ -77,72 +76,6 @@ slice( Containter const& container
 
 template <class Char, class Adapted>
 struct adapter;
-
-//
-// Default Value Traits
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Char, class Value>
-struct default_value_traits {
-  public:
-
-    typedef Char                      char_type;
-    typedef std::size_t               size_type;
-    typedef Value                     value_type;
-    typedef bool                      boolean_type;
-    typedef double                    number_type;
-    typedef posix_time::ptime         datetime_type;
-    typedef posix_time::time_duration duration_type;
-    typedef std::basic_string<Char>   string_type;
-    typedef std::basic_istream<Char>  istream_type;
-    typedef std::basic_ostream<Char>  ostream_type;
-    typedef std::vector<value_type>   sequence_type;
-
-    typedef value_iterator<value_type const> iterator;
-    typedef value_iterator<value_type const> const_iterator;
-
-    typedef std::pair<const_iterator, const_iterator> range_type;
-
-  public:
-
-    template <class A, class B>
-    inline static B convert(A const& a) {
-        B b;
-        // Very crude conversion method for now:
-        std::stringstream stream;
-        stream << a;
-        stream >> b;
-        return b;
-    }
-
-    /// transcode
-    ///     This function allows us to centralize string conversion
-    ///     in order to properly, yet orthogonally, support Unicode.
-    ////////////////////////////////////////////////////////////////////////////
-    template <class C, class S>
-    inline static std::basic_string<C> transcode(S const& string) {
-        return std::basic_string<C>(string.begin(), string.end());
-    }
-
-/*
-    template <class String>
-    inline string_type transcode(String const& string) const {
-        return boost::lexical_cast<string_type>(string);
-    }
-
-    template <class String>
-    inline std::string narrow(String const& string) const {
-        //return boost::lexical_cast<std::string>(string);
-        return std::string(string.begin(), string.end());
-    }
-
-    template <class String>
-    inline std::wstring widen(String const& string) const {
-        //return boost::lexical_cast<std::wstring>(string);
-        return std::wstring(string.begin(), string.end());
-    }*/
-};
-
 
 //
 // value_facade
@@ -400,4 +333,4 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
 }} // namespace ajg::synth
 
-#endif // AJG_SYNTH_VALUE_HPP_INCLUDED
+#endif // AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED

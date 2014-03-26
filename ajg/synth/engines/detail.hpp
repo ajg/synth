@@ -214,13 +214,6 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 #endif
 
 //
-// Debugging helpers
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define AJG_DUMP(e) ((std::cerr << std::boolalpha) << "  " << #e << " = `" << (e) << "`" << std::endl)
-#define AJG_PRINT(e)  ((std::cerr << std::boolalpha) << "  " << (e) << std::endl)
-
-//
 // apply_at:
 //     Provides a way to index a compile-time Sequence at runtime
 //     using a suitable Functor, which is called exactly once. It is

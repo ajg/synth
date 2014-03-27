@@ -292,7 +292,7 @@ struct definition : base_definition< BidirectionalIterator
             = *expression
             ;
         variables
-            = name >> !(token<','>() >> name) // TODO: Generalize to N variables.
+            = name >> *(token<','>() >> name)
             ;
         filter
             = name >> !(token<':'>() >> chain)
@@ -337,27 +337,6 @@ struct definition : base_definition< BidirectionalIterator
     }
 
   public:
-
-    value_type apply_filter( value_type     const& value
-                           , string_type    const& name
-                           , arguments_type const& arguments
-                           , context_type   const& context
-                           , options_type   const& options
-                           ) const {
-        process_filter const processor = { *this, value, name, arguments, context, options };
-        // Let library filters override built-in ones:
-        if (optional<typename options_type::filter_type const> const& filter
-                = find_mapped_value(name, options.loaded_filters)) {
-            return (*filter)(options, &context, value, arguments);
-        }
-        else if (optional<value_type> const& result = detail::may_find_by_index(
-                    *this, filters_.definition, filters_.index, name, processor)) {
-            return *result;
-        }
-        else {
-            throw_exception(missing_filter(this->template transcode<char>(name)));
-        }
-    }
 
     template <char_type Delimiter>
     sequence_type split_argument( value_type   const& argument
@@ -406,12 +385,19 @@ struct definition : base_definition< BidirectionalIterator
         return sequence;
     }
 
-    template <class T>
-    string_type extract_string(T const& from) const {
-        // TODO: Escape sequences, etc.
+    string_type extract_string(match_type const& match) const {
         // Handles "string" or 'string'.
-        string_type const string = from.str();
+        // TODO: Escape sequences, etc.
+        string_type const string = match.str();
         return string.substr(1, string.size() - 2);
+    }
+
+    names_type extract_names(match_type const& match) const {
+        names_type names;
+        BOOST_FOREACH(match_type const& name, detail::select_nested(match, this->name)) {
+            names.push_back(name[id].str());
+        }
+        return names;
     }
 
     void render( stream_type&        stream
@@ -473,13 +459,13 @@ struct definition : base_definition< BidirectionalIterator
     }
 
     value_type apply_filters( value_type   const& value
-                            , match_type   const& filters
+                            , match_type   const& match
                             , context_type const& context
                             , options_type const& options
                             ) const {
         value_type result = value;
 
-        BOOST_FOREACH(match_type const& filter, detail::select_nested(filters, this->filter)) {
+        BOOST_FOREACH(match_type const& filter, detail::select_nested(match, this->filter)) {
             BOOST_ASSERT(filter == this->filter);
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
@@ -494,6 +480,35 @@ struct definition : base_definition< BidirectionalIterator
         return result;
     }
 
+    value_type apply_filter( value_type     const& value
+                           , string_type    const& name
+                           , arguments_type const& arguments
+                           , context_type   const& context
+                           , options_type   const& options
+                           ) const {
+        process_filter const processor = { *this, value, name, arguments, context, options };
+        // Let library filters override built-in ones:
+        if (optional<typename options_type::filter_type const> const& filter
+                = find_mapped_value(name, options.loaded_filters)) {
+            return (*filter)(options, &context, value, arguments);
+        }
+        else if (optional<value_type> const& result = detail::may_find_by_index(
+                    *this, filters_.definition, filters_.index, name, processor)) {
+            return *result;
+        }
+        else {
+            throw_exception(missing_filter(this->template transcode<char>(name)));
+        }
+    }
+
+    value_type evaluate( match_type     const& match
+                       , context_type   const& context
+                       , options_type   const& options
+              // TODO: , arguments_type const& arguments = arguments_type()
+                       ) const {
+        return evaluate_expression(match, context, options);
+    }
+
     arguments_type evaluate_arguments( match_type    const& args
                                      , context_type  const& context
                                      , options_type  const& options
@@ -503,14 +518,6 @@ struct definition : base_definition< BidirectionalIterator
             arguments.first.push_back(this->evaluate_expression(arg, context, options));
         }
         return arguments;
-    }
-
-    value_type evaluate( match_type     const& match
-                       , context_type   const& context
-                       , options_type   const& options
-              // TODO: , arguments_type const& arguments = arguments_type()
-                       ) const {
-        return evaluate_expression(match, context, options);
     }
 
     value_type evaluate_literal( match_type   const& match

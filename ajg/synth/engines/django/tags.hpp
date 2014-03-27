@@ -398,7 +398,7 @@ struct filter_tag {
 
 //
 // for_tag
-// TODO: for ... in ... _reversed_, using BOOST_FOREACH_REVERSE.
+//     TODO: for ... in ... _reversed_, using BOOST_FOREACH_REVERSE.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct for_tag {
@@ -412,6 +412,8 @@ struct for_tag {
                 >> TAG(engine.reserved("endfor"));
         }
 
+        typedef typename Options::names_type names_type;
+
         void render( Match   const& match,   Engine  const& engine
                    , Context const& context, Options const& options
                    , typename Engine::stream_type& out) const {
@@ -419,38 +421,39 @@ struct for_tag {
             Match  const& expr   = match(engine.expression);
             Match  const& for_   = match(engine.block, 0);
             Match  const& empty  = match(engine.block, 1);
-            String const& first  = vars(engine.name, 0)[id].str();
-            String const& second = vars(engine.name, 1)[id].str();
             Value  const& value  = engine.evaluate(expr, context, options);
 
             typename Value::const_iterator it(value.begin()), end(value.end());
+            names_type const& variables = engine.extract_names(vars);
 
-            if (it != end) { // Not empty.
-                Context context_copy = context;
-                uintmax_t i = 0;
-
-                for (; it != end; ++it, ++i) {
-                    if (second.empty()) { // e.g. for i in ...
-                        context_copy[first] = boost::ref(*it);
-                    }
-                    else { // e.g. for k, v in ...
-                        // context_copy[first] = i;
-                        // context_copy[second] = boost::ref(*it);
-
-                        Value const item = *it;
-
-                        if (item.length() < 2) {
-                            throw_exception(std::out_of_range("item"));
-                        }
-                        context_copy[first]  = boost::ref(item[0]);
-                        context_copy[second] = boost::ref(item[1]);
-                    }
-                    engine.render_block(out, for_, context_copy, options);
+            if (it == end) {
+                if (empty) { // for ... empty ... endfor case.
+                    engine.render_block(out, empty, context, options);
                 }
+                return;
             }
-            // for ... empty ... endfor case.
-            else if (empty) {
-                engine.render_block(out, empty, context, options);
+
+            Context context_copy = context;
+            Size const n = variables.size();
+            BOOST_ASSERT(n > 0);
+
+            for (; it != end; ++it) {
+                if (n == 1) { // e.g. for x in ...
+                    context_copy[variables[0]] = boost::ref(*it);
+                }
+                else {
+                    Size i = 0;
+                    BOOST_FOREACH(Value const& var, *it) { // e.g. for x, y, z in ...
+                        if (i >= n) break;
+                        context_copy[variables[i++]] = var; // TODO: boost::ref?
+                    }
+
+                    while (i < n) { // Overwrite the remaining vars in the context.
+                        context_copy[variables[i++]] = options.default_value;
+                    }
+                }
+
+                engine.render_block(out, for_, context_copy, options);
             }
         }
     };

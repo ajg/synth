@@ -17,5 +17,5 @@ script:
   - (while true; do echo "I am a little teapot."; sleep 300; done)&
   - scons
   - ./test
-  - ln -s python-synth.so tests/synth.so
+  - mv python-synth.so tests/synth.so
   - python tests/binding.py

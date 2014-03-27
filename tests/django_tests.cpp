@@ -86,7 +86,6 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 ///     django::block_tag
 ///     django::debug_tag
 ///     django::extends_tag
-///     django::filter_tag
 ///     django::firstof_tag
 ///     django::ifchanged_tag
 ///     django::include_tag
@@ -129,6 +128,10 @@ DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "
 DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% else %}Bad{% endifequal %}", "Good")
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Bad{% else %}Good{% endifequal %}", "Good")
 
+DJANGO_TEST(filter_tag, "{% filter escape %}<foo />{% endfilter %}", "<foo />")
+DJANGO_TEST(filter_tag, "{% filter force_escape %}<foo />{% endfilter %}", "&lt;foo /&gt;")
+DJANGO_TEST(filter_tag, "{% filter title | lower %}aBcD{% endfilter %}", "abcd")
+DJANGO_TEST(filter_tag, "{% filter upper | lower | title %}aBcD{% endfilter %}", "Abcd")
 DJANGO_TEST(filter_tag,
         "{% filter upper %}\n"
         "    <p>\n"

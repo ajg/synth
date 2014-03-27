@@ -424,6 +424,7 @@ Future Work
    * [v1+] Allow using arbitrary programs as filters
  - Python:
    * Turn optional arguments to synth.Template into kwargs
+   * Full support for `unicode` type
  - Documentation:
    * Produce Boost-compatible documentation
    * Create `conf.py` (et al.) to enable ReadTheDocs

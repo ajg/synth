@@ -22,6 +22,8 @@
 #include <boost/optional.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
@@ -84,12 +86,14 @@ struct file_template
                                        , directories_type const& directories
                                        ) {
         struct stat file;
+        namespace algo = boost::algorithm;
 
         // First try looking in the directories specified.
         BOOST_FOREACH(filepath_type const& directory, directories) {
-            filepath_type const& path = directory + filepath;
-            if (stat(path.c_str(), &file) == 0) {
-                info_type(path, file.st_size);
+            filepath_type const& base = algo::trim_right_copy_if(directory, algo::is_any_of("/"));
+            filepath_type const& path = base + "/" + filepath;
+            if (stat(path.c_str(), &file) == 0) { // Found it.
+                return info_type(path, file.st_size);
             }
         }
 

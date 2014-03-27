@@ -117,28 +117,28 @@ DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "",)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
-DJANGO_TEST(if_tag, "{% if True %} Good {% endif %}{% if False %} Bad {% endif %}", " Good ")
-DJANGO_TEST(if_tag, "{% if True %} Good {% else %} Bad {% endif %}",                " Good ")
-DJANGO_TEST(if_tag, "{% if False %} Bad {% else %} Good {% endif %}",               " Good ")
-DJANGO_TEST(if_tag, "{% if 1 %} Good {% endif %}{% if False %} Bad {% endif %}",    " Good ")
-DJANGO_TEST(if_tag, "{% if 1 %} Good {% else %} Bad {% endif %}",                   " Good ")
-DJANGO_TEST(if_tag, "{% if 0 %} Bad {% else %} Good {% endif %}",                   " Good ")
+DJANGO_TEST(if_tag, "{% if True %}Good{% endif %}{% if False %}Bad{% endif %}", "Good")
+DJANGO_TEST(if_tag, "{% if True %}Good{% else %}Bad{% endif %}",                "Good")
+DJANGO_TEST(if_tag, "{% if False %}Bad{% else %}Good{% endif %}",               "Good")
+DJANGO_TEST(if_tag, "{% if 1 %}Good{% endif %}{% if False %}Bad{% endif %}",    "Good")
+DJANGO_TEST(if_tag, "{% if 1 %}Good{% else %}Bad{% endif %}",                   "Good")
+DJANGO_TEST(if_tag, "{% if 0 %}Bad{% else %}Good{% endif %}",                   "Good")
 
-DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %} Yes {% endifequal %}",               " Yes ")
-DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %} Yes {% endifequal %}",               "")
-DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %} Yes {% else %} No {% endifequal %}", " Yes ")
-DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %} Yes {% else %} No {% endifequal %}", " No ")
+DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% endifequal %}",              "Good")
+DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "")
+DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% else %}Bad{% endifequal %}", "Good")
+DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Bad{% else %}Good{% endifequal %}", "Good")
 
 DJANGO_TEST(for_tag-value,
     "{% for v in friends %}[{{ v }}]{% endfor %}",
     "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
 
 DJANGO_TEST(for_empty_tag-value,
-    "{% for v in friends %}[{{ v }}]{% empty %} Bad {% endfor %}",
+    "{% for v in friends %}[{{ v }}]{% empty %}Bad{% endfor %}",
     "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
 
 DJANGO_TEST(for_empty_tag-none,
-    "{% for v in '' %} Bad {% empty %} It's empty, Jim {% endfor %}",
+    "{% for v in '' %}Bad{% empty %} It's empty, Jim {% endfor %}",
     " It's empty, Jim ")
 
 /*

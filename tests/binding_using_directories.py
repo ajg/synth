@@ -4,17 +4,16 @@
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
 import synth
+from difflib import unified_diff
 
 print('Loaded synth; version: ' + synth.version())
-
-directory = 'samples/django/templates/'
-source = open(directory + 'layout.html').read().encode('utf-8')
-
 
 class User:
     def __init__(self):
         self.is_staff = False
         self.is_authenticated = True
+
+directory = 'samples/django/templates/'
 
 context = {
     'request': {
@@ -24,7 +23,19 @@ context = {
     'title': 'Default Title',
     'messages': ["Foo", "Bar", "Qux"],
 }
+source = open(directory + 'layout.html').read().encode('utf-8')
 
 template = synth.Template(source, 'django', True, 'INVALID_VALUE', {}, False, [directory])
+print('Parsing succeeded!')
 
-print(template.render_to_string(context))
+string = template.render_to_string(context)
+print('Rendering succeeded!')
+
+golden = """
+"""
+
+if string != golden:
+    diff = ''.join(unified_diff(golden.splitlines(True), string.splitlines(True)))
+    raise Exception("MISMATCH:\n" + diff)
+
+print('Matching succeeded!')

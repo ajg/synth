@@ -285,7 +285,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 
 /// Filters
 ///     TODO:
-///     django::center_filter
 ///     django::force_escape_filter
 ///     django::iriencode_filter
 ///     django::pprint_filter
@@ -302,6 +301,10 @@ DJANGO_TEST(add_filter, "{{ 3|add:'8' }}", "11")
 DJANGO_TEST(addslashes_filter, "{{ \"String with 'quotes'.\" |addslashes }}", "String with \\'quotes\\'.")
 
 DJANGO_TEST(capfirst_filter, "{{ 'foo fa fa'|capfirst }}", "Foo fa fa")
+
+DJANGO_TEST(center_filter, "{{ \"Django\" | center:\"15\" }}", "     Django    ")
+DJANGO_TEST(center_filter, "{{ \"Django\" | center:\"16\" }}", "     Django     ")
+DJANGO_TEST(center_filter, "{{ \"Django\" | center:\"2\" }}", "Django")
 
 DJANGO_TEST(cut_filter, "{{ 'String with spaces' | cut:' ' }}", "Stringwithspaces")
 
@@ -357,6 +360,7 @@ DJANGO_TEST(getdigit_filter, "{{ -123456789|get_digit:'2' }}", "-123456789")
 DJANGO_TEST(getdigit_filter, "{{ 'foobar'|get_digit:'2' }}",   "foobar")
 
 DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"10\" }}", "Django    ")
+DJANGO_TEST(ljust_filter, "{{ \"Django\" | ljust:\"2\" }}", "Django")
 
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\" | lower }}", "still mad at yoko")
 
@@ -382,6 +386,7 @@ DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slu
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\" | removetags:\"b span foo\"|safe }}", "Begin     End")
 
 DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"10\" }}", "    Django")
+DJANGO_TEST(rjust_filter, "{{ \"Django\" | rjust:\"2\" }}", "Django")
 
 DJANGO_TEST(slugify_filter, "{{ ' Joel is a slug '|slugify }}", "joel-is-a-slug")
 DJANGO_TEST(slugify_filter, "{{ '\tJoel\v is\n a\r slug\x01'|slugify }}", "joel-is-a-slug")

@@ -422,6 +422,8 @@ Future Work
    * Allow named output files
    * [v1+] Allow using arbitrary programs as tags
    * [v1+] Allow using arbitrary programs as filters
+ - Python:
+   * Turn optional arguments to synth.Template into kwargs
  - Documentation:
    * Produce Boost-compatible documentation
    * Create `conf.py` (et al.) to enable ReadTheDocs

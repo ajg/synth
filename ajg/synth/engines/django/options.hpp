@@ -104,7 +104,7 @@ struct options {
     typedef typename traits_type::sequence_type    sequence_type;
     typedef typename traits_type::mapping_type     mapping_type;
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
-    typedef std::vector<string_type>               names_type;
+    typedef std::vector<string_type>               names_type;   // TODO: Maybe rename to symbols_type and the latter to scope_type.
     typedef std::pair<sequence_type, mapping_type> arguments_type;
 
     typedef std::map<string_type, string_type>     formats_type;

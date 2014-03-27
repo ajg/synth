@@ -52,7 +52,7 @@ struct default_loader {
                 filter_type const& filter = library->get_filter(name);
 
                 if (!tag && !filter) {
-                    throw_exception(missing_variable(name));
+                    throw_exception(missing_key(name));
                 }
                 if (tag) {
                     options.loaded_tags[name] = tag;
@@ -68,7 +68,7 @@ struct default_loader {
                     options.loaded_tags[name] = tag;
                 }
                 else {
-                    throw_exception(missing_variable(name));
+                    throw_exception(missing_tag(name));
                 }
             }
             BOOST_FOREACH(string_type const& name, library->list_filters()) {
@@ -76,7 +76,7 @@ struct default_loader {
                     options.loaded_filters[name] = filter;
                 }
                 else {
-                    throw_exception(missing_variable(name));
+                    throw_exception(missing_filter(name));
                 }
             }
         }

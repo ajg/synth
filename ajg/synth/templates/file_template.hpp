@@ -19,6 +19,7 @@
 #endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/utility/base_from_member.hpp>
@@ -30,31 +31,37 @@
 namespace ajg {
 namespace synth {
 
+using boost::optional;
+
 template < class Char
          , class Engine
          , class Iterator = boost::spirit::classic::file_iterator<Char>
          >
 struct file_template
-    : private boost::base_from_member<Iterator>
+    : private boost::base_from_member<optional<Iterator> >
     , public  base_template<Engine, Iterator> {
 
   private:
 
-    typedef boost::base_from_member<Iterator>                                   base_member_type;
+    typedef boost::base_from_member<optional<Iterator> >                        base_member_type;
     typedef base_template<Engine, Iterator>                                     base_type;
 
   public:
 
-    typedef std::string                filepath_type;
-    typedef std::vector<filepath_type> directories_type;
+    typedef typename base_type::size_type       size_type;
+    typedef std::string                         filepath_type;
+    typedef std::vector<filepath_type>          directories_type;
+    typedef std::pair<filepath_type, size_type> info_type;
 
   public:
 
     file_template( filepath_type    const& filepath
                  , directories_type const& directories = directories_type(/*1, "."*/)
                  )
-        : base_member_type(find_path(filepath, directories)) // (check_exists(filepath))
-        , base_type(base_member_type::member, base_member_type::member.make_end())
+        : base_member_type(make_iterator(filepath, directories))
+        , base_type( base_member_type::member ? *base_member_type::member            : Iterator()
+                   , base_member_type::member ? base_member_type::member->make_end() : Iterator()
+                   )
         , filepath_(filepath) {}
 
   public:
@@ -63,16 +70,26 @@ struct file_template
 
   private:
 
-    inline static filepath_type find_path( filepath_type    const& filepath
-                                         , directories_type const& directories
-                                         ) {
+    inline static optional<Iterator> make_iterator( filepath_type    const& filepath
+                                                  , directories_type const& directories
+                                                  ) {
+        info_type const& info = locate_file(filepath, directories);
+        if (info.second == 0) {
+            return boost::none;
+        }
+        return Iterator(info.first);
+    }
+
+    inline static info_type locate_file( filepath_type    const& filepath
+                                       , directories_type const& directories
+                                       ) {
         struct stat file;
 
         // First try looking in the directories specified.
         BOOST_FOREACH(filepath_type const& directory, directories) {
             filepath_type const& path = directory + filepath;
             if (stat(path.c_str(), &file) == 0) {
-                return path;
+                info_type(path, file.st_size);
             }
         }
 
@@ -80,11 +97,8 @@ struct file_template
         if (stat(filepath.c_str(), &file) != 0) {
             throw_exception(file_error(filepath, "read", std::strerror(errno)));
         }
-        else if (file.st_size == 0) {
-            throw_exception(file_error(filepath, "read", "file is empty"));
-        }
 
-        return filepath;
+        return info_type(filepath, file.st_size);
     }
 
     /*

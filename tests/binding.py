@@ -12,49 +12,49 @@ from difflib import unified_diff
 print('Loaded synth; version: ' + synth.version())
 
 source = """
-True:   {{ True }}; {% if True %} GOOD {% else %} BAD {% endif %}.
-False:  {{ False }}; {% if False %} BAD {% else %} GOOD {% endif %}.
+True:   {{ True }}; {% if True %}Good{% else %}Bad{% endif %}
+False:  {{ False }}; {% if False %}Bad{% else %}Good{% endif %}
 
-0:      {{ 0 }}; {% if 0 %} BAD {% else %} GOOD {% endif %}.
-42:     {{ 42 }}; {% if 42 %} GOOD {% else %} BAD {% endif %}.
+0:      {{ 0 }}; {% if 0 %}Bad{% else %}Good{% endif %}
+42:     {{ 42 }}; {% if 42 %}Good{% else %}Bad{% endif %}
 
-"":     {{ "" }}; {% if "" %} BAD {% else %} GOOD {% endif %}.
-"test": {{ "test" }}; {% if "test" %} GOOD {% else %} BAD {% endif %}.
+"":     {{ "" }}; {% if "" %}Bad{% else %}Good{% endif %}
+"test": {{ "test" }}; {% if "test" %}Good{% else %}Bad{% endif %}
 
-bool_true: {{ bool_true }}; {% if bool_true %} GOOD {% else %} BAD {% endif %}.
-bool_false: {{ bool_false }}; {% if bool_false %} BAD {% else %} GOOD {% endif %}.
+bool_true: {{ bool_true }}; {% if bool_true %}Good{% else %}Bad{% endif %}
+bool_false: {{ bool_false }}; {% if bool_false %}Bad{% else %}Good{% endif %}
 
-int_0: {{ int_0 }}; {% if int_0 %} BAD {% else %} GOOD {% endif %}.
-int_42: {{ int_42 }}; {% if int_42 %} GOOD {% else %} BAD {% endif %}.
+int_0: {{ int_0 }}; {% if int_0 %}Bad{% else %}Good{% endif %}
+int_42: {{ int_42 }}; {% if int_42 %}Good{% else %}Bad{% endif %}
 
-str_empty: {{ str_empty }}; {#% if str_empty %} BAD {% else %} GOOD {% endif %#}.
-str_test: {{ str_test }}; {% if str_test %} GOOD {% else %} BAD {% endif %}.
+str_empty: {{ str_empty }}; {% if str_empty %}Bad{% else %}Good{% endif %}
+str_test: {{ str_test }}; {% if str_test %}Good{% else %}Bad{% endif %}
 
-list_empty: {{ list_empty }}; {% if list_empty %} BAD {% else %} GOOD {% endif %}.
-list_12345: {{ list_12345 }}; {% if list_12345 %} GOOD {% else %} BAD {% endif %}.
+list_empty: {{ list_empty }}; {% if list_empty %}Bad{% else %}Good{% endif %}
+list_12345: {{ list_12345 }}; {% if list_12345 %}Good{% else %}Bad{% endif %}
 
-dict_empty: {{ dict_empty }}; {% if dict_empty %} BAD {% else %} GOOD {% endif %}.
-dict_abc: {{ dict_abc }}; {% if dict_abc %} GOOD {% else %} BAD {% endif %}.
+dict_empty: {{ dict_empty }}; {% if dict_empty %}Bad{% else %}Good{% endif %}
+dict_abc: {{ dict_abc }}; {% if dict_abc %}Good{% else %}Bad{% endif %}
 
-{#% for k, v in str_empty %} BAD {% empty %} GOOD {% endfor %#}.
-{% for k, v in list_empty %} BAD {% empty %} GOOD {% endfor %}.
-{% for k, v in dict_empty %} BAD {% empty %} GOOD {% endfor %}.
+{# FIXME: {% for k, v in str_empty %}Bad{% empty %}Good{% endfor %} #}
+{% for k, v in list_empty %}Bad{% empty %}Good{% endfor %}
+{% for k, v in dict_empty %}Bad{% empty %}Good{% endfor %}
 
-"test": {% for v in "test" %}{{ v }}{% endfor %}.
-str_test: {#% for v in str_test %}{{ v }}{% endfor %#}.
-list_12345: {% for v in list_12345 %}{{ v }}{% endfor %}.
-dict_abc: {% for v in dict_abc %}{{ v }}{% endfor %}.
+"test": {% for v in "test" %}{{ v }}{% endfor %}
+{# FIXME: str_test: {% for v in str_test %}{{ v }}{% endfor %} #}
+list_12345: {% for v in list_12345 %}{{ v }}{% endfor %}
+dict_abc: {% for v in dict_abc %}{{ v }}{% endfor %}
 
-dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}.
+dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 
-{{ 0 or 0 }}.
-{{ 0 and 0 }}.
-{{ 0 or "foo" }}.
-{{ 0 and "foo" }}.
-{{ "foo" or 0 }}.
-{{ "foo" and 0 }}.
-{{ "foo" or "bar" }}.
-{{ "foo" and "bar" }}.
+{{ 0 or 0 }}
+{{ 0 and 0 }}
+{{ 0 or "foo" }}
+{{ 0 and "foo" }}
+{{ "foo" or 0 }}
+{{ "foo" and 0 }}
+{{ "foo" or "bar" }}
+{{ "foo" and "bar" }}
 
 """.encode('utf-8')
 
@@ -80,54 +80,54 @@ string = template.render_to_string(context)
 print('Rendering succeeded!')
 
 golden = """
-True:   True;  GOOD .
-False:  False;  GOOD .
+True:   True; Good
+False:  False; Good
 
-0:      0;  GOOD .
-42:     42;  GOOD .
+0:      0; Good
+42:     42; Good
 
-"":     ;  GOOD .
-"test": test;  GOOD .
+"":     ; Good
+"test": test; Good
 
-bool_true: True;  GOOD .
-bool_false: False;  GOOD .
+bool_true: True; Good
+bool_false: False; Good
 
-int_0: 0;  GOOD .
-int_42: 42;  GOOD .
+int_0: 0; Good
+int_42: 42; Good
 
-str_empty: ; .
-str_test: test;  GOOD .
+str_empty: ; Good
+str_test: test; Good
 
-list_empty: [];  GOOD .
-list_12345: [1, 2, 3, 4, 5];  GOOD .
+list_empty: []; Good
+list_12345: [1, 2, 3, 4, 5]; Good
 
-dict_empty: {};  GOOD .
-dict_abc: {&apos;a&apos;: &apos;A&apos;, &apos;c&apos;: &apos;C&apos;, &apos;b&apos;: &apos;B&apos;};  GOOD .
+dict_empty: {}; Good
+dict_abc: {&apos;a&apos;: &apos;A&apos;, &apos;c&apos;: &apos;C&apos;, &apos;b&apos;: &apos;B&apos;}; Good
 
-.
- GOOD .
- GOOD .
 
-"test": test.
-str_test: .
-list_12345: 12345.
-dict_abc: acb.
+Good
+Good
 
-dict_abc: a:Ac:Cb:B.
+"test": test
 
-0.
-0.
-foo.
-0.
-foo.
-0.
-foo.
-bar.
+list_12345: 12345
+dict_abc: acb
+
+dict_abc: a:Ac:Cb:B
+
+0
+0
+foo
+0
+foo
+0
+foo
+bar
 
 """
 
 if string != golden:
-    diff = ''.join(unified_diff(string.splitlines(True), golden.splitlines(True)))
+    diff = ''.join(unified_diff(golden.splitlines(True), string.splitlines(True)))
     raise Exception("MISMATCH:\n" + diff)
 
 print('Matching succeeded!')

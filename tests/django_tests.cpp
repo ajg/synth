@@ -129,6 +129,18 @@ DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "
 DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% else %}Bad{% endifequal %}", "Good")
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Bad{% else %}Good{% endifequal %}", "Good")
 
+DJANGO_TEST(filter_tag,
+        "{% filter upper %}\n"
+        "    <p>\n"
+        "        <a href=\"foo/\">Foo</a>\n"
+        "    </p>\n"
+        "{% endfilter %}\n",
+            "\n"
+            "    <P>\n"
+            "        <A HREF=\"FOO/\">FOO</A>\n"
+            "    </P>\n"
+            "\n")
+
 DJANGO_TEST(for_tag-value,
     "{% for v in friends %}[{{ v }}]{% endfor %}",
     "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
@@ -587,26 +599,16 @@ DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 
 /*
 TODO:
-{% for k, v in a_string_array %}
-    {% cycle k v as ttt %} hello. {{ttt}}
-{% endfor %}
-
-{% filter upper %}
-{% debug %}
-{% endfilter %}
+{% for k, v in a_string_array %}{% cycle k v as x %}({{x}}){% endfor %}
 
 <img src="bar.gif" height="10" width="{% widthratio this_value max_value 100 %}" />
 
 {#% ssi /etc/adjtime parsed % -- normally unavailable on Windows and OS X #}
 {#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}
 
-{% block a_block %}
-This is a block
-{% endblock a_block %}
+{% block a_block %}This is a block{% endblock a_block %}
 
 {% include 'samples/django/empty.tpl' %}
-
-Included:
 {% include 'samples/django/included.tpl' %}
 
 {% firstof nonextant a_false a_pair a_deque %}

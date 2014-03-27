@@ -44,7 +44,7 @@ struct missing_variable : public std::invalid_argument {
     std::string const name;
 
     missing_variable(std::string const& name)
-        : std::invalid_argument("missing context variable `" + name + "'")
+        : std::invalid_argument("missing variable `" + name + "'")
         , name(name) {}
 
     ~missing_variable() throw () {}

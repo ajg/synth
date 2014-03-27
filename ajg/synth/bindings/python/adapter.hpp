@@ -76,6 +76,7 @@ struct adapter<Traits, py::object>
             return I(stl_iterator_type(obj));
         }
         else if (PyObject_HasAttrString(obj.ptr(), "__getitem__")) {
+            // TODO: Don't instantiate a list; use a lazy iterator or generator.
             return I(stl_iterator_type(py::list(obj)));
         }
         else {

@@ -79,6 +79,20 @@ struct missing_library : public std::invalid_argument {
 };
 
 //
+// missing_key exception
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct missing_key : public std::invalid_argument {
+    std::string const name;
+
+    missing_key(std::string const& name)
+        : std::invalid_argument("missing key `" + name + "'")
+        , name(name) {}
+
+    ~missing_key() throw () {}
+};
+
+//
 // missing_tag exception
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

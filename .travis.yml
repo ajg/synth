@@ -19,3 +19,4 @@ script:
   - ./test
   - mv python-synth.so tests/synth.so
   - python tests/binding.py
+  - python tests/binding_using_loaders.py

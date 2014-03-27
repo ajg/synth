@@ -35,6 +35,7 @@ struct base_template : boost::noncopyable {
 
     typedef typename Engine::template definition<Iterator>                      engine_type;
     typedef typename engine_type::char_type                                     char_type;
+    typedef typename engine_type::size_type                                     size_type;
     typedef typename engine_type::sequence_type                                 sequence_type;
     typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::string_type                                   string_type;

@@ -105,6 +105,7 @@ unit_test(missing tag) {
 DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
 // TODO: DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var | escape }}{% endautoescape %}", "???")
+// TODO: DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var | force_escape }}{% endautoescape %}", "???")
 DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var | safe }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
 
 DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
@@ -326,6 +327,15 @@ DJANGO_TEST(divisibleby_filter, "{{ 21 | divisibleby:\"3\" }}", "True")
 DJANGO_TEST(divisibleby_filter, "{{ 20 | divisibleby:\"3\" }}", "False")
 
 DJANGO_TEST(filesizeformat_filter, "{{ 123456789|filesizeformat }}", "117.7 MB")
+
+DJANGO_TEST(firstof_filter, "{% firstof true_var %}", "True")
+DJANGO_TEST(firstof_filter, "{% firstof true_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_filter, "{% firstof true_var false_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_filter, "{% firstof false_var true_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_filter, "{% firstof false_var %}", "")
+DJANGO_TEST(firstof_filter, "{% firstof false_var 'FALLBACK' %}", "FALLBACK")
+DJANGO_TEST(firstof_filter, "{% firstof nonextant false_var numbers cities %}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(firstof_filter, "{% firstof nonextant %}", "")
 
 DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;' |fix_ampersands }}",
                 "String &amp; with &amp; ampersands, but not &apos; or &#1234;")
@@ -613,8 +623,4 @@ TODO:
 
 {% include 'samples/django/empty.tpl' %}
 {% include 'samples/django/included.tpl' %}
-
-{% firstof nonextant a_false a_pair a_deque %}
-{% firstof aa bb cc 'FALLBACK' %}
-{% firstof aa a_true 'FALLBACK' %}
 */

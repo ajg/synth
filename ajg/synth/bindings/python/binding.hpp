@@ -104,17 +104,17 @@ struct loader : Options::abstract_loader_type {
     typedef typename options_type::string_type           string_type;
     typedef typename options_type::library_type          library_type;
 
-    explicit loader(py::object ldr) : ldr_(ldr) {}
+    explicit loader(py::object object) : object_(object) {}
     virtual ~loader() {}
 
     virtual library_type load_library(string_type const& name) {
-        return library_type(new library<options_type>(ldr_(name)));
+        return library_type(new library<options_type>(object_(name)));
     }
 
 
   private:
 
-    py::object /*const*/ ldr_;
+    py::object /*const*/ object_;
 };
 
 //
@@ -133,7 +133,7 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type const& options
                                          ) {
         try {
-            return as_string(rslvr_.attr("resolve")(path));
+            return as_string(object_.attr("resolve")(path));
         }
         catch (...) { // TODO: Catch only Resolver404?
             return none;
@@ -146,7 +146,7 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            return as_string(rslvr_.attr("reverse")(name/*,
+            return as_string(object_.attr("reverse")(name/*,
                 TODO: arguments.first, arguments.second, current_app */));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
@@ -154,7 +154,7 @@ struct resolver : Options::abstract_resolver_type {
         }
     }
 
-    explicit resolver(py::object rslvr) : rslvr_(rslvr) {}
+    explicit resolver(py::object object) : object_(object) {}
     virtual ~resolver() {}
 
   private:
@@ -165,7 +165,7 @@ struct resolver : Options::abstract_resolver_type {
 
   private:
 
-    py::object /*const*/ rslvr_;
+    py::object /*const*/ object_;
 };
 
 template <class MultiTemplate>

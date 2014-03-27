@@ -4,6 +4,7 @@
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
 import synth
+from datetime import datetime
 from difflib import unified_diff
 
 # TODO: Golden-file tests like these are brittle and ugly;
@@ -56,19 +57,24 @@ dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 {{ "foo" or "bar" }}
 {{ "foo" and "bar" }}
 
+{{ datetime_one }}
+{{ datetime_id4 }}
+
 """.encode('utf-8')
 
 context = {
-    'bool_true':  True,
-    'bool_false': False,
-    'int_0':      0,
-    'int_42':     42,
-    'str_empty':  "",
-    'str_test':   "test",
-    'list_empty': [],
-    'list_12345': [1, 2, 3, 4, 5],
-    'dict_empty': {},
-    'dict_abc':   {'a': 'A', 'b': 'B', 'c': 'C'},
+    'bool_true':        True,
+    'bool_false':       False,
+    'int_0':            0,
+    'int_42':           42,
+    'str_empty':        "",
+    'str_test':         "test",
+    'list_empty':       [],
+    'list_12345':       [1, 2, 3, 4, 5],
+    'dict_empty':       {},
+    'dict_abc':         {'a': 'A', 'b': 'B', 'c': 'C'},
+    'datetime_one':     datetime(1, 1, 1),
+    'datetime_id4':     datetime(1776, 7, 4),
 }
 
 template = synth.Template(source, 'django')
@@ -123,6 +129,9 @@ foo
 0
 foo
 bar
+
+0001-01-01 00:00:00
+1776-07-04 00:00:00
 
 """
 

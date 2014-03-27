@@ -161,10 +161,15 @@ struct center_filter {
             if (args.size() > 1) throw_exception(superfluous_argument());
 
             String const string = value.to_string();
-            Size const width = args[0].count();
-            Size const pad = width > string.length() ?
-                (width - string.length()) / 2 : 0;
-            return String(pad, Char(' ')) + string;
+            Size const width = args[0].count(), length = string.length();
+
+            if (width <= length) {
+                return string;
+            }
+
+            Size const right = (width - length) / 2;
+            Size const left  = width - length - right;
+            return String(left, Char(' ')) + string + String(right, Char(' '));
         }
     };
 };

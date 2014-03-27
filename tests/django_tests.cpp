@@ -86,9 +86,7 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 ///     django::block_tag
 ///     django::debug_tag
 ///     django::extends_tag
-///     django::firstof_tag
 ///     django::ifchanged_tag
-///     django::include_tag
 ///     django::load_tag
 ///     django::load_from_tag
 ///     django::now_tag
@@ -128,6 +126,9 @@ DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% endifequal %}",              "
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "")
 DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% else %}Bad{% endifequal %}", "Good")
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Bad{% else %}Good{% endifequal %}", "Good")
+
+DJANGO_TEST(include_tag, "{% include 'samples/django/empty.tpl' %}", "")
+DJANGO_TEST(include_tag, "{% include 'samples/django/variables.tpl' %}", "foo: A\nbar: B\nqux: C\n")
 
 DJANGO_TEST(filter_tag, "{% filter escape %}<foo />{% endfilter %}", "<foo />")
 DJANGO_TEST(filter_tag, "{% filter force_escape %}<foo />{% endfilter %}", "&lt;foo /&gt;")
@@ -617,7 +618,7 @@ DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 
 /*
 TODO:
-{% for k, v in a_string_array %}{% cycle k v as x %}({{x}}){% endfor %}
+{% for k, v in numbers %}{% cycle k v as x %}({{x}}){% endfor %}
 
 <img src="bar.gif" height="10" width="{% widthratio this_value max_value 100 %}" />
 
@@ -625,7 +626,4 @@ TODO:
 {#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}
 
 {% block a_block %}This is a block{% endblock a_block %}
-
-{% include 'samples/django/empty.tpl' %}
-{% include 'samples/django/included.tpl' %}
 */

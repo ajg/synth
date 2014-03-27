@@ -36,12 +36,12 @@ list_12345: {{ list_12345 }}; {% if list_12345 %}Good{% else %}Bad{% endif %}
 dict_empty: {{ dict_empty }}; {% if dict_empty %}Bad{% else %}Good{% endif %}
 dict_abc: {{ dict_abc }}; {% if dict_abc %}Good{% else %}Bad{% endif %}
 
-{# FIXME: {% for k, v in str_empty %}Bad{% empty %}Good{% endfor %} #}
+{% for k, v in str_empty %}Bad{% empty %}Good{% endfor %}
 {% for k, v in list_empty %}Bad{% empty %}Good{% endfor %}
 {% for k, v in dict_empty %}Bad{% empty %}Good{% endfor %}
 
 "test": {% for v in "test" %}{{ v }}{% endfor %}
-{# FIXME: str_test: {% for v in str_test %}{{ v }}{% endfor %} #}
+str_test: {% for v in str_test %}{{ v }}{% endfor %}
 list_12345: {% for v in list_12345 %}{{ v }}{% endfor %}
 dict_abc: {% for v in dict_abc %}{{ v }}{% endfor %}
 
@@ -104,12 +104,12 @@ list_12345: [1, 2, 3, 4, 5]; Good
 dict_empty: {}; Good
 dict_abc: {&apos;a&apos;: &apos;A&apos;, &apos;c&apos;: &apos;C&apos;, &apos;b&apos;: &apos;B&apos;}; Good
 
-
+Good
 Good
 Good
 
 "test": test
-
+str_test: test
 list_12345: 12345
 dict_abc: acb
 

@@ -14,32 +14,42 @@
 
 namespace ajg {
 namespace synth {
+namespace {
+
+namespace py = boost::python;
+
+} // namespace
+
 
 //
 // specialization for boost::python::object
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits>
-struct adapter<Traits, boost::python::object>
+struct adapter<Traits, py::object>
     : public abstract_adapter<Traits> {
 
-    typedef boost::python::object object_type;
+    typedef py::object object_type;
     AJG_SYNTH_ADAPTER(object_type)
     object_type adapted_;
 
   private:
 
-    typedef typename boost::python::stl_input_iterator<object_type> stl_iterator_type;
+    typedef typename py::stl_input_iterator<object_type> stl_iterator_type;
 
   public:
 
-    inline static string_type as_string(boost::python::object const& obj) {
-        return boost::python::extract<string_type>(boost::python::str(obj));
+    inline static string_type as_string(py::object const& obj) {
+        return py::extract<string_type>(py::str(obj));
+    }
+
+    inline static string_type class_name(py::object const& obj) {
+        return as_string(obj.attr("__class__").attr("__name__"));
     }
 
     template <class T>
-    inline static T as_numeric(boost::python::object const& obj) {
-        return boost::python::extract<T>(boost::python::long_(obj));
+    inline static T as_numeric(py::object const& obj) {
+        return py::extract<T>(py::long_(obj));
     }
 
     boolean_type test() const { return boolean_type(adapted_); }
@@ -60,19 +70,31 @@ struct adapter<Traits, boost::python::object>
             );
     }
 
+    template <class I>
+    inline static I begin(py::object const& obj) {
+        if (PyObject_HasAttrString(obj.ptr(), "__iter__")) {
+            return I(stl_iterator_type(obj));
+        }
+        else if (PyObject_HasAttrString(obj.ptr(), "__getitem__")) {
+            return I(stl_iterator_type(py::list(obj)));
+        }
+        else {
+            std::string const& type = traits_type::template transcode<char>(class_name(obj));
+            throw std::runtime_error(type + " object is not iterable");
+        }
+    }
+
  // void input (istream_type& in)        { in >> adapted_; }
  // void output(ostream_type& out) const { out << adapted_; }
     void output(ostream_type& out) const { out << as_string(adapted_); }
 
-    iterator begin() { return iterator(stl_iterator_type(adapted_)); }
+    iterator begin() { return begin<iterator>(adapted_); }
     iterator end()   { return iterator(stl_iterator_type()); }
 
-    const_iterator begin() const { return const_iterator(stl_iterator_type(adapted_)); }
+    const_iterator begin() const { return begin<const_iterator>(adapted_); }
     const_iterator end()   const { return const_iterator(stl_iterator_type()); }
 
     optional<value_type> index(value_type const& what) const {
-        namespace py = ::boost::python;
-
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.

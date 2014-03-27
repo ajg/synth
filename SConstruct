@@ -81,7 +81,6 @@ def get_conditional_cpp_flags(cpp):
             minor = int(triple.group(2))
             patch = int(triple.group(3))
             gcc_version = (major, minor, patch)
-            print gcc_version
 
             if gcc_version < (4, 5):
                 cpp_flags += ['-ftemplate-depth-' + str(cpp_template_depth)] # Note the dash

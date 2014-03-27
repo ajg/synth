@@ -354,6 +354,7 @@ struct firstof_tag {
                 try {
                     if (Value const value = engine.evaluate(var, context, options)) {
                         out << value;
+                        break;
                     }
                 }
                 catch (missing_variable const&) {

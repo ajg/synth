@@ -28,7 +28,7 @@ struct adapter<Traits, std::complex<T> >
 
     number_type  count() const { return number_type(adapted_.real()); }
     boolean_type test()  const { return adapted_ != T(0); }
-    void input (istream_type& in)  const { in >> adapted_; }
+    void input (istream_type& in)        { in >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }
 };
 

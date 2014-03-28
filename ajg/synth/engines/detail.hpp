@@ -374,19 +374,19 @@ BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, INDEX_SEQUENCE, nil)
 #undef PUSH_SYNTAX
 
 //
-// furthest_iterator:
-//     Function object that returns the iterator that is furthest along.
+// set_furthest_iterator:
+//     Function object that sets the iterator to the furthest, either itself or the submatch's end.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Result>
-struct furthest_iterator {
-    typedef Result result_type;
+struct set_furthest_iterator {
+    typedef void result_type;
 
     template <class Iterator, class Submatch>
-    Iterator operator ()( Iterator const& begin
-                        , Submatch const& submatch
-                        ) const {
-        return (std::max)(begin, submatch.second);
+    void operator()
+            ( Iterator&       iterator
+            , Submatch const& submatch
+            ) const {
+        iterator = (std::max)(iterator, submatch.second);
     }
 };
 

@@ -42,6 +42,11 @@ namespace debug {
 // Debugging macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// FIXME: For some god-forsaken reason the compilers used by Travis CI can't find fprintf in
+//        namespace `std`. So this macro is a workaround until we find a solution.
+
+#define AJG_FPRINTF /*std::*/fprintf
+
 #define AJG_CERR_LEAD  (std::cerr << std::boolalpha << "    " << __FUNCTION__ << "() - \t")
 #define AJG_CERR_TRAIL (std::endl)
 
@@ -121,14 +126,14 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
             }
             else {
                 std::string const signature = unmangle(mangled);
-                std::fprintf(file, "%d\t%s\t%s\n", index, module.c_str(), signature.c_str());
+                AJG_FPRINTF(file, "%d\t%s\t%s\n", index, module.c_str(), signature.c_str());
             }
         }
     }
 
 #else
 
-    std::fprintf(file, "Backtrace unavailable\n");
+    AJG_FPRINTF(file, "Backtrace unavailable\n");
 
 #endif // HAS_EXECINFO_H
 
@@ -146,19 +151,19 @@ inline void signal_handler(int signum, siginfo_t* info, void* context) {
     default:      name = "?";       break;
     }
 
-    std::fprintf(stderr, "Caught signal %d (%s)\n", signum, name);
+    AJG_FPRINTF(stderr, "Caught signal %d (%s)\n", signum, name);
     fprint_backtrace(stderr);
     std::exit(signum);
 }
 
 inline void terminate_handler() {
-    std::fprintf(stderr, "Terminated\n");
+    AJG_FPRINTF(stderr, "Terminated\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }
 
 inline void unexpected_handler() {
-    std::fprintf(stderr, "Unexpected Exception\n");
+    AJG_FPRINTF(stderr, "Unexpected Exception\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }
@@ -206,7 +211,7 @@ inline void assertion_failed( char const* const expression
                             , char const* const file
                             , long        const line
                             ) {
-    std::fprintf(stderr, "%s in %s() at %s:%ld\n", expression,
+    AJG_FPRINTF(stderr, "%s in %s() at %s:%ld\n", expression,
         ajg::synth::debug::abbreviate(function).c_str(), file, line);
     ajg::synth::debug::fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
@@ -218,7 +223,7 @@ inline void assertion_failed_msg( char const* const expression
                                 , char const* const file
                                 , long        const line
                                 ) {
-    std::fprintf(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message,
+    AJG_FPRINTF(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message,
         ajg::synth::debug::abbreviate(function).c_str(), file, line);
     ajg::synth::debug::fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);

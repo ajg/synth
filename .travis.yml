@@ -14,10 +14,17 @@ before_install:
 
 script:
   # Prevent slow builds from dying by echoing something every 5 minutes.
-  - (while true; do echo "I am a little teapot."; sleep 300; done)&
-  - scons debug=1
+  - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
+
+  - echo "=== Building ==="
+  - scons debug=1 || exit 1 # TODO: -j 2
+  - echo "=== Done ==="
+
+  - echo "=== Running Test Harness ==="
   - ./test
+  - echo "=== Done ==="
+
+  - echo "=== Running Python Binding Tests ==="
   - mv python-synth.so tests/python/synth.so
-  - python tests/python/binding.py
-  - python tests/python/binding_using_directories.py
-  - python tests/python/binding_using_loaders.py
+  - ls tests/python/binding*.py | xargs -n 1 python
+  - echo "=== Done ==="

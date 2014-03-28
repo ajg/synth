@@ -11,7 +11,7 @@
 #include <ajg/synth/engines/django.hpp>
 #include <ajg/synth/engines/null_resolver.hpp>
 
-#include <tests/context_data.hpp>
+#include <tests/data/kitchen_sink.hpp>
 
 namespace {
 
@@ -26,8 +26,8 @@ typedef s::string_template<char_type, engine_type>                              
 typedef string_template::traits_type                                            traits_type;
 typedef string_template::context_type                                           context_type;
 typedef string_template::options_type                                           options_type;
-typedef tests::context_data<context_type, traits_type, options_type>            context_data_type;
-typedef ajg::test_group<context_data_type>                                      group_type;
+typedef tests::data::kitchen_sink<context_type, traits_type, options_type>      data_type;
+typedef ajg::test_group<data_type>                                              group_type;
 
 group_type group_object("django tests");
 

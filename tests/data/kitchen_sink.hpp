@@ -57,8 +57,8 @@ struct kitchen_sink {
         datetime_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
 
         context[text("past")]        = past;
-        context[text("before_past")] = past - hours(36);
-        context[text("after_past")]  = past + hours(1200) + minutes(20);
+        context[text("before_past")] = past - duration_type(36, 0, 0);
+        context[text("after_past")]  = past + duration_type(1200, 20, 0);
         context[text("future")]      = future;
 
         std::map<string_type, string_type> mumbai, calcutta, nyc, chicago, tokyo;

@@ -240,34 +240,34 @@ DJANGO_TEST(templatetag_tag, "{% templatetag closevariable %}", "}}")
 
 unit_test(url_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
-    tests::null_resolver<options_type>::patterns_type patterns;
+    null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new tests::null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_tag) {
     string_template const t("{% url 'x.y.z' 1 2 3 %}");
-    tests::null_resolver<options_type>::patterns_type patterns;
-    options.resolvers.push_back(options_type::resolver_type(new tests::null_resolver<options_type>(patterns)));
+    null_resolver<options_type>::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
     ensure_throws(std::runtime_error, t.render_to_string(context, options));
 }}}
 
 unit_test(url_as_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
-    tests::null_resolver<options_type>::patterns_type patterns;
+    null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new tests::null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_as_tag) {
     string_template const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
-    tests::null_resolver<options_type>::patterns_type patterns;
-    options.resolvers.push_back(options_type::resolver_type(new tests::null_resolver<options_type>(patterns)));
+    null_resolver<options_type>::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_");
 }}}

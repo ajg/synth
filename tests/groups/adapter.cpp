@@ -115,9 +115,10 @@ unit_test(assignments) {
     context[STRING("a_boost_array")] = boost::array<double, 2>();
     context[STRING("an_optional_float")] = optional<double>(4.5);
 
-    auto_ptr<vector<bool> > bools_(new vector<bool>(2, false));
-    vector<bool> *const bools = bools_.get();
-    // FIXME: context[STRING("a_pointer")] = bools;
+    // FIXME:
+    // auto_ptr<vector<bool> > bools_(new vector<bool>(2, false));
+    // vector<bool> *const bools = bools_.get();
+    // context[STRING("a_pointer")] = bools;
 
     context[STRING("a_true")] = true;
     context[STRING("a_false")] = false;

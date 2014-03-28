@@ -26,6 +26,7 @@ namespace synth {
 namespace python {
 
 namespace py = boost::python;
+namespace d = detail;
 
 inline char const* version()
 {
@@ -87,7 +88,7 @@ struct library : Options::abstract_library_type {
                                  , context_type   const*
                                  , value_type     const& value
                                  , arguments_type const& arguments) {
-        std::pair<py::list, py::dict> const& args = detail::from_arguments(arguments);
+        std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
         return filter(value, *args.first, **args.second);
     }
 
@@ -140,7 +141,7 @@ struct resolver : Options::abstract_resolver_type {
                                          ) {
         try {
             py::object const& result = object_.attr("resolve")(path);
-            return detail::to_string<string_type>(result);
+            return d::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only Resolver404?
             return none;
@@ -154,9 +155,9 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            std::pair<py::list, py::dict> const& args = detail::from_arguments(arguments);
+            std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
-            return detail::to_string<string_type>(result);
+            return d::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return none;
@@ -214,7 +215,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     binding( string_type  const& source
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true
-           , string_type  const& default_value = detail::text("")
+           , string_type  const& default_value = synth::detail::text("")
            // TODO: Rename abbreviated parameters and expose them as kwargs.
            , py::dict     const& fmts          = py::dict()
            , boolean_type const  debug         = false
@@ -331,12 +332,6 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
         return context;
     }
-
-  private:
-
-    template <class O, class B> friend class loader;
-    template <class O, class B> friend class resolver;
-    template <class O, class B> friend class library;
 };
 
 }}} // namespace ajg::synth::python

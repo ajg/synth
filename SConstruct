@@ -68,7 +68,6 @@ def get_cpp_flags(cxx):
         '-Wall',
         # TODO: '-Wextra',
         # TODO: '-pedantic',
-        '-Wno-unused-value',
     ]
 
     cxx_version = find_cxx_version(cxx)

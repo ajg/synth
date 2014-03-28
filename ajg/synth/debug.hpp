@@ -14,6 +14,7 @@
 #include <boost/assert.hpp>
 
 #include <csignal>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <exception>

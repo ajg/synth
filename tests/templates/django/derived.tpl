@@ -1,4 +1,4 @@
-{% extends "samples/django/base.tpl" %}
+{% extends "tests/templates/django/base.tpl" %}
 
 {% block content %}
 Derived content: {{ a_string_array }}.

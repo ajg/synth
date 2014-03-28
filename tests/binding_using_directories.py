@@ -13,7 +13,7 @@ class User:
         self.is_staff = False
         self.is_authenticated = True
 
-directory = 'samples/django/templates/'
+directory = 'tests/templates/django/'
 
 context = {
     'request': {

@@ -54,7 +54,7 @@ def find_test_sources():
     if group:
         return ['tests/groups/%s.cpp' % group]
     else:
-        return Glob('tests/*.cpp')
+        return Glob('tests/groups/*.cpp')
 
 def find_cxx_version(cxx):
     try:

@@ -42,26 +42,23 @@ namespace detail {
 #endif
 
 //
-// AJG_TESTING_BEGIN, TEST_NUMBER
+// AJG_COUNTER, AJG_TESTING_BEGIN, TEST_NUMBER
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __COUNTER__ // E.g. MSVC, GCC 4.3+, Intel...
-
-  #define AJG_TESTING_HAS_COUNTER
-  #define AJG_TESTING_BEGIN \
-    namespace ajg { namespace detail { \
-        static unsigned const counter_start = __COUNTER__; \
-    }}
-  #define TEST_NUMBER() (__COUNTER__ - ajg::detail::counter_start)
-
-#else // !__COUNTER__
-
-  // Use line numbers in this case, which require a much higher
-  // maximum template recursion depth from the compiler.
-  #define AJG_TESTING_BEGIN // Nothing.
-  #define TEST_NUMBER() (__LINE__)
-
+#ifdef __COUNTER__
+#define AJG_COUNTER __COUNTER__
+#else
+// Use line numbers in this case, which require a much higher
+// maximum template recursion depth from the compiler.
+#define AJG_COUNTER __LINE__
 #endif
+
+#define AJG_TESTING_BEGIN \
+  namespace ajg { \
+  namespace detail { \
+      static unsigned const counter_start = AJG_COUNTER; \
+  }} // namespace ajg::detail
+#define TEST_NUMBER() (AJG_COUNTER - ajg::detail::counter_start)
 
 //
 // check_test_number

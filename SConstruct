@@ -75,14 +75,12 @@ def get_cpp_flags(cxx):
     cxx_template_depth = 512
 
     if 'clang' in cxx_version:
-        cpp_flags += ['-Wno-unsequenced']
         cpp_flags += ['-ferror-limit=1']
         cpp_flags += ['-ftemplate-backtrace-limit=1']
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
     elif 'g++' in cxx_version:
-        cpp_flags += ['-Wno-sequence-point']
         cpp_flags += ['-Wfatal-errors']
 
         triple = re.search(r'\s(\d+)[.](\d+)[.](\d+)\s', cxx_version)

@@ -3,36 +3,36 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef TESTS_CONTEXT_DATA_HPP_INCLUDED
-#define TESTS_CONTEXT_DATA_HPP_INCLUDED
+#ifndef TESTS_DATA_KITCHEN_SINK_HPP_INCLUDED
+#define TESTS_DATA_KITCHEN_SINK_HPP_INCLUDED
 
 #include <map>
 #include <string>
 
 #include <boost/mpl/void.hpp>
 #include <boost/assign/list_of.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
 
 namespace tests {
+namespace data {
 
 using boost::assign::list_of;
 using ajg::synth::detail::text;
 
-// TODO: Rename `data`
 template <class Context, class Traits, class Options = boost::mpl::void_>
-struct context_data {
+struct kitchen_sink {
     typedef Context                                             context_type;
     typedef Traits                                              traits_type;
     typedef Options                                             options_type;
     typedef typename traits_type::string_type                   string_type;
     typedef typename traits_type::sequence_type                 sequence_type;
+    typedef typename traits_type::date_type                     date_type;
     typedef typename traits_type::datetime_type                 datetime_type;
     typedef typename traits_type::duration_type                 duration_type;
     typedef typename context_type::mapped_type                  value_type;
 
-    context_data() {
+    kitchen_sink() {
         context[text("foo")] = "A";
         context[text("bar")] = "B";
         context[text("qux")] = "C";
@@ -53,11 +53,8 @@ struct context_data {
 
         context["friends"] = friends;
 
-        using namespace boost::gregorian;
-        using namespace boost::posix_time;
-
-        datetime_type const past(date(2002, Jan, 10), duration_type(1, 2, 3));
-        datetime_type const future(date(2202, Feb, 11), duration_type(3, 2, 1));
+        datetime_type const past(date_type(2002, 1, 10), duration_type(1, 2, 3));
+        datetime_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
 
         context[text("past")]        = past;
         context[text("before_past")] = past - hours(36);
@@ -116,8 +113,8 @@ struct context_data {
     Options options;
     std::map<std::string, std::string> friends[3];
     std::map<std::string, std::string> cities[5];
-};
+}; // kitchen_sink
 
-} // namespace tests
+}} // namespace tests::data
 
-#endif // TESTS_CONTEXT_DATA_HPP_INCLUDED
+#endif // TESTS_DATA_KITCHEN_SINK_HPP_INCLUDED

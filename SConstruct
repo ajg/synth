@@ -28,7 +28,7 @@ def create_targets(env):
     test_harness = env.Clone()
     test_harness.Program(
         target = 'test',
-        source = ['tests/test.cpp'] + find_test_sources(),
+        source = ['tests/harness.cpp'] + find_test_sources(),
     )
 
     command_line_tool = env.Clone()

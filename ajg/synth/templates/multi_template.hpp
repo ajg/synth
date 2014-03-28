@@ -47,6 +47,7 @@ struct multi_template {
     typedef std::vector<string_type>      directories_type;
 
     typedef django_options_type                          options_type;
+    typedef typename django_options_type::arguments_type arguments_type;
     typedef typename django_options_type::formats_type   formats_type;
     typedef typename django_options_type::library_type   library_type;
     typedef typename django_options_type::libraries_type libraries_type;

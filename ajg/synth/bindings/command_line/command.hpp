@@ -72,10 +72,12 @@ struct command {
         if (flags.count("help")) {
             std::cerr << description << std::endl;
             return;
-        } else if (flags.count("version")) {
+        }
+        else if (flags.count("version")) {
             std::cerr << "synth v" << AJG_SYNTH_VERSION_STRING << std::endl;
             return;
-        } else if (!flags.count("engine")) {
+        }
+        else if (!flags.count("engine")) {
             throw_exception(std::invalid_argument("missing engine name"));
         }
 

@@ -17,7 +17,7 @@ namespace synth {
 namespace {
 
 namespace py = boost::python;
-namespace detail = python::detail;
+namespace d = synth::python::detail;
 
 } // namespace
 
@@ -40,11 +40,11 @@ struct adapter<Traits, py::object>
   public:
 
     boolean_type test() const { return boolean_type(adapted_); }
-    datetime_type to_datetime() const { return detail::to_datetime<traits_type>(adapted_); }
+    datetime_type to_datetime() const { return d::to_datetime<traits_type>(adapted_); }
 
  // void input (istream_type& in)        { in >> adapted_; }
  // void output(ostream_type& out) const { out << adapted_; }
-    void output(ostream_type& out) const { out << detail::to_string<string_type>(adapted_); }
+    void output(ostream_type& out) const { out << d::to_string<string_type>(adapted_); }
 
     iterator begin() { return begin<iterator>(adapted_); }
     iterator end()   { return iterator(stl_iterator_type()); }
@@ -103,7 +103,7 @@ struct adapter<Traits, py::object>
             return I(stl_iterator_type(py::list(obj)));
         }
         else {
-            string_type const& type = class_name<std::string>(obj);
+            string_type const& type = d::class_name<std::string>(obj);
             throw std::runtime_error(type + " object is not iterable");
         }
     }

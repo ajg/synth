@@ -1591,7 +1591,6 @@ struct truncatewords_html_filter {
             if (limit <= 0) return string_type();
 
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
-            size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
             size_type count = 0;
             stream_type stream;

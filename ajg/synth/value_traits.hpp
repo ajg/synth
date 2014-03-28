@@ -14,6 +14,7 @@
 #include <sstream>
 #include <utility>
 
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/value_iterator.hpp>
@@ -34,6 +35,8 @@ struct default_value_traits {
     typedef Value                                       value_type;
     typedef bool                                        boolean_type;
     typedef double                                      number_type;
+    typedef boost::gregorian::date                      date_type;
+ // typedef TODO                                        time_type;
     typedef boost::posix_time::ptime                    datetime_type;
     typedef boost::posix_time::time_duration            duration_type;
     typedef std::basic_string<char_type>                string_type;

@@ -17,14 +17,15 @@ script:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
   - echo "=== Building ==="
-  - scons || exit 1 # -j 2
+  # - scons || exit 1 # -j 2
+  scons test debug=1
   - echo "=== Done ==="
 
   - echo "=== Running Test Harness ==="
   - ./test
   - echo "=== Done ==="
 
-  - echo "=== Running Python Binding Tests ==="
-  - mv python-synth.so tests/python/synth.so
-  - ls tests/python/binding*.py | xargs -n 1 python
-  - echo "=== Done ==="
+  # - echo "=== Running Python Binding Tests ==="
+  # - mv python-synth.so tests/python/synth.so
+  # - ls tests/python/binding*.py | xargs -n 1 python
+  # - echo "=== Done ==="

@@ -72,8 +72,8 @@ struct base_definition : boost::noncopyable {
     void initialize_grammar() {
         using namespace xpressive;
 
-        typedef detail::furthest_iterator<iterator_type> f;
-        typename xpressive::function<f>::type const furthest = {{}};
+        typedef detail::set_furthest_iterator f;
+        typename xpressive::function<f>::type const set_furthest = {{}};
         definition_type& self = static_cast<definition_type&>(*this);
 
         self.text = +(~before(self.skipper) >> _);
@@ -82,8 +82,8 @@ struct base_definition : boost::noncopyable {
         // block = skip(text[...])(*tag[...]);
 
         self.block = *keep // causes actions (i.e. furthest) to execute eagerly.
-            ( xpressive::ref(self.tag)  [iterator_ = furthest(iterator_, _)]
-            | xpressive::ref(self.text) [iterator_ = furthest(iterator_, _)]
+            ( xpressive::ref(self.tag)  [set_furthest(iterator_, _)]
+            | xpressive::ref(self.text) [set_furthest(iterator_, _)]
             );
     }
 

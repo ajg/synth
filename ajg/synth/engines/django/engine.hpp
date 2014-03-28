@@ -847,6 +847,19 @@ struct definition : base_definition< BidirectionalIterator
         loader_.template load<this_type>(context, options, library, names);
     }
 
+    typename options_type::tag_type const& get_tag
+            ( string_type  const& name
+            , context_type const& context
+            , options_type const& options
+            ) const {
+        typename options_type::tags_type::const_iterator it = options.loaded_tags.find(name);
+
+        if (it == options.loaded_tags.end()) {
+            throw_exception(missing_tag(this->template transcode<char>(name)));
+        }
+        return it->second;
+    }
+
   private:
 
     struct process_filter {

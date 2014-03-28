@@ -138,8 +138,6 @@ struct options {
     formats_type      formats;
     boolean_type      debug;
     directories_type  directories;
-    tags_type         loaded_tags;
-    filters_type      loaded_filters;
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
@@ -195,15 +193,20 @@ struct options {
 
   private:
 
+    tags_type         loaded_tags;
+    filters_type      loaded_filters;
+
     typedef size_type                          marker_type; // FIXME: pair<filename, size_type>
     typedef std::map<string_type, string_type> blocks_type;
     typedef std::map<marker_type, size_type>   cycles_type;
     typedef std::map<marker_type, value_type>  changes_type;
 
-    friend class block_tag;
-    friend class cycle_tag;
-    friend class extends_tag;
-    friend class ifchanged_tag;
+    friend struct block_tag;
+    friend struct cycle_tag;
+    friend struct extends_tag;
+    friend struct ifchanged_tag;
+    friend struct default_loader;
+    template <class, class> friend struct engine;
 
     blocks_type*  blocks_;
     cycles_type   cycles_;

@@ -1173,20 +1173,16 @@ struct library_tag {
             string_type const& name = match(engine.unreserved_name)[id].str();
             match_type  const& args = match(engine.arguments);
             match_type  const& body = match(engine.block);
+            tag_type    const& tag  = engine.get_tag(name, context, options);
 
             arguments_type arguments    = engine.evaluate_arguments(args, context, options);
             context_type   context_copy = context;
             options_type   options_copy = options;
 
-            if (optional<tag_type const> const& tag = detail::find_mapped_value(name, options_copy.loaded_tags)) {
-                if (value_type const& value = (*tag)(options_copy, &context_copy, arguments)) {
-                    output << value;
-                }
-                engine.render_block(output, body, context_copy, options_copy);
+            if (value_type const& value = tag(options_copy, &context_copy, arguments)) {
+                output << value;
             }
-            else {
-                throw_exception(missing_tag(engine.template transcode<char>(name)));
-            }
+            engine.render_block(output, body, context_copy, options_copy);
         }
     };
 };

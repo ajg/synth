@@ -18,6 +18,7 @@ def run():
     create_targets(env)
 
 def make_environment(cxx):
+    # TODO: VariantDir('build' / 'stage', '?', duplicate=0)
     return Environment(
         CXX      = cxx,
         CPPPATH  = ['.'],

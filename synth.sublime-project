@@ -47,10 +47,14 @@
             "file_exclude_patterns":
             [
                 ".sconsign.dblite",
+                "MANIFEST",
                 "synth",
                 "test",
                 "*.o",
+                "*.o-*",
                 "*.os",
+                "*.os-*",
+                "*.pyc",
                 "*.so"
             ],
             "folder_exclude_patterns":

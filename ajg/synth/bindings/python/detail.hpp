@@ -49,7 +49,7 @@ inline typename Traits::datetime_type to_datetime(py::object const& obj) {
 template <class Value>
 inline py::object from_value(Value const& value) {
     // TODO: Implement.
-    return py::str("TODO");
+    throw_exception(not_implemented("from_value"));
 }
 
 template <class Arguments>

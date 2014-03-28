@@ -78,7 +78,7 @@ struct multi_template {
         , tmpl_options_() {                        // TODO: directories, debug, ...
 
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
-            throw std::invalid_argument("engine_name");
+            throw_exception(std::invalid_argument("engine_name"));
         }
     }
 

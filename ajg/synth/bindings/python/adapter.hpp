@@ -104,7 +104,7 @@ struct adapter<Traits, py::object>
         }
         else {
             string_type const& type = d::class_name<std::string>(obj);
-            throw std::runtime_error(type + " object is not iterable");
+            throw_exception(std::runtime_error(type + " object is not iterable"));
         }
     }
 };

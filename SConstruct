@@ -34,7 +34,7 @@ def create_targets(env):
     command_line_tool = env.Clone()
     command_line_tool.Program(
         target = 'synth',
-        source = ['ajg/synth/bindings/command_line/program.cpp'], # TODO: Rename to tool.cpp.
+        source = ['ajg/synth/bindings/command_line/tool.cpp'],
         LIBS   = ['boost_program_options'],
     )
 

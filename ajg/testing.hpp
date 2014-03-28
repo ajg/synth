@@ -95,6 +95,12 @@ namespace {
     struct empty {};
 } // namespace anonymous
 
+
+inline static void silence_unused_function_warnings() {
+    tut::ensure_not(false);
+    tut::fail("");
+}
+
 } // namespace detail
 
 //

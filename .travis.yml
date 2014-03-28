@@ -17,7 +17,7 @@ script:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
   - echo "=== Building ==="
-  - scons -j 2 debug=1 || exit 1
+  - scons || exit 1 # -j 2
   - echo "=== Done ==="
 
   - echo "=== Running Test Harness ==="

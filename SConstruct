@@ -52,9 +52,9 @@ def create_targets(env):
 
 def find_test_sources():
     if group:
-        return ['tests/%s_tests.cpp' % group]
+        return ['tests/groups/%s.cpp' % group]
     else:
-        return Glob('tests/*_tests.cpp')
+        return Glob('tests/*.cpp')
 
 def find_cxx_version(cxx):
     try:

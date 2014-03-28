@@ -72,7 +72,7 @@ def get_cpp_flags(cxx):
     ]
 
     cxx_version = find_cxx_version(cxx)
-    cxx_template_depth = 512
+    cxx_template_depth = 1024
 
     if 'clang' in cxx_version:
         cpp_flags += ['-ferror-limit=1']

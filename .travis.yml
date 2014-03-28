@@ -17,7 +17,7 @@ script:
   - (while true; do echo "I am a little teapot."; sleep 300; done)&
   - scons debug=1
   - ./test
-  - mv python-synth.so tests/synth.so
-  - python tests/binding.py
-  - python tests/binding_using_directories.py
-  - python tests/binding_using_loaders.py
+  - mv python-synth.so tests/python/synth.so
+  - python tests/python/binding.py
+  - python tests/python/binding_using_directories.py
+  - python tests/python/binding_using_loaders.py

@@ -51,6 +51,8 @@
 #    endif
 #endif
 
+// #define BOOST_THROW_EXCEPTION_CURRENT_FUNCTION
+
 #include <ajg/synth/debug.hpp>
 
 #endif // NDEBUG

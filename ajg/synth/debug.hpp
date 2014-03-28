@@ -41,7 +41,7 @@ namespace debug {
 // Debugging macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_CERR_LEAD  (std::cerr << std::boolalpha << __FUNCTION__ << "| ")
+#define AJG_CERR_LEAD  (std::cerr << std::boolalpha << "    " << __FUNCTION__ << "() - \t")
 #define AJG_CERR_TRAIL (std::endl)
 
 #define AJG_DUMP(e)  (AJG_CERR_LEAD << #e << " = `" << (e) << "`" << AJG_CERR_TRAIL)

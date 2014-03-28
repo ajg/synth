@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef TESTS_TEST_RESOLVER_HPP_INCLUDED
-#define TESTS_TEST_RESOLVER_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_NULL_RESOLVER_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_NULL_RESOLVER_HPP_INCLUDED
 
 #include <map>
 #include <string>
@@ -12,16 +12,17 @@
 #include <boost/optional.hpp>
 #include <boost/mpl/void.hpp>
 
-namespace tests {
+namespace ajg {
+namespace synth {
 
 using boost::optional;
 
 //
-// test_resolver
+// null_resolver
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Options>
-struct test_resolver : Options::abstract_resolver_type {
+struct null_resolver : Options::abstract_resolver_type {
     typedef Options                               options_type;
     typedef typename options_type::string_type    string_type;
     typedef typename options_type::value_type     value_type;
@@ -53,14 +54,15 @@ struct test_resolver : Options::abstract_resolver_type {
         return it->second + suffix;
     }
 
-    explicit test_resolver(patterns_type patterns) : patterns_(patterns) {}
-    virtual ~test_resolver() {}
+    explicit null_resolver(patterns_type patterns) : patterns_(patterns) {}
+    virtual ~null_resolver() {}
 
   private:
 
     patterns_type patterns_;
-};
+}; // null_resolver
 
-} // namespace tests
+}} // namespace ajg::synth
 
-#endif // TESTS_TEST_RESOLVER_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_NULL_RESOLVER_HPP_INCLUDED
+

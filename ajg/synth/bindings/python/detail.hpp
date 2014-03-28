@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <boost/python.hpp>
+#include <boost/foreach.hpp>
 
 namespace ajg {
 namespace synth {
@@ -45,10 +46,25 @@ inline typename Traits::datetime_type to_datetime(py::object const& obj) {
         );
 }
 
+template <class Value>
+inline py::object from_value(Value const& value) {
+    // TODO: Implement.
+    return py::str("TODO");
+}
+
 template <class Arguments>
 inline std::pair<py::list, py::dict> from_arguments(Arguments const& arguments) {
-    // TODO: Implement
-    return std::pair<py::list, py::dict>();
+    std::pair<py::list, py::dict> args;
+
+    BOOST_FOREACH(typename Arguments::first_type::value_type const& value, arguments.first) {
+        args.first.append(from_value(value));
+    }
+
+    BOOST_FOREACH(typename Arguments::second_type::value_type const& pair, arguments.second) {
+        args.second[pair.first] = from_value(pair.second);
+    }
+
+    return args;
 }
 
 template <class String>

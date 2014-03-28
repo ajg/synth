@@ -1337,6 +1337,7 @@ struct truncatechars_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef typename value_type::number_type               number_type;
 
         Value process(Value  const& value, Engine  const& engine,
                       String const& name,  Context const& context,
@@ -1344,8 +1345,9 @@ struct truncatechars_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            long const limit = args[0].count();
-            if (limit <= 0) return string_type();
+            number_type const number = args[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
 
             size_type   const ellip = engine.ellipsis.length();
             string_type const text  = value.to_string();
@@ -1376,6 +1378,7 @@ struct truncatechars_html_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef typename value_type::number_type               number_type;
         typedef typename string_type::const_iterator           iterator_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
         typedef typename regex_iterator_type::value_type       sub_match_type;
@@ -1386,8 +1389,9 @@ struct truncatechars_html_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            long const limit = args[0].count();
-            if (limit <= 0) return string_type();
+            number_type const number = args[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
 
             size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
@@ -1463,6 +1467,7 @@ struct truncatewords_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef typename value_type::number_type               number_type;
         typedef std::basic_ostringstream<char_type>            stream_type;
         typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
@@ -1505,8 +1510,9 @@ struct truncatewords_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            long const limit = args[0].count();
-            if (limit <= 0) return string_type();
+            number_type const number = args[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
 
             string_type const text = value.to_string();
             size_type count = 0;
@@ -1534,6 +1540,7 @@ struct truncatewords_html_filter {
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
+        typedef typename value_type::number_type               number_type;
         typedef std::basic_ostringstream<char_type>            stream_type;
         typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
@@ -1587,8 +1594,9 @@ struct truncatewords_html_filter {
             if (args.size() < 1) throw_exception(missing_argument());
             if (args.size() > 1) throw_exception(superfluous_argument());
 
-            long const limit = args[0].count();
-            if (limit <= 0) return string_type();
+            number_type const number = args[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
 
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
             string_type const input = value.to_string();

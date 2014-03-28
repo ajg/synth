@@ -47,7 +47,8 @@ int main(int const argc, char const *const argv[])
 try {
     command_type::run(argc, argv);
     return EXIT_SUCCESS;
-} catch (std::exception const& e) {
+}
+catch (std::exception const& e) {
     std::cerr << "synth: " << e.what() << std::endl;
     return EXIT_FAILURE;
 }

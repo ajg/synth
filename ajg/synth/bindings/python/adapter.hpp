@@ -6,20 +6,20 @@
 #ifndef AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED
 
-
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/bindings/python/detail.hpp>
 
 namespace ajg {
 namespace synth {
 namespace {
 
 namespace py = boost::python;
+namespace detail = python::detail;
 
 } // namespace
-
 
 //
 // specialization for boost::python::object
@@ -39,55 +39,12 @@ struct adapter<Traits, py::object>
 
   public:
 
-    inline static string_type as_string(py::object const& obj) {
-        return py::extract<string_type>(py::str(obj));
-    }
-
-    inline static string_type class_name(py::object const& obj) {
-        return as_string(obj.attr("__class__").attr("__name__"));
-    }
-
-    template <class T>
-    inline static T as_numeric(py::object const& obj) {
-        return py::extract<T>(py::long_(obj));
-    }
-
     boolean_type test() const { return boolean_type(adapted_); }
-    datetime_type to_datetime() const {
-        using namespace boost::gregorian;
-        using namespace boost::posix_time;
-        return datetime_type
-            ( date( as_numeric<unsigned short>(adapted_.attr("year"))
-                  , as_numeric<unsigned short>(adapted_.attr("month"))
-                  , as_numeric<unsigned short>(adapted_.attr("day"))
-                  )
-            , time_duration( as_numeric<long>(adapted_.attr("hour"))
-                           , as_numeric<long>(adapted_.attr("minute"))
-                           , as_numeric<long>(adapted_.attr("second"))
-                           , as_numeric<long>(adapted_.attr("microsecond")) * 1000
-                        // , TODO: adapted_.attr("tzinfo")
-                           )
-            );
-    }
-
-    template <class I>
-    inline static I begin(py::object const& obj) {
-        if (PyObject_HasAttrString(obj.ptr(), "__iter__")) {
-            return I(stl_iterator_type(obj));
-        }
-        else if (PyObject_HasAttrString(obj.ptr(), "__getitem__")) {
-            // TODO: Don't instantiate a list; use a lazy iterator or generator.
-            return I(stl_iterator_type(py::list(obj)));
-        }
-        else {
-            std::string const& type = traits_type::template transcode<char>(class_name(obj));
-            throw std::runtime_error(type + " object is not iterable");
-        }
-    }
+    datetime_type to_datetime() const { return detail::to_datetime<traits_type>(adapted_); }
 
  // void input (istream_type& in)        { in >> adapted_; }
  // void output(ostream_type& out) const { out << adapted_; }
-    void output(ostream_type& out) const { out << as_string(adapted_); }
+    void output(ostream_type& out) const { out << detail::to_string<string_type>(adapted_); }
 
     iterator begin() { return begin<iterator>(adapted_); }
     iterator end()   { return iterator(stl_iterator_type()); }
@@ -132,6 +89,23 @@ struct adapter<Traits, py::object>
         }
 
         return none;
+    }
+
+  private:
+
+    template <class I>
+    inline static I begin(py::object const& obj) {
+        if (PyObject_HasAttrString(obj.ptr(), "__iter__")) {
+            return I(stl_iterator_type(obj));
+        }
+        else if (PyObject_HasAttrString(obj.ptr(), "__getitem__")) {
+            // TODO: Don't instantiate a list; use a lazy iterator or generator.
+            return I(stl_iterator_type(py::list(obj)));
+        }
+        else {
+            string_type const& type = class_name<std::string>(obj);
+            throw std::runtime_error(type + " object is not iterable");
+        }
     }
 };
 

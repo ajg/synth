@@ -18,6 +18,7 @@
 
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/django/options.hpp> // (abstract_library)
+#include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
 
 namespace ajg {
@@ -49,7 +50,7 @@ struct library : Options::abstract_library_type {
     typedef typename options_type::tags_type             tags_type;
     typedef typename options_type::filters_type          filters_type;
 
-    explicit library(py::object lib) {
+    explicit library(py::object const& lib) {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {
             py::stl_input_iterator<string_type> begin(tags.keys()), end;
             tag_names_ = names_type(begin, end);
@@ -81,8 +82,13 @@ struct library : Options::abstract_library_type {
         throw_exception(not_implemented("call_tag"));
     }
 
-    static value_type call_filter(py::object filter, options_type const&, context_type const*, value_type const&, arguments_type const&) {
-        throw_exception(not_implemented("call_filter"));
+    static value_type call_filter( py::object            filter
+                                 , options_type   const&
+                                 , context_type   const*
+                                 , value_type     const& value
+                                 , arguments_type const& arguments) {
+        std::pair<py::list, py::dict> const& args = detail::from_arguments(arguments);
+        return filter(value, *args.first, **args.second);
     }
 
   private:
@@ -104,7 +110,7 @@ struct loader : Options::abstract_loader_type {
     typedef typename options_type::string_type           string_type;
     typedef typename options_type::library_type          library_type;
 
-    explicit loader(py::object object) : object_(object) {}
+    explicit loader(py::object const& object) : object_(object) {}
     virtual ~loader() {}
 
     virtual library_type load_library(string_type const& name) {
@@ -133,12 +139,14 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type const& options
                                          ) {
         try {
-            return as_string(object_.attr("resolve")(path));
+            py::object const& result = object_.attr("resolve")(path);
+            return detail::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only Resolver404?
             return none;
         }
     }
+
 
     virtual optional<string_type> reverse( string_type    const& name
                                          , arguments_type const& arguments
@@ -146,22 +154,17 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            return as_string(object_.attr("reverse")(name/*,
-                TODO: arguments.first, arguments.second, current_app */));
+            std::pair<py::list, py::dict> const& args = detail::from_arguments(arguments);
+            py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
+            return detail::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return none;
         }
     }
 
-    explicit resolver(py::object object) : object_(object) {}
+    explicit resolver(py::object const& object) : object_(object) {}
     virtual ~resolver() {}
-
-  private:
-
-    inline static string_type as_string(py::object const& obj) {
-        return py::extract<string_type>(py::str(obj));
-    }
 
   private:
 
@@ -173,9 +176,11 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
   public:
 
+    typedef binding                              binding_type;
     typedef MultiTemplate                        base_type;
     typedef typename base_type::boolean_type     boolean_type;
     typedef typename base_type::string_type      string_type;
+    typedef typename base_type::arguments_type   arguments_type;
     typedef typename base_type::formats_type     formats_type;
     typedef typename base_type::directories_type directories_type;
     typedef typename base_type::options_type     options_type;
@@ -186,7 +191,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     typedef typename base_type::resolver_type    resolver_type;
     typedef typename base_type::resolvers_type   resolvers_type;
     typedef py::dict                             context_type;
-
+    typedef std::pair<py::list, py::dict>        args_type;
     typedef py::init< string_type
                     , string_type
                     , py::optional
@@ -199,7 +204,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                         , py::list
                         , py::list
                         >
-                    > constructor_type;
+                    >                           constructor_type;
 
   public:
 
@@ -210,6 +215,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true
            , string_type  const& default_value = detail::text("")
+           // TODO: Rename abbreviated parameters and expose them as kwargs.
            , py::dict     const& fmts          = py::dict()
            , boolean_type const  debug         = false
            , py::list     const& dirs          = py::list()
@@ -260,6 +266,8 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
         return formats;
     }
+
+    // TODO: Rename these to_* or as_*
 
     inline static directories_type get_directories(py::list dirs) {
         py::stl_input_iterator<string_type> begin(dirs), end;
@@ -323,6 +331,12 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
         return context;
     }
+
+  private:
+
+    template <class O, class B> friend class loader;
+    template <class O, class B> friend class resolver;
+    template <class O, class B> friend class library;
 };
 
 }}} // namespace ajg::synth::python

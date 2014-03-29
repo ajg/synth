@@ -25,7 +25,7 @@ typedef string_template::traits_type                                            
 typedef tests::data::kitchen_sink<context_type, traits_type>                    data_type;
 typedef ajg::test_group<data_type>                                              group_type;
 
-group_type group_object("tmpl tests");
+group_type group_object("tmpl");
 
 } // namespace
 

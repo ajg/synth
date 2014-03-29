@@ -29,7 +29,7 @@ typedef string_template::options_type                                           
 typedef tests::data::kitchen_sink<context_type, traits_type, options_type>      data_type;
 typedef ajg::test_group<data_type>                                              group_type;
 
-group_type group_object("django tests");
+group_type group_object("django");
 
 } // namespace
 

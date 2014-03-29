@@ -21,7 +21,7 @@ typedef string_template::traits_type                        traits_type;
 typedef ajg::test_group<>                                   group_type;
 
 static options_type const default_options;
-group_type group_object("ssi tests");
+group_type group_object("ssi");
 
 } // namespace
 

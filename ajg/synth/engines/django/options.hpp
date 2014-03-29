@@ -95,10 +95,13 @@ struct options {
     typedef options                                options_type;
     typedef Value                                  value_type;
     typedef typename value_type::traits_type       traits_type;
-    typedef typename traits_type::char_type        char_type;
-    typedef typename traits_type::string_type      string_type;
     typedef typename traits_type::boolean_type     boolean_type;
+    typedef typename traits_type::char_type        char_type;
     typedef typename traits_type::size_type        size_type;
+    typedef typename traits_type::number_type      number_type;
+    typedef typename traits_type::string_type      string_type;
+    typedef typename traits_type::istream_type     istream_type;
+    typedef typename traits_type::ostream_type     ostream_type;
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
     typedef typename traits_type::sequence_type    sequence_type;

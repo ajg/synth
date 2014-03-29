@@ -18,7 +18,7 @@ script:
 
   - echo "=== Building ==="
   # - scons || exit 1 # -j 2
-  scons test debug=1
+  - scons test debug=1
   - echo "=== Done ==="
 
   - echo "=== Running Test Harness ==="

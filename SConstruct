@@ -64,21 +64,22 @@ def find_cxx_version(cxx):
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)
 
 def get_cpp_flags(cxx):
-    cpp_flags = [
-        '-Wall',
-        '-Wold-style-cast',
-        '-Woverloaded-virtual',
-        '-Wsign-promo',
-        '-Wmaybe-uninitialized',
-        # TODO: '-Wsurprising',
-        # TODO: '-Weffc++',
-        '-Wextra', '-Wno-unused-parameter',
-        '-pedantic', '-Wno-long-long',
-    ]
+    cpp_flags = []
+
+    # Common flags:
+    cpp_flags += ['-Wall']
+    cpp_flags += ['-Wold-style-cast']
+    cpp_flags += ['-Woverloaded-virtual']
+    cpp_flags += ['-Wsign-promo']
+    # TODO: cpp_flags += ['-Wsurprising']
+    # TODO: cpp_flags += ['-Weffc++']
+    cpp_flags += ['-Wextra', '-Wno-unused-parameter']
+    cpp_flags += ['-pedantic', '-Wno-long-long']
 
     cxx_version = find_cxx_version(cxx)
     cxx_template_depth = 1024
 
+    # Conditional flags:
     if 'clang' in cxx_version:
         cpp_flags += ['-Wuninitialized']
         cpp_flags += ['-Wnarrowing']
@@ -109,6 +110,7 @@ def get_cpp_flags(cxx):
                 cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
             if gcc_version >= (4, 8):
+                cpp_flags += ['-Wmaybe-uninitialized']
                 cpp_flags += ['-Wnarrowing']
                 cpp_flags += ['-fmax-errors=1']
                 cpp_flags += ['-ftemplate-backtrace-limit=1']

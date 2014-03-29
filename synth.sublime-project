@@ -3,7 +3,7 @@
     [
         /* TODO: Use variants instead of this mess. */
         {
-            "cmd": "scons",
+            "cmd": "scons --quiet",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build All (release)",
@@ -11,7 +11,7 @@
             "working_dir": "${project_path}"
         },
         {
-            "cmd": "scons debug=1 synth",
+            "cmd": "scons --quiet debug=1 synth",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build Command-Line Tool (debug)",
@@ -19,7 +19,7 @@
             "working_dir": "${project_path}"
         },
         {
-            "cmd": "scons debug=1 test && ./test",
+            "cmd": "scons --quiet debug=1 test && ./test",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build & Run Tests (debug)",
@@ -30,6 +30,7 @@
             "cmd":
             [
                 "scons",
+                "--quiet",
                 "debug=1",
                 /* "j=2", */
                 /* "cpp=g++-4.2", */

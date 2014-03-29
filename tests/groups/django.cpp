@@ -36,25 +36,23 @@ group_type group_object("django tests");
 AJG_TESTING_BEGIN
 
 #define DJANGO_TEST_(name, in, out, context) \
-    unit_test(name) { \
-        string_template const t(in); \
-        ensure_equals(t.render_to_string(context/*, options */), out); \
-    }}} \
+    unit_test(name) { ensure_equals(string_template(in).render_to_string(context), out); }}}
 
 #define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
 
+#define NO_CONTEXT // Nothing.
 
 /// Sanity checks
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DJANGO_TEST_(empty w/o context,  "", "",)
-DJANGO_TEST_(empty with context, "", "", context)
+DJANGO_TEST_(empty, "", "", NO_CONTEXT)
+DJANGO_TEST_(empty, "", "", context)
 
-DJANGO_TEST_(text w/o context,  "ABC", "ABC",)
-DJANGO_TEST_(text with context, "ABC", "ABC", context)
+DJANGO_TEST_(text, "ABC", "ABC", NO_CONTEXT)
+DJANGO_TEST_(text, "ABC", "ABC", context)
 
-DJANGO_TEST_(html w/o context,  "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>",)
-DJANGO_TEST_(html with context, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
+DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", NO_CONTEXT)
+DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
 
 /// Literal tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +111,7 @@ DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                    
 DJANGO_TEST(comment_tag-short, "0{# {{ x | y:'z' }} #}1",                            "01")
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
-DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "",)
+DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
 DJANGO_TEST(if_tag, "{% if True %}Good{% endif %}{% if False %}Bad{% endif %}", "Good")
@@ -272,7 +270,7 @@ unit_test(url_as_tag) {
     ensure_equals(t.render_to_string(context, options), "_");
 }}}
 
-DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",)
+DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 
 DJANGO_TEST(verbatim_tag,

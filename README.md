@@ -415,6 +415,7 @@ Future Work
    * Named arguments (e.g. for tags and filters)
    * Option to pre-load libraries, tags and filters
    * Implement missing date/time format specifiers
+   * Make markers dynamically configurable
  - Command-line:
    * Allow specifying formats option
    * Allow specifying debug option

@@ -85,8 +85,6 @@ struct definition : base_definition< BidirectionalIterator
                , frame_type   const& frame
                , context_type const& context
                , options_type const& options) const {
-        fusion::for_each(filters_.definition,
-            detail::construct<append_filter>(*this));
 
         if (options.engine == engine::name()) {
 

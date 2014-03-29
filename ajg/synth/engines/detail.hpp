@@ -700,9 +700,9 @@ inline String escape_entities(String const& string, bool const ascii = false) {
     }
 }
 
+/*
 //
 // may_find_by_index
-//     TODO: Rename may_find_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine, class Sequence, class Index, class Needle, class Functor>
@@ -722,10 +722,10 @@ inline optional<typename Functor::result_type> may_find_by_index( Engine   const
     BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
     return detail::template apply_at<size>::fn(distance, sequence, functor);
 }
+*/
 
 //
 // must_find_by_index
-//     TODO: Rename must_find_tag
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine, class Sequence, class Index, class Needle, class Functor>

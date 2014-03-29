@@ -64,41 +64,39 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    typedef definition                          this_type;
-    typedef base_definition
-        < BidirectionalIterator
-        , this_type
-        >                                       base_type;
-    typedef typename base_type::id_type         id_type;
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::char_type       char_type;
-    typedef typename base_type::match_type      match_type;
-    typedef typename base_type::regex_type      regex_type;
-    typedef typename base_type::frame_type      frame_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::stream_type     stream_type;
-    typedef typename base_type::symbols_type    symbols_type;
-    typedef typename base_type::iterator_type   iterator_type;
-    typedef typename base_type::definition_type definition_type;
+    typedef definition                                                          this_type;
+    typedef base_definition<BidirectionalIterator, this_type>                   base_type;
+    typedef Library                                                             library_type;
+    typedef Loader                                                              loader_type;
+    typedef typename base_type::id_type                                         id_type;
+    typedef typename base_type::size_type                                       size_type;
+    typedef typename base_type::char_type                                       char_type;
+    typedef typename base_type::match_type                                      match_type;
+    typedef typename base_type::regex_type                                      regex_type;
+    typedef typename base_type::frame_type                                      frame_type;
+    typedef typename base_type::string_type                                     string_type;
+    typedef typename base_type::stream_type                                     stream_type;
+    typedef typename base_type::symbols_type                                    symbols_type;
+    typedef typename base_type::iterator_type                                   iterator_type;
+    typedef typename base_type::definition_type                                 definition_type;
+    typedef typename base_type::string_regex_type                               string_regex_type;
 
-    typedef typename base_type::string_regex_type string_regex_type;
-
-    typedef Library                               library_type;
-    typedef Loader                                loader_type;
-    typedef typename library_type::first          tags_type;
-    typedef typename library_type::second         filters_type;
-    typedef django::value<char_type>              value_type;
-    typedef options<value_type>                   options_type;
-    typedef typename value_type::boolean_type     boolean_type;
-    typedef typename value_type::datetime_type    datetime_type;
-    typedef typename value_type::duration_type    duration_type;
-    typedef typename options_type::context_type   context_type;
-    typedef typename options_type::names_type     names_type;
-    typedef typename options_type::sequence_type  sequence_type;
-    typedef typename options_type::arguments_type arguments_type;
-
-    typedef detail::indexable_sequence<this_type, tags_type,    id_type,     detail::create_definitions_extended> tag_sequence_type;
-    typedef detail::indexable_sequence<this_type, filters_type, string_type, detail::create_definitions_extended> filter_sequence_type;
+    typedef library_type                                                        builtin_tags_type;
+    typedef builtin_filters<this_type>                                          builtin_filters_type;
+    typedef django::value<char_type>                                            value_type;
+    typedef options<value_type>                                                 options_type;
+    typedef typename value_type::boolean_type                                   boolean_type;
+    typedef typename value_type::datetime_type                                  datetime_type;
+    typedef typename value_type::duration_type                                  duration_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::names_type                                   names_type;
+    typedef typename options_type::sequence_type                                sequence_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+    typedef detail::indexable_sequence< this_type
+                                      , builtin_tags_type
+                                      , id_type
+                                      , detail::create_definitions_extended
+                                      >                                         tag_sequence_type;
 
   private:
 
@@ -332,7 +330,6 @@ struct definition : base_definition< BidirectionalIterator
 
         this->initialize_grammar();
         fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
-        fusion::for_each(filters_.definition, detail::construct<append_filter>(*this));
         detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
@@ -442,7 +439,7 @@ struct definition : base_definition< BidirectionalIterator
                    ) const {
         using namespace detail;
         // If there's only _one_ tag, xpressive will not nest the match, so we use it directly.
-        match_type const& tag = tags_type::size::value == 1 ? match : detail::unnest(match);
+        match_type const& tag = tag_sequence_type::size == 1 ? match : detail::unnest(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
         must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
@@ -486,19 +483,17 @@ struct definition : base_definition< BidirectionalIterator
                            , context_type   const& context
                            , options_type   const& options
                            ) const {
-        process_filter const processor = { *this, value, name, arguments, context, options };
-        // Let library filters override built-in ones:
-        if (optional<typename options_type::filter_type const> const& filter
-                = find_mapped_value(name, options.loaded_filters)) {
-            return (*filter)(options, &context, value, arguments);
+        typename options_type::filters_type::const_iterator it = options.loaded_filters.find(name);
+
+        if (it != options.loaded_filters.end()) { // Let library filters override built-in ones.
+            return it->second(options, &context, value, arguments);
         }
-        else if (optional<value_type> const& result = detail::may_find_by_index(
-                    *this, filters_.definition, filters_.index, name, processor)) {
-            return *result;
+
+        // TODO: Pass the full arguments, not just the sequential (.first) ones.
+        if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {
+            return filter(*this, value, arguments.first, context, options);
         }
-        else {
-            throw_exception(missing_filter(this->template transcode<char>(name)));
-        }
+        throw_exception(missing_filter(this->template transcode<char>(name)));
     }
 
     value_type evaluate( match_type     const& match
@@ -514,6 +509,7 @@ struct definition : base_definition< BidirectionalIterator
                                      , options_type  const& options
                                      ) const {
         arguments_type arguments;
+        // TODO: Evaluate the full arguments, not just the sequential (.first) ones.
         BOOST_FOREACH(match_type const& arg, args.nested_results()) {
             arguments.first.push_back(this->evaluate_expression(arg, context, options));
         }
@@ -847,47 +843,17 @@ struct definition : base_definition< BidirectionalIterator
         loader_.template load<this_type>(context, options, library, names);
     }
 
-    typename options_type::tag_type const& get_tag
-            ( string_type  const& name
-            , context_type const& context
-            , options_type const& options
-            ) const {
+    typename options_type::tag_type const& get_tag( string_type  const& name
+                                                  , context_type const& context
+                                                  , options_type const& options
+                                                  ) const {
         typename options_type::tags_type::const_iterator it = options.loaded_tags.find(name);
 
-        if (it == options.loaded_tags.end()) {
-            throw_exception(missing_tag(this->template transcode<char>(name)));
+        if (it != options.loaded_tags.end()) {
+            return it->second;
         }
-        return it->second;
+        throw_exception(missing_tag(this->template transcode<char>(name)));
     }
-
-  private:
-
-    struct process_filter {
-        this_type      const& self;
-        value_type     const& value_;
-        string_type    const& name_;
-        arguments_type const& arguments_;
-        context_type   const& context_;
-        options_type   const& options_;
-
-        typedef value_type result_type;
-
-        template <class Filter>
-        value_type operator()(Filter const& filter) const {
-            options_type& options = const_cast<options_type&>(options_);
-            // TODO: Pass the full arguments_, not just the sequential (.first) ones.
-            return filter.process(value_, self, name_, context_, arguments_.first, options);
-        }
-    };
-
-    struct append_filter {
-        this_type& self;
-
-        template <class Filter>
-        void operator()(Filter const& filter) const {
-            self.filters_.index.push_back(filter.name());
-        }
-    };
 
   public:
 
@@ -925,7 +891,6 @@ struct definition : base_definition< BidirectionalIterator
   private:
 
     tag_sequence_type    tags_;
-    filter_sequence_type filters_;
     loader_type          loader_;
 
 }; // definition

@@ -17,6 +17,7 @@
 #include <boost/format.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/assign/list_of.hpp>
 #include <boost/throw_exception.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
@@ -32,8 +33,23 @@
 namespace ajg {
 namespace synth {
 namespace django {
+namespace {
 
 using detail::text;
+using boost::xpressive::_d;
+using boost::xpressive::_ln;
+using boost::xpressive::_n;
+using boost::xpressive::_w;
+using boost::xpressive::alnum;
+using boost::xpressive::as_xpr;
+using boost::xpressive::before;
+using boost::xpressive::regex_replace;
+using boost::xpressive::s1;
+using boost::xpressive::set;
+
+static char const word_delimiters[] = " \t\n.,;:!?'\"-";
+
+} // anonymous
 
 //
 // argument exceptions
@@ -49,42 +65,137 @@ struct missing_argument : public std::invalid_argument {
         std::invalid_argument("missing argument to filter") {}
 };
 
-namespace {
-    static char const word_delimiters[] = " \t\n.,;:!?'\"-";
-} // anonymous
+template <class Engine>
+struct builtin_filters {
+    typedef Engine                                                              engine_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename options_type::boolean_type                                 boolean_type;
+    typedef typename options_type::string_type                                  string_type;
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::sequence_type                                sequence_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+    typedef typename options_type::context_type                                 context_type;
+    // TODO: Replace these with *_type versions:
+    typedef typename options_type::char_type                                    Char;
+    typedef typename options_type::string_type                                  String;
+    typedef typename options_type::value_type                                   Value;
+    typedef typename options_type::size_type                                    Size;
+
+    typedef typename engine_type::string_regex_type                             string_regex_type;
+
+//
+// filter_type
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    typedef value_type (*filter_type)( engine_type   const&
+                                     , value_type    const&
+                                     , sequence_type const& // TODO: arguments_type
+                                     , context_type  const&
+                                     , options_type  const&
+                                     );
+
+//
+// get
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static filter_type get(string_type const& name) {
+        // TODO: Consider replacing with fastmatch.h switch.
+        static std::map<string_type, filter_type> const filters = boost::assign::map_list_of
+            (string_type(detail::text("add")),                add_filter::process)
+            (string_type(detail::text("addslashes")),         addslashes_filter::process)
+            (string_type(detail::text("capfirst")),           capfirst_filter::process)
+            (string_type(detail::text("center")),             center_filter::process)
+            (string_type(detail::text("cut")),                cut_filter::process)
+            (string_type(detail::text("date")),               date_filter::process)
+            (string_type(detail::text("default")),            default_filter::process)
+            (string_type(detail::text("default_if_none")),    default_if_none_filter::process)
+            (string_type(detail::text("dictsort")),           dictsort_filter::process)
+            (string_type(detail::text("dictsortreversed")),   dictsortreversed_filter::process)
+            (string_type(detail::text("divisibleby")),        divisibleby_filter::process)
+            (string_type(detail::text("escape")),             escape_filter::process)
+            (string_type(detail::text("escapejs")),           escapejs_filter::process)
+            (string_type(detail::text("filesizeformat")),     filesizeformat_filter::process)
+            (string_type(detail::text("first")),              first_filter::process)
+            (string_type(detail::text("fix_ampersands")),     fix_ampersands_filter::process)
+            (string_type(detail::text("floatformat")),        floatformat_filter::process)
+            (string_type(detail::text("force_escape")),       force_escape_filter::process)
+            (string_type(detail::text("get_digit")),          get_digit_filter::process)
+            (string_type(detail::text("iriencode")),          iriencode_filter::process)
+            (string_type(detail::text("join")),               join_filter::process)
+            (string_type(detail::text("last")),               last_filter::process)
+            (string_type(detail::text("length")),             length_filter::process)
+            (string_type(detail::text("length_is")),          length_is_filter::process)
+            (string_type(detail::text("linebreaks")),         linebreaks_filter::process)
+            (string_type(detail::text("linebreaksbr")),       linebreaksbr_filter::process)
+            (string_type(detail::text("linenumbers")),        linenumbers_filter::process)
+            (string_type(detail::text("ljust")),              ljust_filter::process)
+            (string_type(detail::text("lower")),              lower_filter::process)
+            (string_type(detail::text("make_list")),          make_list_filter::process)
+            (string_type(detail::text("phone2numeric")),      phone2numeric_filter::process)
+            (string_type(detail::text("pluralize")),          pluralize_filter::process)
+            (string_type(detail::text("pprint")),             pprint_filter::process)
+            (string_type(detail::text("random")),             random_filter::process)
+            (string_type(detail::text("removetags")),         removetags_filter::process)
+            (string_type(detail::text("rjust")),              rjust_filter::process)
+            (string_type(detail::text("safe")),               safe_filter::process)
+            (string_type(detail::text("safeseq")),            safeseq_filter::process)
+            (string_type(detail::text("slice")),              slice_filter::process)
+            (string_type(detail::text("slugify")),            slugify_filter::process)
+            (string_type(detail::text("stringformat")),       stringformat_filter::process)
+            (string_type(detail::text("striptags")),          striptags_filter::process)
+            (string_type(detail::text("time")),               time_filter::process)
+            (string_type(detail::text("timesince")),          timesince_filter::process)
+            (string_type(detail::text("timeuntil")),          timeuntil_filter::process)
+            (string_type(detail::text("title")),              title_filter::process)
+            (string_type(detail::text("truncatechars")),      truncatechars_filter::process)
+            (string_type(detail::text("truncatechars_html")), truncatechars_html_filter::process)
+            (string_type(detail::text("truncatewords")),      truncatewords_filter::process)
+            (string_type(detail::text("truncatewords_html")), truncatewords_html_filter::process)
+            (string_type(detail::text("unordered_list")),     unordered_list_filter::process)
+            (string_type(detail::text("upper")),              upper_filter::process)
+            (string_type(detail::text("urlencode")),          urlencode_filter::process)
+            (string_type(detail::text("urlize")),             urlize_filter::process)
+            (string_type(detail::text("urlizetrunc")),        urlizetrunc_filter::process)
+            (string_type(detail::text("wordcount")),          wordcount_filter::process)
+            (string_type(detail::text("wordwrap")),           wordwrap_filter::process)
+            (string_type(detail::text("yesno")),              yesno_filter::process)
+            ;
+        typename std::map<string_type, filter_type>::const_iterator it = filters.find(name);
+        return it == filters.end() ? 0 : it->second;
+    }
 
 //
 // add_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct add_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("add"); }
+    struct add_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            return value.count() + args[0].count();
+            return value.count() + arguments[0].count();
         }
     };
-};
 
 //
 // addslashes_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct addslashes_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("addslashes"); }
+    struct addslashes_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+            return escape(value).mark_safe();
+        }
 
         inline static Value escape(Value const& value) {
             String const string = value.to_string();
@@ -110,58 +221,43 @@ struct addslashes_filter {
                 return value;
             }
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-            return escape(value).mark_safe();
-        }
     };
-};
 
 //
 // capfirst_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct capfirst_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("capfirst"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct capfirst_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             String string = value.to_string();
             if (!string.empty()) string[0] = std::toupper(string[0]);
             return string;
         }
     };
-};
 
 //
 // center_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct center_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("center"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct center_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             String const string = value.to_string();
-            Size const width = args[0].count(), length = string.length();
+            Size const width = arguments[0].count(), length = string.length();
 
             if (width <= length) {
                 return string;
@@ -172,203 +268,167 @@ struct center_filter {
             return String(left, Char(' ')) + string + String(right, Char(' '));
         }
     };
-};
 
 //
 // cut_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct cut_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("cut"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct cut_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             String const from = value.to_string();
-            String const what = args[0].to_string();
+            String const what = arguments[0].to_string();
             return algorithm::erase_all_copy(from, what);
         }
     };
-};
 
 //
 // date_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct date_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("date"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
+    struct date_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
             String format = "DATE_FORMAT";
 
-            if (args.size() > 1) throw_exception(superfluous_argument());
-            if (args.size() > 0) format = args[0].to_string();
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+            if (arguments.size() > 0) format = arguments[0].to_string();
 
             return engine.format_datetime(options, format, value.to_datetime());
         }
     };
-};
 
 //
 // default_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct default_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("default"); }
+    struct default_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            return value ? value : args[0];
+            return value ? value : arguments[0];
         }
     };
-};
 
 //
 // default_if_none_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct default_if_none_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("default_if_none"); }
+    struct default_if_none_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            return value.empty() ? args[0] : value;
+            return value.empty() ? arguments[0] : value;
         }
     };
-};
 
 //
 // dictsort_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct dictsort_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("dictsort"); }
+    struct dictsort_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            return value.sort_by(args[0], false);
+            return value.sort_by(arguments[0], false);
         }
     };
-};
 
 //
 // dictsortreversed_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct dictsortreversed_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("dictsortreversed"); }
+    struct dictsortreversed_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            return value.sort_by(args[0], true);
+            return value.sort_by(arguments[0], true);
         }
     };
-};
 
 //
 // divisibleby_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct divisibleby_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("divisibleby"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct divisibleby_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             intmax_t const dividend = value.count();
-            intmax_t const divisor  = args[0].count();
+            intmax_t const divisor  = arguments[0].count();
             return dividend % divisor == 0;
         }
     };
-};
 
 //
 // escape_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct escape_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("escape"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct escape_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return value.mark_unsafe();
         }
     };
-};
 
 //
 // escapejs_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct escapejs_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("escapejs"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct escapejs_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             String string = value.to_string(), result;
             result.reserve(string.size()); // Assume no escapes.
@@ -380,48 +440,40 @@ struct escapejs_filter {
             return result;
         }
     };
-};
 
 //
 // filesizeformat_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct filesizeformat_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("filesizeformat"); }
+    struct filesizeformat_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+
+            return format(std::abs(value.count()));
+        }
 
         inline static String format(uintmax_t const size) {
             return detail::abbreviate_size<String>(size);
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-
-            return format(std::abs(value.count()));
-        }
     };
-};
 
 //
 // first_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct first_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("first"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct first_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             if (!value.length()) {
                 throw_exception(std::invalid_argument("sequence"));
@@ -430,110 +482,85 @@ struct first_filter {
             return value.front();
         }
     };
-};
 
 //
 // fix_ampersands_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct fix_ampersands_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("fix_ampersands"); }
+    struct fix_ampersands_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
-        definition() {
-            using namespace xpressive;
-            regex_ = as_xpr('&') >> ~before((+_w | '#' >> +_d) >> ';');
+            static string_regex_type const regex = as_xpr('&') >> ~before((+_w | '#' >> +_d) >> ';');
+            return Value(regex_replace(value.to_string(), regex, text("&amp;"))).mark_safe();
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-
-            return Value(xpressive::regex_replace(value.to_string(),
-                regex_, text("&amp;"))).mark_safe();
-        }
-
-      private:
-
-        typename Engine::string_regex_type regex_;
     };
-};
 
 //
 // floatformat_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct floatformat_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("floatformat"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct floatformat_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             // Get the number and the decimal places.
             std::basic_ostringstream<Char> stream;
-            int const n = args.empty() ? -1 : args[0].count();
+            int const n = arguments.empty() ? -1 : arguments[0].count();
             typename Value::number_type const number = value.count();
 
             // If it's an integer and n < 0, we don't want decimals.
-            bool const is_integer = detail::is_integer(number);
+            boolean_type const is_integer = detail::is_integer(number);
             int const precision = n < 0 && is_integer ? 0 : std::abs(n);
             stream << std::fixed << std::setprecision(precision) << number;
 
             return Value(stream.str()).mark_safe();
         }
     };
-};
 
 //
 // force_escape_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct force_escape_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("force_escape"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct force_escape_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return value.escape().mark_safe();
         }
     };
-};
 
 //
 // get_digit_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct get_digit_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("get_digit"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct get_digit_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             try {
                 typename Value::number_type const number = value.count();
-                intmax_t const position = args[0].count();
+                intmax_t const position = arguments[0].count();
                 intmax_t const integer = number;
 
                 if (position > 0) {
@@ -553,48 +580,40 @@ struct get_digit_filter {
             return value;
         }
     };
-};
 
 //
 // iriencode_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct iriencode_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("iriencode"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct iriencode_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return detail::iri_encode(value.to_string());
         }
     };
-};
 
 //
 // join_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct join_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("join"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct join_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             Size i = 0;
             std::basic_ostringstream<Char> stream;
-            String const delimiter = args[0].to_string();
+            String const delimiter = arguments[0].to_string();
 
             BOOST_FOREACH(Value const& v, value) {
                 if (i++) stream << delimiter;
@@ -607,23 +626,19 @@ struct join_filter {
             return result;
         }
     };
-};
 
 //
 // last_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct last_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("last"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct last_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             if (!value.length()) {
                 throw_exception(std::invalid_argument("sequence"));
@@ -632,79 +647,63 @@ struct last_filter {
             return value.back();
         }
     };
-};
 
 //
 // length_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct length_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("length"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct length_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return value.length();
         }
     };
-};
 
 //
 // length_is_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct length_is_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("length_is"); }
+    struct length_is_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            Size const length = args[0].count();
+            Size const length = arguments[0].count();
             return length == value.length();
         }
     };
-};
 
 //
 // linebreaks_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct linebreaks_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("linebreaks"); }
-
-        definition() {
-            using namespace xpressive;
-            newlines_ = _n >> +_n;
-            regex_ = '\r' >> !as_xpr('\n'); // TODO: Use xpressive::{_n,_nl} instead.
-        }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct linebreaks_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+            static string_regex_type const newline  = _ln;
+            static string_regex_type const newlines = _ln >> +_ln;
 
             std::basic_ostringstream<Char> stream;
-            String const input = xpressive::regex_replace(value.to_string(), regex_, engine.newline);
+            String const input = regex_replace(value.to_string(), newline, engine.newline);
 
             xpressive::regex_token_iterator<typename String::const_iterator>
-                begin(input.begin(), input.end(), newlines_, -1), end;
-            bool const safe = !options.autoescape || value.safe();
+                begin(input.begin(), input.end(), newlines, -1), end;
+            boolean_type const safe = !options.autoescape || value.safe();
 
             BOOST_FOREACH(String const& line, std::make_pair(begin, end)) {
                 String p = safe ? Value(line).escape().to_string() : line;
@@ -714,51 +713,38 @@ struct linebreaks_filter {
 
             return Value(stream.str()).mark_safe();
         }
-
-      private:
-
-        typename Engine::string_regex_type regex_;
-        typename Engine::string_regex_type newlines_;
     };
-};
 
 //
 // linebreaksbr_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct linebreaksbr_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("linebreaksbr"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct linebreaksbr_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             return Value(algorithm::replace_all_copy(value.to_string(),
                 engine.newline, text("<br />"))).mark_safe();
         }
     };
-};
 
 //
 // linenumbers_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct linenumbers_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("linenumbers"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct linenumbers_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             Size count = 1;
             std::vector<String> lines;
@@ -766,7 +752,7 @@ struct linenumbers_filter {
             std::basic_ostringstream<Char> stream;
             String const input = value.to_string();
             String const pattern = text("%%0%dd. %%s");
-            bool const safe = !options.autoescape || value.safe();
+            boolean_type const safe = !options.autoescape || value.safe();
             algorithm::split(lines, input, algorithm::is_any_of("\n"));
             Size const width = boost::lexical_cast<String>(lines.size()).size();
             String const spec = (format(pattern) % width).str();
@@ -779,69 +765,57 @@ struct linenumbers_filter {
             return Value(stream.str()).mark_safe();
         }
     };
-};
 
 //
 // ljust_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ljust_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("ljust"); }
+    struct ljust_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            Size const width = args[0].count();
+            Size const width = arguments[0].count();
             std::basic_ostringstream<Char> stream;
             stream << std::left << std::setw(width) << value;
             BOOST_ASSERT(stream);
             return stream.str();
         }
     };
-};
 
 //
 // lower_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct lower_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("lower"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct lower_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return algorithm::to_lower_copy(value.to_string());
         }
     };
-};
 
 //
 // make_list_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct make_list_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("make_list"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct make_list_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             Size i = 0;
             std::basic_ostringstream<Char> stream;
@@ -855,37 +829,19 @@ struct make_list_filter {
             return stream.str() + Char(']');
         }
     };
-};
 
 //
 // phone2numeric_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct phone2numeric_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("phone2numeric"); }
-
-        inline static int translate(int const c) {
-            switch (c) {
-                case 'a': case 'b': case 'c': return '2';
-                case 'd': case 'e': case 'f': return '3';
-                case 'g': case 'h': case 'i': return '4';
-                case 'j': case 'k': case 'l': return '5';
-                case 'm': case 'n': case 'o': return '6';
-                case 't': case 'u': case 'v': return '8';
-                case 'p': case 'q': case 'r': case 's': return '7';
-                case 'w': case 'x': case 'y': case 'z': return '9';
-                default: return c;
-            }
-        }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct phone2numeric_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             String phone = value.to_string();
             algorithm::to_lower(phone);
@@ -893,29 +849,41 @@ struct phone2numeric_filter {
                            phone.begin(), translate);
             return phone;
         }
+
+      private:
+
+        inline static int translate(int const c) {
+            switch (c) {
+                case 'a': case 'b': case 'c':           return '2';
+                case 'd': case 'e': case 'f':           return '3';
+                case 'g': case 'h': case 'i':           return '4';
+                case 'j': case 'k': case 'l':           return '5';
+                case 'm': case 'n': case 'o':           return '6';
+                case 't': case 'u': case 'v':           return '8';
+                case 'p': case 'q': case 'r': case 's': return '7';
+                case 'w': case 'x': case 'y': case 'z': return '9';
+                default: return c;
+            }
+        }
     };
-};
 
 
 //
 // pluralize_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct pluralize_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("pluralize"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct pluralize_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             String singular, plural;
-            Array const sequential_arguments = args.empty() ? Array() :
-                engine.template split_argument<','>(args[0], context, options);
+            sequence_type const sequential_arguments = arguments.empty() ? sequence_type() :
+                engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
                 case 0: plural = text("s");             break;
@@ -928,46 +896,38 @@ struct pluralize_filter {
             return value.count() == 1 ? singular : plural;
         }
     };
-};
 
 //
 // pprint_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct pprint_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("pprint"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct pprint_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             // NOTE: Since this filter is for debugging, we don't normally try
             //       to do anything fancy. However, in the Python binding,
             //       this filter is overridden with a call to the real pprint.
             return value.to_string();
         }
     };
-};
 
 //
 // random_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct random_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("random"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct random_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             if (Size const length = value.length()) {
                 Size const index = detail::random_int(0, length - 1);
@@ -978,86 +938,76 @@ struct random_filter {
             }
         }
     };
-};
 
 //
 // removetags_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct removetags_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("removetags"); }
-
-        struct formatter {
-            std::vector<String> const& tags;
-
-            template <class Match_>
-            String operator()(Match_ const& match) const {
-                String const tag = match[xpressive::s1].str();
-                return detail::find_value(tag, tags) ? String() : match.str();
-            }
-        };
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct removetags_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             std::vector<String> tags;
             formatter const format = { tags };
             int (*predicate)(int) = std::isspace;
-            String const source = args[0].to_string();
+            String const source = arguments[0].to_string();
             algorithm::split(tags, source, predicate);
-            return xpressive::regex_replace(value.to_string(), engine.html_tag, format);
+            return regex_replace(value.to_string(), engine.html_tag, format);
         }
+
+      private:
+
+        struct formatter {
+            std::vector<String> const& tags;
+
+            template <class Match>
+            String operator()(Match const& match) const {
+                String const tag = match[s1].str();
+                return detail::find_value(tag, tags) ? String() : match.str();
+            }
+        };
     };
-};
 
 //
 // rjust_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct rjust_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("rjust"); }
+    struct rjust_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            Size const width = args[0].count();
+            Size const width = arguments[0].count();
             std::basic_ostringstream<Char> stream;
             stream << std::right << std::setw(width) << value;
             BOOST_ASSERT(stream);
             return stream.str();
         }
     };
-};
 
 //
 // safe_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct safe_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("safe"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct safe_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             return options.autoescape ?
                 // NOTE: The to_string is there because `safe`
@@ -1066,23 +1016,19 @@ struct safe_filter {
                 Value(value.to_string()).mark_safe() : value;
         }
     };
-};
 
 //
 // safeseq_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct safeseq_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("safeseq"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct safeseq_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             Value copy = value;
 
@@ -1094,33 +1040,29 @@ struct safeseq_filter {
             return copy.mark_safe();
         }
     };
-};
 
 //
 // slice_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct slice_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("slice"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct slice_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             String singular, plural;
-            Array const sequential_arguments = args.empty() ? Array() :
-                engine.template split_argument<':'>(args[0], context, options);
+            sequence_type const sequential_arguments = arguments.empty() ? sequence_type() :
+                engine.template split_argument<':'>(arguments[0], context, options);
 
             if (sequential_arguments.size() < 2) {
                 throw_exception(missing_argument());
             }
 
-            Array result;
+            sequence_type result;
             Value const lower = sequential_arguments[0];
             Value const upper = sequential_arguments[1];
             typename Value::range_type range =
@@ -1130,26 +1072,22 @@ struct slice_filter {
             return result;
         }
     };
-};
 
 //
 // slugify_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct slugify_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("slugify"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct slugify_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             struct invalid {
-                inline static bool fn(Char const c) {
+                inline static boolean_type fn(Char const c) {
                     return !std::isalnum(c) && c != '_' && c != '-';
                 }
             };
@@ -1162,149 +1100,117 @@ struct slugify_filter {
             return slug;
         }
     };
-};
 
 //
 // stringformat_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct stringformat_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("stringformat"); }
+    struct stringformat_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            String const spec = args[0].to_string();
+            String const spec = arguments[0].to_string();
             return (basic_format<Char>(Char('%') + spec) % value).str();
         }
     };
-};
 
 //
 // striptags_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct striptags_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("striptags"); }
-
-        definition() {
-            using namespace xpressive;
-            tag_ = '<' >> -*~(as_xpr('>')) >> '>';
+    struct striptags_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+            static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
+            return regex_replace(value.to_string(), tag, text(""));
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-            return xpressive::regex_replace(value.to_string(), tag_, text(""));
-        }
-
-      private:
-
-        typename Engine::string_regex_type tag_;
     };
-};
 
 //
 // time_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct time_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("time"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
+    struct time_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
             String format = "TIME_FORMAT";
 
-            if (args.size() > 1) throw_exception(superfluous_argument());
-            if (args.size() > 0) format = args[0].to_string();
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+            if (arguments.size() > 0) format = arguments[0].to_string();
 
             return engine.format_datetime(options, format, value.to_datetime());
         }
     };
-};
 
 //
 // timesince_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct timesince_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("timesince"); }
+    struct timesince_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            typename Options::datetime_type to = value.to_datetime();
-            typename Options::datetime_type from = args.empty() ?
-                detail::local_now() : args[0].to_datetime();
+            typename options_type::datetime_type to = value.to_datetime();
+            typename options_type::datetime_type from = arguments.empty() ?
+                detail::local_now() : arguments[0].to_datetime();
 
             return Value(engine.format_duration(options, from - to)).mark_safe();
         }
     };
-};
 
 //
 // timeuntil_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct timeuntil_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("timeuntil"); }
+    struct timeuntil_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            typename Options::datetime_type to = value.to_datetime();
-            typename Options::datetime_type from = args.empty() ?
-                detail::local_now() : args[0].to_datetime();
+            typename options_type::datetime_type to = value.to_datetime();
+            typename options_type::datetime_type from = arguments.empty() ?
+                detail::local_now() : arguments[0].to_datetime();
 
             return Value(engine.format_duration(options, to - from)).mark_safe();
         }
     };
-};
 
 //
 // title_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct title_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("title"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct title_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
             String text = value.to_string();
 
@@ -1320,32 +1226,22 @@ struct title_filter {
             return text;
         }
     };
-};
 
 //
 // truncatechars_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct truncatechars_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("truncatechars"); }
+    struct truncatechars_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-        typedef Char                                           char_type;
-        typedef Size                                           size_type;
-        typedef String                                         string_type;
-        typedef Value                                          value_type;
-        typedef typename value_type::number_type               number_type;
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            number_type const number = args[0].count();
+            number_type const number = arguments[0].count();
             if (number <= 0) return string_type();
             size_type const limit = static_cast<size_type>(number);
 
@@ -1360,36 +1256,31 @@ struct truncatechars_filter {
                 return text;
             }
         }
-    };
-};
 
-//
-// truncatechars_html_filter
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct truncatechars_html_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("truncatechars_html"); }
+      private:
 
         typedef Char                                           char_type;
         typedef Size                                           size_type;
         typedef String                                         string_type;
         typedef Value                                          value_type;
         typedef typename value_type::number_type               number_type;
-        typedef typename string_type::const_iterator           iterator_type;
-        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
-        typedef typename regex_iterator_type::value_type       sub_match_type;
+    };
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+//
+// truncatechars_html_filter
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            number_type const number = args[0].count();
+    struct truncatechars_html_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+
+            number_type const number = arguments[0].count();
             if (number <= 0) return string_type();
             size_type const limit = static_cast<size_type>(number);
 
@@ -1449,19 +1340,46 @@ struct truncatechars_html_filter {
 
             return value_type(stream.str()).mark_safe();
         }
+
+      private:
+
+        typedef Char                                           char_type;
+        typedef Size                                           size_type;
+        typedef String                                         string_type;
+        typedef Value                                          value_type;
+        typedef typename value_type::number_type               number_type;
+        typedef typename string_type::const_iterator           iterator_type;
+        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
+        typedef typename regex_iterator_type::value_type       sub_match_type;
     };
-};
 
 //
 // truncatewords_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct truncatewords_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("truncatewords"); }
+    struct truncatewords_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+
+            number_type const number = arguments[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
+
+            string_type const text = value.to_string();
+            size_type count = 0;
+            stream_type stream;
+
+            process_words(stream, text.begin(), text.end(), count, limit, engine.ellipsis);
+            return stream.str();
+        }
+
+      private:
 
         typedef Char                                           char_type;
         typedef Size                                           size_type;
@@ -1469,7 +1387,6 @@ struct truncatewords_filter {
         typedef Value                                          value_type;
         typedef typename value_type::number_type               number_type;
         typedef std::basic_ostringstream<char_type>            stream_type;
-        typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
         typedef char_separator<char_type>                      separator_type;
         typedef tokenizer < separator_type
@@ -1503,38 +1420,66 @@ struct truncatewords_filter {
             }
             return !words_left;
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            number_type const number = args[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
-            string_type const text = value.to_string();
-            size_type count = 0;
-            stream_type stream;
-
-            this->process_words(stream, text.begin(), text.end(),
-                                    count, limit, engine.ellipsis);
-            return stream.str();
-        }
     };
-};
 
 //
 // truncatewords_html_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct truncatewords_html_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("truncatewords_html"); }
+    struct truncatewords_html_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+
+            number_type const number = arguments[0].count();
+            if (number <= 0) return string_type();
+            size_type const limit = static_cast<size_type>(number);
+
+            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
+            string_type const input = value.to_string();
+            size_type count = 0;
+            stream_type stream;
+
+            iterator_type last = input.begin(), done = input.end();
+            regex_iterator_type begin(last, done, engine.html_tag), end;
+            stack_type open_tags;
+
+            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
+                string_type   const tag  = match.str();
+                string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
+                iterator_type const prev = last; last = match.second;
+
+                if (!process_words(stream, prev, match.first, count, limit, engine.ellipsis) || count >= limit) {
+                    break;
+                }
+                stream << tag;
+
+                if (name[0] == char_type('/')) {
+                    if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
+                        open_tags.pop();
+                    }
+                }
+                else {
+                    open_tags.push(name);
+                }
+            }
+
+            if (!process_words(stream, last, done, count, limit, engine.ellipsis) || count >= limit) {
+                while (!open_tags.empty()) {
+                    stream << "</" << open_tags.top() << ">";
+                    open_tags.pop();
+                }
+            }
+
+            return value_type(stream.str()).mark_safe();
+        }
+
+      private:
 
         typedef Char                                           char_type;
         typedef Size                                           size_type;
@@ -1542,7 +1487,6 @@ struct truncatewords_html_filter {
         typedef Value                                          value_type;
         typedef typename value_type::number_type               number_type;
         typedef std::basic_ostringstream<char_type>            stream_type;
-        typedef typename Options::boolean_type                 boolean_type;
         typedef typename string_type::const_iterator           iterator_type;
         typedef std::stack<string_type>                        stack_type;
         typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
@@ -1587,70 +1531,30 @@ struct truncatewords_html_filter {
 
             return !words_left;
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            number_type const number = args[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
-            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
-            string_type const input = value.to_string();
-            size_type count = 0;
-            stream_type stream;
-
-            iterator_type last = input.begin(), done = input.end();
-            regex_iterator_type begin(last, done, engine.html_tag), end;
-            stack_type open_tags;
-
-            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
-                string_type   const tag  = match.str();
-                string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
-                iterator_type const prev = last; last = match.second;
-
-                if (!this->process_words(stream, prev, match.first, count, limit, engine.ellipsis) || count >= limit) {
-                    break;
-                }
-                stream << tag;
-
-                if (name[0] == char_type('/')) {
-                    if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
-                        open_tags.pop();
-                    }
-                }
-                else {
-                    open_tags.push(name);
-                }
-            }
-
-            if (!this->process_words(stream, last, done, count, limit, engine.ellipsis) || count >= limit) {
-                while (!open_tags.empty()) {
-                    stream << "</" << open_tags.top() << ">";
-                    open_tags.pop();
-                }
-            }
-
-            return value_type(stream.str()).mark_safe();
-        }
     };
-};
 
 //
 // unordered_list_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct unordered_list_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("unordered_list"); }
+    struct unordered_list_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
 
-        inline static bool is_iterable(Value const& item) {
+            std::basic_ostringstream<Char> stream;
+            value.safe() ? push_item<true>(value, engine, 0, stream)
+                         : push_item<false>(value, engine, 0, stream);
+            return Value(stream.str()).mark_safe();
+        }
+
+      private:
+
+        inline static boolean_type is_iterable(Value const& item) {
             if (item.is_string()) {
             // Treat strings atomically.
                 return false;
@@ -1667,7 +1571,7 @@ struct unordered_list_filter {
             }
         }
 
-        template <bool Safe, class Stream>
+        template <boolean_type Safe, class Stream>
         inline static void push_item( Value  const& item
                                     , Engine const& engine
                                     , Size   const  level
@@ -1703,78 +1607,56 @@ struct unordered_list_filter {
                 out << "</li>" << std::endl;
             }
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-
-            std::basic_ostringstream<Char> stream;
-            value.safe() ? push_item<true>(value, engine, 0, stream)
-                         : push_item<false>(value, engine, 0, stream);
-            return Value(stream.str()).mark_safe();
-        }
     };
-};
 
 //
 // upper_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct upper_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("upper"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct upper_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return algorithm::to_upper_copy(value.to_string());
         }
     };
-};
 
 //
 // urlencode_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct urlencode_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("urlencode"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
+    struct urlencode_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
             return detail::uri_encode(value.to_string());
         }
     };
-};
 
 //
 // urlize_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct urlize_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("urlize"); }
-
-        definition() {
-            using namespace xpressive;
-            typename Engine::string_regex_type const safe =
-                +(alnum | (set= '/', '&', '=', ':', ';', '#',
-                                '?', '+', '-', '*', '%', '@'));
-            url_ = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
+    struct urlize_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+            return urlize(value, Size(-1), engine.ellipsis);
         }
+
+      private:
 
         struct formatter {
             Size const limit;
@@ -1782,75 +1664,72 @@ struct urlize_filter {
             formatter(Size const limit, String const& ellipsis)
                 : limit(limit), ellipsis(ellipsis) {}
 
-            template <class Match_>
-            String operator()(Match_ const& match) const {
+            template <class Match>
+            String operator()(Match const& match) const {
                 std::basic_ostringstream<Char> stream;
                 String const link = match.str();
                 String const full = match.str();
                 String const text = full.substr(0, limit);
-                bool const scheme = !match[xpressive::s1];
-                bool const more = text.size() < full.size();
+                boolean_type const scheme = !match[xpressive::s1];
+                boolean_type const more = text.size() < full.size();
                 stream << "<a href='" << (scheme ? "http://" : "") << link;
                 stream << "'>" << text << (more ? ellipsis : "") << "</a>";
                 return stream.str();
             }
         };
 
-        Value urlize(Value const& value, Size const limit, String const& ellipsis) const {
+      protected:
+
+        inline static Value urlize(Value const& value, Size const limit, String const& ellipsis) {
+            static string_regex_type const safe = +(alnum | (set= '/', '&', '=', ':', ';', '#',
+                                                                  '?', '+', '-', '*', '%', '@'));
+            static string_regex_type const url = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
+
             String const body = value.to_string();
-
-            return Value(xpressive::regex_replace(body,
-                url_, formatter(limit, ellipsis))).mark_safe();
+            return Value(regex_replace(body, url, formatter(limit, ellipsis))).mark_safe();
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-            return this->urlize(value, Size(-1), engine.ellipsis);
-        }
-
-      private:
-
-        typename Engine::string_regex_type url_;
     };
-};
 
 //
 // urlizetrunc_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct urlizetrunc_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition : urlize_filter
-         ::definition< Char, Regex, String, Context, Value
-                     , Size, Match, Engine, Options, Array
-                     > {
-        String name() const { return text("urlizetrunc"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-            return this->urlize(value, args[0].count(), engine.ellipsis);
+    struct urlizetrunc_filter : urlize_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+            return urlize_filter::urlize(value, arguments[0].count(), engine.ellipsis);
         }
     };
-};
 
 
 //
 // wordcount_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct wordcount_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("wordcount"); }
+    struct wordcount_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (!arguments.empty()) throw_exception(superfluous_argument());
+
+            String const input = value.to_string();
+            String const delimiters = text(word_delimiters);
+            separator_type const separator(delimiters.c_str());
+            tokenizer_type const tokenizer(input, separator);
+
+            return std::distance(tokenizer.begin(), tokenizer.end());
+        }
+
+      private:
 
         typedef Char                            char_type;
         typedef String                          string_type;
@@ -1860,32 +1739,29 @@ struct wordcount_filter {
                           , iterator_type
                           , String >            tokenizer_type;
 
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (!args.empty()) throw_exception(superfluous_argument());
-
-            String const input = value.to_string();
-            String const delimiters = text(word_delimiters);
-            separator_type const separator(delimiters.c_str());
-            tokenizer_type const tokenizer(input, separator);
-
-            return std::distance(tokenizer.begin(), tokenizer.end());
-        }
     };
-};
 
 
 //
 // wordwrap_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct wordwrap_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("wordwrap"); }
+    struct wordwrap_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
+
+            Size   const width = arguments[0].count();
+            String const text = value.to_string();
+            return wrap(text, width, engine.newline);
+        }
+
+      private:
 
         inline static String wrap( String const& input
                                  , Size   const& width
@@ -1915,39 +1791,25 @@ struct wordwrap_filter {
             result += word;
             return result;
         }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
-
-            Size   const width = args[0].count();
-            String const text = value.to_string();
-            return wrap(text, width, engine.newline);
-        }
     };
-};
 
 //
 // yesno_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct yesno_filter {
-    template < class Char, class Regex, class String, class Context, class Value
-             , class Size, class Match, class Engine, class Options, class Array
-             >
-    struct definition {
-        String name() const { return text("yesno"); }
-
-        Value process(Value  const& value, Engine  const& engine,
-                      String const& name,  Context const& context,
-                      Array  const& args,  Options const& options) const {
-            if (args.size() < 1) throw_exception(missing_argument());
-            if (args.size() > 1) throw_exception(superfluous_argument());
+    struct yesno_filter {
+        inline static value_type process( engine_type   const& engine
+                                        , value_type    const& value
+                                        , sequence_type const& arguments
+                                        , context_type  const& context
+                                        , options_type  const& options
+                                        ) {
+            if (arguments.size() < 1) throw_exception(missing_argument());
+            if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             Value true_, false_, none_;
-            Array const sequential_arguments = engine.template split_argument<','>(args[0], context, options);
+            sequence_type const sequential_arguments =
+                engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
                 case 0:
@@ -1969,7 +1831,7 @@ struct yesno_filter {
             return value.empty() ? none_ : (value ? true_ : false_);
         }
     };
-};
+}; // builtin_filters
 
 }}} // namespace ajg::synth::django
 

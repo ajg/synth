@@ -66,6 +66,12 @@ def find_cxx_version(cxx):
 def get_cpp_flags(cxx):
     cpp_flags = [
         '-Wall',
+        '-Wold-style-cast',
+        '-Woverloaded-virtual',
+        '-Wsign-promo',
+        '-Wmaybe-uninitialized',
+        # TODO: '-Wsurprising',
+        # TODO: '-Weffc++',
         '-Wextra', '-Wno-unused-parameter',
         '-pedantic', '-Wno-long-long',
     ]
@@ -74,13 +80,19 @@ def get_cpp_flags(cxx):
     cxx_template_depth = 1024
 
     if 'clang' in cxx_version:
+        cpp_flags += ['-Wuninitialized']
+        cpp_flags += ['-Wnarrowing']
         cpp_flags += ['-ferror-limit=1']
         cpp_flags += ['-ftemplate-backtrace-limit=1']
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
     elif 'g++' in cxx_version:
+        if not debug:
+            cpp_flags += ['-Wuninitialized'] # g++ doesn't support this without -O
+
         cpp_flags += ['-Wfatal-errors']
+        cpp_flags += ['-Wstrict-null-sentinel']
 
         triple = re.search(r'\s(\d+)[.](\d+)[.](\d+)\s', cxx_version)
         if triple:
@@ -97,11 +109,13 @@ def get_cpp_flags(cxx):
                 cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
             if gcc_version >= (4, 8):
+                cpp_flags += ['-Wnarrowing']
                 cpp_flags += ['-fmax-errors=1']
                 cpp_flags += ['-ftemplate-backtrace-limit=1']
 
+
     if debug:
-        cpp_flags += ['-g']
+        cpp_flags += ['-g', '-fstack-protector-all']
     else:
         cpp_flags += ['-O3', '-DNDEBUG']
 

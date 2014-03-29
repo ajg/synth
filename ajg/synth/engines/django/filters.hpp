@@ -70,18 +70,30 @@ struct builtin_filters {
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::boolean_type                                 boolean_type;
+    typedef typename options_type::char_type                                    char_type;
+    typedef typename options_type::size_type                                    size_type;
+    typedef typename options_type::number_type                                  number_type;
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::sequence_type                                sequence_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
-    // TODO: Replace these with *_type versions:
-    typedef typename options_type::char_type                                    Char;
-    typedef typename options_type::string_type                                  String;
-    typedef typename options_type::value_type                                   Value;
-    typedef typename options_type::size_type                                    Size;
 
+    typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef typename engine_type::string_regex_type                             string_regex_type;
+    typedef typename string_type::const_iterator                                string_iterator_type;
+    typedef xpressive::regex_token_iterator<string_iterator_type>               regex_iterator_type;
+    typedef typename regex_iterator_type::value_type                            sub_match_type;
+    typedef boost::char_separator<char_type>                                    separator_type;
+    typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
+
+
+    // TODO: Eliminate these:
+    typedef char_type   Char;
+    typedef size_type   Size;
+    typedef string_type String;
+    typedef value_type  Value;
+
 
 //
 // filter_type
@@ -701,8 +713,7 @@ struct builtin_filters {
             std::basic_ostringstream<Char> stream;
             String const input = regex_replace(value.to_string(), newline, engine.newline);
 
-            xpressive::regex_token_iterator<typename String::const_iterator>
-                begin(input.begin(), input.end(), newlines, -1), end;
+            regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
             boolean_type const safe = !options.autoescape || value.safe();
 
             BOOST_FOREACH(String const& line, std::make_pair(begin, end)) {
@@ -1256,14 +1267,6 @@ struct builtin_filters {
                 return text;
             }
         }
-
-      private:
-
-        typedef Char                                           char_type;
-        typedef Size                                           size_type;
-        typedef String                                         string_type;
-        typedef Value                                          value_type;
-        typedef typename value_type::number_type               number_type;
     };
 
 //
@@ -1288,7 +1291,7 @@ struct builtin_filters {
             string_type const input = value.to_string();
             std::basic_ostringstream<char_type> stream;
 
-            iterator_type last = input.begin(), done = input.end();
+            string_iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
             std::stack<string_type> open_tags;
             size_type length = 0;
@@ -1340,17 +1343,6 @@ struct builtin_filters {
 
             return value_type(stream.str()).mark_safe();
         }
-
-      private:
-
-        typedef Char                                           char_type;
-        typedef Size                                           size_type;
-        typedef String                                         string_type;
-        typedef Value                                          value_type;
-        typedef typename value_type::number_type               number_type;
-        typedef typename string_type::const_iterator           iterator_type;
-        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
-        typedef typename regex_iterator_type::value_type       sub_match_type;
     };
 
 //
@@ -1373,7 +1365,7 @@ struct builtin_filters {
 
             string_type const text = value.to_string();
             size_type count = 0;
-            stream_type stream;
+            string_stream_type stream;
 
             process_words(stream, text.begin(), text.end(), count, limit, engine.ellipsis);
             return stream.str();
@@ -1381,25 +1373,12 @@ struct builtin_filters {
 
       private:
 
-        typedef Char                                           char_type;
-        typedef Size                                           size_type;
-        typedef String                                         string_type;
-        typedef Value                                          value_type;
-        typedef typename value_type::number_type               number_type;
-        typedef std::basic_ostringstream<char_type>            stream_type;
-        typedef typename string_type::const_iterator           iterator_type;
-        typedef char_separator<char_type>                      separator_type;
-        typedef tokenizer < separator_type
-                          , iterator_type
-                          , string_type
-                          >                                    tokenizer_type;
-
-        inline static boolean_type process_words( stream_type&         stream
-                                                , iterator_type const& from
-                                                , iterator_type const& to
-                                                , size_type&           count
-                                                , size_type     const  limit
-                                                , string_type   const& ellipsis
+        inline static boolean_type process_words( string_stream_type&         stream
+                                                , string_iterator_type const& from
+                                                , string_iterator_type const& to
+                                                , size_type&                  count
+                                                , size_type            const  limit
+                                                , string_type          const& ellipsis
                                                 ) {
             static string_type    const delimiters = detail::text(word_delimiters);
             static separator_type const separator(delimiters.c_str());
@@ -1443,16 +1422,16 @@ struct builtin_filters {
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
             string_type const input = value.to_string();
             size_type count = 0;
-            stream_type stream;
+            string_stream_type stream;
 
-            iterator_type last = input.begin(), done = input.end();
+            string_iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
-            stack_type open_tags;
+            std::stack<string_type> open_tags;
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type   const tag  = match.str();
                 string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
-                iterator_type const prev = last; last = match.second;
+                string_iterator_type const prev = last; last = match.second;
 
                 if (!process_words(stream, prev, match.first, count, limit, engine.ellipsis) || count >= limit) {
                     break;
@@ -1481,28 +1460,12 @@ struct builtin_filters {
 
       private:
 
-        typedef Char                                           char_type;
-        typedef Size                                           size_type;
-        typedef String                                         string_type;
-        typedef Value                                          value_type;
-        typedef typename value_type::number_type               number_type;
-        typedef std::basic_ostringstream<char_type>            stream_type;
-        typedef typename string_type::const_iterator           iterator_type;
-        typedef std::stack<string_type>                        stack_type;
-        typedef xpressive::regex_token_iterator<iterator_type> regex_iterator_type;
-        typedef typename regex_iterator_type::value_type       sub_match_type;
-        typedef char_separator<char_type>                      separator_type;
-        typedef tokenizer < separator_type
-                          , iterator_type
-                          , string_type
-                          >                                    tokenizer_type;
-
-        inline static boolean_type process_words( stream_type&         stream
-                                                , iterator_type const& from
-                                                , iterator_type const& to
-                                                , size_type&           count
-                                                , size_type     const  limit
-                                                , string_type   const& ellipsis
+        inline static boolean_type process_words( string_stream_type&         stream
+                                                , string_iterator_type const& from
+                                                , string_iterator_type const& to
+                                                , size_type&                  count
+                                                , size_type            const  limit
+                                                , string_type          const& ellipsis
                                                 ) {
             static string_type    const delimiters = detail::text(word_delimiters);
             static separator_type const separator(delimiters.c_str());
@@ -1510,7 +1473,7 @@ struct builtin_filters {
             tokenizer_type const tokenizer(from, to, separator);
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
-            iterator_type it = from;
+            string_iterator_type it = from;
 
             for (; count < limit && word != stop; ++word, ++count) {
                 string_type const lead = string_type(it, word.base() - word->length());
@@ -1728,19 +1691,7 @@ struct builtin_filters {
 
             return std::distance(tokenizer.begin(), tokenizer.end());
         }
-
-      private:
-
-        typedef Char                            char_type;
-        typedef String                          string_type;
-        typedef typename String::const_iterator iterator_type;
-        typedef char_separator<Char>            separator_type;
-        typedef tokenizer < separator_type
-                          , iterator_type
-                          , String >            tokenizer_type;
-
     };
-
 
 //
 // wordwrap_filter

@@ -976,7 +976,7 @@ struct uniform_random_number_generator {
 
         ptime const epoch = from_time_t(std::time_t(0));
         ptime const now = microsec_clock::local_time();
-        return (now - epoch).total_microseconds();
+        return static_cast<seed_type>((now - epoch).total_microseconds());
     }
 };
 

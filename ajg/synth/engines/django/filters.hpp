@@ -69,7 +69,8 @@ template <class Engine>
 struct builtin_filters {
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
-    typedef typename options_type::boolean_type                                 boolean_type;
+	typedef typename options_type::boolean_type                                 boolean_type;
+	typedef typename options_type::size_type                                    size_type;
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::sequence_type                                sequence_type;
@@ -256,16 +257,17 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            String const string = value.to_string();
-            Size const width = arguments[0].count(), length = string.length();
+            string_type const string = value.to_string();
+			size_type   const width  = arguments[0].to_size();
+			size_type   const length = string.length();
 
             if (width <= length) {
                 return string;
             }
 
-            Size const right = (width - length) / 2;
-            Size const left  = width - length - right;
-            return String(left, Char(' ')) + string + String(right, Char(' '));
+            size_type const right = (width - length) / 2;
+			size_type const left = width - length - right;
+			return string_type(left, char_type(' ')) + string + string_type(right, char_type(' '));
         }
     };
 
@@ -395,8 +397,8 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            intmax_t const dividend = value.count();
-            intmax_t const divisor  = arguments[0].count();
+            intmax_t const dividend = static_cast<intmax_t>(value.count());
+			intmax_t const divisor  = static_cast<intmax_t>(arguments[0].count());
             return dividend % divisor == 0;
         }
     };
@@ -454,11 +456,11 @@ struct builtin_filters {
                                         ) {
             if (!arguments.empty()) throw_exception(superfluous_argument());
 
-            return format(std::abs(value.count()));
+            return format(static_cast<size_type>(std::abs(static_cast<intmax_t>(value.count()))));
         }
 
-        inline static String format(uintmax_t const size) {
-            return detail::abbreviate_size<String>(size);
+        inline static String format(size_type const size) {
+            return detail::abbreviate_size<string_type>(size);
         }
     };
 
@@ -516,7 +518,7 @@ struct builtin_filters {
 
             // Get the number and the decimal places.
             std::basic_ostringstream<Char> stream;
-            int const n = arguments.empty() ? -1 : arguments[0].count();
+            int const n = arguments.empty() ? -1 : static_cast<int>(arguments[0].count());
             typename Value::number_type const number = value.count();
 
             // If it's an integer and n < 0, we don't want decimals.
@@ -560,16 +562,17 @@ struct builtin_filters {
 
             try {
                 typename Value::number_type const number = value.count();
-                intmax_t const position = arguments[0].count();
-                intmax_t const integer = number;
+                intmax_t const position = static_cast<intmax_t>(arguments[0].count());
+                intmax_t const integer  = static_cast<intmax_t>(number);
 
                 if (position > 0) {
                     // Ensure the number operated on is whole.
                     if (number == integer && integer >= 1) {
                         String const text = boost::lexical_cast<String>(integer);
+						size_type const distance = static_cast<size_type>(position);
 
-                        if (Size(position) <= text.length()) {
-                            return *(text.end() - position);
+						if (distance <= text.length()) {
+							return *(text.end() - distance);
                         }
                     }
                 }
@@ -678,8 +681,7 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            Size const length = arguments[0].count();
-            return length == value.length();
+			return arguments[0].to_size() == value.length();
         }
     };
 
@@ -780,7 +782,7 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            Size const width = arguments[0].count();
+            size_type const width = arguments[0].to_size();
             std::basic_ostringstream<Char> stream;
             stream << std::left << std::setw(width) << value;
             BOOST_ASSERT(stream);
@@ -886,7 +888,7 @@ struct builtin_filters {
                 engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
-                case 0: plural = text("s");             break;
+                case 0: plural = text("s");                           break;
                 case 1: plural = sequential_arguments[0].to_string(); break;
                 default: // 2+
                     singular = sequential_arguments[0].to_string();
@@ -988,7 +990,7 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            Size const width = arguments[0].count();
+            size_type const width = arguments[0].to_size();
             std::basic_ostringstream<Char> stream;
             stream << std::right << std::setw(width) << value;
             BOOST_ASSERT(stream);
@@ -1066,8 +1068,8 @@ struct builtin_filters {
             Value const lower = sequential_arguments[0];
             Value const upper = sequential_arguments[1];
             typename Value::range_type range =
-                value.slice(lower ? optional<int>(lower.count()) : none,
-                            upper ? optional<int>(upper.count()) : none);
+                value.slice(lower ? optional<int>(static_cast<int>(lower.count())) : none,
+                            upper ? optional<int>(static_cast<int>(upper.count())) : none);
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;
         }
@@ -1241,10 +1243,7 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            number_type const number = arguments[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
+			size_type   const limit = arguments[0].to_size();
             size_type   const ellip = engine.ellipsis.length();
             string_type const text  = value.to_string();
 
@@ -1280,10 +1279,7 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            number_type const number = arguments[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
+			size_type   const limit = arguments[0].to_size();
             size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
             std::basic_ostringstream<char_type> stream;
@@ -1367,11 +1363,8 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            number_type const number = arguments[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
-            string_type const text = value.to_string();
+            size_type   const limit = arguments[0].to_size();
+            string_type const text  = value.to_string();
             size_type count = 0;
             stream_type stream;
 
@@ -1436,11 +1429,8 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            number_type const number = arguments[0].count();
-            if (number <= 0) return string_type();
-            size_type const limit = static_cast<size_type>(number);
-
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
+			size_type   const limit = arguments[0].to_size();
             string_type const input = value.to_string();
             size_type count = 0;
             stream_type stream;
@@ -1703,7 +1693,7 @@ struct builtin_filters {
                                         ) {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
-            return urlize_filter::urlize(value, arguments[0].count(), engine.ellipsis);
+            return urlize_filter::urlize(value, arguments[0].to_size(), engine.ellipsis);
         }
     };
 
@@ -1756,8 +1746,8 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-            Size   const width = arguments[0].count();
-            String const text = value.to_string();
+            size_type   const width = arguments[0].to_size();
+            string_type const text  = value.to_string();
             return wrap(text, width, engine.newline);
         }
 

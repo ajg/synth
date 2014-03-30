@@ -385,7 +385,9 @@ struct definition : base_definition< BidirectionalIterator
     string_type extract_string(match_type const& match) const {
         // Handles "string" or 'string'.
         // TODO: Escape sequences, etc.
+        BOOST_ASSERT(match == this->string_literal);
         string_type const string = match.str();
+        BOOST_ASSERT(string.size() >= 2);
         return string.substr(1, string.size() - 2);
     }
 

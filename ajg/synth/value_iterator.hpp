@@ -20,10 +20,14 @@ struct clone_ptr : boost::scoped_ptr<T> {
     clone_ptr(T *const t = 0) : boost::scoped_ptr<T>(t) {}
     clone_ptr(clone_ptr const& c) : boost::scoped_ptr<T>(c ? &c->clone() : 0) {}
 
-    clone_ptr& operator =(clone_ptr const& c) {
+    inline clone_ptr& operator =(clone_ptr const& c) {
         this->reset(c ? &c->clone() : 0);
         return *this;
     }
+
+	inline operator bool() const {
+		return boost::scoped_ptr<T>::get() != 0;
+	}
 };
 
 } // detail

@@ -15,6 +15,7 @@
 #include <ctime>
 #include <limits>
 #include <vector>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

@@ -12,14 +12,18 @@
 #include <boost/static_assert.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wunused-variable"
+#ifndef _MSC_VER
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wunused-function"
+#    pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-#pragma GCC diagnostic pop
+#ifndef _MSC_VER
+#    pragma GCC diagnostic pop
+#endif
 
 #define AJG_TESTING 1
 

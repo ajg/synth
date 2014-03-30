@@ -88,7 +88,13 @@ struct value : value_facade<Char, value<Char> > {
         return token_;
     }
 
-    value_type escape() const {
+	inline size_type to_size() const {
+		number_type const number = this->count();
+		if (number <= 0) return 0;
+		return static_cast<size_type>(number);
+	}
+
+	value_type escape() const {
         // xxx: Should this method escape binary and control characters?
         return detail::escape_entities(this->to_string());
     }

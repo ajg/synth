@@ -139,15 +139,21 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
 }
 
-inline void signal_handler(int signum, siginfo_t* info, void* context) {
+inline void signal_handler( int        signum
+#if HAS_SIGACTION
+						  , siginfo_t* info
+						  , void*      context
+#endif
+						  ) {
     char const* name = 0;
 
     switch (signum) {
     case SIGABRT: name = "SIGABRT"; break;
     case SIGSEGV: name = "SIGSEGV"; break;
-    case SIGBUS:  name = "SIGBUS";  break;
+ // case SIGBUS:  name = "SIGBUS";  break;
     case SIGILL:  name = "SIGILL";  break;
-    case SIGFPE:  name = "SIGFPE";  break;
+	case SIGFPE:  name = "SIGFPE";  break;
+ // case SIGPIPE: name = "SIGPIPE"; break;
     default:      name = "?";       break;
     }
 
@@ -169,17 +175,30 @@ inline void unexpected_handler() {
 }
 
 inline void set_handlers() {
+#if HAS_SIGACTION
+
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO;
     sa.sa_sigaction = signal_handler;
-    sigemptyset( &sa.sa_mask );
+    sigemptyset(&sa.sa_mask);
 
-    sigaction(SIGABRT, &sa, NULL);
-    sigaction(SIGSEGV, &sa, NULL);
-    sigaction(SIGBUS,  &sa, NULL);
-    sigaction(SIGILL,  &sa, NULL);
-    sigaction(SIGFPE,  &sa, NULL);
-    sigaction(SIGPIPE, &sa, NULL);
+	BOOST_VERIFY(sigaction(SIGABRT, &sa, NULL) == 0);
+	BOOST_VERIFY(sigaction(SIGSEGV, &sa, NULL) == 0);
+	BOOST_VERIFY(sigaction(SIGBUS,  &sa, NULL) == 0);
+	BOOST_VERIFY(sigaction(SIGILL,  &sa, NULL) == 0);
+	BOOST_VERIFY(sigaction(SIGFPE,  &sa, NULL) == 0);
+	BOOST_VERIFY(sigaction(SIGPIPE, &sa, NULL) == 0);
+
+#else
+
+	BOOST_VERIFY(signal(SIGABRT, signal_handler) != SIG_ERR);
+	BOOST_VERIFY(signal(SIGSEGV, signal_handler) != SIG_ERR);
+ // BOOST_VERIFY(signal(SIGBUS,  signal_handler) != SIG_ERR);
+	BOOST_VERIFY(signal(SIGILL,  signal_handler) != SIG_ERR);
+	BOOST_VERIFY(signal(SIGFPE,  signal_handler) != SIG_ERR);
+ // BOOST_VERIFY(signal(SIGPIPE, signal_handler) != SIG_ERR);
+
+#endif // HAS_SIGACTION
 
     std::set_terminate(terminate_handler);
     std::set_unexpected(unexpected_handler);

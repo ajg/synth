@@ -49,6 +49,13 @@
 #    endif
 #endif
 
+// XXX: This is not especially accurate:
+#if defined(_MSC_VER)
+#    define HAS_SIGACTION 0
+#else
+#    define HAS_SIGACTION 1
+#endif
+
 // #define BOOST_THROW_EXCEPTION_CURRENT_FUNCTION
 
 #include <ajg/synth/debug.hpp>

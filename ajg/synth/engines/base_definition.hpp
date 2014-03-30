@@ -35,7 +35,11 @@ namespace synth {
 
 namespace xpressive = boost::xpressive;
 
-template <class BidirectionalIterator, class Definition>
+template < class BidirectionalIterator
+	     , class Definition
+		 // This argument is only necessary because MSVC chokes on iterator_type::value_type:
+	     , class Char = typename BidirectionalIterator::value_type
+         >
 struct base_definition : boost::noncopyable {
   public:
 
@@ -44,12 +48,12 @@ struct base_definition : boost::noncopyable {
     typedef Definition            definition_type;
 
     // Derived types:
-    typedef base_definition                         this_type;
-    typedef std::size_t                             size_type;
-    typedef typename iterator_type::value_type      char_type;
+    typedef base_definition                               this_type;
+    typedef std::size_t                                   size_type; // TODO: Use Traits::size_type
+    typedef Char /* typename iterator_type::value_type */ char_type; // TODO: Use Traits::char_type
 
     typedef xpressive::regex_id_type                id_type;
-    typedef xpressive::basic_regex<iterator_type>   regex_type;
+	typedef xpressive::basic_regex<iterator_type>   regex_type;
     typedef xpressive::match_results<iterator_type> frame_type;
     typedef xpressive::match_results<iterator_type> match_type;
     typedef std::basic_string<char_type>            string_type; // TODO: Use Traits::string_type.

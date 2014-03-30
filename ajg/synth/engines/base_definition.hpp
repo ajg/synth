@@ -94,18 +94,18 @@ struct base_definition : boost::noncopyable {
   public:
 
     /// [deprecated] Prefer Traits::transcode.
-    template <class Char, class String>
-    inline std::basic_string<Char> transcode(String const& string) const {
-        return std::basic_string<Char>(string.begin(), string.end());
+    template <class C, class S>
+    inline std::basic_string<C> transcode(S const& string) const {
+        return std::basic_string<C>(string.begin(), string.end());
     }
 
-    template <class Iterator>
-    void parse(std::pair<Iterator, Iterator> const& range, frame_type& frame) const {
+    template <class I>
+    void parse(std::pair<I, I> const& range, frame_type& frame) const {
         return parse(range.first, range.second, frame);
     }
 
-    template <class Iterator>
-    void parse(Iterator const& begin, Iterator const& end, frame_type& frame) const {
+    template <class I>
+    void parse(I const& begin, I const& end, frame_type& frame) const {
         definition_type const& self = static_cast<definition_type const&>(*this);
         iterator_type const begin_ = begin;
         iterator_type const end_ = end;

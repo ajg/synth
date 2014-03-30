@@ -1,2 +1,6 @@
 # Set default behavior to automatically normalize line endings.
 * text=auto
+*.html -crlf
+*.shtml -crlf
+*.tmpl -crlf
+*.tpl -crlf

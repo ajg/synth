@@ -1243,7 +1243,9 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-			size_type   const limit = arguments[0].to_size();
+			size_type const limit = arguments[0].to_size();
+            if (limit == 0) return string_type();
+
             size_type   const ellip = engine.ellipsis.length();
             string_type const text  = value.to_string();
 
@@ -1279,11 +1281,12 @@ struct builtin_filters {
             if (arguments.size() < 1) throw_exception(missing_argument());
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
-			size_type   const limit = arguments[0].to_size();
+			size_type const limit = arguments[0].to_size();
+            if (limit == 0) return string_type();
+
             size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
             std::basic_ostringstream<char_type> stream;
-
             iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
             std::stack<string_type> open_tags;
@@ -1430,11 +1433,12 @@ struct builtin_filters {
             if (arguments.size() > 1) throw_exception(superfluous_argument());
 
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
-			size_type   const limit = arguments[0].to_size();
-            string_type const input = value.to_string();
+			size_type const limit = arguments[0].to_size();
+            if (limit == 0) return string_type();
+            
             size_type count = 0;
             stream_type stream;
-
+            string_type const input = value.to_string();
             iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
             stack_type open_tags;

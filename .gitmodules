@@ -1,0 +1,3 @@
+[submodule "tests/tut-framework"]
+	path = tests/tut-framework
+	url = https://github.com/mrzechonek/tut-framework

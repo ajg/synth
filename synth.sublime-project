@@ -61,8 +61,7 @@
             "folder_exclude_patterns":
             [
                 "build",
-                "dist",
-                "tut"
+                "dist"
             ],
             "follow_symlinks": true,
             "path": "."

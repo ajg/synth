@@ -9,13 +9,17 @@
 #include <string>
 #include <iostream>
 
+#include <boost/static_assert.hpp>
+#include <boost/preprocessor/stringize.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-#include <boost/config.hpp>
-// XXX: #undef BOOST_HAS_LONG_LONG // Disable long long for gcc's -pedantic.
-#include <boost/static_assert.hpp>
-#include <boost/preprocessor/stringize.hpp>
+#pragma GCC diagnostic pop
 
 #define AJG_TESTING 1
 
@@ -91,12 +95,6 @@ struct check_test_number {
 namespace {
     struct empty {};
 } // namespace anonymous
-
-
-inline static void silence_unused_function_warnings() {
-    tut::ensure_not(false);
-    tut::fail("");
-}
 
 } // namespace detail
 

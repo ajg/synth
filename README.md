@@ -424,6 +424,8 @@ Future Work
    * Option to pre-load libraries, tags and filters
    * Implement missing date/time format specifiers
    * Make markers dynamically configurable
+ - SSI:
+   * Implement additional directives from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
  - Command-line:
    * Allow specifying formats option
    * Allow specifying debug option

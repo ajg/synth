@@ -6,6 +6,8 @@
 #ifndef AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
+// TODO: Move a lot of this stuff to a more general synth/detail.hpp.
+
 #include <ajg/synth/config.hpp>
 #include <ajg/synth/vector.hpp>
 
@@ -1109,32 +1111,45 @@ void read_file(FILE *const file, Stream& stream) {
     }
 }
 
+//
+// AJG_SYNTH_IF_WINDOWS:
+//     Picks the first version for Windows environments, otherwise the second.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(_WIN32) || defined(_WIN64)
+#    define AJG_SYNTH_IF_WINDOWS(a, b) a
+#else
+#    define AJG_SYNTH_IF_WINDOWS(a, b) b
+#endif
+
+//
+// AJG_SYNTH_IF_MSVC:
+//     Picks the first version for Microsoft compilers, otherwise the second.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(_MSC_VER)
+#    define AJG_SYNTH_IF_MSVC(a, b) a
+#else
+#    define AJG_SYNTH_IF_MSVC(a, b) b
+#endif
 
 //
 // pipe:
 //     Nicer, safer interface to popen/pclose.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _WIN32
-  #define AJG_SYNTH_POPEN  _popen
-  #define AJG_SYNTH_PCLOSE _pclose
-#else
-  #define AJG_SYNTH_POPEN  /*std::*/popen
-  #define AJG_SYNTH_PCLOSE /*std::*/pclose
-#endif
-
 struct pipe : boost::noncopyable {
   public:
 
     explicit pipe(std::string const& command, bool const reading = true) {
-        if ((file_ = AJG_SYNTH_POPEN(command.c_str(),
+		if ((file_ = AJG_SYNTH_IF_MSVC(_popen, /*std::*/popen)(command.c_str(),
                 reading ? "r" : "w")) == 0) {
             throw_exception(error("open"));
         }
     }
 
     ~pipe() {
-        if (AJG_SYNTH_PCLOSE(file_) == -1) {
+		if (AJG_SYNTH_IF_MSVC(_pclose, /*std::*/pclose)(file_) == -1) {
             throw_exception(error("close"));
         }
     }

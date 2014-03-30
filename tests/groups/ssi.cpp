@@ -268,14 +268,12 @@ unit_test(file template) {
 }}}
 
 unit_test(include directive) {
-    string_template const t(
-        "<!--#include file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), "\n\n\n"
-        "============\nfoo: A\nbar: B\nqux: C\n\n============\n");
+    string_template const t("<!--#include file='tests/templates/ssi/example.shtml' -->");
+    ensure_equals(t.render_to_string(), "\n\n\n============\nfoo: A\nbar: B\nqux: C\n\n============\n");
 }}}
 
 unit_test(exec directive) {
-    std::string const command = AJG_WIN32_DIVERGE("dir", "ls");
+    std::string const command = AJG_SYNTH_IF_WINDOWS("dir", "ls");
     string_template const t("<!--#exec cmd='" + command + "' -->");
     ensure(t.render_to_string().find("LICENSE_1_0.txt") != string_type::npos);
 }}}

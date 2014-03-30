@@ -386,11 +386,16 @@ TMPL Engine
 Future Work
 -----------
 
+ - Build:
+   * Create Visual Studio 2013 solution & project
+     ~ Pass /W3 cleanly
+     ~ Pass /W4 cleanly
+     ~ Pass /Wall cleanly
+   * Create Visual Studio 2012 solution & project
  - Distribution:
-   * [Homebrew](http://brew.sh/) formula
    * Pre-built OS X binaries
    * Pre-built Windows binaries
-   * Create Visual Studio solution & project using Scons
+   * [Homebrew](http://brew.sh/) formula
  - Bindings:
    * `ruby` binding based on [Rice](http://rice.rubyforge.org/)
    * `go` binding based on [cgo](http://golang.org/cmd/cgo/)

@@ -24,7 +24,7 @@
 #define AJG_TESTING 1
 
 #ifndef TEMPLATE_DEPTH
-#define TEMPLATE_DEPTH 256
+#define TEMPLATE_DEPTH 1024
 #endif
 
 #ifndef AJG_TESTING_MAX_TESTS_PER_FILE
@@ -33,17 +33,6 @@
 
 namespace ajg {
 namespace detail {
-
-//
-// AJG_WIN32_DIVERGE:
-//     Picks the first version for WIN32, otherwise the second.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef _WIN32
-  #define AJG_WIN32_DIVERGE(a, b) a
-#else
-  #define AJG_WIN32_DIVERGE(a, b) b
-#endif
 
 //
 // AJG_COUNTER, AJG_TESTING_BEGIN, TEST_NUMBER

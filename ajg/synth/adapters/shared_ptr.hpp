@@ -25,7 +25,7 @@ struct adapter<Traits, shared_ptr<T> >
 
     template <class A> A forward() const { return A(boost::cref(*adapted_)); }
     // T&   get()   const { return *adapted_; }
-    bool valid() const { return adapted_; }
+    bool valid() const { return bool(adapted_); }
 };
 
 

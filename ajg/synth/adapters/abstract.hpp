@@ -148,8 +148,8 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         return self && this_.adapted_ == self->adapted_;
     }
 
-    void list( ostream_type&      out
-             , string_type const& delimiter = boost::lexical_cast<string_type>(", ")
+    void list( ostream_type&     out
+             , string_type const delimiter = string_type(", ") // boost::lexical_cast<string_type>(", ", 2)
              ) const {
         size_type i = 0;
 

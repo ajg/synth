@@ -403,6 +403,9 @@ Future Work
    * [v1+] `cheetah` engine
    * `ctpp` engine
    * `multi_engine`
+ - Traits:
+   * Add dedicated `none_type` defaulted to `boost::none_t`
+     ~ Propagate this type in lieu of `boolean_type` where appropriate
  - Adapters:
    * `boost::tribool` adapter
    * `boost::fusion` sequence adapters

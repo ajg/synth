@@ -228,32 +228,31 @@ unit_test(invalid config sizefmt) {
 }}}
 
 unit_test(fsize directive bytes) {
-    string_template const t(
-        "<!--#fsize file='LICENSE_1_0.txt' -->");
+    string_template const t("<!--#fsize file='tests/templates/ssi/1338' -->");
     ensure_equals(t.render_to_string(), "1338");
 }}}
 
 unit_test(fsize directive abbrev) {
     string_template const t(
         "<!--#config sizefmt='abbrev' -->"
-        "<!--#fsize file='LICENSE_1_0.txt' -->");
+        "<!--#fsize file='tests/templates/ssi/1338' -->");
     ensure_equals(t.render_to_string(), "1.3 KB");
 }}}
 
 unit_test(flastmod directive) {
     string_template const t(
-        "<!--#flastmod file='LICENSE_1_0.txt' -->");
+        "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), s::detail::format_time(default_options.time_format,
-        boost::posix_time::from_time_t(s::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
+        boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
 unit_test(flastmod directive custom) {
     string_type const format("%H:%M:%S-%d/%m/%y");
     string_template const t(
         "<!--#config timefmt='" + format + "' -->"
-        "<!--#flastmod file='LICENSE_1_0.txt' -->");
+        "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), s::detail::format_time(format,
-        boost::posix_time::from_time_t(s::detail::stat_file("LICENSE_1_0.txt").st_mtime)));
+        boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
 unit_test(directive with error) {
@@ -268,14 +267,12 @@ unit_test(file template) {
 }}}
 
 unit_test(include directive) {
-    string_template const t(
-        "<!--#include file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), "\n\n\n"
-        "============\nfoo: A\nbar: B\nqux: C\n\n============\n");
+    string_template const t("<!--#include file='tests/templates/ssi/example.shtml' -->");
+    ensure_equals(t.render_to_string(), "\n\n\n============\nfoo: A\nbar: B\nqux: C\n\n============\n");
 }}}
 
 unit_test(exec directive) {
-    std::string const command = AJG_WIN32_DIVERGE("dir", "ls");
-    string_template const t("<!--#exec cmd='" + command + "' -->");
-    ensure(t.render_to_string().find("LICENSE_1_0.txt") != string_type::npos);
+    std::string const command = AJG_SYNTH_IF_WINDOWS("dir", "ls");
+    string_template const t("<!--#exec cmd='" + command + " \"tests/templates/ssi\"' -->");
+    ensure(t.render_to_string().find("example.shtml") != string_type::npos);
 }}}

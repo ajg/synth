@@ -708,7 +708,7 @@ struct definition : base_definition< BidirectionalIterator
 
         static transliterations_type const transliterations = boost::assign::list_of<transliteration_type>
             (char_type('%'), detail::text("%%"))
-            (char_type('a'), detail::text("%P")) // TODO: Periods
+			(char_type('a'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%P"))) // TODO: Periods; implement on Windows.
             (char_type('A'), detail::text("%p"))
             (char_type('b'), detail::text("%b")) // TODO: Lowercase
             (char_type('B'), detail::text(""))   // "Not implemented" per spec.
@@ -725,7 +725,7 @@ struct definition : base_definition< BidirectionalIterator
             (char_type('H'), detail::text("%H"))
             (char_type('i'), detail::text("%M"))
             (char_type('I'), detail::text(""))   // TODO: Implement
-            (char_type('j'), detail::text("%e")) // TODO: No leading blank
+            (char_type('j'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%e"))) // TODO: No leading blank; implement on Windows.
             (char_type('l'), detail::text("%A"))
             (char_type('L'), detail::text(""))   // TODO: Implement
             (char_type('m'), detail::text("%m"))
@@ -734,7 +734,7 @@ struct definition : base_definition< BidirectionalIterator
             (char_type('N'), detail::text("%b")) // TODO: Abbreviations/periods
             (char_type('o'), detail::text("%G"))
             (char_type('O'), detail::text(""))   // TODO: Implement
-            (char_type('P'), detail::text("%r")) // TODO: Periods, no zero minutes, "midnight"/"noon"
+			(char_type('P'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%r"))) // TODO: Periods, no zero minutes, "midnight"/"noon"; implement on Windows.
             (char_type('r'), detail::text("%a, %d %b %Y %T %z"))
             (char_type('s'), detail::text("%S"))
             (char_type('S'), detail::text(""))   // TODO: Implement
@@ -743,7 +743,7 @@ struct definition : base_definition< BidirectionalIterator
             (char_type('u'), detail::text("%f")) // TODO: No leading period
             (char_type('U'), detail::text(""))   // TODO: Implement
             (char_type('w'), detail::text("%w"))
-            (char_type('W'), detail::text("%V")) // TODO: No leading zeros
+			(char_type('W'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%V"))) // TODO: No leading zeros; implement on Windows.
             (char_type('y'), detail::text("%y"))
             (char_type('Y'), detail::text("%Y"))
             (char_type('z'), detail::text("%j")) // TODO: No leading zeros
@@ -751,9 +751,11 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         std::basic_ostringstream<char_type> stream;
+		typename options_type::formats_type::const_iterator const it = options.formats.find(format);
+		string_type const original = it == options.formats.end() ? format : it->second;
 
         // TODO: This might not be UTF8-safe; consider using a utf8_iterator.
-        BOOST_FOREACH(char_type const c, find_mapped_value(format, options.formats).get_value_or(format)) {
+		BOOST_FOREACH(char_type const c, original) {
             stream << find_mapped_value(c, transliterations).get_value_or(string_type(1, c));
         }
 

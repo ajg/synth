@@ -16,4 +16,4 @@ script:
   # Prevent slow builds from dying by echoing something every 5 minutes.
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
   - scons && ./test
-  - python setup.py install && ls tests/python/binding*.py | xargs -n 1 python
+  - sudo python setup.py install && ls tests/python/binding*.py | xargs -n 1 python

@@ -469,6 +469,7 @@ Future Work
    * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
    * [v1] Rename `this_type` to `self_type` unless it's actually a pointer
    * [v1] Reformat all operator _()'s to operator_()
+   * [v2+] Factor out values & adapters into separate library for generic language interop
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

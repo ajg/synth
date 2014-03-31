@@ -7,22 +7,29 @@
 *.o-*
 *.os
 *.os-*
-*.pyc
 *.so
+*.so-*
+*.dll
+*.dll-*
+*.lib
+*.lib-*
+
+# Executables
 /synth
 /test
 
 # Sublime Text
 *.sublime-workspace
 
-# Code::Blocks
+# Code Blocks
 *.depend
 *.layout
 
-# Visual Studio 2010
+# Visual Studio
 ipch/
 Debug/
 Release/
+*.idb
 *.suo
 *.sdf
 *.opensdf
@@ -30,6 +37,8 @@ Release/
 # Python
 /dist/
 /MANIFEST
+*.pyc
+*.pyd
 
 # Misc.
 SCRATCH

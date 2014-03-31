@@ -27,7 +27,7 @@
 #include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
-#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/detail.hpp>
 #include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {

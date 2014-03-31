@@ -10,35 +10,18 @@
 #ifndef AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
-// TODO: Move a lot of this stuff to a more general synth/detail.hpp.
-
 #include <ajg/synth/config.hpp>
 #include <ajg/synth/vector.hpp>
 
 #include <map>
 #include <ctime>
-#include <limits>
 #include <vector>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <utility>
-#include <exception>
-#include <stdexcept>
 #include <algorithm>
-#include <sys/stat.h>
 
-#ifndef _WIN32
-  #include <unistd.h>
-  extern char **environ;
-#endif
-
-#include <boost/assert.hpp>
 #include <boost/random.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/or.hpp>
@@ -71,9 +54,10 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/seq/for_each_product.hpp>
 
-#include <boost/program_options/environment_iterator.hpp>
-
+#include <ajg/synth/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
+
+// TODO: Move more of this stuff to ../detail.hpp.
 
 namespace ajg {
 namespace synth {
@@ -83,10 +67,8 @@ using boost::disable_if;
 using boost::disable_if_c;
 using boost::enable_if;
 using boost::enable_if_c;
-using boost::noncopyable;
 using boost::none;
 using boost::optional;
-using boost::throw_exception;
 
 namespace algorithm  = boost::algorithm;
 namespace date_time  = boost::date_time;
@@ -150,40 +132,6 @@ struct string_literal {
         return that.compare(self) != 0;
     }
 };
-
-//
-// AJG_UNREACHABLE:
-//     Wrapper around BOOST_ASSERT that also invokes __assume on MSVC,
-//     which (a) prevents warning C4715 and (b) eliminates wasteful code.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_MSC_VER)
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
-#elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
-#else
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
-#endif
-
-/*
-//
-// unreachable:
-//     A function to give the last, unreachable, operand to a ternary
-//     operator expression the right type, instead of void.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline T unreachable(T const&) {
-    AJG_UNREACHABLE;
-}
-*/
-
-struct unreachable {
-    unreachable() {}
-
-    template <class T>
-    inline operator T() const { AJG_UNREACHABLE; }
-};
-
 
 //
 // AJG_CASE_OF, AJG_CASE_OF_ELSE
@@ -320,6 +268,8 @@ struct create_definitions_extended;
 BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
 #undef CREATE_DEFINITIONS
 #undef DEFINITION
+
+#undef AJG_VECTOR_0_IF
 
 //
 // indexable_sequence
@@ -565,20 +515,6 @@ inline String format_time(String format, Time const& time) {
     stream.imbue(std::locale(stream.getloc(), facet));
     // Finally, stream out the time, properly formatted.
     return (stream << time), stream.str();
-}
-
-//
-// stat_file
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline struct stat stat_file(std::string const& filepath) {
-    struct stat file;
-
-    if (stat(filepath.c_str(), &file) != 0) {
-        throw_exception(file_error(filepath, "read", std::strerror(errno)));
-    }
-
-    return file;
 }
 
 //
@@ -1043,154 +979,6 @@ inline static bool is_integer(FloatingPoint const& fp) {
     FloatingPoint integer_part;
     return std::modf(fp, &integer_part) == FloatingPoint(0.0);
 }
-
-//
-// nonconstructible:
-//     Utility class to prevent instantiations of a class meant to be 'static.'
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct nonconstructible {
-  private:
-    nonconstructible();
-};
-
-
-
-//
-// standard_environment:
-//     Safer and iterable interface to the program's environment.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct standard_environment {
-  public:
-
-    typedef boost::environment_iterator         iterator;
-    typedef boost::environment_iterator         const_iterator;
-    typedef iterator::value_type                value_type;
-    typedef value_type::first_type              key_type;
-    typedef value_type::second_type             mapped_type;
-
-  public:
-
-    const_iterator begin() const {
-        return const_iterator(environ);
-    }
-
-    const_iterator end() const {
-        return const_iterator();
-    }
-
-    const_iterator find(key_type const& name) const {
-        const_iterator const end = this->end();
-
-        for (const_iterator it = begin(); it != end; ++it) {
-            if (it->first == name) {
-                return it;
-            }
-        }
-
-        return end;
-    }
-};
-
-//
-// read_file:
-//     Slurps a whole file directly into a stream, using a buffer.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifndef PIPE_BUF
-  #define PIPE_BUF 4096
-#endif
-
-template <class Stream>
-void read_file(FILE *const file, Stream& stream) {
-    typedef typename Stream::char_type char_type;
-    BOOST_STATIC_CONSTANT(std::size_t, buffer_size
-        = PIPE_BUF /*BUFSIZ*/ / sizeof(char_type));
-    char_type buffer[buffer_size];
-    BOOST_ASSERT(file != 0);
-
-    while (std::size_t const items = std::fread(buffer,
-            sizeof(char_type), buffer_size, file)) {
-        stream.write(buffer, items);
-    }
-}
-
-//
-// AJG_SYNTH_IF_WINDOWS:
-//     Picks the first version for Windows environments, otherwise the second.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_WIN32) || defined(_WIN64)
-#    define AJG_SYNTH_IF_WINDOWS(a, b) a
-#else
-#    define AJG_SYNTH_IF_WINDOWS(a, b) b
-#endif
-
-//
-// AJG_SYNTH_IF_MSVC:
-//     Picks the first version for Microsoft compilers, otherwise the second.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_MSC_VER)
-#    define AJG_SYNTH_IF_MSVC(a, b) a
-#else
-#    define AJG_SYNTH_IF_MSVC(a, b) b
-#endif
-
-//
-// AJG_SYNTH_THROW:
-//     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
-//     types) MSVC won't get it through its head that throw_exception doesn't return, even with
-//     __declspec(noreturn) which triggers warning C4715 or error C4716.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define AJG_SYNTH_THROW(e) AJG_SYNTH_IF_MSVC( \
-    (::boost::throw_exception(e), AJG_UNREACHABLE), \
-    ::boost::throw_exception(e))
-
-//
-// pipe:
-//     Nicer, safer interface to popen/pclose.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct pipe : boost::noncopyable {
-  public:
-
-    explicit pipe(std::string const& command, bool const reading = true) {
-		if ((file_ = AJG_SYNTH_IF_MSVC(_popen, /*std::*/popen)(command.c_str(),
-                reading ? "r" : "w")) == 0) {
-            throw_exception(error("open"));
-        }
-    }
-
-    ~pipe() {
-		if (AJG_SYNTH_IF_MSVC(_pclose, /*std::*/pclose)(file_) == -1) {
-            throw_exception(error("close"));
-        }
-    }
-
-  public:
-
-    struct error : public std::runtime_error {
-        error(std::string const& action)
-            : std::runtime_error("could not " + action +
-                " pipe (" + std::strerror(errno) + ")") {}
-    };
-
-  public:
-
-    template <class Stream>
-    void read_into(Stream& stream) {
-        read_file(file_, stream);
-    }
-
-  private:
-
-    FILE* file_;
-};
-
-#undef AJG_VECTOR_0_IF
 
 }}} // namespace ajg::synth::detail
 

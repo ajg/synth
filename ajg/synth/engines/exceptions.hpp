@@ -12,19 +12,6 @@
 namespace ajg {
 namespace synth {
 
-// TODO: Move to ajg/synth/
-
-//
-// not_implemented exception
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct not_implemented : public std::runtime_error {
-    not_implemented(std::string const& feature)
-        : std::runtime_error("not implemented: " + feature) {}
-
-    ~not_implemented() throw () {}
-};
-
 //
 // parsing_error exception
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,24 +133,6 @@ struct duplicate_attribute : public std::invalid_argument {
         , name(name) {}
 
     ~duplicate_attribute() throw () {}
-};
-
-//
-// file_error exception
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct file_error : public std::runtime_error {
-    std::string const filepath, action, reason;
-
-    file_error( std::string const& filepath
-              , std::string const& action
-              , std::string const& reason
-              )
-        : std::runtime_error("could not " + action +
-            " file `" + filepath + "' (" + reason + ")")
-        , filepath(filepath), action(action), reason(reason) {}
-
-    ~file_error() throw () {}
 };
 
 }} // namespace ajg::synth

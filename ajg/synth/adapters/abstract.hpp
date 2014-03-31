@@ -17,6 +17,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <ajg/synth/detail.hpp>
+
 namespace ajg {
 namespace synth {
 

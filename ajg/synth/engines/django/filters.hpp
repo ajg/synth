@@ -1544,14 +1544,16 @@ struct builtin_filters {
                         Safe ? out << value : out << value.escape();
 
                         if (++i < length) {
-                            if (is_iterable(value)) {
+                            value_type const& next = item[static_cast<number_type>(i)];
+
+                            if (is_iterable(next)) {
                                 out << std::endl << indent << "<ul>" << std::endl;
-                                push_item<Safe>(value, engine, level + 1, out);
+                                push_item<Safe>(next, engine, level + 1, out);
                                 out << indent << "</ul>" << std::endl << indent;
                             }
                             else {
                                 out << "</li>" << std::endl << indent << "<li>";
-                                Safe ? out << value : out << value.escape();
+                                Safe ? out << next : out << next.escape();
                             }
                         }
 

@@ -18,6 +18,8 @@ def library_loader(name):
         return Library(tags={'x': None, 'y': None, 'z': None})
     elif name == 'example_filters':
         return Library(filters={'a': None, 'b': None, 'c': None})
+    elif name in ('foo', 'bar', 'qux'):
+        return Library()
     else:
         raise Exception('Library not found')
 
@@ -26,10 +28,7 @@ source = """
 
 {% load x y z from tags.examples %}
 {% load a b c from example_filters %}
-
-{% comment %}
 {% load foo bar qux %}
-{% endcomment %}
 
 """.encode('utf-8')
 
@@ -41,7 +40,6 @@ string = template.render_to_string(context)
 print('Rendering succeeded!')
 
 golden = """
-
 
 
 

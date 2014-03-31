@@ -7,7 +7,6 @@ import os
 import re
 import subprocess
 import sys
-from distutils import sysconfig
 
 debug = int(ARGUMENTS.get('debug', 0))
 group = str(ARGUMENTS.get('group', ''))
@@ -40,17 +39,19 @@ def create_targets(env):
         LIBS   = ['boost_program_options'],
     )
 
-    python_module = env.Clone()
-    python_module.LoadableModule(
-        target    = 'python-synth.so',
-        source    = ['ajg/synth/bindings/python/module.cpp'],
-        CPPPATH   = ['.', sysconfig.get_python_inc()],
-        LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
-        LIBPREFIX = '',
-        LIBS      = ['boost_python', 'python' + sysconfig.get_config_var('VERSION')],
-    )
+    ### Note: Deprecated in favor of setup.py ###
+    # from distutils import sysconfig
+    # python_module = env.Clone()
+    # python_module.LoadableModule(
+    #     target    = 'python-synth.so',
+    #     source    = ['ajg/synth/bindings/python/module.cpp'],
+    #     CPPPATH   = ['.', sysconfig.get_python_inc()],
+    #     LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
+    #     LIBPREFIX = '',
+    #     LIBS      = ['boost_python', 'python' + sysconfig.get_config_var('VERSION')],
+    # )
 
-    return [test_harness, command_line_tool, python_module]
+    return [test_harness, command_line_tool]
 
 def find_test_sources():
     if group:
@@ -84,7 +85,7 @@ def get_cpp_flags(cxx):
     # Conditional flags:
     if 'clang' in cxx_version:
         cpp_flags += ['-Wuninitialized']
-        cpp_flags += ['-Wnarrowing']
+        cpp_flags += ['-Wc++11-narrowing']
         cpp_flags += ['-ferror-limit=1']
         cpp_flags += ['-ftemplate-backtrace-limit=1']
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]

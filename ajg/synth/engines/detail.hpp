@@ -3,6 +3,10 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
+#ifdef _MSC_VER
+#    pragma once
+#endif
+
 #ifndef AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
@@ -1133,6 +1137,17 @@ void read_file(FILE *const file, Stream& stream) {
 #else
 #    define AJG_SYNTH_IF_MSVC(a, b) b
 #endif
+
+//
+// AJG_SYNTH_THROW:
+//     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
+//     types) MSVC won't get it through its head that throw_exception doesn't return, even with
+//     __declspec(noreturn) which triggers warning C4715 or error C4716.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define AJG_SYNTH_THROW(e) AJG_SYNTH_IF_MSVC( \
+    (::boost::throw_exception(e), AJG_UNREACHABLE), \
+    ::boost::throw_exception(e))
 
 //
 // pipe:

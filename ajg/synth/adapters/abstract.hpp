@@ -68,12 +68,12 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
 
   public:
 
-    virtual const_iterator begin() const { throw_exception(bad_method("begin")); }
-    virtual const_iterator end()   const { throw_exception(bad_method("end")); }
+    virtual const_iterator begin() const { AJG_SYNTH_THROW(bad_method("begin")); }
+    virtual const_iterator end()   const { AJG_SYNTH_THROW(bad_method("end")); }
 
-    virtual number_type   count() const { throw_exception(bad_method("count")); } // TODO: Rename to_number
-    virtual boolean_type  test()  const { throw_exception(bad_method("test")); }  // TODO: Rename to_boolean
-    virtual datetime_type to_datetime()  const { throw_exception(bad_method("to_datetime")); }
+    virtual number_type   count() const { AJG_SYNTH_THROW(bad_method("count")); } // TODO: Rename to_number
+    virtual boolean_type  test()  const { AJG_SYNTH_THROW(bad_method("test")); }  // TODO: Rename to_boolean
+    virtual datetime_type to_datetime()  const { AJG_SYNTH_THROW(bad_method("to_datetime")); }
 
     // TODO: Make virtual?
     inline string_type to_string() const {
@@ -95,7 +95,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         }
         catch (bad_method const& method) {
             if (method.name == "begin" || method.name == "end") {
-                throw_exception(bad_method("equal"));
+                AJG_SYNTH_THROW(bad_method("equal"));
             }
             else {
                 throw;
@@ -113,7 +113,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         }
         catch (bad_method const& method) {
             if (method.name == "output") {
-                throw_exception(bad_method("less"));
+                AJG_SYNTH_THROW(bad_method("less"));
             }
             else {
                 throw;
@@ -121,17 +121,17 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         }
     }
 
-    virtual void input (istream_type& in)        { throw_exception(bad_method("input")); }
-    virtual void output(ostream_type& out) const { throw_exception(bad_method("output")); }
+    virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
+    virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
 
-    virtual std::type_info const& type() const { throw_exception(bad_method("type")); }
+    virtual std::type_info const& type() const { AJG_SYNTH_THROW(bad_method("type")); }
 
     virtual const_iterator find(value_type const& value) const {
-        throw_exception(bad_method("find"));
+        AJG_SYNTH_THROW(bad_method("find"));
     }
 
     virtual optional<value_type> index(value_type const& what) const {
-        throw_exception(bad_method("index"));
+        AJG_SYNTH_THROW(bad_method("index"));
     }
 
   public:

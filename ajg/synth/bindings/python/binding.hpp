@@ -80,7 +80,7 @@ struct library : Options::abstract_library_type {
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
     static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type&) {
-        throw_exception(not_implemented("call_tag"));
+        AJG_SYNTH_THROW(not_implemented("call_tag"));
     }
 
     static value_type call_filter( py::object            filter

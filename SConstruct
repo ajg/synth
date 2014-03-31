@@ -60,7 +60,8 @@ def find_test_sources():
 
 def find_cxx_version(cxx):
     try:
-        return subprocess.check_output([cxx, '--version'])
+        # Note: '--version' doesn't always work with g++
+        return subprocess.check_output([cxx, '--verbose'])
     except OSError as e:
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)
 
@@ -89,7 +90,7 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
-    elif 'g++' in cxx_version:
+    elif 'g++' in cxx_version or 'gcc' in cxx_version:
         if not debug:
             cpp_flags += ['-Wuninitialized'] # g++ doesn't support this without -O
 

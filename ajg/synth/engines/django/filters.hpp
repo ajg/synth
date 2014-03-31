@@ -943,7 +943,7 @@ struct builtin_filters {
 
             if (Size const length = value.length()) {
                 Size const index = detail::random_int(0, length - 1);
-                return value[index];
+                return value[static_cast<number_type>(index)];
             }
             else {
                 throw_exception(std::invalid_argument("sequence"));
@@ -1539,18 +1539,19 @@ struct builtin_filters {
             if (is_iterable(item)) {
                 if (Size const length = item.length()) {
                     for (Size i = 0; i < length; ++i) {
+                        value_type const& value = item[static_cast<number_type>(i)];
                         out << indent << "<li>";
-                        Safe ? out << item[i] : out << item[i].escape();
+                        Safe ? out << value : out << value.escape();
 
                         if (++i < length) {
-                            if (is_iterable(item[i])) {
+                            if (is_iterable(value)) {
                                 out << std::endl << indent << "<ul>" << std::endl;
-                                push_item<Safe>(item[i], engine, level + 1, out);
+                                push_item<Safe>(value, engine, level + 1, out);
                                 out << indent << "</ul>" << std::endl << indent;
                             }
                             else {
                                 out << "</li>" << std::endl << indent << "<li>";
-                                Safe ? out << item[i] : out << item[i].escape();
+                                Safe ? out << value : out << value.escape();
                             }
                         }
 

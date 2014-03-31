@@ -81,7 +81,7 @@ struct adapter<Traits, py::object>
 
         // 4. List-index lookup
         if (PySequence_Check(o)) {
-            Py_ssize_t n = what.count();
+            Py_ssize_t n = static_cast<Py_ssize_t>(what.count());
 
             if (n < PySequence_Size(o)) {
                 return value_type(py::object(adapted_[py::long_(n)]));

@@ -223,7 +223,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
             }
         }
 
-        throw_exception(std::invalid_argument("index"));
+        AJG_SYNTH_THROW(std::invalid_argument("index"));
     }
 
     inline const_iterator find(value_type const& value) const {

@@ -443,6 +443,7 @@ Future Work
    * Rewrite the majority of unit tests as a set of .in/.out files
    * Add unit tests from Cjango
    * Add way to specify expected failures; re-enable commented out tests
+   * Add valgrind to travis config as part of passing criteria
  - Optimization:
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Investigate `-fvisibility-inlines-hidden`

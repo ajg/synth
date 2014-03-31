@@ -48,8 +48,8 @@ slice( Containter const& container
     int upper_ = upper.get_value_or(size);
 
     // Adjust negative indices to the right position.
-    if (lower_ < 0) lower_ = size + lower_;
-    if (upper_ < 0) upper_ = size + upper_;
+    if (lower_ < 0) lower_ = static_cast<int>(size) + lower_;
+    if (upper_ < 0) upper_ = static_cast<int>(size) + upper_;
 
     // Check for indices that are out of range.
     if (lower_ < 0 || size_type(lower_) > size)

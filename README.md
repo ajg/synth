@@ -127,7 +127,10 @@ Installation
 
  2. Get the source:
 
-        git clone https://github.com/ajg/synth.git && cd synth
+        git clone https://github.com/ajg/synth.git
+        cd synth
+        git submodule init
+        git submodule update
 
  3. [Optional] Build the command-line program:
 

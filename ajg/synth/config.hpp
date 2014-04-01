@@ -27,6 +27,10 @@
 #define FUSION_MAX_MAP_SIZE            AJG_SYNTH_SEQUENCE_LIMIT
 #define FUSION_MAX_VECTOR_SIZE         AJG_SYNTH_SEQUENCE_LIMIT
 
+#if defined(NDEBUG) && defined(_DEBUG)
+#    error NDEBUG is not compatible with _DEBUG
+#endif
+
 #ifndef NDEBUG
 
 #ifndef AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT

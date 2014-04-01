@@ -312,6 +312,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     boost::shared_ptr<abstract_type const> adapter_;
 };
 
+// TODO[c++11]: Replace with variadic templates.
 #define AJG_SYNTH_VALUE_CONSTRUCTORS(name, base, rest) \
     name() \
         : base() rest \

@@ -686,7 +686,7 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
         std::string const name = engine.template transcode<char>(
             boost::lexical_cast<typename Engine::string_type>(needle));
         std::string const message = name + " not found";
-        throw_exception(std::runtime_error(message));
+        AJG_SYNTH_THROW(std::runtime_error(message));
     }
 
     typename Engine::size_type const distance = std::distance(index.begin(), it);

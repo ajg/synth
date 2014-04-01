@@ -3,12 +3,14 @@
 ##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
+import fnmatch
+import os
 import re
 import sys
 from distutils.core import setup, Extension
 from glob import glob
 
-# TODO: os.join where appropriate.
+# TODO: os.path.join where appropriate.
 
 def run():
     setup(
@@ -100,7 +102,7 @@ def get_extra_compile_args():
         return [
             '/D' + define,
             '/bigobj', # Prevent reaching object limit.
-            '/EHsc',   # Override structured exception handling (SEH). 
+            '/EHsc',   # Override structured exception handling (SEH).
             '/FD',     # Allow minimal rebuild.
             '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4180', # "qualifier applied to function type has no meaning" in list_of.hpp.
@@ -132,7 +134,7 @@ def get_libraries():
         threading = '-mt' if is_threaded else ''
         compiler  = '-vc%d%d' % msvc_version
         version   = '-%d_%d' % boost_version[:-1]
-        return [prefix + name + compiler + threading + version] 
+        return [prefix + name + compiler + threading + version]
     else:
         return [name]
 
@@ -158,16 +160,16 @@ def get_language():
 def get_sources():
     return [synth_base + 'bindings/python/module.cpp']
 
-def get_headers():
-    # TODO: Find a more elegant way to do this:
-    return (
-        glob(synth_base + '*.hpp') +
-        glob(synth_base + '*/*.hpp') +
-        glob(synth_base + '*/*/*.hpp') +
-        glob(synth_base + '*/*/*/*.hpp')
-    )
-
 def get_data_files():
-    return [('', get_headers())]
+    data_files = []
+
+    for base, _, files in os.walk(synth_base):
+        headers = []
+        for header in fnmatch.filter(files, '*.hpp'):
+            headers.append(os.path.join(base, header))
+        target = os.path.join('include', base)
+        data_files.append((target, headers))
+
+    return data_files
 
 run()

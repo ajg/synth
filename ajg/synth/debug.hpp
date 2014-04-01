@@ -35,6 +35,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/exception/detail/attribute_noreturn.hpp>
 
 // TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
 
@@ -166,6 +167,21 @@ inline void signal_handler( int        signum
     std::exit(signum);
 }
 
+#ifdef AJG_SYNTH_THROW_EXCEPTION
+#undef AJG_SYNTH_THROW_EXCEPTION
+#endif
+
+#define AJG_SYNTH_THROW_EXCEPTION ajg::synth::debug::throw_exception
+
+template <class Exception>
+BOOST_ATTRIBUTE_NORETURN
+inline void throw_exception(Exception const& e) {
+    std::string const name = unmangle(typeid(Exception).name());
+    AJG_FPRINTF(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
+    fprint_backtrace(stderr, 1);
+    boost::throw_exception(e);
+}
+
 inline void terminate_handler() {
     AJG_FPRINTF(stderr, "Terminated\n");
     fprint_backtrace(stderr, 1);
@@ -173,7 +189,7 @@ inline void terminate_handler() {
 }
 
 inline void unexpected_handler() {
-    AJG_FPRINTF(stderr, "Unexpected Exception\n");
+    AJG_FPRINTF(stderr, "Unexpected exception\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }

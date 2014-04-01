@@ -152,8 +152,9 @@ struct string_literal {
         // (BOOST_ASSERT(0), throw 0, ajg::synth::detail::unreachable(value)))
 
 //
-// text:
+// [deprecated] text:
 //     Creates string_literal objects from native literals.
+//     TODO: Replace remaining uses with traits_type::literal.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class From, std::size_t Length>

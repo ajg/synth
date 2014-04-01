@@ -55,18 +55,19 @@ def get_classifiers():
 def get_extension():
     return Extension(
         'synth',
+        language             = get_language(),
         sources              = get_sources(),
         libraries            = get_libraries(),
         include_dirs         = get_include_dirs(),
         library_dirs         = get_library_dirs(),
-        language             = get_language(),
+        runtime_library_dirs = get_runtime_library_dirs(),
         extra_compile_args   = get_extra_compile_args(),
         define_macros        = get_define_macros(),
-        runtime_library_dirs = get_runtime_library_dirs(),
+        undef_macros         = get_undef_macros(),
     )
 
 # TODO: Allow some of these to be overridden via environment variable:
-is_debug    = False
+is_debug    = True
 is_static   = True
 is_threaded = True
 synth_base  = 'ajg/synth/'
@@ -153,7 +154,10 @@ def get_synth_version():
     return (major, minor, patch)
 
 def get_define_macros():
-    return [] if is_debug else [('NDEBUG', '1')]
+    return [] if is_debug else [('NDEBUG', None)]
+
+def get_undef_macros():
+    return ['NDEBUG'] if is_debug else []
 
 def get_language():
     return 'c++'

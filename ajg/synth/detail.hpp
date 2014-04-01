@@ -175,9 +175,12 @@ struct unreachable {
 //     __declspec(noreturn) which triggers warning C4715 or error C4716.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_THROW(e) AJG_SYNTH_IF_MSVC( \
-    (::boost::throw_exception(e), AJG_UNREACHABLE), \
-    ::boost::throw_exception(e))
+#ifndef AJG_SYNTH_THROW_EXCEPTION
+#define AJG_SYNTH_THROW_EXCEPTION boost::throw_exception
+#endif
+
+#define AJG_SYNTH_THROW(e) \
+    AJG_SYNTH_IF_MSVC((AJG_SYNTH_THROW_EXCEPTION(e), AJG_UNREACHABLE), AJG_SYNTH_THROW_EXCEPTION(e))
 
 //
 // stat_file

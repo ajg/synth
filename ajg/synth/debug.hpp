@@ -6,6 +6,10 @@
 #ifndef AJG_SYNTH_DEBUG_HPP_INCLUDED
 #define AJG_SYNTH_DEBUG_HPP_INCLUDED
 
+#ifdef NDEBUG
+#    error Debugging instrumentation with NDEBUG
+#endif
+
 #ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
 #define BOOST_ENABLE_ASSERT_HANDLER
 #endif

@@ -39,18 +39,6 @@ def create_targets(env):
         LIBS   = ['boost_program_options'],
     )
 
-    ### Note: Deprecated in favor of setup.py ###
-    # from distutils import sysconfig
-    # python_module = env.Clone()
-    # python_module.LoadableModule(
-    #     target    = 'python-synth.so',
-    #     source    = ['ajg/synth/bindings/python/module.cpp'],
-    #     CPPPATH   = ['.', sysconfig.get_python_inc()],
-    #     LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
-    #     LIBPREFIX = '',
-    #     LIBS      = ['boost_python', 'python' + sysconfig.get_config_var('VERSION')],
-    # )
-
     return [test_harness, command_line_tool]
 
 def find_test_sources():

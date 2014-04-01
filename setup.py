@@ -7,7 +7,8 @@ import fnmatch
 import os
 import re
 import sys
-from distutils.core import setup, Extension
+# from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from glob import glob
 
 # TODO: os.path.join where appropriate.

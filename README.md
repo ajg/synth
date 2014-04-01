@@ -145,6 +145,12 @@ Install [Boost](#installing-boost), then:
 
     pip install synth
 
+### Using Easy Install:
+
+Install [Boost](#installing-boost), then:
+
+    easy_install synth
+
 Components
 ----------
 

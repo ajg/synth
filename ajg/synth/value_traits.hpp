@@ -13,6 +13,7 @@
 #include <ostream>
 #include <sstream>
 #include <utility>
+#include <typeinfo>
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -21,6 +22,23 @@
 
 namespace ajg {
 namespace synth {
+namespace detail {
+inline std::string get_type_name(std::type_info const& info) {
+    return info.name(); // TODO: Unmangle where needed.
+}
+} // namespace detail
+
+//
+// conversion_error (TODO: Consider renaming bad_conversion.)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct conversion_error : public std::runtime_error {
+    conversion_error(std::type_info const& a, std::type_info const& b)
+        : std::runtime_error("could not convert value of type `"
+                                 + detail::get_type_name(a) + "' to `"
+                                 + detail::get_type_name(b) + "'") {}
+    ~conversion_error() throw () {}
+};
 
 //
 // default_value_traits

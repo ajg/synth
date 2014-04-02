@@ -126,10 +126,8 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct
-            <detail::element_initializer<this_type> >(*this));
-        detail::index_sequence<this_type, tag_sequence_type,
-            &this_type::tags_, tag_sequence_type::size>(*this);
+        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
+        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:

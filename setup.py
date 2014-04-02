@@ -7,11 +7,10 @@ import fnmatch
 import os
 import re
 import sys
-# from distutils.core import setup, Extension
-from setuptools import setup, Extension
+from distutils.core import setup, Extension
+# from setuptools import setup, Extension
 from glob import glob
-
-# TODO: os.path.join where appropriate.
+from os.path import join
 
 def run():
     setup(
@@ -70,7 +69,7 @@ def get_extension():
 is_debug    = False
 is_static   = True
 is_threaded = True
-synth_base  = 'ajg/synth/'
+synth_base  = join('ajg', 'synth')
 is_windows  = sys.platform == 'win32'
 
 if is_windows:
@@ -147,7 +146,7 @@ def get_runtime_library_dirs():
         return []
 
 def get_synth_version():
-    config = open(synth_base + 'version.hpp').read()
+    config = open(join(synth_base, 'version.hpp')).read()
     major  = int(re.search(r'AJG_SYNTH_VERSION_MAJOR\s+(\S+)', config).group(1))
     minor  = int(re.search(r'AJG_SYNTH_VERSION_MINOR\s+(\S+)', config).group(1))
     patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
@@ -163,16 +162,17 @@ def get_language():
     return 'c++'
 
 def get_sources():
-    return [synth_base + 'bindings/python/module.cpp']
+    return [join(synth_base, 'bindings', 'python', 'module.cpp')]
 
 def get_data_files():
     data_files = []
 
     for base, _, files in os.walk(synth_base):
         headers = []
-        for header in fnmatch.filter(files, '*.hpp'):
-            headers.append(os.path.join(base, header))
-        target = os.path.join('include', base)
+        for file in fnmatch.filter(files, '*.hpp'):
+            header = join(base, file)
+            headers.append(header)
+        target = join('include', base)
         data_files.append((target, headers))
 
     return data_files

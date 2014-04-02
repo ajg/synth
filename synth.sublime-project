@@ -3,7 +3,7 @@
     [
         /* TODO: Use variants instead of this mess. */
         {
-            "cmd": "scons --quiet && python setup.py clean --all install",
+            "cmd": "scons && python setup.py clean --all install",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build All (release)",
@@ -11,7 +11,7 @@
             "working_dir": "${project_path}"
         },
         {
-            "cmd": "scons --quiet debug=1 synth",
+            "cmd": "scons debug=1 synth",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build Command-Line Tool (debug)",
@@ -19,28 +19,13 @@
             "working_dir": "${project_path}"
         },
         {
-            "cmd": "scons --quiet debug=1 && python setup.py clean --all install && ./test && ls tests/python/binding*.py | xargs -n 1 python",
+            "cmd": "scons debug=1 && ./test && python setup.py clean --all install && ls tests/python/binding*.py | xargs -n 1 python",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build All & Run Tests (debug)",
             "path": "/usr/local/bin:$PATH",
             "working_dir": "${project_path}"
-        },
-        {
-            "cmd":
-            [
-                "scons",
-                "--quiet",
-                "debug=1",
-                /* "j=2", */
-                /* "cpp=g++-4.2", */
-                "python-synth.so"
-            ],
-            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-            "name": "Synth: Build Python Module (debug)",
-            "path": "/usr/local/bin:$PATH",
-            "working_dir": "${project_path}"
-        },
+        }
     ],
     "folders":
     [

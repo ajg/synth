@@ -453,7 +453,6 @@ Future Work
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Investigate `-fvisibility-inlines-hidden`
    * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`
-   * Enable Xpressive's `syntax_option_type::optimize` or make configurable
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace

@@ -149,8 +149,7 @@ struct value : value_facade<Char, value<Char> > {
             return *attr;
         }
         else {
-            throw_exception(missing_attribute(traits_type::template
-                transcode<char>(attribute.to_string())));
+            throw_exception(missing_attribute(traits_type::narrow(attribute.to_string())));
         }
     }
 

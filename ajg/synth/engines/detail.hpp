@@ -672,9 +672,8 @@ inline optional<typename Functor::result_type> may_find_by_index( Engine   const
 // must_find_by_index
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Engine, class Sequence, class Index, class Needle, class Functor>
-inline typename Functor::result_type must_find_by_index( Engine   const& engine
-                                                       , Sequence const& sequence
+template <class Traits, class Sequence, class Index, class Needle, class Functor>
+inline typename Functor::result_type must_find_by_index( Sequence const& sequence
                                                        , Index    const& index
                                                        , Needle   const& needle
                                                        , Functor  const& functor
@@ -683,14 +682,13 @@ inline typename Functor::result_type must_find_by_index( Engine   const& engine
 
     if (it == index.end()) {
         // TODO: Throw missing_tag exception.
-        std::string const name = engine.template transcode<char>(
-            boost::lexical_cast<typename Engine::string_type>(needle));
+        std::string const name = Traits::narrow(Traits::to_string(needle));
         std::string const message = name + " not found";
         AJG_SYNTH_THROW(std::runtime_error(message));
     }
 
-    typename Engine::size_type const distance = std::distance(index.begin(), it);
-    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
+    typename Traits::size_type const distance = std::distance(index.begin(), it);
+    BOOST_STATIC_CONSTANT(typename Traits::size_type, size = Sequence::size::value);
     return detail::template apply_at<size>::fn(distance, sequence, functor);
 }
 

@@ -282,7 +282,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         if (value.empty()) {
-            return output << boost::lexical_cast<string_type>("<empty>");
+            return output << traits_type::literal("<empty>");
         }
         else {
             return value.get()->output(output), output;

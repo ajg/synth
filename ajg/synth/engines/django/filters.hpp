@@ -51,20 +51,6 @@ static char const word_delimiters[] = " \t\n.,;:!?'\"-";
 
 } // anonymous
 
-//
-// argument exceptions
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct superfluous_argument : public std::invalid_argument {
-    superfluous_argument() :
-        std::invalid_argument("superfluous argument to filter") {}
-};
-
-struct missing_argument : public std::invalid_argument {
-    missing_argument() :
-        std::invalid_argument("missing argument to filter") {}
-};
-
 template <class Engine>
 struct builtin_filters {
     typedef Engine                                                              engine_type;

@@ -108,6 +108,24 @@ struct missing_filter : public std::invalid_argument {
 };
 
 //
+// missing_argument exception
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct missing_argument : public std::invalid_argument {
+    missing_argument() : std::invalid_argument("missing argument") {}
+    ~missing_argument() throw () {}
+};
+
+//
+// superfluous_argument exception
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct superfluous_argument : public std::invalid_argument {
+    superfluous_argument() : std::invalid_argument("superfluous argument") {}
+    ~superfluous_argument() throw () {}
+};
+
+//
 // invalid_attribute exception
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

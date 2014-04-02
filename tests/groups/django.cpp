@@ -20,7 +20,7 @@ using boost::optional;
 using s::null_resolver;
 
 typedef char                                                                    char_type;
-typedef s::django::engine<>                                                     engine_type;
+typedef s::django::engine                                                       engine_type;
 typedef s::file_template<char_type, engine_type>                                file_template;
 typedef s::string_template<char_type, engine_type>                              string_template;
 typedef string_template::traits_type                                            traits_type;

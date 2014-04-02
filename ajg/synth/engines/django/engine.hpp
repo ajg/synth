@@ -35,8 +35,9 @@
 #include <ajg/synth/engines/base_definition.hpp>
 #include <ajg/synth/engines/django/value.hpp>
 #include <ajg/synth/engines/django/loader.hpp>
-#include <ajg/synth/engines/django/library.hpp>
 #include <ajg/synth/engines/django/options.hpp>
+#include <ajg/synth/engines/django/builtin_tags.hpp>
+#include <ajg/synth/engines/django/builtin_filters.hpp>
 
 namespace ajg {
 namespace synth {
@@ -46,9 +47,6 @@ using detail::operator ==;
 using detail::find_mapped_value;
 namespace x = boost::xpressive;
 
-template < class Library = django::default_library
-         , class Loader  = django::default_loader
-         >
 struct engine : detail::nonconstructible {
 
 typedef engine engine_type;
@@ -66,8 +64,7 @@ struct definition : base_definition< BidirectionalIterator
 
     typedef definition                                                          this_type;
     typedef base_definition<BidirectionalIterator, this_type>                   base_type;
-    typedef Library                                                             library_type;
-    typedef Loader                                                              loader_type;
+    typedef django::loader<this_type>                                           loader_type;
     typedef typename base_type::id_type                                         id_type;
     typedef typename base_type::size_type                                       size_type;
     typedef typename base_type::char_type                                       char_type;
@@ -81,7 +78,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::definition_type                                 definition_type;
     typedef typename base_type::string_regex_type                               string_regex_type;
 
-    typedef library_type                                                        builtin_tags_type;
+    typedef builtin_tags<this_type>                                             builtin_tags_type;
     typedef builtin_filters<this_type>                                          builtin_filters_type;
     typedef django::value<char_type>                                            value_type;
     typedef options<value_type>                                                 options_type;
@@ -93,11 +90,6 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename options_type::names_type                                   names_type;
     typedef typename options_type::sequence_type                                sequence_type;
     typedef typename options_type::arguments_type                               arguments_type;
-    typedef detail::indexable_sequence< this_type
-                                      , builtin_tags_type
-                                      , id_type
-                                      , detail::create_definitions_extended
-                                      >                                         tag_sequence_type;
 
   private:
 
@@ -330,8 +322,9 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
-        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
+        builtin_tags_.initialize(*this);
+        // fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
+        // detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:
@@ -440,11 +433,14 @@ struct definition : base_definition< BidirectionalIterator
                    , context_type const& context
                    , options_type const& options
                    ) const {
-        using namespace detail;
-        // If there's only _one_ tag, xpressive will not nest the match, so we use it directly.
-        match_type const& tag = tag_sequence_type::size == 1 ? match : detail::unnest(match);
-        tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
+        match_type const& match_ = detail::unnest(match);
+        id_type const id = match_.regex_id();
+        if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
+            tag(*this, match_, context, options, stream);
+        }
+        else {
+            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+        }
     }
 
     void render_match( stream_type&        stream
@@ -496,7 +492,9 @@ struct definition : base_definition< BidirectionalIterator
         if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {
             return filter(*this, value, arguments.first, context, options);
         }
-        throw_exception(missing_filter(traits_type::narrow(name)));
+        else {
+            throw_exception(missing_filter(traits_type::narrow(name)));
+        }
     }
 
     value_type evaluate( match_type     const& match
@@ -844,19 +842,7 @@ struct definition : base_definition< BidirectionalIterator
                      , string_type const& library
                      , names_type  const* names   = 0
                      ) const {
-        loader_.template load<this_type>(context, options, library, names);
-    }
-
-    typename options_type::tag_type const& get_tag( string_type  const& name
-                                                  , context_type const& context
-                                                  , options_type const& options
-                                                  ) const {
-        typename options_type::tags_type::const_iterator it = options.loaded_tags.find(name);
-
-        if (it != options.loaded_tags.end()) {
-            return it->second;
-        }
-        throw_exception(missing_tag(traits_type::narrow(name)));
+        loader_type::load(context, options, library, names);
     }
 
   public:
@@ -894,8 +880,7 @@ struct definition : base_definition< BidirectionalIterator
 
   private:
 
-    tag_sequence_type    tags_;
-    loader_type          loader_;
+    builtin_tags_type builtin_tags_;
 
 }; // definition
 

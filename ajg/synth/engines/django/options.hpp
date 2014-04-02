@@ -205,12 +205,9 @@ struct options {
     typedef std::map<marker_type, size_type>   cycles_type;
     typedef std::map<marker_type, value_type>  changes_type;
 
-    friend struct block_tag;
-    friend struct cycle_tag;
-    friend struct extends_tag;
-    friend struct ifchanged_tag;
-    friend struct default_loader;
-    template <class, class> friend struct engine;
+    friend struct engine;
+    template <class> friend struct builtin_tags;
+    template <class> friend struct loader;
 
     blocks_type*  blocks_;
     cycles_type   cycles_;

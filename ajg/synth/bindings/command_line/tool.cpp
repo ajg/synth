@@ -22,7 +22,7 @@ namespace synth = ajg::synth;
 typedef synth::command_line::binding<synth::detail::multi_template
     < char
     , synth::stream_template_identity
-    , synth::django::engine<>
+    , synth::django::engine
     , synth::ssi::engine<>
     , synth::tmpl::engine<>
     >

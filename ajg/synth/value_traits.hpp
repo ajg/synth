@@ -13,7 +13,9 @@
 #include <ostream>
 #include <sstream>
 #include <utility>
+#include <typeinfo>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -21,6 +23,23 @@
 
 namespace ajg {
 namespace synth {
+namespace detail {
+inline std::string get_type_name(std::type_info const& info) {
+    return info.name(); // TODO: Unmangle where needed.
+}
+} // namespace detail
+
+//
+// conversion_error (TODO: Consider renaming bad_conversion.)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct conversion_error : public std::runtime_error {
+    conversion_error(std::type_info const& a, std::type_info const& b)
+        : std::runtime_error("could not convert value of type `"
+                                 + detail::get_type_name(a) + "' to `"
+                                 + detail::get_type_name(b) + "'") {}
+    ~conversion_error() throw () {}
+};
 
 //
 // default_value_traits
@@ -30,6 +49,7 @@ template <class Char, class Value>
 struct default_value_traits {
   public:
 
+    typedef default_value_traits                        self_type;
     typedef Char                                        char_type;
     typedef std::size_t                                 size_type;
     typedef Value                                       value_type;
@@ -53,42 +73,57 @@ struct default_value_traits {
 
   public:
 
-    template <class A, class B>
-    inline static B convert(A const& a) {
-        B b;
+    template <class To, class From>
+    inline static To to(From const& from) {
+        To to;
         // Very crude conversion method for now:
         std::basic_stringstream<char_type> stream;
-        stream << a;
-        stream >> b;
-        return b;
+        stream << from;
+        stream >> to;
+        return to;
     }
+
+    template <class From>
+    inline static string_type to_string(From const& from) {
+        try {
+            return boost::lexical_cast<string_type>(from);
+        }
+        catch (boost::bad_lexical_cast const&) {
+            AJG_SYNTH_THROW(conversion_error(typeid(from), typeid(string_type)));
+        }
+    }
+
+    template <class From>
+    inline static number_type to_number(From const& from) {
+        return self_type::template to<number_type>(from);
+    }
+
+    inline static string_type literal(char const* const s) {
+        return self_type::widen(std::string(s));
+    }
+
+    /* TODO:
+    template <typename C, size_type N>
+    inline static ... literal(C const (&n)[N]) { ... }
+    */
 
     /// transcode
     ///     This function allows us to centralize string conversion
     ///     in order to properly, yet orthogonally, support Unicode.
     ////////////////////////////////////////////////////////////////////////////
-    template <class C, class S>
-    inline static std::basic_string<C> transcode(S const& string) {
-        return std::basic_string<C>(string.begin(), string.end());
+    template <class To, class From>
+    inline static std::basic_string<To> transcode(std::basic_string<From> const& s) {
+        // return boost::lexical_cast<std::basic_string<To> >(s);
+        return std::basic_string<To>(s.begin(), s.end());
     }
 
-/*
-    template <class S>
-    inline string_type transcode(S const& s) const {
-        return boost::lexical_cast<string_type>(s);
+    inline static std::basic_string<char> narrow(std::basic_string<Char> const& s) {
+        return self_type::template transcode<Char, char>(s);
     }
 
-    template <class S>
-    inline std::string narrow(S const& s) const {
-        //return boost::lexical_cast<std::string>(s);
-        return std::string(s.begin(), s.end());
+    inline static std::basic_string<Char> widen(std::basic_string<char> const& s) {
+        return self_type::template transcode<char, Char>(s);
     }
-
-    template <class S>
-    inline std::wstring widen(S const& s) const {
-        //return boost::lexical_cast<std::wstring>(s);
-        return std::wstring(s.begin(), s.end());
-    }*/
 };
 
 }} // namespace ajg::synth

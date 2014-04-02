@@ -11,17 +11,22 @@
 #include <ostream>
 #include <typeinfo>
 #include <stdexcept>
+#include <functional>
 
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
+
+#include <ajg/synth/detail.hpp>
 
 namespace ajg {
 namespace synth {
 
 using boost::optional;
 using boost::throw_exception;
+
+template <class Traits>
+struct abstract_numeric_adapter;
 
 //
 // bad_method exception
@@ -77,15 +82,43 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
 
     // TODO: Make virtual?
     inline string_type to_string() const {
-        // return boost::lexical_cast<string_type>(*this);
         std::basic_ostringstream<char_type> stream;
         this->output(stream);
         return stream.str();
     }
 
+    // TODO: concrete | abstract
+    //       bool     | boolean
+    //       char     | character
+    //       number   | numeric
+    //       string   | ?
+    //       datetime | chronological
+    //       ?        | sequential
+    //       ?        | mapping/indexed/associative
+    //
+
+    virtual boolean_type equal(abstract_type const& that) const {
+        if (this->shares_type_with(that))                  return this->equal_adapted(that);
+        else if (this->is_boolean() && that.is_boolean())  return this->test()      == that.test();
+        else if (this->is_numeric() && that.is_numeric())  return this->count()     == that.count();
+        else if (this->is_string()  && that.is_string())   return this->to_string() == that.to_string();
+        // TODO: Compare sequences, etc.
+        else return false;
+    }
+
+    virtual boolean_type less(abstract_type const& that) const {
+        if (this->shares_type_with(that))                  return this->less_adapted(that);
+        else if (this->is_boolean() && that.is_boolean())  return this->test()      == that.test();
+        else if (this->is_numeric() && that.is_numeric())  return this->count()     == that.count();
+        else if (this->is_string()  && that.is_string())   return this->to_string() == that.to_string();
+        // TODO: Compare sequences, etc.
+        else return false;
+    }
+
+    /*
     virtual boolean_type equal(abstract_type const& that) const {
         // Try comparing as a sequence by default.
-        // XXX: Should this behavior go in value or value_facade?
+        // FIXME: Move this only to sequential adapters.
         const_iterator i1, i2, e1, e2;
         try {
             i1 = begin();
@@ -94,6 +127,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
             e2 = that.end();
         }
         catch (bad_method const& method) {
+            AJG_DUMP(method.name);
             if (method.name == "begin" || method.name == "end") {
                 AJG_SYNTH_THROW(bad_method("equal"));
             }
@@ -104,7 +138,19 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
 
         return this->compare_range(i1, i2, e1, e2);
     }
+    */
 
+    /*
+    virtual boolean_type equal(abstract_type const& that) const {
+        // Try string equality by default.
+        // XXX: Should this behavior go in value or value_facade?
+        try {
+            return this->to_string() == that.to_string();
+        }
+    }
+    */
+
+    /*
     virtual boolean_type less(abstract_type const& that) const {
         // Try lexicographical ordering by default.
         // XXX: Should this behavior go in value or value_facade?
@@ -112,6 +158,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
             return this->to_string() < that.to_string();
         }
         catch (bad_method const& method) {
+            AJG_DUMP(method.name);
             if (method.name == "output") {
                 AJG_SYNTH_THROW(bad_method("less"));
             }
@@ -120,6 +167,7 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
             }
         }
     }
+    */
 
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
@@ -134,23 +182,87 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         AJG_SYNTH_THROW(bad_method("index"));
     }
 
-  public:
+    virtual boolean_type is_numeric() const {
+        typedef abstract_numeric_adapter<traits_type> numeric_adapter;
+        return dynamic_cast<numeric_adapter const*>(this) != 0;
+    }
+
+    virtual boolean_type is_string() const {
+        return is<string_type>();
+    }
+
+    virtual boolean_type is_boolean() const {
+        return is<boolean_type>();
+    }
 
     virtual ~abstract_adapter() {}
 
+  private:
+
+    template <class T>
+    inline boolean_type is() const {
+        return this->type() == typeid(T);
+    }
+
+    boolean_type shares_type_with(abstract_type const& that) const {
+        // FIXME: Figure out if this is reliable, otherwise defer to concrete adapters.
+        return this->type() == that.type();
+    }
+
+
+    template <class Adapter>
+    inline Adapter const* as() const {
+        // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
+        Adapter const* const this_ = dynamic_cast<Adapter const*>(this);
+        // BOOST_ASSERT(this_ != 0);
+        return this_;
+    }
+
   protected:
+
+    template <class T, class A>
+    friend struct adapter;
+
+    template <class T, class _, class A, class D>
+    friend struct forwarding_adapter;
+
+    virtual boolean_type equal_adapted(abstract_type const& that) const = 0;
+    virtual boolean_type less_adapted(abstract_type const& that) const  = 0;
+
+    // virtual boolean_type equal_adapted(abstract_type const& that) const { AJG_SYNTH_THROW(bad_method("equal_adapted")); }
+    // virtual boolean_type less_adapted(abstract_type const& that) const  { AJG_SYNTH_THROW(bad_method("less_adapted")); }
+
+    template <class Adapter>
+    inline boolean_type equal_as(abstract_type const& that) const {
+        Adapter const* const this_ = this->template as<Adapter>();
+        Adapter const* const that_ = that.template as<Adapter>();
+        return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
+    }
+
+    template <class Adapter>
+    inline boolean_type less_as(abstract_type const& that) const {
+        Adapter const* const this_ = this->template as<Adapter>();
+        Adapter const* const that_ = that.template as<Adapter>();
+        return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
+    }
+
+    /*
+    // TODO: Rename to something like can_equal
+    template <class This, class That>
+    inline static This const* comparable(This const& this_, That const& that) {
+        // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
+        return dynamic_cast<This const*>(&that);
+    }
 
     // TODO: Rename to something like is_equal
     template <class This, class That>
     inline static boolean_type compare(This const& this_, That const& that) {
-        // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
-        This const *const self = dynamic_cast<This const*>(&that);
-        return self && this_.adapted_ == self->adapted_;
+        This const* const that_ = comparable<This>(&that);
+        return that_ && this_.adapted_ == that_->adapted_;
     }
+    */
 
-    void list( ostream_type&     out
-             , string_type const delimiter = string_type(", ") // boost::lexical_cast<string_type>(", ", 2)
-             ) const {
+    void list(ostream_type& out, string_type const delimiter = traits_type::literal(", ")) const {
         size_type i = 0;
 
         BOOST_FOREACH(value_type const& value, *this) {

@@ -34,6 +34,18 @@ struct adapter<Traits, reference_wrapper<T> >
     template <class U, class V>
     adapter(adapted_type const& adapted, const U& u, const V& v) : adapted_(adapted, u, v) {}
 
+  protected:
+
+    typedef adapter<Traits, typename remove_const<T>::type> wrapped_adapter_type;
+
+    virtual boolean_type equal_adapted(abstract_type const& that) const {
+        return adapted_.template equal_as<wrapped_adapter_type>(that);
+    }
+
+    virtual boolean_type less_adapted(abstract_type const& that) const {
+        return adapted_.template less_as<wrapped_adapter_type>(that);
+    }
+
   public:
 
     boolean_type equal(abstract_type const& that) const { return adapted_.equal(that); }
@@ -51,7 +63,7 @@ struct adapter<Traits, reference_wrapper<T> >
   private:
 
     // adapted_type const& adapted_;
-    adapter<Traits, typename remove_const<T>::type> adapted_;
+    wrapped_adapter_type adapted_;
 };
 
 

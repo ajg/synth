@@ -69,6 +69,7 @@ template <class Engine>
 struct builtin_filters {
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
+    typedef typename options_type::traits_type                                  traits_type;
     typedef typename options_type::boolean_type                                 boolean_type;
     typedef typename options_type::char_type                                    char_type;
     typedef typename options_type::size_type                                    size_type;
@@ -79,6 +80,7 @@ struct builtin_filters {
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
+    typedef boost::basic_format<char_type>                                      format_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef typename engine_type::string_regex_type                             string_regex_type;
     typedef typename string_type::const_iterator                                string_iterator_type;
@@ -87,13 +89,11 @@ struct builtin_filters {
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
 
-
     // TODO: Eliminate these:
     typedef char_type   Char;
     typedef size_type   Size;
     typedef string_type String;
     typedef value_type  Value;
-
 
 //
 // filter_type
@@ -579,8 +579,8 @@ struct builtin_filters {
                 if (position > 0) {
                     // Ensure the number operated on is whole.
                     if (number == integer && integer >= 1) {
-                        String const text = boost::lexical_cast<String>(integer);
-						size_type const distance = static_cast<size_type>(position);
+                        string_type const text     = traits_type::to_string(integer);
+						size_type   const distance = static_cast<size_type>(position);
 
 						if (distance <= text.length()) {
 							return *(text.end() - distance);
@@ -588,8 +588,8 @@ struct builtin_filters {
                     }
                 }
             }
-            catch (bad_method              const&) {} // Do nothing.
-            catch (boost::bad_lexical_cast const&) {} // Do nothing.
+            catch (bad_method       const&) {} // Do nothing.
+            catch (conversion_error const&) {} // Do nothing.
             // Otherwise, (e.g. if any of the above failed):
             return value;
         }
@@ -758,20 +758,22 @@ struct builtin_filters {
                                         ) {
             if (!arguments.empty()) throw_exception(superfluous_argument());
 
-            Size count = 1;
-            std::vector<String> lines;
-            typedef basic_format<Char> format;
-            std::basic_ostringstream<Char> stream;
-            String const input = value.to_string();
-            String const pattern = text("%%0%dd. %%s");
-            boolean_type const safe = !options.autoescape || value.safe();
-            algorithm::split(lines, input, algorithm::is_any_of("\n"));
-            Size const width = boost::lexical_cast<String>(lines.size()).size();
-            String const spec = (format(pattern) % width).str();
+            std::vector<string_type>            lines;
+            std::basic_ostringstream<char_type> stream;
 
+            string_type  const input   = value.to_string();
+            string_type  const pattern = traits_type::literal("%%0%dd. %%s");
+            boolean_type const safe    = !options.autoescape || value.safe();
+
+            algorithm::split(lines, input, algorithm::is_any_of("\n"));
+
+            size_type   const width = traits_type::to_string(lines.size()).size();
+            string_type const spec  = (format_type(pattern) % width).str();
+
+            size_type i = 1;
             BOOST_FOREACH(Value const& line, lines) {
                 Value const item = safe ? line : line.escape();
-                stream << (format(spec) % count++ % item) << std::endl;
+                stream << (format_type(spec) % i++ % item) << std::endl;
             }
 
             return Value(stream.str()).mark_safe();
@@ -1544,14 +1546,16 @@ struct builtin_filters {
                         Safe ? out << value : out << value.escape();
 
                         if (++i < length) {
-                            if (is_iterable(value)) {
+                            value_type const& next = item[static_cast<number_type>(i)];
+
+                            if (is_iterable(next)) {
                                 out << std::endl << indent << "<ul>" << std::endl;
-                                push_item<Safe>(value, engine, level + 1, out);
+                                push_item<Safe>(next, engine, level + 1, out);
                                 out << indent << "</ul>" << std::endl << indent;
                             }
                             else {
                                 out << "</li>" << std::endl << indent << "<li>";
-                                Safe ? out << value : out << value.escape();
+                                Safe ? out << next : out << next.escape();
                             }
                         }
 

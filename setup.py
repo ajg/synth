@@ -3,12 +3,15 @@
 ##  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 ##  http://www.boost.org/LICENSE_1_0.txt).
 
+import fnmatch
+import os
 import re
 import sys
-from distutils.core import setup, Extension
+# from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from glob import glob
 
-# TODO: os.join where appropriate.
+# TODO: os.path.join where appropriate.
 
 def run():
     setup(
@@ -52,14 +55,15 @@ def get_classifiers():
 def get_extension():
     return Extension(
         'synth',
+        language             = get_language(),
         sources              = get_sources(),
         libraries            = get_libraries(),
         include_dirs         = get_include_dirs(),
         library_dirs         = get_library_dirs(),
-        language             = get_language(),
+        runtime_library_dirs = get_runtime_library_dirs(),
         extra_compile_args   = get_extra_compile_args(),
         define_macros        = get_define_macros(),
-        runtime_library_dirs = get_runtime_library_dirs(),
+        undef_macros         = get_undef_macros(),
     )
 
 # TODO: Allow some of these to be overridden via environment variable:
@@ -100,7 +104,7 @@ def get_extra_compile_args():
         return [
             '/D' + define,
             '/bigobj', # Prevent reaching object limit.
-            '/EHsc',   # Override structured exception handling (SEH). 
+            '/EHsc',   # Override structured exception handling (SEH).
             '/FD',     # Allow minimal rebuild.
             '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4180', # "qualifier applied to function type has no meaning" in list_of.hpp.
@@ -132,7 +136,7 @@ def get_libraries():
         threading = '-mt' if is_threaded else ''
         compiler  = '-vc%d%d' % msvc_version
         version   = '-%d_%d' % boost_version[:-1]
-        return [prefix + name + compiler + threading + version] 
+        return [prefix + name + compiler + threading + version]
     else:
         return [name]
 
@@ -150,7 +154,10 @@ def get_synth_version():
     return (major, minor, patch)
 
 def get_define_macros():
-    return [] if is_debug else [('NDEBUG', '1')]
+    return [] if is_debug else [('NDEBUG', None)]
+
+def get_undef_macros():
+    return ['NDEBUG'] if is_debug else []
 
 def get_language():
     return 'c++'
@@ -158,16 +165,16 @@ def get_language():
 def get_sources():
     return [synth_base + 'bindings/python/module.cpp']
 
-def get_headers():
-    # TODO: Find a more elegant way to do this:
-    return (
-        glob(synth_base + '*.hpp') +
-        glob(synth_base + '*/*.hpp') +
-        glob(synth_base + '*/*/*.hpp') +
-        glob(synth_base + '*/*/*/*.hpp')
-    )
-
 def get_data_files():
-    return [('', get_headers())]
+    data_files = []
+
+    for base, _, files in os.walk(synth_base):
+        headers = []
+        for header in fnmatch.filter(files, '*.hpp'):
+            headers.append(os.path.join(base, header))
+        target = os.path.join('include', base)
+        data_files.append((target, headers))
+
+    return data_files
 
 run()

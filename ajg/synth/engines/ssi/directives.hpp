@@ -33,14 +33,12 @@ using namespace detail::placeholders;
 
 enum { interpolated = true, raw = false };
 
-#define FOREACH_ATTRIBUTE_IN(x, how, if_statement) do {                      \
-    BOOST_FOREACH( typename Engine::match_type const& attr                   \
-                 , get_nested<1>(x).nested_results()) {                      \
-        typename Engine::string_type name, value;                            \
-        tie(name, value) = args.engine.parse_attribute(attr, args, how);     \
-        if_statement else throw_exception                                    \
-            (invalid_attribute(args.engine.template transcode<char>(name))); \
-    }                                                                        \
+#define FOREACH_ATTRIBUTE_IN(x, how, if_statement) do {                                            \
+    BOOST_FOREACH(typename Engine::match_type const& attr, get_nested<A>(x).nested_results()) {    \
+        typename Engine::string_type name, value;                                                  \
+        boost::tie(name, value) = args.engine.parse_attribute(attr, args, how);                    \
+        if_statement else throw_exception(invalid_attribute(Engine::traits_type::narrow(name)));   \
+    }                                                                                              \
 } while (0)
 
 #define NO_ATTRIBUTES_IN(x) FOREACH_ATTRIBUTE_IN(x, raw, if (false) {})
@@ -125,7 +123,7 @@ struct exec_directive {
                     throw_exception(not_implemented("exec cgi"));
                 }
                 else if (name == text("cmd")) {
-                    std::string const command = args.engine.template transcode<char>(value);
+                    std::string const command = Engine::traits_type::narrow(value);
                     detail::pipe pipe(command);
                     pipe.read_into(args.stream);
                 }
@@ -263,23 +261,20 @@ struct if_directive {
 
         bool compare_regex( typename Engine::args_type         const& args
                           , typename Engine::string_match_type const& expr) const {
-            typename Engine::string_type const
-                left  = parse_string(args, get_nested<A>(expr)),
-                right = get_nested<C>(expr)[xpressive::s1].str();
-            typename Engine::string_match_type match;
-            typename Engine::string_regex_type const pattern =
-                Engine::string_regex_type::compile(right/*, xpressive::regex_constants::optimize*/);
+            typename Engine::string_type       const left    = parse_string(args, get_nested<A>(expr));
+            typename Engine::string_type       const right   = get_nested<C>(expr)[xpressive::s1].str();
+            typename Engine::string_regex_type const pattern = Engine::string_regex_type::compile(right);
 
             for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
-                args.context.erase(boost::lexical_cast<typename Engine::string_type>(i));
+                args.context.erase(Engine::traits_type::to_string(i));
             }
 
+            typename Engine::string_match_type match;
             if (xpressive::regex_search(left, match, pattern)) {
                 std::size_t const limit = (std::min)(match.size(), MaxRegexCaptures);
 
                 for (std::size_t i = 0; i <= limit; ++i) {
-                    typename Engine::string_type const key =
-                        boost::lexical_cast<typename Engine::string_type>(i);
+                    typename Engine::string_type const key = Engine::traits_type::to_string(i);
                     args.context.insert(std::make_pair(key, match[i].str()));
                 }
             }
@@ -438,13 +433,9 @@ struct printenv_directive {
 
         void render(typename Engine::args_type const& args) const {
             NO_ATTRIBUTES_IN(args.match);
-
-            typedef typename Engine::char_type char_type;
-            typedef typename Engine::environment_type::value_type name_value;
-
-            BOOST_FOREACH(name_value const& nv, args.engine.environment) {
-                args.stream << args.engine.template transcode<char_type>(nv.first) << '='
-                            << args.engine.template transcode<char_type>(nv.second) << std::endl;
+            BOOST_FOREACH(typename Engine::environment_type::value_type const& nv, args.engine.environment) {
+                args.stream << Engine::traits_type::widen(nv.first) << '='
+                            << Engine::traits_type::widen(nv.second) << std::endl;
             }
         }
     };

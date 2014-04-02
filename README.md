@@ -127,7 +127,7 @@ Installation
 
  2. Get the source:
 
-        git clone https://github.com/ajg/synth.git && cd synth
+        git clone --recursive https://github.com/ajg/synth.git && cd synth
 
  3. [Optional] Build the command-line program:
 
@@ -144,6 +144,12 @@ Installation
 Install [Boost](#installing-boost), then:
 
     pip install synth
+
+### Using Easy Install:
+
+Install [Boost](#installing-boost), then:
+
+    easy_install synth
 
 Components
 ----------
@@ -443,12 +449,14 @@ Future Work
    * Rewrite the majority of unit tests as a set of .in/.out files
    * Add unit tests from Cjango
    * Add way to specify expected failures; re-enable commented out tests
+   * Add valgrind to travis config as part of passing criteria
  - Optimization:
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Investigate `-fvisibility-inlines-hidden`
    * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`
    * Enable Xpressive's `syntax_option_type::optimize` or make configurable
  - Refactoring:
+   * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
    * Replace all remaining get_nested uses with s1, s2, ... or named patterns
@@ -469,6 +477,7 @@ Future Work
    * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
    * [v1] Rename `this_type` to `self_type` unless it's actually a pointer
    * [v1] Reformat all operator _()'s to operator_()
+   * [v2+] Factor out values & adapters into separate library for generic language interop
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

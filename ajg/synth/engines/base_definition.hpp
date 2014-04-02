@@ -93,12 +93,6 @@ struct base_definition : boost::noncopyable {
 
   public:
 
-    /// [deprecated] Prefer Traits::transcode.
-    template <class C, class S>
-    inline std::basic_string<C> transcode(S const& string) const {
-        return std::basic_string<C>(string.begin(), string.end());
-    }
-
     template <class I>
     void parse(std::pair<I, I> const& range, frame_type& frame) const {
         return parse(range.first, range.second, frame);
@@ -106,6 +100,8 @@ struct base_definition : boost::noncopyable {
 
     template <class I>
     void parse(I const& begin, I const& end, frame_type& frame) const {
+        typedef typename definition_type::traits_type traits_type;
+
         definition_type const& self = static_cast<definition_type const&>(*this);
         iterator_type const begin_ = begin;
         iterator_type const end_ = end;
@@ -122,7 +118,7 @@ struct base_definition : boost::noncopyable {
         size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
         string_type const site(furthest, furthest + (std::min)(room, limit));
         string_type const line(site.begin(), detail::find_or('\n', site, site.end()));
-        throw_exception(parsing_error(transcode<char>(line)));
+        throw_exception(parsing_error(traits_type::narrow(line)));
     }
 
   protected:

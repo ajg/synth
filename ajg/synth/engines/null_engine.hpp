@@ -7,11 +7,60 @@
 #define AJG_SYNTH_ENGINES_NULL_ENGINE_HPP_INCLUDED
 
 #include <map>
+#include <functional>
 
 #include <boost/mpl/void.hpp>
 
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/engines/base_definition.hpp>
+
+namespace ajg {
+namespace synth {
+namespace detail {
+
+// TODO: Move to null_value.hpp.
+template <class Char>
+struct null_value : value_facade<Char, null_value<Char> > {
+  public:
+
+    typedef value_facade<Char, null_value> base_type;
+
+  public:
+
+    AJG_SYNTH_VALUE_CONSTRUCTORS(null_value, base_type, {})
+};
+
+}}} // namespace ajg::synth::detail
+
+namespace std {
+
+template<class Char>
+struct equal_to<ajg::synth::detail::null_value<Char> > {
+    bool operator()(ajg::synth::detail::null_value<Char> const& a, ajg::synth::detail::null_value<Char> const& b) const {
+        return true;
+    }
+};
+
+template<class Char>
+struct less<ajg::synth::detail::null_value<Char> > {
+    bool operator()(ajg::synth::detail::null_value<Char> const& a, ajg::synth::detail::null_value<Char> const& b) const {
+        return false;
+    }
+};
+
+} // namespace std
+
+namespace std {
+
+template<class T>
+struct less<complex<T> > {
+    bool operator()(complex<T> const& a, complex<T> const& b) const {
+        return a.real() < b.real() && a.imag() < b.imag();
+    }
+};
+
+} // namespace std
+
 
 namespace ajg {
 namespace synth {
@@ -24,21 +73,6 @@ template <class BidirectionalIterator>
 struct definition : base_definition< BidirectionalIterator
                                    , definition<BidirectionalIterator>
                                    > {
-  private:
-
-    template <class Char>
-    struct null_value : value_facade<Char, null_value<Char> > {
-      public:
-
-        typedef null_value                         this_type;
-        typedef Char                               char_type;
-        typedef value_facade<char_type, this_type> base_type;
-
-      public:
-
-        AJG_SYNTH_VALUE_CONSTRUCTORS(null_value, base_type, {})
-    };
-
   public:
 
     typedef definition this_type;
@@ -56,7 +90,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
-    typedef null_value<char_type>             value_type;
+    typedef detail::null_value<char_type>     value_type;
     typedef std::vector<value_type>           sequence_type; // TODO: Use Traits::sequence_type
     typedef std::map<string_type, value_type> context_type;  // TODO: Use Traits::context_type
     typedef boost::mpl::void_                 options_type;

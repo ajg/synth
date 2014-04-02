@@ -50,18 +50,6 @@ struct less<ajg::synth::detail::null_value<Char> > {
 
 } // namespace std
 
-namespace std {
-
-template<class T>
-struct less<complex<T> > {
-    bool operator()(complex<T> const& a, complex<T> const& b) const {
-        return a.real() < b.real() && a.imag() < b.imag();
-    }
-};
-
-} // namespace std
-
-
 namespace ajg {
 namespace synth {
 
@@ -70,14 +58,10 @@ struct null_engine : detail::nonconstructible {
 typedef null_engine engine_type;
 
 template <class BidirectionalIterator>
-struct definition : base_definition< BidirectionalIterator
-                                   , definition<BidirectionalIterator>
-                                   > {
+struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
 
-    typedef definition this_type;
-    typedef base_definition< BidirectionalIterator
-                           , this_type> base_type;
+    typedef base_definition<BidirectionalIterator, definition> base_type;
 
     typedef typename base_type::id_type         id_type;
     typedef typename base_type::size_type       size_type;

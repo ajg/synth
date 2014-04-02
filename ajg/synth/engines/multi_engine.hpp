@@ -49,14 +49,10 @@ struct multi_engine : detail::nonconstructible {
 typedef multi_engine engine_type;
 
 template <class BidirectionalIterator>
-struct definition : base_definition< BidirectionalIterator
-                                   , definition<BidirectionalIterator>
-                                   > {
+struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
 
-    typedef definition this_type;
-    typedef base_definition< BidirectionalIterator
-                           , this_type> base_type;
+    typedef base_definition<BidirectionalIterator, definition> base_type;
 
     typedef typename base_type::id_type         id_type;
     typedef typename base_type::size_type       size_type;
@@ -68,12 +64,6 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::stream_type     stream_type;
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
-
-    // typedef ssi::value<char_type>             value_type;
-    typedef std::map<string_type, value_type> context_type;
-    typedef options<string_type>              options_type;
-    typedef detail::indexable_sequence<this_type, tags_type,
-        id_type, detail::create_definitions>  tag_sequence_type;
 
   public:
 

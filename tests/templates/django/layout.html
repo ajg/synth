@@ -3,14 +3,14 @@
   <head>
       <title>{% block title %}{{ title }}{% endblock %}{% block title_extra %}{% endblock %}</title>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-      {% block site_meta %}
-      {% endblock %}
+      {% block site_meta %}<!-- -->
+      {% endblock %}<!-- -->
 
-      {% block meta %}
-      {% endblock %}
+      {% block meta %}<!-- -->
+      {% endblock %}<!-- -->
       <link rel="shortcut icon" href="{{ STATIC_URL }}css/images/favicon.ico" type="image/x-icon" />
 
-      {% if not request.user.is_staff %}
+      {% if not request.user.is_staff %}<!-- -->
       <script type="text/javascript">
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', '{% block analytics_id %}{% endblock %}']);
@@ -22,7 +22,7 @@
           var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
       </script>
-      {% endif %}
+      {% endif %}<!-- -->
   </head>
   <body class="{{ request.user.is_authenticated|yesno:'authenticated,anonymous' }} {% block class %}{% endblock %}">
     <div id="distance"></div>
@@ -30,26 +30,26 @@
       <div class="container">
         <div id="header">
           {% block logo %}<a href="/" title="Home"><img id="logo" src="{{ STATIC_URL}}css/images/logo.png" alt="" /></a>{% endblock %}
-          {% block header %}{% endblock %}
+          {% block header %}{% endblock %}<!-- -->
           <div id="navigation">
-            {% block navigation %}{% endblock %}
+            {% block navigation %}{% endblock %}<!-- -->
           </div>
-          {% block header_suffix %}{% endblock %}
+          {% block header_suffix %}{% endblock %}<!-- -->
         </div>
         <div id="columns">
           <div id="center">
             <div id="content" class="content">
               {% if messages %}<div id="messages">{% include "messages.html" %}</div>{% endif %}
-              {% block prefix %}{% endblock %}
-              {% block content %}{% endblock %}
-              {% block suffix %}{% endblock %}
+              {% block prefix %}{% endblock %}<!-- -->
+              {% block content %}{% endblock %}<!-- -->
+              {% block suffix %}{% endblock %}<!-- -->
             </div>
           </div>
           <div id="left">
-            {% block left %}{% endblock %}
+            {% block left %}{% endblock %}<!-- -->
           </div>
           <div id="right">
-            {% block right %}{% endblock %}
+            {% block right %}{% endblock %}<!-- -->
           </div>
           <div class="clear">{% block columns_suffix %}{% endblock %}</div>
         </div>
@@ -58,9 +58,8 @@
     </div>
     <div id="footer">
       <div class="container">
-        {% block footer %}{% endblock %}
+        {% block footer %}{% endblock %}<!-- -->
       </div>
     </div>
-    <div id="timestamp">{% now "%r" %}</div>
   </body>
 </html>

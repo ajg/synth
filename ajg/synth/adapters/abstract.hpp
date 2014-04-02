@@ -290,6 +290,23 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         // Make sure |this| == |that|.
         return i1 == e1 && i2 == e2;
     }
+
+    boolean_type less_sequence(abstract_type const& that) const {
+        return this->less_range(begin(), that.begin(), end(), that.end());
+    }
+
+    boolean_type less_range( const_iterator i1, const_iterator i2
+                           , const_iterator e1, const_iterator e2
+                           ) const {
+        for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
+            if (!i1->less(*i2)) {
+                return false;
+            }
+        }
+
+        // Make sure |this| <= |that|.
+        return i1 == e1;
+    }
 };
 
 }} // namespace ajg::synth

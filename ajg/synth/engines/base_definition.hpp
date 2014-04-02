@@ -49,8 +49,9 @@ struct base_definition : boost::noncopyable {
 
     // Derived types:
     typedef base_definition                               this_type;
-    typedef std::size_t                                   size_type; // TODO: Use Traits::size_type
-    typedef Char /* typename iterator_type::value_type */ char_type; // TODO: Use Traits::char_type
+    typedef bool                                          boolean_type; // TODO: Use Traits::boolean_type
+    typedef std::size_t                                   size_type;    // TODO: Use Traits::size_type
+    typedef Char /* typename iterator_type::value_type */ char_type;    // TODO: Use Traits::char_type
 
     typedef xpressive::regex_id_type                id_type;
 	typedef xpressive::basic_regex<iterator_type>   regex_type;

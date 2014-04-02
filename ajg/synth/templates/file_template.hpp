@@ -48,6 +48,7 @@ struct file_template
   public:
 
     typedef typename base_type::size_type       size_type;
+    typedef typename base_type::boolean_type    boolean_type;
     typedef std::string                         filepath_type;
     typedef std::vector<filepath_type>          directories_type;
     typedef std::pair<filepath_type, size_type> info_type;
@@ -58,7 +59,11 @@ struct file_template
                  , directories_type const& directories = directories_type(/*1, "."*/)
                  )
         : base_member_type(make_iterator(filepath, directories))
-        , base_type(base_member_type::member, base_member_type::member ? base_member_type::member.make_end() : base_member_type::member)
+        , base_type( base_member_type::member
+                   , base_member_type::member ? base_member_type::member.make_end() : base_member_type::member
+                     // This chicken dance is needed because file_iterator can't handle empty files.
+                   , boolean_type(base_member_type::member)
+                   )
         , filepath_(filepath) {} // TODO: Use info.first instead.
 
   public:

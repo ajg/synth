@@ -34,6 +34,7 @@ struct base_template : boost::noncopyable {
   public:
 
     typedef typename Engine::template definition<Iterator>                      engine_type;
+    typedef typename engine_type::boolean_type                                  boolean_type;
     typedef typename engine_type::char_type                                     char_type;
     typedef typename engine_type::size_type                                     size_type;
     typedef typename engine_type::sequence_type                                 sequence_type;
@@ -51,10 +52,11 @@ struct base_template : boost::noncopyable {
 
     base_template( iterator_type const& begin
                  , iterator_type const& end
-              // ,  bool const cache = false
+                 , boolean_type  const  parse = true
                  )
             : engine_(&shared_engine()) {
-        reset(begin, end);
+        range_ = range_type(begin, end);
+        if (parse) engine_->parse(begin, end, frame_);
     }
 
   public:
@@ -103,24 +105,6 @@ struct base_template : boost::noncopyable {
 
     string_type text() const {
         return string_type(range_.first, range_.second);
-    }
-
-  protected:
-
-//
-// reset
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void reset( iterator_type const& begin
-              , iterator_type const& end
-              ) {
-        range_ = range_type(begin, end);
-        if (begin == end) {
-            frame_ = frame_type();
-        }
-        else {
-            engine_->parse(begin, end, frame_);
-        }
     }
 
   private:

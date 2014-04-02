@@ -54,11 +54,11 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    typedef definition this_type;
-    typedef base_definition< BidirectionalIterator
-                           , this_type> base_type;
+    typedef definition                                        this_type;
+    typedef base_definition<BidirectionalIterator, this_type> base_type;
 
     typedef typename base_type::id_type         id_type;
+    typedef typename base_type::boolean_type    boolean_type;
     typedef typename base_type::size_type       size_type;
     typedef typename base_type::char_type       char_type;
     typedef typename base_type::match_type      match_type;

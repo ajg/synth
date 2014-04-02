@@ -115,7 +115,12 @@ struct base_template : boost::noncopyable {
               , iterator_type const& end
               ) {
         range_ = range_type(begin, end);
-        engine_->parse(begin, end, frame_);
+        if (begin == end) {
+            frame_ = frame_type();
+        }
+        else {
+            engine_->parse(begin, end, frame_);
+        }
     }
 
   private:

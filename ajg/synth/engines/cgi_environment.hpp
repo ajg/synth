@@ -26,6 +26,7 @@ struct cgi_environment {
   public:
 
     typedef Engine                             engine_type;
+    typedef typename engine_type::traits_type  traits_type;
     typedef typename engine_type::char_type    char_type;
     typedef typename engine_type::value_type   value_type;
     typedef typename engine_type::string_type  string_type;
@@ -37,46 +38,46 @@ struct cgi_environment {
     cgi_environment(engine_type const& engine)
         : engine_(engine)
         , variables_(assign::list_of<string_type>
-            (detail::text("AUTH_TYPE"))
-            (detail::text("AUTH_USER"))
-            (detail::text("CONTENT_LENGTH"))
-            (detail::text("CONTENT_TYPE"))
-            (detail::text("DOCUMENT_ROOT"))
-            (detail::text("GATEWAY_INTERFACE"))
-            (detail::text("HTTP_ACCEPT"))
-            (detail::text("HTTP_ACCEPT_CHARSET"))
-            (detail::text("HTTP_ACCEPT_ENCODING"))
-            (detail::text("HTTP_ACCEPT_LANGUAGE"))
-            (detail::text("HTTP_CONNECTION"))
-            (detail::text("HTTP_COOKIE"))
-            (detail::text("HTTP_FORWARDED"))
-            (detail::text("HTTP_HOST"))
-            (detail::text("HTTP_IF_MODIFIED_SINCE"))
-            (detail::text("HTTP_PROXY_CONNECTION"))
-            (detail::text("HTTP_REFERER"))
-            (detail::text("HTTP_USER_AGENT"))
-            (detail::text("HTTPS"))
-            (detail::text("LAST_MODIFIED"))
-            (detail::text("PATH"))
-            (detail::text("PATH_INFO"))
-            (detail::text("PATH_TRANSLATED"))
-            (detail::text("QUERY_STRING"))
-            (detail::text("REMOTE_ADDR"))
-            (detail::text("REMOTE_HOST"))
-            (detail::text("REMOTE_IDENT"))
-            (detail::text("REMOTE_PORT"))
-            (detail::text("REMOTE_USER"))
-            (detail::text("REQUEST_METHOD"))
-            (detail::text("REQUEST_URI"))
-            (detail::text("SCRIPT_FILENAME"))
-            (detail::text("SCRIPT_NAME"))
-            (detail::text("SERVER_ADDR"))
-            (detail::text("SERVER_ADMIN"))
-            (detail::text("SERVER_NAME"))
-            (detail::text("SERVER_PORT"))
-            (detail::text("SERVER_PROTOCOL"))
-            (detail::text("SERVER_SIGNATURE"))
-            (detail::text("SERVER_SOFTWARE"))
+            (traits_type::literal("AUTH_TYPE"))
+            (traits_type::literal("AUTH_USER"))
+            (traits_type::literal("CONTENT_LENGTH"))
+            (traits_type::literal("CONTENT_TYPE"))
+            (traits_type::literal("DOCUMENT_ROOT"))
+            (traits_type::literal("GATEWAY_INTERFACE"))
+            (traits_type::literal("HTTP_ACCEPT"))
+            (traits_type::literal("HTTP_ACCEPT_CHARSET"))
+            (traits_type::literal("HTTP_ACCEPT_ENCODING"))
+            (traits_type::literal("HTTP_ACCEPT_LANGUAGE"))
+            (traits_type::literal("HTTP_CONNECTION"))
+            (traits_type::literal("HTTP_COOKIE"))
+            (traits_type::literal("HTTP_FORWARDED"))
+            (traits_type::literal("HTTP_HOST"))
+            (traits_type::literal("HTTP_IF_MODIFIED_SINCE"))
+            (traits_type::literal("HTTP_PROXY_CONNECTION"))
+            (traits_type::literal("HTTP_REFERER"))
+            (traits_type::literal("HTTP_USER_AGENT"))
+            (traits_type::literal("HTTPS"))
+            (traits_type::literal("LAST_MODIFIED"))
+            (traits_type::literal("PATH"))
+            (traits_type::literal("PATH_INFO"))
+            (traits_type::literal("PATH_TRANSLATED"))
+            (traits_type::literal("QUERY_STRING"))
+            (traits_type::literal("REMOTE_ADDR"))
+            (traits_type::literal("REMOTE_HOST"))
+            (traits_type::literal("REMOTE_IDENT"))
+            (traits_type::literal("REMOTE_PORT"))
+            (traits_type::literal("REMOTE_USER"))
+            (traits_type::literal("REQUEST_METHOD"))
+            (traits_type::literal("REQUEST_URI"))
+            (traits_type::literal("SCRIPT_FILENAME"))
+            (traits_type::literal("SCRIPT_NAME"))
+            (traits_type::literal("SERVER_ADDR"))
+            (traits_type::literal("SERVER_ADMIN"))
+            (traits_type::literal("SERVER_NAME"))
+            (traits_type::literal("SERVER_PORT"))
+            (traits_type::literal("SERVER_PROTOCOL"))
+            (traits_type::literal("SERVER_SIGNATURE"))
+            (traits_type::literal("SERVER_SOFTWARE"))
                 .to_container(variables_)
         ) {}
 
@@ -95,11 +96,10 @@ struct cgi_environment {
   private:
 
     optional<value_type> get(string_type const& name) const {
-        std::string const name_ = engine_.template transcode<char>(name);
+        std::string const name_ = traits_type::narrow(name);
      // char const *const value = (*Source)(name_.c_str());
-        if (char const *const value = std::getenv(name_.c_str())) {
-            return value_type(engine_.template
-                transcode<char_type>(std::string(value)));
+        if (char const* const value = std::getenv(name_.c_str())) {
+            return value_type(traits_type::widen(std::string(value)));
         }
         else {
             return none;
@@ -108,8 +108,8 @@ struct cgi_environment {
 
   private:
 
-    engine_type const& engine_;
-    variables_type const variables_;
+    engine_type    const& engine_;
+    variables_type const  variables_;
 };
 
 /*
@@ -118,18 +118,16 @@ struct standard_environment {
     typename Engine::value_type get( typename Engine::this_type const& engine
                                    , typename Engine::string_type const& name
                                    ) const {
-        std::string const name_ = engine.template transcode<char>(name);
+        std::string const name_ = traits_type::narrow(name);
         std::string const value = std::getenv(name_.c_str());
-        typedef typename Engine::value_type::char_type C;
-        return engine.template transcode<C>(value);
+        return value_type(traits_type::widen(value));
     }
 
     optional<value_type> get(string_type const& name) const {
-        std::string const name_ = engine_.template transcode<char>(name);
+        std::string const name_ = traits_type::narrow(name);
      // char const *const value = (*Source)(name_.c_str());
         if (char const *const value = std::getenv(name_.c_str())) {
-            return value_type(engine_.template
-                transcode<char_type>(std::string(value)));
+            return value_type(traits_type::widen(std::string(value)));
         }
         else {
             return none;

@@ -85,6 +85,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef builtin_filters<this_type>                                          builtin_filters_type;
     typedef django::value<char_type>                                            value_type;
     typedef options<value_type>                                                 options_type;
+    typedef typename value_type::traits_type                                    traits_type;
     typedef typename value_type::boolean_type                                   boolean_type;
     typedef typename value_type::datetime_type                                  datetime_type;
     typedef typename value_type::duration_type                                  duration_type;
@@ -366,7 +367,7 @@ struct definition : base_definition< BidirectionalIterator
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
 
-                    if (this->template transcode<char>(string) != e.name) {
+                    if (traits_type::narrow(string) != e.name) {
                         throw_exception(e);
                     }
 
@@ -412,7 +413,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template transcode<char>(filepath);
+        std::string const filepath_ = traits_type::narrow(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
 
@@ -443,7 +444,7 @@ struct definition : base_definition< BidirectionalIterator
         // If there's only _one_ tag, xpressive will not nest the match, so we use it directly.
         match_type const& tag = tag_sequence_type::size == 1 ? match : detail::unnest(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
+        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
 
     void render_match( stream_type&        stream
@@ -495,7 +496,7 @@ struct definition : base_definition< BidirectionalIterator
         if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {
             return filter(*this, value, arguments.first, context, options);
         }
-        throw_exception(missing_filter(this->template transcode<char>(name)));
+        throw_exception(missing_filter(traits_type::narrow(name)));
     }
 
     value_type evaluate( match_type     const& match
@@ -547,7 +548,7 @@ struct definition : base_definition< BidirectionalIterator
             }
         }
         else if (literal == number_literal) {
-            value = boost::lexical_cast<typename value_type::number_type>(string);
+            value = traits_type::to_number(string);
             value.token(literal[0]);
         }
         else if (literal == string_literal) {
@@ -561,7 +562,7 @@ struct definition : base_definition< BidirectionalIterator
                 value.token(literal[0]);
             }
             else {
-                throw_exception(missing_variable(this->template transcode<char>(string)));
+                throw_exception(missing_variable(traits_type::narrow(string)));
             }
         }
         else {
@@ -804,8 +805,7 @@ struct definition : base_definition< BidirectionalIterator
 
         if (i + 1 < N) {
             if ((count = (total - (seconds[i] * count)) / seconds[i + 1])) {
-                result += string_type(detail::text(", "))
-                       +  pluralize_unit(count, units[i + 1], options);
+                result += traits_type::literal(", ") + pluralize_unit(count, units[i + 1], options);
             }
         }
 
@@ -820,8 +820,8 @@ struct definition : base_definition< BidirectionalIterator
                                             , string_type  const& s
                                             , options_type const& options
                                             ) {
-        return boost::lexical_cast<string_type>(n) + options.nonbreaking_space + s +
-            (n == 1 ? string_type() : string_type(detail::text("s")));
+        string_type const suffix = n == 1 ? string_type() : traits_type::literal("s");
+        return traits_type::to_string(n) + options.nonbreaking_space + s + suffix;
     }
 
     optional<string_type> get_view_url( value_type     const& view
@@ -856,7 +856,7 @@ struct definition : base_definition< BidirectionalIterator
         if (it != options.loaded_tags.end()) {
             return it->second;
         }
-        throw_exception(missing_tag(this->template transcode<char>(name)));
+        throw_exception(missing_tag(traits_type::narrow(name)));
     }
 
   public:

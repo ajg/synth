@@ -84,8 +84,13 @@ struct definition : base_definition< BidirectionalIterator
     typedef library_type                                 tags_type;
     typedef std::map<string_type, value_type, less_type> context_type;
     typedef std::vector<value_type>                      sequence_type;
-    typedef detail::indexable_sequence<this_type, tags_type,
-        id_type, detail::create_definitions>             tag_sequence_type;
+    typedef detail::indexable_sequence
+                < this_type
+                , tags_type
+                , id_type
+                , detail::create_definitions
+                >                                        tag_sequence_type;
+    typedef typename value_type::traits_type             traits_type;
 
   public:
 
@@ -206,7 +211,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template transcode<char>(filepath);
+        std::string const filepath_ = traits_type::narrow(filepath);
         file_template_type(filepath_).render(stream, context, options);
     }
 
@@ -238,7 +243,7 @@ struct definition : base_definition< BidirectionalIterator
         // "nest" the match, so we use it directly instead.
         match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
         tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
+        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
 
 

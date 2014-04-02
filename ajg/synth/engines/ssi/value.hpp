@@ -6,8 +6,6 @@
 #ifndef AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
 
-#include <boost/lexical_cast.hpp>
-
 #include <ajg/synth/value_facade.hpp>
 
 namespace ajg {
@@ -18,19 +16,11 @@ template <class Char>
 struct value : value_facade<Char, value<Char> > {
   public:
 
-    typedef value                              this_type;
-    typedef Char                               char_type;
-    typedef value_facade<char_type, this_type> base_type;
+    typedef value_facade<Char, value> base_type;
 
   public:
 
     AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type, {})
-
-  public:
-
-    inline typename base_type::string_type to_string() const {
-        return boost::lexical_cast<typename base_type::string_type>(*this);
-    }
 };
 
 }}} // namespace ajg::synth::ssi

@@ -69,16 +69,21 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
-    typedef Library                           library_type;
-    typedef Environment                       environment_type;
-    typedef ssi::value<char_type>             value_type;
-    typedef std::vector<string_type>          whitelist_type;
-    typedef std::vector<value_type>           sequence_type;
-    typedef std::map<string_type, value_type> context_type;
-    typedef library_type                      tags_type;
-    typedef options<string_type>              options_type;
-    typedef detail::indexable_sequence<this_type, tags_type,
-        id_type, detail::create_definitions>  tag_sequence_type;
+    typedef Library                             library_type;
+    typedef Environment                         environment_type;
+    typedef ssi::value<char_type>               value_type;
+    typedef std::vector<string_type>            whitelist_type;
+    typedef std::vector<value_type>             sequence_type;
+    typedef std::map<string_type, value_type>   context_type;
+    typedef library_type                        tags_type;
+    typedef options<string_type>                options_type;
+    typedef detail::indexable_sequence
+                < this_type
+                , tags_type
+                , id_type
+                , detail::create_definitions
+                >                               tag_sequence_type;
+    typedef typename value_type::traits_type    traits_type;
 
     struct args_type {
         this_type   const& engine;
@@ -183,10 +188,9 @@ struct definition : base_definition< BidirectionalIterator
             throw_exception(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
-        else if(optional<typename environment_type::mapped_type const>
-                       const value = detail::find_mapped_value(
-                   this->template transcode<char>(name), environment)) {
-            return this->template transcode<char_type>(*value);
+        else if(optional<typename environment_type::mapped_type const> const value =
+            detail::find_mapped_value(traits_type::narrow(name), environment)) {
+            return traits_type::widen(*value);
         }
         // Otherwise, use the undefined echo message.
         else {
@@ -209,7 +213,7 @@ struct definition : base_definition< BidirectionalIterator
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine_type> file_template_type;
-        std::string const filepath_ = this->template transcode<char>(filepath);
+        std::string const filepath_ = traits_type::narrow(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
 
@@ -242,7 +246,7 @@ struct definition : base_definition< BidirectionalIterator
         // "nest" the match, so we use it directly instead.
         match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
         tag_renderer<this_type, true> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index(*this, tags_.definition, tags_.index, tag.regex_id(), renderer);
+        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
     }
     catch (std::exception const&) {
         if (throw_on_errors) throw;

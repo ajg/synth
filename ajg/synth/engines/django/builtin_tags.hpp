@@ -86,151 +86,45 @@ struct builtin_tags {
   public:
 
     inline void initialize(engine_type& engine) {
-        regex_type const autoescape_syntax  = autoescape_tag::syntax(engine);
-        regex_type const block_syntax       = block_tag::syntax(engine);
-        regex_type const comment_syntax     = comment_tag::syntax(engine);
-        regex_type const csrf_token_syntax  = csrf_token_tag::syntax(engine);
-        regex_type const cycle_syntax       = cycle_tag::syntax(engine);
-        regex_type const debug_syntax       = debug_tag::syntax(engine);
-        regex_type const extends_syntax     = extends_tag::syntax(engine);
-        regex_type const filter_syntax      = filter_tag::syntax(engine);
-        regex_type const firstof_syntax     = firstof_tag::syntax(engine);
-        regex_type const for_syntax         = for_tag::syntax(engine);
-        regex_type const for_empty_syntax   = for_empty_tag::syntax(engine);
-        regex_type const if_syntax          = if_tag::syntax(engine);
-        regex_type const ifchanged_syntax   = ifchanged_tag::syntax(engine);
-        regex_type const ifequal_syntax     = ifequal_tag::syntax(engine);
-        regex_type const ifnotequal_syntax  = ifnotequal_tag::syntax(engine);
-        regex_type const include_syntax     = include_tag::syntax(engine);
-        regex_type const load_syntax        = load_tag::syntax(engine);
-        regex_type const load_from_syntax   = load_from_tag::syntax(engine);
-        regex_type const now_syntax         = now_tag::syntax(engine);
-        regex_type const regroup_syntax     = regroup_tag::syntax(engine);
-        regex_type const spaceless_syntax   = spaceless_tag::syntax(engine);
-        regex_type const ssi_syntax         = ssi_tag::syntax(engine);
-        regex_type const templatetag_syntax = templatetag_tag::syntax(engine);
-        regex_type const url_syntax         = url_tag::syntax(engine);
-        regex_type const url_as_syntax      = url_as_tag::syntax(engine);
-        regex_type const variable_syntax    = variable_tag::syntax(engine);
-        regex_type const verbatim_syntax    = verbatim_tag::syntax(engine);
-        regex_type const widthratio_syntax  = widthratio_tag::syntax(engine);
-        regex_type const with_syntax        = with_tag::syntax(engine);
-        regex_type const library_syntax     = library_tag::syntax(engine);
-
         engine.tag
-            = autoescape_syntax
-            | block_syntax
-            | comment_syntax
-            | csrf_token_syntax
-            | cycle_syntax
-            | debug_syntax
-            | extends_syntax
-            | filter_syntax
-            | firstof_syntax
-            | for_syntax
-            | for_empty_syntax
-            | if_syntax
-            | ifchanged_syntax
-            | ifequal_syntax
-            | ifnotequal_syntax
-            | include_syntax
-            | load_syntax
-            | load_from_syntax
-            | now_syntax
-            | regroup_syntax
-            | spaceless_syntax
-            | ssi_syntax
-            | templatetag_syntax
-            | url_syntax
-            | url_as_syntax
-            | variable_syntax
-            | verbatim_syntax
-            | widthratio_syntax
-            | with_syntax
-            | library_syntax
-            ;
-
-        tags_ = boost::assign::map_list_of
-          // TODO: Consider replacing with fastmatch.h switch or unordered_map.
-            (initialize_tag(engine, autoescape_syntax),  autoescape_tag::render)
-            (initialize_tag(engine, block_syntax),       block_tag::render)
-            (initialize_tag(engine, comment_syntax),     comment_tag::render)
-            (initialize_tag(engine, csrf_token_syntax),  csrf_token_tag::render)
-            (initialize_tag(engine, cycle_syntax),       cycle_tag::render)
-            (initialize_tag(engine, debug_syntax),       debug_tag::render)
-            (initialize_tag(engine, extends_syntax),     extends_tag::render)
-            (initialize_tag(engine, filter_syntax),      filter_tag::render)
-            (initialize_tag(engine, firstof_syntax),     firstof_tag::render)
-            (initialize_tag(engine, for_syntax),         for_tag::render)
-            (initialize_tag(engine, for_empty_syntax),   for_empty_tag::render)
-            (initialize_tag(engine, if_syntax),          if_tag::render)
-            (initialize_tag(engine, ifchanged_syntax),   ifchanged_tag::render)
-            (initialize_tag(engine, ifequal_syntax),     ifequal_tag::render)
-            (initialize_tag(engine, ifnotequal_syntax),  ifnotequal_tag::render)
-            (initialize_tag(engine, include_syntax),     include_tag::render)
-            (initialize_tag(engine, load_syntax),        load_tag::render)
-            (initialize_tag(engine, load_from_syntax),   load_from_tag::render)
-            (initialize_tag(engine, now_syntax),         now_tag::render)
-            (initialize_tag(engine, regroup_syntax),     regroup_tag::render)
-            (initialize_tag(engine, spaceless_syntax),   spaceless_tag::render)
-            (initialize_tag(engine, ssi_syntax),         ssi_tag::render)
-            (initialize_tag(engine, templatetag_syntax), templatetag_tag::render)
-            (initialize_tag(engine, url_syntax),         url_tag::render)
-            (initialize_tag(engine, url_as_syntax),      url_as_tag::render)
-            (initialize_tag(engine, variable_syntax),    variable_tag::render)
-            (initialize_tag(engine, verbatim_syntax),    verbatim_tag::render)
-            (initialize_tag(engine, widthratio_syntax),  widthratio_tag::render)
-            (initialize_tag(engine, with_syntax),        with_tag::render)
-            (initialize_tag(engine, library_syntax),     library_tag::render)
+            = add(engine, autoescape_tag::syntax(engine),  autoescape_tag::render)
+            | add(engine, block_tag::syntax(engine),       block_tag::render)
+            | add(engine, comment_tag::syntax(engine),     comment_tag::render)
+            | add(engine, csrf_token_tag::syntax(engine),  csrf_token_tag::render)
+            | add(engine, cycle_tag::syntax(engine),       cycle_tag::render)
+            | add(engine, debug_tag::syntax(engine),       debug_tag::render)
+            | add(engine, extends_tag::syntax(engine),     extends_tag::render)
+            | add(engine, filter_tag::syntax(engine),      filter_tag::render)
+            | add(engine, firstof_tag::syntax(engine),     firstof_tag::render)
+            | add(engine, for_tag::syntax(engine),         for_tag::render)
+            | add(engine, for_empty_tag::syntax(engine),   for_empty_tag::render)
+            | add(engine, if_tag::syntax(engine),          if_tag::render)
+            | add(engine, ifchanged_tag::syntax(engine),   ifchanged_tag::render)
+            | add(engine, ifequal_tag::syntax(engine),     ifequal_tag::render)
+            | add(engine, ifnotequal_tag::syntax(engine),  ifnotequal_tag::render)
+            | add(engine, include_tag::syntax(engine),     include_tag::render)
+            | add(engine, load_tag::syntax(engine),        load_tag::render)
+            | add(engine, load_from_tag::syntax(engine),   load_from_tag::render)
+            | add(engine, now_tag::syntax(engine),         now_tag::render)
+            | add(engine, regroup_tag::syntax(engine),     regroup_tag::render)
+            | add(engine, spaceless_tag::syntax(engine),   spaceless_tag::render)
+            | add(engine, ssi_tag::syntax(engine),         ssi_tag::render)
+            | add(engine, templatetag_tag::syntax(engine), templatetag_tag::render)
+            | add(engine, url_tag::syntax(engine),         url_tag::render)
+            | add(engine, url_as_tag::syntax(engine),      url_as_tag::render)
+            | add(engine, variable_tag::syntax(engine),    variable_tag::render)
+            | add(engine, verbatim_tag::syntax(engine),    verbatim_tag::render)
+            | add(engine, widthratio_tag::syntax(engine),  widthratio_tag::render)
+            | add(engine, with_tag::syntax(engine),        with_tag::render)
+            | add(engine, library_tag::syntax(engine),     library_tag::render)
             ;
     }
-
-    /*inline void initialize(engine_type& engine) {
-        tags_ = boost::assign::map_list_of
-          // TODO: Consider replacing with fastmatch.h switch or unordered_map.
-            (initialize_tag(engine, autoescape_tag::syntax(engine)),  autoescape_tag::render)
-            (initialize_tag(engine, block_tag::syntax(engine)),       block_tag::render)
-            (initialize_tag(engine, comment_tag::syntax(engine)),     comment_tag::render)
-            (initialize_tag(engine, csrf_token_tag::syntax(engine)),  csrf_token_tag::render)
-            (initialize_tag(engine, cycle_tag::syntax(engine)),       cycle_tag::render)
-            (initialize_tag(engine, debug_tag::syntax(engine)),       debug_tag::render)
-            (initialize_tag(engine, extends_tag::syntax(engine)),     extends_tag::render)
-            (initialize_tag(engine, filter_tag::syntax(engine)),      filter_tag::render)
-            (initialize_tag(engine, firstof_tag::syntax(engine)),     firstof_tag::render)
-            (initialize_tag(engine, for_tag::syntax(engine)),         for_tag::render)
-            (initialize_tag(engine, for_empty_tag::syntax(engine)),   for_empty_tag::render)
-            (initialize_tag(engine, if_tag::syntax(engine)),          if_tag::render)
-            (initialize_tag(engine, ifchanged_tag::syntax(engine)),   ifchanged_tag::render)
-            (initialize_tag(engine, ifequal_tag::syntax(engine)),     ifequal_tag::render)
-            (initialize_tag(engine, ifnotequal_tag::syntax(engine)),  ifnotequal_tag::render)
-            (initialize_tag(engine, include_tag::syntax(engine)),     include_tag::render)
-            (initialize_tag(engine, load_tag::syntax(engine)),        load_tag::render)
-            (initialize_tag(engine, load_from_tag::syntax(engine)),   load_from_tag::render)
-            (initialize_tag(engine, now_tag::syntax(engine)),         now_tag::render)
-            (initialize_tag(engine, regroup_tag::syntax(engine)),     regroup_tag::render)
-            (initialize_tag(engine, spaceless_tag::syntax(engine)),   spaceless_tag::render)
-            (initialize_tag(engine, ssi_tag::syntax(engine)),         ssi_tag::render)
-            (initialize_tag(engine, templatetag_tag::syntax(engine)), templatetag_tag::render)
-            (initialize_tag(engine, url_tag::syntax(engine)),         url_tag::render)
-            (initialize_tag(engine, url_as_tag::syntax(engine)),      url_as_tag::render)
-            (initialize_tag(engine, variable_tag::syntax(engine)),    variable_tag::render)
-            (initialize_tag(engine, verbatim_tag::syntax(engine)),    verbatim_tag::render)
-            (initialize_tag(engine, widthratio_tag::syntax(engine)),  widthratio_tag::render)
-            (initialize_tag(engine, with_tag::syntax(engine)),        with_tag::render)
-            (initialize_tag(engine, library_tag::syntax(engine)),     library_tag::render)
-            ;
-    }
-    inline static id_type initialize_tag(engine_type& engine, regex_type const& tag) {
-        if (engine.tag.regex_id() == 0) engine.tag = tag;
-        else engine.tag = tag;
-        return tag.regex_id();
-    }
-  */
 
   private:
 
-    inline static id_type initialize_tag(engine_type& engine, regex_type const& tag) {
-        return tag.regex_id();
+    inline regex_type const& add(engine_type& engine, regex_type const& regex, tag_type const tag) {
+        tags_[regex.regex_id()] = tag;
+        return regex;
     }
 
     tags_type tags_;

@@ -37,7 +37,7 @@ struct adapter<Traits, std::complex<T> >
 
 namespace std {
 
-template<class T>
+template <class T>
 struct less<complex<T> > {
     bool operator()(complex<T> const& a, complex<T> const& b) const {
         return a.real() < b.real() && a.imag() < b.imag();

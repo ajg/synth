@@ -19,7 +19,6 @@
 #endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
-#include <boost/optional.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -33,19 +32,17 @@
 namespace ajg {
 namespace synth {
 
-using boost::optional;
-
 template < class Char
          , class Engine
          , class Iterator = boost::spirit::classic::file_iterator<Char>
          >
 struct file_template
-    : private boost::base_from_member<optional<Iterator> >
+    : private boost::base_from_member<Iterator >
     , public  base_template<Engine, Iterator> {
 
   private:
 
-    typedef boost::base_from_member<optional<Iterator> >                        base_member_type;
+    typedef boost::base_from_member<Iterator>                                   base_member_type;
     typedef base_template<Engine, Iterator>                                     base_type;
 
   public:
@@ -61,10 +58,8 @@ struct file_template
                  , directories_type const& directories = directories_type(/*1, "."*/)
                  )
         : base_member_type(make_iterator(filepath, directories))
-        , base_type( base_member_type::member ? *base_member_type::member            : Iterator()
-                   , base_member_type::member ? base_member_type::member->make_end() : Iterator()
-                   )
-        , filepath_(filepath) {}
+        , base_type(base_member_type::member, base_member_type::member ? base_member_type::member.make_end() : base_member_type::member)
+        , filepath_(filepath) {} // TODO: Use info.first instead.
 
   public:
 
@@ -72,14 +67,11 @@ struct file_template
 
   private:
 
-    inline static optional<Iterator> make_iterator( filepath_type    const& filepath
-                                                  , directories_type const& directories
-                                                  ) {
+    inline static Iterator make_iterator( filepath_type    const& filepath
+                                        , directories_type const& directories
+                                        ) {
         info_type const& info = locate_file(filepath, directories);
-        if (info.second == 0) {
-            return boost::none;
-        }
-        return Iterator(info.first);
+        return info.second == 0 ? Iterator() : Iterator(info.first);
     }
 
     inline static info_type locate_file( filepath_type    const& filepath

@@ -53,6 +53,8 @@ static char const word_delimiters[] = " \t\n.,;:!?'\"-";
 
 template <class Engine>
 struct builtin_filters {
+  public:
+
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::traits_type                                  traits_type;
@@ -60,11 +62,15 @@ struct builtin_filters {
     typedef typename options_type::char_type                                    char_type;
     typedef typename options_type::size_type                                    size_type;
     typedef typename options_type::number_type                                  number_type;
+    typedef typename options_type::datetime_type                                datetime_type;
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::range_type                                   range_type;
     typedef typename options_type::sequence_type                                sequence_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
+
+  private:
 
     typedef boost::basic_format<char_type>                                      format_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
@@ -75,11 +81,22 @@ struct builtin_filters {
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
 
-    // TODO: Eliminate these:
-    typedef char_type   Char;
-    typedef size_type   Size;
-    typedef string_type String;
-    typedef value_type  Value;
+  private:
+
+//
+// with_arity
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <size_type Min, size_type Max = Min>
+    struct with_arity {
+        inline static void validate(sequence_type const& arguments) {
+            size_type const n = arguments.size();
+            if (n < Min) throw_exception(missing_argument());
+            else if (n > Max) throw_exception(superfluous_argument());
+        }
+    };
+
+  public:
 
 //
 // filter_type
@@ -91,7 +108,6 @@ struct builtin_filters {
                                      , context_type  const&
                                      , options_type  const&
                                      );
-
 //
 // get
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,9 +189,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             return value.count() + arguments[0].count();
         }
     };
@@ -191,25 +205,23 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return escape(value).mark_safe();
         }
 
-        inline static Value escape(Value const& value) {
-            String const string = value.to_string();
-            // std::basic_ostringstream<Char> stream;
-            if (Size const escapes = std::count_if(string.begin(),
-                string.end(), algorithm::is_any_of("'\"\\"))) {
-
-                String result;
+        inline static value_type escape(value_type const& value) {
+            string_type const string = value.to_string();
+            // string_stream_type stream;
+            if (size_type const escapes = std::count_if(string.begin(), string.end(), algorithm::is_any_of("'\"\\"))) {
+                string_type result;
                 result.reserve(string.size() + escapes);
 
-                BOOST_FOREACH(Char const c, string) {
+                BOOST_FOREACH(char_type const c, string) {
                     switch (c) {
-                        case Char('\''): result += text("\\'");  break;
-                        case Char('"'):  result += text("\\\""); break;
-                        case Char('\\'): result += text("\\\\"); break;
-                        default: result += c;
+                    case char_type('\''): result += traits_type::literal("\\'");  break;
+                    case char_type('"'):  result += traits_type::literal("\\\""); break;
+                    case char_type('\\'): result += traits_type::literal("\\\\"); break;
+                    default: result += c;
                     }
                 }
 
@@ -232,9 +244,8 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            String string = value.to_string();
+            with_arity<0>::validate(arguments);
+            string_type string = value.to_string();
             if (!string.empty()) string[0] = std::toupper(string[0]);
             return string;
         }
@@ -251,9 +262,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             string_type const string = value.to_string();
 			size_type   const width  = arguments[0].to_size();
 			size_type   const length = string.length();
@@ -279,11 +288,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            String const from = value.to_string();
-            String const what = arguments[0].to_string();
+            with_arity<1>::validate(arguments);
+            string_type const from = value.to_string();
+            string_type const what = arguments[0].to_string();
             return algorithm::erase_all_copy(from, what);
         }
     };
@@ -299,11 +306,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            String format = "DATE_FORMAT";
-
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-            if (arguments.size() > 0) format = arguments[0].to_string();
-
+            with_arity<0, 1>::validate(arguments);
+            string_type const format = arguments.empty() ?
+                traits_type::literal("DATE_FORMAT") : arguments[0].to_string();
             return engine.format_datetime(options, format, value.to_datetime());
         }
     };
@@ -319,9 +324,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             return value ? value : arguments[0];
         }
     };
@@ -337,9 +340,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             return value.empty() ? arguments[0] : value;
         }
     };
@@ -355,9 +356,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             return value.sort_by(arguments[0], false);
         }
     };
@@ -373,9 +372,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             return value.sort_by(arguments[0], true);
         }
     };
@@ -391,9 +388,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             intmax_t const dividend = static_cast<intmax_t>(value.count());
 			intmax_t const divisor  = static_cast<intmax_t>(arguments[0].count());
             return dividend % divisor == 0;
@@ -411,7 +406,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return value.mark_unsafe();
         }
     };
@@ -427,13 +422,12 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            String string = value.to_string(), result;
+            with_arity<0>::validate(arguments);
+            string_type string = value.to_string(), result;
             result.reserve(string.size()); // Assume no escapes.
 
-            BOOST_FOREACH(Char const c, string) {
-                result += c < 32 ? String(text("\\x")) + detail::to_hex<2>(c) : String(1, c);
+            BOOST_FOREACH(char_type const c, string) {
+                result += c < 32 ? string_type(text("\\x")) + detail::to_hex<2>(c) : string_type(1, c);
             }
 
             return result;
@@ -451,12 +445,11 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
+            with_arity<0>::validate(arguments);
             return format(static_cast<size_type>(std::abs(static_cast<intmax_t>(value.count()))));
         }
 
-        inline static String format(size_type const size) {
+        inline static string_type format(size_type const size) {
             return detail::abbreviate_size<string_type>(size);
         }
     };
@@ -472,12 +465,8 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            if (!value.length()) {
-                throw_exception(std::invalid_argument("sequence"));
-            }
-
+            with_arity<0>::validate(arguments);
+            if (!value.length()) throw_exception(std::invalid_argument("sequence"));
             return value.front();
         }
     };
@@ -493,10 +482,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
+            with_arity<0>::validate(arguments);
             static string_regex_type const regex = as_xpr('&') >> ~before((+_w | '#' >> +_d) >> ';');
-            return Value(regex_replace(value.to_string(), regex, text("&amp;"))).mark_safe();
+            return value_type(regex_replace(value.to_string(), regex, text("&amp;"))).mark_safe();
         }
     };
 
@@ -511,19 +499,18 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<0, 1>::validate(arguments);
             // Get the number and the decimal places.
-            std::basic_ostringstream<Char> stream;
+            string_stream_type stream;
             int const n = arguments.empty() ? -1 : static_cast<int>(arguments[0].count());
-            typename Value::number_type const number = value.count();
+            number_type const number = value.count();
 
             // If it's an integer and n < 0, we don't want decimals.
             boolean_type const is_integer = detail::is_integer(number);
             int const precision = n < 0 && is_integer ? 0 : std::abs(n);
             stream << std::fixed << std::setprecision(precision) << number;
 
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
     };
 
@@ -538,7 +525,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return value.escape().mark_safe();
         }
     };
@@ -554,11 +541,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             try {
-                typename Value::number_type const number = value.count();
+                number_type const number = value.count();
                 intmax_t const position = static_cast<intmax_t>(arguments[0].count());
                 intmax_t const integer  = static_cast<intmax_t>(number);
 
@@ -592,7 +577,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return detail::iri_encode(value.to_string());
         }
     };
@@ -608,20 +593,18 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
+            with_arity<1>::validate(arguments);
+            string_type const delimiter = arguments[0].to_string();
 
-            Size i = 0;
-            std::basic_ostringstream<Char> stream;
-            String const delimiter = arguments[0].to_string();
-
-            BOOST_FOREACH(Value const& v, value) {
+            size_type i = 0;
+            string_stream_type stream;
+            BOOST_FOREACH(value_type const& v, value) {
                 if (i++) stream << delimiter;
                 stream << v;
             }
 
             BOOST_ASSERT(stream);
-            Value result = stream.str();
+            value_type result = stream.str();
             result.safe(value.safe());
             return result;
         }
@@ -638,12 +621,8 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            if (!value.length()) {
-                throw_exception(std::invalid_argument("sequence"));
-            }
-
+            with_arity<0>::validate(arguments);
+            if (!value.length()) throw_exception(std::invalid_argument("sequence"));
             return value.back();
         }
     };
@@ -659,7 +638,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return value.length();
         }
     };
@@ -675,9 +654,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
 			return arguments[0].to_size() == value.length();
         }
     };
@@ -693,23 +670,23 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             static string_regex_type const newline  = _ln;
             static string_regex_type const newlines = _ln >> +_ln;
 
-            std::basic_ostringstream<Char> stream;
-            String const input = regex_replace(value.to_string(), newline, engine.newline);
+            string_stream_type stream;
+            string_type const input = regex_replace(value.to_string(), newline, engine.newline);
 
             regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
             boolean_type const safe = !options.autoescape || value.safe();
 
-            BOOST_FOREACH(String const& line, std::make_pair(begin, end)) {
-                String p = safe ? Value(line).escape().to_string() : line;
+            BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
+                string_type p = safe ? value_type(line).escape().to_string() : line;
                 algorithm::replace_all(p, engine.newline, text("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
     };
 
@@ -724,10 +701,10 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            return Value(algorithm::replace_all_copy(value.to_string(),
-                engine.newline, text("<br />"))).mark_safe();
+            with_arity<0>::validate(arguments);
+            string_type const text = algorithm::replace_all_copy(value.to_string(),
+                engine.newline, traits_type::literal("<br />"));
+            return value_type(text).mark_safe();
         }
     };
 
@@ -742,10 +719,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
+            with_arity<0>::validate(arguments);
             std::vector<string_type>            lines;
-            std::basic_ostringstream<char_type> stream;
+            string_stream_type stream;
 
             string_type  const input   = value.to_string();
             string_type  const pattern = traits_type::literal("%%0%dd. %%s");
@@ -757,12 +733,12 @@ struct builtin_filters {
             string_type const spec  = (format_type(pattern) % width).str();
 
             size_type i = 1;
-            BOOST_FOREACH(Value const& line, lines) {
-                Value const item = safe ? line : line.escape();
+            BOOST_FOREACH(value_type const& line, lines) {
+                value_type const item = safe ? line : line.escape();
                 stream << (format_type(spec) % i++ % item) << std::endl;
             }
 
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
     };
 
@@ -777,11 +753,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             size_type const width = arguments[0].to_size();
-            std::basic_ostringstream<Char> stream;
+            string_stream_type stream;
             stream << std::left << std::setw(width) << value;
             BOOST_ASSERT(stream);
             return stream.str();
@@ -799,7 +773,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return algorithm::to_lower_copy(value.to_string());
         }
     };
@@ -815,18 +789,18 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
+            string_stream_type stream;
+            value_type const sequence = value.is_numeric() ? value.to_string() : value;
 
-            Size i = 0;
-            std::basic_ostringstream<Char> stream;
-            Value const sequence = value.is_numeric() ?
-                value.to_string() : value;
-
-            BOOST_FOREACH(Value const& item, sequence) {
-                stream << (i++ ? ", " : "[") << item;
+            size_type i = 0;
+            stream << traits_type::literal("[");
+            BOOST_FOREACH(value_type const& item, sequence) {
+                if (i++) stream << traits_type::literal(", ");
+                stream << item;
             }
-
-            return stream.str() + Char(']');
+            stream << traits_type::literal("]");
+            return stream.str();
         }
     };
 
@@ -841,12 +815,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            String phone = value.to_string();
-            algorithm::to_lower(phone);
-            std::transform(phone.begin(), phone.end(),
-                           phone.begin(), translate);
+            with_arity<0>::validate(arguments);
+            string_type phone = algorithm::to_lower_copy(value.to_string());
+            std::transform(phone.begin(), phone.end(), phone.begin(), translate);
             return phone;
         }
 
@@ -854,19 +825,18 @@ struct builtin_filters {
 
         inline static int translate(int const c) {
             switch (c) {
-                case 'a': case 'b': case 'c':           return '2';
-                case 'd': case 'e': case 'f':           return '3';
-                case 'g': case 'h': case 'i':           return '4';
-                case 'j': case 'k': case 'l':           return '5';
-                case 'm': case 'n': case 'o':           return '6';
-                case 't': case 'u': case 'v':           return '8';
-                case 'p': case 'q': case 'r': case 's': return '7';
-                case 'w': case 'x': case 'y': case 'z': return '9';
-                default: return c;
+            case 'a': case 'b': case 'c':           return '2';
+            case 'd': case 'e': case 'f':           return '3';
+            case 'g': case 'h': case 'i':           return '4';
+            case 'j': case 'k': case 'l':           return '5';
+            case 'm': case 'n': case 'o':           return '6';
+            case 't': case 'u': case 'v':           return '8';
+            case 'p': case 'q': case 'r': case 's': return '7';
+            case 'w': case 'x': case 'y': case 'z': return '9';
+            default: return c;
             }
         }
     };
-
 
 //
 // pluralize_filter
@@ -879,18 +849,17 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            String singular, plural;
+            with_arity<0, 1>::validate(arguments);
+            string_type singular, plural;
             sequence_type const sequential_arguments = arguments.empty() ? sequence_type() :
                 engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
-                case 0: plural = text("s");                           break;
-                case 1: plural = sequential_arguments[0].to_string(); break;
-                default: // 2+
-                    singular = sequential_arguments[0].to_string();
-                    plural   = sequential_arguments[1].to_string();
+            case 0: plural = text("s");                           break;
+            case 1: plural = sequential_arguments[0].to_string(); break;
+            default: // 2+
+                singular = sequential_arguments[0].to_string();
+                plural   = sequential_arguments[1].to_string();
             }
 
             return value.count() == 1 ? singular : plural;
@@ -908,7 +877,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             // NOTE: Since this filter is for debugging, we don't normally try
             //       to do anything fancy. However, in the Python binding,
             //       this filter is overridden with a call to the real pprint.
@@ -927,10 +896,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            if (Size const length = value.length()) {
-                Size const index = detail::random_int(0, length - 1);
+            with_arity<0>::validate(arguments);
+            if (size_type const length = value.length()) {
+                size_type const index  = detail::random_int(0, length - 1);
                 return value[static_cast<number_type>(index)];
             }
             else {
@@ -950,13 +918,11 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            std::vector<String> tags;
+            with_arity<1>::validate(arguments);
+            std::vector<string_type> tags;
             formatter const format = { tags };
             int (*predicate)(int) = std::isspace;
-            String const source = arguments[0].to_string();
+            string_type const source = arguments[0].to_string();
             algorithm::split(tags, source, predicate);
             return regex_replace(value.to_string(), engine.html_tag, format);
         }
@@ -964,12 +930,12 @@ struct builtin_filters {
       private:
 
         struct formatter {
-            std::vector<String> const& tags;
+            std::vector<string_type> const& tags;
 
             template <class Match>
-            String operator()(Match const& match) const {
-                String const tag = match[s1].str();
-                return detail::find_value(tag, tags) ? String() : match.str();
+            string_type operator()(Match const& match) const {
+                string_type const tag = match[s1].str();
+                return detail::find_value(tag, tags) ? string_type() : match.str();
             }
         };
     };
@@ -985,11 +951,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             size_type const width = arguments[0].to_size();
-            std::basic_ostringstream<Char> stream;
+            string_stream_type stream;
             stream << std::right << std::setw(width) << value;
             BOOST_ASSERT(stream);
             return stream.str();
@@ -1007,13 +971,10 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            return options.autoescape ?
-                // NOTE: The to_string is there because `safe`
-                //       is expected to stringize its operand
-                //       immediately, not just mark it safe.
-                Value(value.to_string()).mark_safe() : value;
+            with_arity<0>::validate(arguments);
+            // NOTE: The to_string is there because `safe` is expected to stringize its operand
+            //       immediately, not just mark it safe.
+            return options.autoescape ? value_type(value.to_string()).mark_safe() : value;
         }
     };
 
@@ -1028,13 +989,12 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            Value copy = value;
+            with_arity<0>::validate(arguments);
+            value_type copy = value;
 
             // FIXME: These values should be mutable.
-            BOOST_FOREACH(Value const& v, copy) {
-                const_cast<Value&>(v).safe(true);
+            BOOST_FOREACH(value_type const& v, copy) {
+                const_cast<value_type&>(v).safe(true);
             }
 
             return copy.mark_safe();
@@ -1052,22 +1012,17 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            String singular, plural;
+            with_arity<0, 1>::validate(arguments);
+            string_type singular, plural;
             sequence_type const sequential_arguments = arguments.empty() ? sequence_type() :
                 engine.template split_argument<':'>(arguments[0], context, options);
-
-            if (sequential_arguments.size() < 2) {
-                throw_exception(missing_argument());
-            }
+            if (sequential_arguments.size() < 2) throw_exception(missing_argument());
 
             sequence_type result;
-            Value const lower = sequential_arguments[0];
-            Value const upper = sequential_arguments[1];
-            typename Value::range_type range =
-                value.slice(lower ? optional<int>(static_cast<int>(lower.count())) : none,
-                            upper ? optional<int>(static_cast<int>(upper.count())) : none);
+            value_type const lower = sequential_arguments[0];
+            value_type const upper = sequential_arguments[1];
+            range_type  range = value.slice(lower ? optional<int>(static_cast<int>(lower.count())) : none,
+                                            upper ? optional<int>(static_cast<int>(upper.count())) : none);
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;
         }
@@ -1084,20 +1039,17 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
+            with_arity<0>::validate(arguments);
             struct invalid {
-                inline static boolean_type fn(Char const c) {
+                inline static boolean_type fn(char_type const c) {
                     return !std::isalnum(c) && c != '_' && c != '-';
                 }
             };
 
-            String slug = value.to_string();
-            algorithm::trim(slug);
-            std::replace(slug.begin(), slug.end(), Char(' '), Char('-'));
+            string_type slug = algorithm::trim_copy(value.to_string());
+            std::replace(slug.begin(), slug.end(), char_type(' '), char_type('-'));
             slug.erase(std::remove_if(slug.begin(), slug.end(), invalid::fn), slug.end());
-            algorithm::to_lower(slug);
-            return slug;
+            return algorithm::to_lower_copy(slug);
         }
     };
 
@@ -1112,11 +1064,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            String const spec = arguments[0].to_string();
-            return (basic_format<Char>(Char('%') + spec) % value).str();
+            with_arity<1>::validate(arguments);
+            string_type const spec = arguments[0].to_string();
+            return (format_type(char_type('%') + spec) % value).str();
         }
     };
 
@@ -1131,7 +1081,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
             return regex_replace(value.to_string(), tag, text(""));
         }
@@ -1148,11 +1098,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            String format = "TIME_FORMAT";
-
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-            if (arguments.size() > 0) format = arguments[0].to_string();
-
+            with_arity<0, 1>::validate(arguments);
+            string_type const format = arguments.empty() ?
+                traits_type::literal("TIME_FORMAT") : arguments[0].to_string();
             return engine.format_datetime(options, format, value.to_datetime());
         }
     };
@@ -1168,13 +1116,10 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            typename options_type::datetime_type to = value.to_datetime();
-            typename options_type::datetime_type from = arguments.empty() ?
-                detail::local_now() : arguments[0].to_datetime();
-
-            return Value(engine.format_duration(options, from - to)).mark_safe();
+            with_arity<0, 1>::validate(arguments);
+            datetime_type const to   = value.to_datetime();
+            datetime_type const from = arguments.empty() ? detail::local_now() : arguments[0].to_datetime();
+            return value_type(engine.format_duration(options, from - to)).mark_safe();
         }
     };
 
@@ -1189,13 +1134,10 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            typename options_type::datetime_type to = value.to_datetime();
-            typename options_type::datetime_type from = arguments.empty() ?
-                detail::local_now() : arguments[0].to_datetime();
-
-            return Value(engine.format_duration(options, to - from)).mark_safe();
+            with_arity<0, 1>::validate(arguments);
+            datetime_type const to   = value.to_datetime();
+            datetime_type const from = arguments.empty() ? detail::local_now() : arguments[0].to_datetime();
+            return value_type(engine.format_duration(options, to - from)).mark_safe();
         }
     };
 
@@ -1210,17 +1152,12 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
+            string_type text = value.to_string();
 
-            String text = value.to_string();
-
-            for (Size i = 0; i < text.length(); ++i) {
-                if (i == 0 || std::isspace(text[i - 1])) {
-                    text[i] = std::toupper(text[i]);
-                }
-                else {
-                    text[i] = std::tolower(text[i]);
-                }
+            for (size_type i = 0, n = text.length(); i < n; ++i) {
+                boolean_type const boundary = i == 0 || std::isspace(text[i - 1]);
+                text[i] = boundary ? std::toupper(text[i]) : std::tolower(text[i]);
             }
 
             return text;
@@ -1238,9 +1175,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
 			size_type const limit = arguments[0].to_size();
             if (limit == 0) return string_type();
 
@@ -1268,15 +1203,13 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
 			size_type const limit = arguments[0].to_size();
             if (limit == 0) return string_type();
 
             size_type   const ellip = engine.ellipsis.length();
             string_type const input = value.to_string();
-            std::basic_ostringstream<char_type> stream;
+            string_stream_type stream;
 
             string_iterator_type last = input.begin(), done = input.end();
             regex_iterator_type begin(last, done, engine.html_tag), end;
@@ -1343,9 +1276,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             size_type   const limit = arguments[0].to_size();
             string_type const text  = value.to_string();
             size_type count = 0;
@@ -1396,9 +1327,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             static string_type const boundaries = detail::text(" \t\n\v\f\r>");
 			size_type const limit = arguments[0].to_size();
             if (limit == 0) return string_type();
@@ -1489,17 +1418,16 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            std::basic_ostringstream<Char> stream;
+            with_arity<0>::validate(arguments);
+            string_stream_type stream;
             value.safe() ? push_item<true>(value, engine, 0, stream)
                          : push_item<false>(value, engine, 0, stream);
-            return Value(stream.str()).mark_safe();
+            return value_type(stream.str()).mark_safe();
         }
 
       private:
 
-        inline static boolean_type is_iterable(Value const& item) {
+        inline static boolean_type is_iterable(value_type const& item) {
             if (item.is_string()) {
             // Treat strings atomically.
                 return false;
@@ -1517,16 +1445,16 @@ struct builtin_filters {
         }
 
         template <boolean_type Safe, class Stream>
-        inline static void push_item( Value  const& item
-                                    , Engine const& engine
-                                    , Size   const  level
-                                    , Stream&       out
+        inline static void push_item( value_type  const& item
+                                    , engine_type const& engine
+                                    , size_type   const  level
+                                    , Stream&            out
                                     ) {
-            String const indent(level, Char('\t'));
+            string_type const indent(level, char_type('\t'));
 
             if (is_iterable(item)) {
-                if (Size const length = item.length()) {
-                    for (Size i = 0; i < length; ++i) {
+                if (size_type const length = item.length()) {
+                    for (size_type i = 0; i < length; ++i) {
                         value_type const& value = item[static_cast<number_type>(i)];
                         out << indent << "<li>";
                         Safe ? out << value : out << value.escape();
@@ -1568,7 +1496,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return algorithm::to_upper_copy(value.to_string());
         }
     };
@@ -1584,7 +1512,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
+            with_arity<0>::validate(arguments);
             return detail::uri_encode(value.to_string());
         }
     };
@@ -1600,24 +1528,22 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-            return urlize(value, Size(-1), engine.ellipsis);
+            with_arity<0>::validate(arguments);
+            return urlize(value, std::numeric_limits<size_type>::max(), engine.ellipsis);
         }
 
       private:
 
         struct formatter {
-            Size const limit;
-            String const ellipsis;
-            formatter(Size const limit, String const& ellipsis)
-                : limit(limit), ellipsis(ellipsis) {}
+            size_type   const limit;
+            string_type const ellipsis;
 
             template <class Match>
-            String operator()(Match const& match) const {
-                std::basic_ostringstream<Char> stream;
-                String const link = match.str();
-                String const full = match.str();
-                String const text = full.substr(0, limit);
+            string_type operator()(Match const& match) const {
+                string_stream_type stream;
+                string_type const link = match.str();
+                string_type const full = match.str();
+                string_type const text = full.substr(0, limit);
                 boolean_type const scheme = !match[xpressive::s1];
                 boolean_type const more = text.size() < full.size();
                 stream << "<a href='" << (scheme ? "http://" : "") << link;
@@ -1628,13 +1554,13 @@ struct builtin_filters {
 
       protected:
 
-        inline static Value urlize(Value const& value, Size const limit, String const& ellipsis) {
-            static string_regex_type const safe = +(alnum | (set= '/', '&', '=', ':', ';', '#',
-                                                                  '?', '+', '-', '*', '%', '@'));
-            static string_regex_type const url = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
+        inline static value_type urlize(value_type const& value, size_type const limit, string_type const& ellipsis) {
+            static string_regex_type const safe = +(alnum | (set= '/', '&', '=', ':', ';', '#', '?', '+', '-', '*', '%', '@'));
+            static string_regex_type const url  = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
 
-            String const body = value.to_string();
-            return Value(regex_replace(body, url, formatter(limit, ellipsis))).mark_safe();
+            string_type const body   = value.to_string();
+            formatter   const format = detail::construct<formatter>(limit, ellipsis);
+            return value_type(regex_replace(body, url, format)).mark_safe();
         }
     };
 
@@ -1649,12 +1575,10 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
+            with_arity<1>::validate(arguments);
             return urlize_filter::urlize(value, arguments[0].to_size(), engine.ellipsis);
         }
     };
-
 
 //
 // wordcount_filter
@@ -1667,10 +1591,9 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (!arguments.empty()) throw_exception(superfluous_argument());
-
-            String const input = value.to_string();
-            String const delimiters = text(word_delimiters);
+            with_arity<0>::validate(arguments);
+            string_type const input = value.to_string();
+            string_type const delimiters = text(word_delimiters);
             separator_type const separator(delimiters.c_str());
             tokenizer_type const tokenizer(input, separator);
 
@@ -1689,9 +1612,7 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
+            with_arity<1>::validate(arguments);
             size_type   const width = arguments[0].to_size();
             string_type const text  = value.to_string();
             return wrap(text, width, engine.newline);
@@ -1699,29 +1620,27 @@ struct builtin_filters {
 
       private:
 
-        inline static String wrap( String const& input
-                                 , Size   const& width
-                                 , String const& newline
+        inline static string_type wrap( string_type const& input
+                                 , size_type   const  width
+                                 , string_type const& newline
                                  ) {
-            Size i = 0;
-            String word;
-            String result;
-            Char last = '\0';
+            string_type word, result;
 
-            BOOST_FOREACH(Char const& c, input) {
+            size_type i    = 0;
+            char_type last = '\0';
+            BOOST_FOREACH(char_type const c, input) {
                 if (++i == width) {
                     algorithm::trim_left(word);
                     result += newline + word;
                     i = word.length();
                     word.clear();
                 }
-                else if (std::isspace(c)
-                     && !std::isspace(last)) {
+                else if (std::isspace(c) && !std::isspace(last)) {
                     result += word;
                     word.clear();
                 }
 
-                word += last = c;
+                word += (last = c);
             }
 
             result += word;
@@ -1740,28 +1659,26 @@ struct builtin_filters {
                                         , context_type  const& context
                                         , options_type  const& options
                                         ) {
-            if (arguments.size() < 1) throw_exception(missing_argument());
-            if (arguments.size() > 1) throw_exception(superfluous_argument());
-
-            Value true_, false_, none_;
+            with_arity<1>::validate(arguments);
+            value_type true_, false_, none_;
             sequence_type const sequential_arguments =
                 engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
-                case 0:
-                case 1:
-                    throw_exception(missing_argument());
-                case 2:
-                    true_  = sequential_arguments[0];
-                    false_ = sequential_arguments[1];
-                    none_  = sequential_arguments[1];
-                    break;
-                case 3:
-                    true_  = sequential_arguments[0];
-                    false_ = sequential_arguments[1];
-                    none_  = sequential_arguments[2];
-                    break;
-                default: throw_exception(superfluous_argument());
+            case 0:
+            case 1:
+                throw_exception(missing_argument());
+            case 2:
+                true_  = sequential_arguments[0];
+                false_ = sequential_arguments[1];
+                none_  = sequential_arguments[1];
+                break;
+            case 3:
+                true_  = sequential_arguments[0];
+                false_ = sequential_arguments[1];
+                none_  = sequential_arguments[2];
+                break;
+            default: throw_exception(superfluous_argument());
             }
 
             return value.empty() ? none_ : (value ? true_ : false_);

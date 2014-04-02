@@ -32,25 +32,6 @@ struct null_value : value_facade<Char, null_value<Char> > {
 
 }}} // namespace ajg::synth::detail
 
-/*
-namespace ajg {
-namespace synth {
-
-//
-// specialization for null_value
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Traits>
-struct adapter<Traits, detail::null_value<char> >
-    : public abstract_adapter<Traits> {
-
-    AJG_SYNTH_ADAPTER(detail::null_value<char>)
-    adapted_type adapted_;
-};
-
-}} // namespace ajg::synth
-*/
-
 namespace std {
 
 template<class Char>

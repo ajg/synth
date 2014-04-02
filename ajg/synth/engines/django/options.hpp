@@ -104,6 +104,7 @@ struct options {
     typedef typename traits_type::ostream_type     ostream_type;
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
+    typedef typename traits_type::range_type       range_type;
     typedef typename traits_type::sequence_type    sequence_type;
     typedef typename traits_type::mapping_type     mapping_type;
     typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.

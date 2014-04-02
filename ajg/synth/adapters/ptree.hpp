@@ -6,6 +6,9 @@
 #ifndef AJG_SYNTH_ADAPTERS_PTREE_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_PTREE_HPP_INCLUDED
 
+#include <algorithm>
+#include <functional>
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <ajg/synth/adapters/adapter.hpp>
@@ -63,6 +66,27 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
 };
 
 }} // namespace ajg::synth
+
+namespace std {
+
+template <class K, class V>
+// struct less<boost::property_tree::basic_ptree<K, V> > {
+//     bool operator()( boost::property_tree::basic_ptree<K, V> const& a
+//                    , boost::property_tree::basic_ptree<K, V> const& b
+//                    ) const {
+    inline bool operator <( boost::property_tree::basic_ptree<K, V> const& a
+                          , boost::property_tree::basic_ptree<K, V> const& b
+                          ) {
+        if (a.data() < b.data()) {
+            return std::lexicographical_compare( a.ordered_begin(), a.not_found()
+                                               , b.ordered_begin(), b.not_found()
+                                               );
+        }
+        return false;
+    }
+// };
+
+} // namespace std
 
 #endif // AJG_SYNTH_ADAPTERS_PTREE_HPP_INCLUDED
 

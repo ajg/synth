@@ -38,7 +38,7 @@ struct adapter<Traits, std::map<K, V> >
     const_iterator end()   const { return const_iterator(adapted_.end()); }
 
     optional<value_type> index(value_type const& what) const {
-        key_type const key = traits_type::template convert<value_type, key_type>(what);
+        key_type const key = traits_type::template to<key_type>(what);
         typename map_type::const_iterator const it = adapted_.find(key);
         if (it == adapted_.end()) {
             return boost::none;
@@ -72,7 +72,7 @@ struct adapter<Traits, std::multimap<K, V> >
 
     /* TODO: Return a sequence or set of values, or the first one?
     optional<value_type> index(value_type const& what) const {
-        key_type const key = traits_type::convert<value_type, key_type>(what);
+        key_type const key = traits_type::template to<key_type>(what);
         typename map_type::const_iterator it const = adapted_.find(key);
         if (it == adapted_.end()) {
             return boost::none;

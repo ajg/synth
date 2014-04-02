@@ -69,6 +69,16 @@ struct adapter<Traits, T[]>
     adapted_type adapted_;
     std::size_t const length_;
 
+  protected:
+
+    virtual boolean_type equal_adapted(abstract_type const& that) const {
+        return this->template equal_as<adapter>(that);
+    }
+
+    virtual boolean_type less_adapted(abstract_type const& that) const {
+        return this->template less_as<adapter>(that);
+    }
+
   public:
 
     adapter(adapted_type adapted, std::size_t const length)

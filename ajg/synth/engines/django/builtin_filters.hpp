@@ -1527,7 +1527,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return urlize(value, std::numeric_limits<size_type>::max(), engine.ellipsis);
+            return urlize(value, (std::numeric_limits<size_type>::max)(), engine.ellipsis);
         }
 
       private:

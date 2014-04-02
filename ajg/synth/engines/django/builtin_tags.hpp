@@ -1118,20 +1118,6 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct library_tag {
-      private:
-
-        typedef context_type     context_type;
-        typedef Engine      engine_type;
-        typedef match_type       match_type;
-        typedef options_type     options_type;
-        typedef regex_type       regex_type;
-        typedef string_type      string_type;
-        typedef value_type       value_type;
-
-        typedef typename engine_type::stream_type       output_type;
-
-      public:
-
         static regex_type syntax(engine_type& engine) {
             return AJG_TAG(engine.unreserved_name >> engine.arguments) >> engine.block;
         }

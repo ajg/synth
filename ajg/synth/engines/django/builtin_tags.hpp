@@ -900,9 +900,10 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            string_type const path = match[s1].str();
+            string_type  const path   = match[s1].str();
+            boolean_type const parsed = match[s2].matched;
 
-            if (boolean_type const parsed = match[s2].matched) {
+            if (parsed) {
                 engine.render_file(out, path, context, options);
             }
             else {

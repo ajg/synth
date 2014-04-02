@@ -42,6 +42,16 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
 
     numeric_adapter(adapted_type const& adapted) : adapted_(adapted) {}
 
+  protected:
+
+    virtual boolean_type equal_adapted(abstract_type const& that) const {
+        return this->template equal_as<numeric_adapter>(that);
+    }
+
+    virtual boolean_type less_adapted(abstract_type const& that) const {
+        return this->template less_as<numeric_adapter>(that);
+    }
+
   public:
 
     boolean_type equal(abstract_type const& that) const {

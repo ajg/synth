@@ -106,7 +106,7 @@ struct block_tag {
             String const& close = match(s2)[id].str();
 
             if (!close.empty() && name != close) {
-                std::string const original = engine.template transcode<char>(name);
+                std::string const original = Value::traits_type::narrow(name);
                 std::string const message  = "mismatched endblock tag for " + original;
                 throw_exception(std::logic_error(message));
             }
@@ -877,8 +877,7 @@ struct ssi_tag {
             }
             else {
                 String line;
-                std::string const path_ =
-                    engine.template transcode<char>(path);
+                std::string const path_ = Value::traits_type::narrow(path);
                 std::basic_ifstream<Char> file(path_.c_str());
                 while (std::getline(file, line)) out << line;
             }

@@ -12,20 +12,12 @@ compiler:
 before_install:
   - sudo apt-get install libboost-dev libboost-program-options-dev libboost-python-dev
 
+before_script:
+  - sudo apt-get install gdb
+
 script:
   # Prevent slow builds from dying by echoing something every 5 minutes.
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
-
-  - echo "=== Building ==="
-  # - scons || exit 1 # -j 2
-  - scons test debug=1
-  - echo "=== Done ==="
-
-  - echo "=== Running Test Harness ==="
-  - ./test
-  - echo "=== Done ==="
-
-  # - echo "=== Running Python Binding Tests ==="
-  # - mv python-synth.so tests/python/synth.so
-  # - ls tests/python/binding*.py | xargs -n 1 python
-  # - echo "=== Done ==="
+  - scons debug=1 group=django && cat tests/debug.gdb | sudo gdb ./test
+  ### - scons && ./test
+  ### - sudo python setup.py install && ls tests/python/binding*.py | xargs -n 1 python

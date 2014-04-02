@@ -33,7 +33,7 @@ struct adapter<Traits, std::pair<First, Second> >
     // A pair can never be 'false', since its
     // 'length' is always non-zero (i.e. two.)
     boolean_type test() const { return true; }
-    void output(ostream_type& out) const { this->list(out, boost::lexical_cast<string_type>(": ")); }
+    void output(ostream_type& out) const { this->list(out, traits_type::literal(": ")); }
     boolean_type equal(abstract_type const& that) const {
         return this->compare_sequence(that);
     }

@@ -138,18 +138,9 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
   public:
 
-    inline boolean_type is_numeric() const {
-        typedef abstract_numeric_adapter<traits_type> numeric_adapter;
-        return dynamic_cast<numeric_adapter const*>(this->get()) != 0;
-    }
-
-    inline boolean_type is_string() const {
-        return this->template is<string_type>();
-    }
-
-    inline string_type to_string() const {
-        return get()->to_string();
-    }
+    inline boolean_type is_numeric() const { return get()->is_numeric(); }
+    inline boolean_type is_string()  const { return get()->is_string(); }
+    inline string_type  to_string()  const { return get()->to_string(); }
 
     inline void          clear()       { return adapter_.reset(); }
     inline number_type   count() const { return get()->count(); }
@@ -277,11 +268,6 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
   protected:
 
-    template <class T>
-    inline boolean_type is() const {
-        return get()->type() == typeid(T);
-    }
-
     inline const abstract_type* get() const {
         if (!adapter_) {
             throw_exception(std::logic_error("empty value"));
@@ -296,7 +282,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         if (value.empty()) {
-            return output << boost::lexical_cast<string_type>("<empty>");
+            return output << traits_type::literal("<empty>");
         }
         else {
             return value.get()->output(output), output;
@@ -312,6 +298,7 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     boost::shared_ptr<abstract_type const> adapter_;
 };
 
+// TODO[c++11]: Replace with variadic templates.
 #define AJG_SYNTH_VALUE_CONSTRUCTORS(name, base, rest) \
     name() \
         : base() rest \

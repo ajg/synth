@@ -6,6 +6,10 @@
 #ifndef AJG_SYNTH_DEBUG_HPP_INCLUDED
 #define AJG_SYNTH_DEBUG_HPP_INCLUDED
 
+#ifdef NDEBUG
+#    error Debugging instrumentation with NDEBUG
+#endif
+
 #ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
 #define BOOST_ENABLE_ASSERT_HANDLER
 #endif
@@ -31,6 +35,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/xpressive/xpressive_dynamic.hpp>
+#include <boost/exception/detail/attribute_noreturn.hpp>
 
 // TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
 
@@ -86,6 +92,7 @@ inline std::string abbreviate(char const* s) {
     return result;
 }
 
+// TODO: Make this usable outside of debugging.
 inline std::string unmangle(std::string const& mangled) {
 
 #if HAS_CXXABI_H
@@ -103,6 +110,9 @@ inline std::string unmangle(std::string const& mangled) {
 
 }
 
+// TODO: Reimplement using static regexes.
+static boost::xpressive::sregex const signature = boost::xpressive::sregex::compile(
+    "((?<=[\\s:~])(\\w+)\\s*\\(([\\w\\s,<>\\[\\].=&':/*]*?)\\)\\s*(const)?\\s*(?={))");
 
 inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
@@ -125,8 +135,14 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
                 break;
             }
             else {
-                std::string const signature = unmangle(mangled);
-                AJG_FPRINTF(file, "%d\t%s\t%s\n", index, module.c_str(), signature.c_str());
+                std::string entry = unmangle(mangled);
+                boost::xpressive::smatch match;
+
+                if (boost::xpressive::regex_match(entry, match, signature)) {
+                    entry = match[2] + "(" + match[1] + ")";
+                }
+
+                AJG_FPRINTF(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
             }
         }
     }
@@ -162,6 +178,21 @@ inline void signal_handler( int        signum
     std::exit(signum);
 }
 
+#ifdef AJG_SYNTH_THROW_EXCEPTION
+#undef AJG_SYNTH_THROW_EXCEPTION
+#endif
+
+#define AJG_SYNTH_THROW_EXCEPTION ajg::synth::debug::throw_exception
+
+template <class Exception>
+BOOST_ATTRIBUTE_NORETURN
+inline void throw_exception(Exception const& e) {
+    std::string const name = unmangle(typeid(Exception).name());
+    AJG_FPRINTF(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
+    fprint_backtrace(stderr, 1);
+    boost::throw_exception(e);
+}
+
 inline void terminate_handler() {
     AJG_FPRINTF(stderr, "Terminated\n");
     fprint_backtrace(stderr, 1);
@@ -169,7 +200,7 @@ inline void terminate_handler() {
 }
 
 inline void unexpected_handler() {
-    AJG_FPRINTF(stderr, "Unexpected Exception\n");
+    AJG_FPRINTF(stderr, "Unexpected exception\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }

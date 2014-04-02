@@ -39,18 +39,22 @@ struct adapter<Traits, py::object>
 
   public:
 
-    boolean_type test() const { return boolean_type(adapted_); }
-    datetime_type to_datetime() const { return d::to_datetime<traits_type>(adapted_); }
+    virtual boolean_type test() const { return boolean_type(adapted_); }
+    virtual datetime_type to_datetime() const { return d::to_datetime<traits_type>(adapted_); }
 
- // void input (istream_type& in)        { in >> adapted_; }
- // void output(ostream_type& out) const { out << adapted_; }
-    void output(ostream_type& out) const { out << d::to_string<string_type>(adapted_); }
+ // virtual void input (istream_type& in)        { in >> adapted_; }
+ // virtual void output(ostream_type& out) const { out << adapted_; }
+    virtual void output(ostream_type& out) const { out << d::to_string<string_type>(adapted_); }
 
-    iterator begin() { return begin<iterator>(adapted_); }
-    iterator end()   { return iterator(stl_iterator_type()); }
+    virtual iterator begin() { return begin<iterator>(adapted_); }
+    virtual iterator end()   { return end<iterator>(adapted_); }
 
-    const_iterator begin() const { return begin<const_iterator>(adapted_); }
-    const_iterator end()   const { return const_iterator(stl_iterator_type()); }
+    virtual const_iterator begin() const { return begin<const_iterator>(adapted_); }
+    virtual const_iterator end()   const { return end<const_iterator>(adapted_); }
+
+    virtual boolean_type is_boolean() const { return PyBool_Check(adapted_.ptr()); }
+    virtual boolean_type is_string()  const { return PyString_Check(adapted_.ptr()); }
+    virtual boolean_type is_numeric() const { return PyNumber_Check(adapted_.ptr()); }
 
     optional<value_type> index(value_type const& what) const {
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
@@ -106,6 +110,11 @@ struct adapter<Traits, py::object>
             string_type const& type = d::class_name<std::string>(obj);
             throw_exception(std::runtime_error(type + " object is not iterable"));
         }
+    }
+
+    template <class I>
+    inline static I end(py::object const& obj) {
+        return I(stl_iterator_type());
     }
 };
 

@@ -53,7 +53,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
     const_iterator end()   const { return const_iterator(adapted_.end()); }
 
     optional<value_type> index(value_type const& what) const {
-        key_type const key = traits_type::template convert<value_type, key_type>(what);
+        key_type const key = traits_type::template to<key_type>(what);
         typename ptree_type::const_assoc_iterator const it = adapted_.find(key);
         if (it == adapted_.not_found()) {
             return boost::none;

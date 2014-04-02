@@ -94,8 +94,8 @@ struct builtin_filters {
     struct with_arity {
         inline static void validate(sequence_type const& arguments) {
             size_type const n = arguments.size();
-            if (n < Min) throw_exception(missing_argument());
-            else if (n > Max) throw_exception(superfluous_argument());
+            if (n > Max) throw_exception(superfluous_argument());
+            else if (Min && n < Min) throw_exception(missing_argument());
         }
     };
 

@@ -67,7 +67,7 @@ def get_extension():
     )
 
 # TODO: Allow some of these to be overridden via environment variable:
-is_debug    = True
+is_debug    = False
 is_static   = True
 is_threaded = True
 synth_base  = 'ajg/synth/'

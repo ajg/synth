@@ -219,13 +219,17 @@ struct builtin_tags {
             (initialize_tag(engine, with_tag::syntax(engine)),        with_tag::render)
             (initialize_tag(engine, library_tag::syntax(engine)),     library_tag::render)
             ;
-    }*/
+    }
+    inline static id_type initialize_tag(engine_type& engine, regex_type const& tag) {
+        if (engine.tag.regex_id() == 0) engine.tag = tag;
+        else engine.tag = tag;
+        return tag.regex_id();
+    }
+  */
 
   private:
 
     inline static id_type initialize_tag(engine_type& engine, regex_type const& tag) {
-        if (engine.tag.regex_id() == 0) engine.tag = tag;
-        else engine.tag = tag;
         return tag.regex_id();
     }
 

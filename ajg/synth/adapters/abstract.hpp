@@ -115,60 +115,6 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         else return false;
     }
 
-    /*
-    virtual boolean_type equal(abstract_type const& that) const {
-        // Try comparing as a sequence by default.
-        // FIXME: Move this only to sequential adapters.
-        const_iterator i1, i2, e1, e2;
-        try {
-            i1 = begin();
-            i2 = that.begin();
-            e1 = end();
-            e2 = that.end();
-        }
-        catch (bad_method const& method) {
-            AJG_DUMP(method.name);
-            if (method.name == "begin" || method.name == "end") {
-                AJG_SYNTH_THROW(bad_method("equal"));
-            }
-            else {
-                throw;
-            }
-        }
-
-        return this->compare_range(i1, i2, e1, e2);
-    }
-    */
-
-    /*
-    virtual boolean_type equal(abstract_type const& that) const {
-        // Try string equality by default.
-        // XXX: Should this behavior go in value or value_facade?
-        try {
-            return this->to_string() == that.to_string();
-        }
-    }
-    */
-
-    /*
-    virtual boolean_type less(abstract_type const& that) const {
-        // Try lexicographical ordering by default.
-        // XXX: Should this behavior go in value or value_facade?
-        try {
-            return this->to_string() < that.to_string();
-        }
-        catch (bad_method const& method) {
-            AJG_DUMP(method.name);
-            if (method.name == "output") {
-                AJG_SYNTH_THROW(bad_method("less"));
-            }
-            else {
-                throw;
-            }
-        }
-    }
-    */
-
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
 
@@ -246,22 +192,6 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 
-    /*
-    // TODO: Rename to something like can_equal
-    template <class This, class That>
-    inline static This const* comparable(This const& this_, That const& that) {
-        // TODO: Deal with forwarding_adapter's and with reference_wrapper's.
-        return dynamic_cast<This const*>(&that);
-    }
-
-    // TODO: Rename to something like is_equal
-    template <class This, class That>
-    inline static boolean_type compare(This const& this_, That const& that) {
-        This const* const that_ = comparable<This>(&that);
-        return that_ && this_.adapted_ == that_->adapted_;
-    }
-    */
-
     void list(ostream_type& out, string_type const delimiter = traits_type::literal(", ")) const {
         size_type i = 0;
 
@@ -271,16 +201,13 @@ struct abstract_adapter { // TODO: Rename to virtual_adapter
         }
     }
 
-    // TODO: Rename to something like is_equal_sequence
-    boolean_type compare_sequence(abstract_type const& that) const {
-        return this->compare_range(begin(), that.begin(), end(), that.end());
+    boolean_type equal_sequence(abstract_type const& that) const {
+        return this->equal_range(begin(), that.begin(), end(), that.end());
     }
 
-    // TODO: Rename to something like is_equal_range
-    boolean_type compare_range( const_iterator i1, const_iterator i2
-                              , const_iterator e1, const_iterator e2
-                              ) const {
-        // TODO: See if we can refactor this using std::equal.
+    boolean_type equal_range( const_iterator i1, const_iterator i2
+                            , const_iterator e1, const_iterator e2
+                            ) const {
         for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
             if (!i1->equal(*i2)) {
                 return false;

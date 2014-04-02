@@ -35,7 +35,7 @@ struct adapter<Traits, std::pair<First, Second> >
     boolean_type test() const { return true; }
     void output(ostream_type& out) const { this->list(out, traits_type::literal(": ")); }
     boolean_type equal(abstract_type const& that) const {
-        return this->compare_sequence(that);
+        return this->equal_sequence(that);
     }
 
     const_iterator begin() const { return const_pair_iterator(adapted_, first); }

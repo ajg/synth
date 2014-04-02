@@ -35,7 +35,7 @@ struct adapter<Traits, T[N]>
     boolean_type test()  const { return N != 0; }
     void output(ostream_type& out) const { this->list(out); }
     boolean_type equal(abstract_type const& that) const {
-        return this->compare_sequence(that);
+        return this->equal_sequence(that);
     }
 
     const_iterator begin() const { return const_iterator(pointer<0>()); }
@@ -90,7 +90,7 @@ struct adapter<Traits, T[]>
     boolean_type test()  const { return length_ != 0; }
     void output(ostream_type& out) const { this->list(out); }
     boolean_type equal(abstract_type const& that) const {
-        return this->compare_sequence(that);
+        return this->equal_sequence(that);
     }
 
     const_iterator begin() const { return adapted_ + 0; }

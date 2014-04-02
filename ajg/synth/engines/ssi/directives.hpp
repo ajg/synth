@@ -259,8 +259,9 @@ struct if_directive {
                 ;
         }
 
-        bool compare_regex( typename Engine::args_type         const& args
-                          , typename Engine::string_match_type const& expr) const {
+        bool equals_regex( typename Engine::args_type         const& args
+                         , typename Engine::string_match_type const& expr
+                         ) const {
             typename Engine::string_type       const left    = parse_string(args, get_nested<A>(expr));
             typename Engine::string_type       const right   = get_nested<C>(expr)[xpressive::s1].str();
             typename Engine::string_regex_type const pattern = Engine::string_regex_type::compile(right);
@@ -282,12 +283,13 @@ struct if_directive {
             return match;
         }
 
-        bool compare( typename Engine::args_type         const& args
-                    , typename Engine::string_match_type const& expr) const {
+        bool equals( typename Engine::args_type         const& args
+                   , typename Engine::string_match_type const& expr
+                   ) const {
             typename Engine::string_type const op = expr(comparison_operator).str();
 
             if (get_nested<C>(expr) == regex_expression) {
-                bool const matched = compare_regex(args, expr);
+                bool const matched = equals_regex(args, expr);
                 std::logic_error const error("comparison operator");
                 return AJG_CASE_OF_ELSE(op, ((text("="),  matched))
                                                  ((text("=="), matched))
@@ -338,7 +340,7 @@ struct if_directive {
                 ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
                 ((expression,            evaluate_expression(args, get_nested<A>(expr))))
                 ((string_expression,     !parse_string(args, expr).empty()))
-                ((comparison_expression, compare(args, expr))));
+                ((comparison_expression, equals(args, expr))));
         }
 
         bool evaluate_directive( typename Engine::args_type  const& args

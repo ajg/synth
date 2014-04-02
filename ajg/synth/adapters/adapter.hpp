@@ -276,7 +276,7 @@ struct adapter<Traits, value_facade<Char, Value> >
     template <class T>
     typename enable_if_c<is_const_iterable<T>::value
                      && !is_base_of<base_value, T>::value, boolean_type>::type equal_(abstract_type const& that) const {
-        return this->compare_sequence(that);
+        return this->equal_sequence(that);
     }
 
     template <class T>

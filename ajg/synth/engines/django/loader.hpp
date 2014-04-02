@@ -13,11 +13,11 @@ namespace synth {
 namespace django {
 
 //
-// default_loader
+// loader
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct default_loader {
-    template <class Engine>
+template <class Engine>
+struct loader {
     static void load( typename Engine::context_type&      context
                     , typename Engine::options_type&      options
                     , typename Engine::string_type const& library_name

@@ -70,6 +70,13 @@ struct builtin_filters {
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
+    typedef value_type (*filter_type)( engine_type   const&
+                                     , value_type    const&
+                                     , sequence_type const& // TODO: arguments_type
+                                     , context_type  const&
+                                     , options_type  const&
+                                     );
+
   private:
 
     typedef boost::basic_format<char_type>                                      format_type;
@@ -83,10 +90,6 @@ struct builtin_filters {
 
   private:
 
-//
-// with_arity
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
     template <size_type Min, size_type Max = Min>
     struct with_arity {
         inline static void validate(sequence_type const& arguments) {
@@ -98,81 +101,67 @@ struct builtin_filters {
 
   public:
 
-//
-// filter_type
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    typedef value_type (*filter_type)( engine_type   const&
-                                     , value_type    const&
-                                     , sequence_type const& // TODO: arguments_type
-                                     , context_type  const&
-                                     , options_type  const&
-                                     );
-//
-// get
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
     inline static filter_type get(string_type const& name) {
-        // TODO: Consider replacing with fastmatch.h switch.
+        // TODO: Consider replacing with fastmatch.h switch or unordered_map.
         static std::map<string_type, filter_type> const filters = boost::assign::map_list_of
-            (string_type(detail::text("add")),                add_filter::process)
-            (string_type(detail::text("addslashes")),         addslashes_filter::process)
-            (string_type(detail::text("capfirst")),           capfirst_filter::process)
-            (string_type(detail::text("center")),             center_filter::process)
-            (string_type(detail::text("cut")),                cut_filter::process)
-            (string_type(detail::text("date")),               date_filter::process)
-            (string_type(detail::text("default")),            default_filter::process)
-            (string_type(detail::text("default_if_none")),    default_if_none_filter::process)
-            (string_type(detail::text("dictsort")),           dictsort_filter::process)
-            (string_type(detail::text("dictsortreversed")),   dictsortreversed_filter::process)
-            (string_type(detail::text("divisibleby")),        divisibleby_filter::process)
-            (string_type(detail::text("escape")),             escape_filter::process)
-            (string_type(detail::text("escapejs")),           escapejs_filter::process)
-            (string_type(detail::text("filesizeformat")),     filesizeformat_filter::process)
-            (string_type(detail::text("first")),              first_filter::process)
-            (string_type(detail::text("fix_ampersands")),     fix_ampersands_filter::process)
-            (string_type(detail::text("floatformat")),        floatformat_filter::process)
-            (string_type(detail::text("force_escape")),       force_escape_filter::process)
-            (string_type(detail::text("get_digit")),          get_digit_filter::process)
-            (string_type(detail::text("iriencode")),          iriencode_filter::process)
-            (string_type(detail::text("join")),               join_filter::process)
-            (string_type(detail::text("last")),               last_filter::process)
-            (string_type(detail::text("length")),             length_filter::process)
-            (string_type(detail::text("length_is")),          length_is_filter::process)
-            (string_type(detail::text("linebreaks")),         linebreaks_filter::process)
-            (string_type(detail::text("linebreaksbr")),       linebreaksbr_filter::process)
-            (string_type(detail::text("linenumbers")),        linenumbers_filter::process)
-            (string_type(detail::text("ljust")),              ljust_filter::process)
-            (string_type(detail::text("lower")),              lower_filter::process)
-            (string_type(detail::text("make_list")),          make_list_filter::process)
-            (string_type(detail::text("phone2numeric")),      phone2numeric_filter::process)
-            (string_type(detail::text("pluralize")),          pluralize_filter::process)
-            (string_type(detail::text("pprint")),             pprint_filter::process)
-            (string_type(detail::text("random")),             random_filter::process)
-            (string_type(detail::text("removetags")),         removetags_filter::process)
-            (string_type(detail::text("rjust")),              rjust_filter::process)
-            (string_type(detail::text("safe")),               safe_filter::process)
-            (string_type(detail::text("safeseq")),            safeseq_filter::process)
-            (string_type(detail::text("slice")),              slice_filter::process)
-            (string_type(detail::text("slugify")),            slugify_filter::process)
-            (string_type(detail::text("stringformat")),       stringformat_filter::process)
-            (string_type(detail::text("striptags")),          striptags_filter::process)
-            (string_type(detail::text("time")),               time_filter::process)
-            (string_type(detail::text("timesince")),          timesince_filter::process)
-            (string_type(detail::text("timeuntil")),          timeuntil_filter::process)
-            (string_type(detail::text("title")),              title_filter::process)
-            (string_type(detail::text("truncatechars")),      truncatechars_filter::process)
-            (string_type(detail::text("truncatechars_html")), truncatechars_html_filter::process)
-            (string_type(detail::text("truncatewords")),      truncatewords_filter::process)
-            (string_type(detail::text("truncatewords_html")), truncatewords_html_filter::process)
-            (string_type(detail::text("unordered_list")),     unordered_list_filter::process)
-            (string_type(detail::text("upper")),              upper_filter::process)
-            (string_type(detail::text("urlencode")),          urlencode_filter::process)
-            (string_type(detail::text("urlize")),             urlize_filter::process)
-            (string_type(detail::text("urlizetrunc")),        urlizetrunc_filter::process)
-            (string_type(detail::text("wordcount")),          wordcount_filter::process)
-            (string_type(detail::text("wordwrap")),           wordwrap_filter::process)
-            (string_type(detail::text("yesno")),              yesno_filter::process)
+            (traits_type::literal("add"),                add_filter::process)
+            (traits_type::literal("addslashes"),         addslashes_filter::process)
+            (traits_type::literal("capfirst"),           capfirst_filter::process)
+            (traits_type::literal("center"),             center_filter::process)
+            (traits_type::literal("cut"),                cut_filter::process)
+            (traits_type::literal("date"),               date_filter::process)
+            (traits_type::literal("default"),            default_filter::process)
+            (traits_type::literal("default_if_none"),    default_if_none_filter::process)
+            (traits_type::literal("dictsort"),           dictsort_filter::process)
+            (traits_type::literal("dictsortreversed"),   dictsortreversed_filter::process)
+            (traits_type::literal("divisibleby"),        divisibleby_filter::process)
+            (traits_type::literal("escape"),             escape_filter::process)
+            (traits_type::literal("escapejs"),           escapejs_filter::process)
+            (traits_type::literal("filesizeformat"),     filesizeformat_filter::process)
+            (traits_type::literal("first"),              first_filter::process)
+            (traits_type::literal("fix_ampersands"),     fix_ampersands_filter::process)
+            (traits_type::literal("floatformat"),        floatformat_filter::process)
+            (traits_type::literal("force_escape"),       force_escape_filter::process)
+            (traits_type::literal("get_digit"),          get_digit_filter::process)
+            (traits_type::literal("iriencode"),          iriencode_filter::process)
+            (traits_type::literal("join"),               join_filter::process)
+            (traits_type::literal("last"),               last_filter::process)
+            (traits_type::literal("length"),             length_filter::process)
+            (traits_type::literal("length_is"),          length_is_filter::process)
+            (traits_type::literal("linebreaks"),         linebreaks_filter::process)
+            (traits_type::literal("linebreaksbr"),       linebreaksbr_filter::process)
+            (traits_type::literal("linenumbers"),        linenumbers_filter::process)
+            (traits_type::literal("ljust"),              ljust_filter::process)
+            (traits_type::literal("lower"),              lower_filter::process)
+            (traits_type::literal("make_list"),          make_list_filter::process)
+            (traits_type::literal("phone2numeric"),      phone2numeric_filter::process)
+            (traits_type::literal("pluralize"),          pluralize_filter::process)
+            (traits_type::literal("pprint"),             pprint_filter::process)
+            (traits_type::literal("random"),             random_filter::process)
+            (traits_type::literal("removetags"),         removetags_filter::process)
+            (traits_type::literal("rjust"),              rjust_filter::process)
+            (traits_type::literal("safe"),               safe_filter::process)
+            (traits_type::literal("safeseq"),            safeseq_filter::process)
+            (traits_type::literal("slice"),              slice_filter::process)
+            (traits_type::literal("slugify"),            slugify_filter::process)
+            (traits_type::literal("stringformat"),       stringformat_filter::process)
+            (traits_type::literal("striptags"),          striptags_filter::process)
+            (traits_type::literal("time"),               time_filter::process)
+            (traits_type::literal("timesince"),          timesince_filter::process)
+            (traits_type::literal("timeuntil"),          timeuntil_filter::process)
+            (traits_type::literal("title"),              title_filter::process)
+            (traits_type::literal("truncatechars"),      truncatechars_filter::process)
+            (traits_type::literal("truncatechars_html"), truncatechars_html_filter::process)
+            (traits_type::literal("truncatewords"),      truncatewords_filter::process)
+            (traits_type::literal("truncatewords_html"), truncatewords_html_filter::process)
+            (traits_type::literal("unordered_list"),     unordered_list_filter::process)
+            (traits_type::literal("upper"),              upper_filter::process)
+            (traits_type::literal("urlencode"),          urlencode_filter::process)
+            (traits_type::literal("urlize"),             urlize_filter::process)
+            (traits_type::literal("urlizetrunc"),        urlizetrunc_filter::process)
+            (traits_type::literal("wordcount"),          wordcount_filter::process)
+            (traits_type::literal("wordwrap"),           wordwrap_filter::process)
+            (traits_type::literal("yesno"),              yesno_filter::process)
             ;
         typename std::map<string_type, filter_type>::const_iterator it = filters.find(name);
         return it == filters.end() ? 0 : it->second;

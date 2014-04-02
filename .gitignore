@@ -39,6 +39,7 @@ Release/
 /MANIFEST
 *.pyc
 *.pyd
+*.egg-info
 
 # Misc.
 SCRATCH

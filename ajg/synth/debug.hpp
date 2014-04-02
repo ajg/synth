@@ -35,6 +35,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 
 // TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
@@ -91,6 +92,7 @@ inline std::string abbreviate(char const* s) {
     return result;
 }
 
+// TODO: Make this usable outside of debugging.
 inline std::string unmangle(std::string const& mangled) {
 
 #if HAS_CXXABI_H
@@ -108,6 +110,9 @@ inline std::string unmangle(std::string const& mangled) {
 
 }
 
+// TODO: Reimplement using static regexes.
+static boost::xpressive::sregex const signature = boost::xpressive::sregex::compile(
+    "((?<=[\\s:~])(\\w+)\\s*\\(([\\w\\s,<>\\[\\].=&':/*]*?)\\)\\s*(const)?\\s*(?={))");
 
 inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
@@ -130,8 +135,14 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
                 break;
             }
             else {
-                std::string const signature = unmangle(mangled);
-                AJG_FPRINTF(file, "%d\t%s\t%s\n", index, module.c_str(), signature.c_str());
+                std::string entry = unmangle(mangled);
+                boost::xpressive::smatch match;
+
+                if (boost::xpressive::regex_match(entry, match, signature)) {
+                    entry = match[2] + "(" + match[1] + ")";
+                }
+
+                AJG_FPRINTF(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
             }
         }
     }

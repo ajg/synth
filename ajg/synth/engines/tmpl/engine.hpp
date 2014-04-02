@@ -76,8 +76,10 @@ struct definition : base_definition< BidirectionalIterator
     typedef typename base_type::definition_type definition_type;
 
     typedef typename mpl::if_c
-        < CaseSensitive, std::less<string_type>
-        , detail::insensitive_less<string_type> >::type  less_type;
+        < CaseSensitive
+        , std::less<string_type>
+        , detail::insensitive_less<string_type>
+        >::type                                          less_type;
     typedef Library                                      library_type;
     typedef tmpl::value<char_type>                       value_type;
     typedef mpl::void_                                   options_type;
@@ -140,10 +142,8 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct
-            <detail::element_initializer<this_type> >(*this));
-        detail::index_sequence<this_type, tag_sequence_type,
-            &this_type::tags_, tag_sequence_type::size>(*this);
+        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
+        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:

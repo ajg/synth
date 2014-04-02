@@ -138,18 +138,9 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
 
   public:
 
-    inline boolean_type is_numeric() const {
-        typedef abstract_numeric_adapter<traits_type> numeric_adapter;
-        return dynamic_cast<numeric_adapter const*>(this->get()) != 0;
-    }
-
-    inline boolean_type is_string() const {
-        return this->template is<string_type>();
-    }
-
-    inline string_type to_string() const {
-        return get()->to_string();
-    }
+    inline boolean_type is_numeric() const { return get()->is_numeric(); }
+    inline boolean_type is_string()  const { return get()->is_string(); }
+    inline string_type  to_string()  const { return get()->to_string(); }
 
     inline void          clear()       { return adapter_.reset(); }
     inline number_type   count() const { return get()->count(); }
@@ -276,11 +267,6 @@ struct value_facade : spirit::classic::safe_bool<value_facade<Char, Value> > {
     }
 
   protected:
-
-    template <class T>
-    inline boolean_type is() const {
-        return get()->type() == typeid(T);
-    }
 
     inline const abstract_type* get() const {
         if (!adapter_) {

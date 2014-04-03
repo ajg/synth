@@ -78,7 +78,7 @@ struct library : Options::abstract_library_type {
     virtual tag_type     get_tag(string_type const& name) { return tags_[name]; }
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
-    static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type&) {
+    static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type& arguments) {
         std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
         return tag(*args.first, **args.second);
     }
@@ -89,7 +89,7 @@ struct library : Options::abstract_library_type {
                                  , value_type     const& value
                                  , arguments_type const& arguments) {
         std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
-        return filter(from_value(value), *args.first, **args.second);
+        return filter(d::from_value(value), *args.first, **args.second);
     }
 
   private:

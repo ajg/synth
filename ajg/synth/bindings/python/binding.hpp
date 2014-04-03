@@ -79,7 +79,8 @@ struct library : Options::abstract_library_type {
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
     static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type&) {
-        AJG_SYNTH_THROW(not_implemented("call_tag"));
+        std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
+        return tag(*args.first, **args.second);
     }
 
     static value_type call_filter( py::object            filter

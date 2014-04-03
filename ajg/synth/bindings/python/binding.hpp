@@ -88,7 +88,7 @@ struct library : Options::abstract_library_type {
                                  , value_type     const& value
                                  , arguments_type const& arguments) {
         std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
-        return filter(value, *args.first, **args.second);
+        return filter(from_value(value), *args.first, **args.second);
     }
 
   private:

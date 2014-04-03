@@ -26,7 +26,7 @@ typedef s::string_template<char_type, engine_type>                              
 typedef string_template::traits_type                                            traits_type;
 typedef string_template::context_type                                           context_type;
 typedef string_template::options_type                                           options_type;
-typedef tests::data::kitchen_sink<context_type, traits_type, options_type>      data_type;
+struct data_type : tests::data::kitchen_sink<context_type, traits_type, options_type> {};
 typedef ajg::test_group<data_type>                                              group_type;
 
 group_type group_object("django");

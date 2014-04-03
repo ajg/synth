@@ -15,6 +15,7 @@
 #include <utility>
 #include <typeinfo>
 
+#include <boost/none_t.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -50,6 +51,7 @@ struct default_value_traits {
   public:
 
     typedef default_value_traits                        self_type;
+    typedef boost::none_t                               none_type;
     typedef Char                                        char_type;
     typedef std::size_t                                 size_type;
     typedef Value                                       value_type;

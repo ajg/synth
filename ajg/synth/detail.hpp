@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 #include <exception>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -255,6 +256,71 @@ struct pipe : boost::noncopyable {
 
     FILE* file_;
 };
+
+//
+// slice:
+//     Accepts the indices for a half-open range [lower, upper) and returns said range as a pair of
+//     iterators; imitates Python's sequence slicing including negative indices, which are "rotated"
+//     into their positive counterparts. The indices are bounds-checked regardless of their sign.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Container>
+inline std::pair< typename Container::const_iterator
+                , typename Container::const_iterator
+                > slice( Container                 const& container
+                       , boost::optional<intmax_t> const  lower     = boost::none
+                       , boost::optional<intmax_t> const  upper     = boost::none
+                       ) {
+    typedef typename Container::size_type size_type;
+
+    size_type const size = container.size();
+    intmax_t lower_ = lower.get_value_or(0);
+    intmax_t upper_ = upper.get_value_or(size);
+
+    // Adjust negative indices to the right position.
+    if (lower_ < 0) lower_ = static_cast<intmax_t>(size) + lower_;
+    if (upper_ < 0) upper_ = static_cast<intmax_t>(size) + upper_;
+
+    // Check for indices that are out of range.
+    if (lower_ < 0 || static_cast<size_type>(lower_) > size) throw_exception(std::out_of_range("lower index"));
+    if (upper_ < 0 || static_cast<size_type>(upper_) > size) throw_exception(std::out_of_range("upper index"));
+    if (lower_ > upper_)                                     throw_exception(std::logic_error("reversed indices"));
+
+    // Move to the right places.
+    typename Container::const_iterator first  = container.begin();
+    typename Container::const_iterator second = first;
+    std::advance(first, lower_);
+    std::advance(second, upper_);
+    return std::make_pair(first, second);
+}
+
+//
+// at:
+//     Accepts an index which can be negative, which is "rotated" into its positive counterpart.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Container>
+inline typename Container::const_iterator at(Container const& container, intmax_t const index) {
+    typedef typename Container::size_type size_type;
+
+    size_type const size   = container.size();
+    intmax_t  const index_ = index < 0 ? static_cast<intmax_t>(size) + index : index;
+
+    if (index_ < 0 || static_cast<size_type>(index_) > size) throw_exception(std::out_of_range("index"));
+
+    // TODO: Once we have value_iterator::advance_to consider using return begin() + index,
+    //       to be O(1). For now, we must use this O(n) method:
+    typename Container::const_iterator       it  = container.begin();
+    typename Container::const_iterator const end = container.end();
+
+    for (size_type i = 0; it != end; ++it, ++i) {
+        if (i == static_cast<size_type>(index_)) {
+            return it;
+        }
+    }
+
+    AJG_SYNTH_THROW(std::invalid_argument("index"));
+}
 
 }}} // namespace ajg::synth::detail
 

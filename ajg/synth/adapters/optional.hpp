@@ -25,7 +25,7 @@ struct adapter<Traits, optional<T> >
     optional<T> adapted_;
 
     bool   valid() const { return adapted_; }
-    //T const& get() const { return *adapted_; }
+    // T const& get() const { return *adapted_; }
     template <class A> A forward() const { return A(ref(*adapted_)); }
 };
 

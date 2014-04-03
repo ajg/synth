@@ -48,9 +48,5 @@ struct less<ajg::synth::null_value<Char> > {
 
 } // namespace std
 
-}; // null_value
-
-}} // namespace ajg::synth
-
 #endif // AJG_SYNTH_ENGINES_NULL_VALUE_HPP_INCLUDED
 

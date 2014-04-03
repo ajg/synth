@@ -79,7 +79,7 @@ struct adapter<Traits, reference_wrapper<T> >
     // T const& adapted_;
 
     bool   valid() const { return true; }
-    T const& get() const { return adapted_; }
+    // T const& get() const { return adapted_; }
 };*/
 
 

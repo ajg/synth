@@ -33,7 +33,7 @@ struct adapter<Traits, T[N]>
 
     number_type  count() const { return N; }
     boolean_type test()  const { return N != 0; }
-    void output(ostream_type& out) const { this->list(out); }
+    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
     boolean_type equal(abstract_type const& that) const {
         return this->equal_sequence(that);
     }
@@ -88,7 +88,7 @@ struct adapter<Traits, T[]>
 
     number_type  count() const { return length_; }
     boolean_type test()  const { return length_ != 0; }
-    void output(ostream_type& out) const { this->list(out); }
+    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
     boolean_type equal(abstract_type const& that) const {
         return this->equal_sequence(that);
     }

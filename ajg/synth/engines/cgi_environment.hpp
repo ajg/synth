@@ -133,14 +133,6 @@ struct standard_environment {
             return none;
         }
     }
-
-    template <class Engine>
-    void list( typename Engine::this_type const& engine
-             , typename Engine::stream_type& out
-             ) const {
-
-
-    }
 };*/
 
 }} // namespace ajg::synth

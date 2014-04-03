@@ -69,7 +69,7 @@ struct builtin_tags {
     typedef typename engine_type::id_type                                       id_type;
     typedef typename engine_type::regex_type                                    regex_type;
     typedef typename engine_type::match_type                                    match_type;
-    typedef typename engine_type::stream_type                                   out_type;
+    typedef typename engine_type::stream_type                                   out_type; // TODO: Rename ostream_type.
 
     typedef void (*tag_type)( engine_type  const& engine
                             , match_type   const& match
@@ -1080,9 +1080,9 @@ struct builtin_tags {
             match_type const& width = match(engine.expression, 2);
 
             number_type const ratio
-                = engine.evaluate(value, context, options).count()
-                / engine.evaluate(limit, context, options).count()
-                * engine.evaluate(width, context, options).count();
+                = engine.evaluate(value, context, options).to_number()
+                / engine.evaluate(limit, context, options).to_number()
+                * engine.evaluate(width, context, options).to_number();
 
             out << round(ratio);
         }

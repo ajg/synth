@@ -28,9 +28,8 @@ namespace python {
 namespace py = boost::python;
 namespace d = detail;
 
-inline char const* version()
-{
-   return AJG_SYNTH_VERSION_STRING;
+inline char const* version() {
+    return AJG_SYNTH_VERSION_STRING;
 }
 
 //

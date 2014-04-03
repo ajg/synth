@@ -48,8 +48,7 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type,
-        BOOST_PP_COMMA() safe_(false) {})
+    AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type, BOOST_PP_COMMA() safe_(false) {})
 
   public:
 
@@ -88,12 +87,6 @@ struct value : value_facade<Char, value<Char> > {
         return token_;
     }
 
-	inline size_type to_size() const {
-		number_type const number = this->count();
-		if (number <= 0) return 0;
-		return static_cast<size_type>(number);
-	}
-
 	value_type escape() const {
         // xxx: Should this method escape binary and control characters?
         return detail::escape_entities(this->to_string());
@@ -131,7 +124,7 @@ struct value : value_facade<Char, value<Char> > {
             if (method.name == "index") {
                 try {
                     // If that fails, try using the value as an index.
-                    const_iterator const it = this->at(attribute.count());
+                    const_iterator const it = this->at(attribute.to_number());
                     return it == this->end() ? none : *it;
                 }
                 catch (std::exception const&) {
@@ -191,19 +184,14 @@ struct value : value_facade<Char, value<Char> > {
     value_type sort_by(value_type const& attrs, boolean_type const reverse) const {
         sequence_type result, trail = make_trail(attrs);
 
-        result.reserve(this->length());
+        result.reserve(this->size());
         BOOST_FOREACH(value_type const& value, *this) {
             result.push_back(value);
         }
 
-        if (reverse) {
-            std::sort(result.rbegin(), result.rend(),
-                boost::bind(deep_less, boost::ref(trail), _1, _2));
-        }
-        else {
-            std::sort(result.begin(), result.end(),
-                boost::bind(deep_less, boost::ref(trail), _1, _2));
-        }
+        reverse ?
+            std::sort(result.rbegin(), result.rend(), boost::bind(deep_less, boost::ref(trail), _1, _2)) :
+            std::sort(result.begin(),  result.end(),  boost::bind(deep_less, boost::ref(trail), _1, _2));
         return result;
     }
 

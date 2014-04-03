@@ -24,6 +24,10 @@
 
 namespace ajg {
 namespace synth {
+
+template <class Traits>
+struct abstract_adapter;
+
 namespace detail {
 inline std::string get_type_name(std::type_info const& info) {
     return info.name(); // TODO: Unmangle where needed.
@@ -50,6 +54,21 @@ template <class Char, class Value>
 struct default_value_traits {
   public:
 
+    //
+    // TODO:
+    //        specific | general
+    //       ----------+----------
+    //        none_t   | none/nil
+    //        bool     | boolean
+    //        char     | character
+    //        number   | numeric
+    //        string   | text?
+    //        datetime | chronological
+    //        vector   | sequential
+    //        map      | mapping/indexed/associative
+    //        set      | ?
+    //
+
     typedef default_value_traits                        self_type;
     typedef boost::none_t                               none_type;
     typedef Char                                        char_type;
@@ -72,6 +91,9 @@ struct default_value_traits {
     typedef value_iterator<value_type const>            const_iterator;
 
     typedef std::pair<const_iterator, const_iterator>   range_type;
+
+    typedef abstract_adapter<self_type>                 abstract_adapter_type;
+ // typedef typename value_type::abstract_type          abstract_adapter_type;
 
   public:
 
@@ -100,6 +122,12 @@ struct default_value_traits {
         return self_type::template to<number_type>(from);
     }
 
+    inline static size_type to_size(value_type const& value) {
+        number_type const number = value.to_number();
+        if (number <= 0) return 0;
+        return static_cast<size_type>(number);
+    }
+
     inline static string_type literal(char const* const s) {
         return self_type::widen(std::string(s));
     }
@@ -126,6 +154,89 @@ struct default_value_traits {
     inline static std::basic_string<Char> widen(std::basic_string<char> const& s) {
         return self_type::template transcode<char, Char>(s);
     }
+
+    struct adapter_traits {
+        inline static string_type to_string(abstract_adapter_type const& adapter) {
+            std::basic_ostringstream<char_type> stream;
+            adapter.output(stream);
+            return stream.str();
+        }
+
+        inline static void enumerate( abstract_adapter_type const& adapter
+                                    , ostream_type&                out
+                                    , string_type                  const delimiter = literal(", ")
+                                    ) {
+            size_type i = 0;
+            BOOST_FOREACH(value_type const& value, adapter) {
+                if (i++) out << delimiter;
+                out << value;
+            }
+        }
+
+        inline static boolean_type contains(value_type const& a, value_type const& b) {
+            return !a.find(b).equal(a.end()); // TODO: Defer to adapter.
+        }
+
+        inline static boolean_type equal(value_type const& a, value_type const& b) {
+            // TODO: Defer to adapter even in non-same_as cases:
+            //       if (...) return a.adapter()->equal(*that.adapter());
+            if (a.shares_type_with(b))                  return a.typed_equal(b);
+            else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() == b.to_boolean();
+            else if (a.is_numeric() && b.is_numeric())  return a.to_number()  == b.to_number();
+            else if (a.is_string()  && b.is_string())   return a.to_string()  == b.to_string();
+            // TODO: Compare sequences, etc.
+            else return false;
+        }
+
+        inline static boolean_type less(value_type const& a, value_type const& b) {
+            if (a.shares_type_with(b))                  return a.typed_less(b);
+            else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() < b.to_boolean();
+            else if (a.is_numeric() && b.is_numeric())  return a.to_number()  < b.to_number();
+            else if (a.is_string()  && b.is_string())   return a.to_string()  < b.to_string();
+            // TODO: Compare sequences, etc.
+            else return false;
+        }
+
+        inline static boolean_type equal_sequence( abstract_adapter_type const& a
+                                                 , abstract_adapter_type const& b
+                                                 ) {
+            return equal_range(a.begin(), b.begin(), a.end(), b.end());
+        }
+
+        inline static boolean_type less_sequence( abstract_adapter_type const& a
+                                                , abstract_adapter_type const& b
+                                                ) {
+            return less_range(a.begin(), b.begin(), a.end(), b.end());
+        }
+
+        // TODO: Use the right STL function.
+        inline static boolean_type equal_range( const_iterator i1, const_iterator i2
+                                              , const_iterator e1, const_iterator e2
+                                              ) {
+            for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
+                if (!i1->equal(*i2)) {
+                    return false;
+                }
+            }
+
+            // Make sure |this| == |that|.
+            return i1 == e1 && i2 == e2;
+        }
+
+        // TODO: Use std::lexicographic_compare.
+        inline static boolean_type less_range( const_iterator i1, const_iterator i2
+                                             , const_iterator e1, const_iterator e2
+                                             ) {
+            for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
+                if (!i1->less(*i2)) {
+                    return false;
+                }
+            }
+
+            // Make sure |this| <= |that|.
+            return i1 == e1;
+        }
+    };
 };
 
 }} // namespace ajg::synth

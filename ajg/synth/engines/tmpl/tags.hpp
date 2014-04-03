@@ -147,39 +147,33 @@ struct loop_tag {
                    , typename Engine::options_type const& options
                    , typename Engine::stream_type&        out
                    ) const {
-            typename Engine::match_type const& attr = match(engine.name_attribute);
-            typename Engine::match_type const& body = match(engine.block);
-            typename Engine::value_type const value =
-                engine.evaluate(attr, context, options);
-            typename Engine::size_type const length = value.length();
-            typename Engine::size_type i = 1;
-            typename Engine::context_type copy;
-            typedef typename Engine::char_type C;
-
-            if (GlobalVariables) {
-                copy = context;
-            }
+            typename Engine::match_type const& attr    = match(engine.name_attribute);
+            typename Engine::match_type const& body    = match(engine.block);
+            typename Engine::value_type const  value   = engine.evaluate(attr, context, options);
+            typename Engine::size_type  const  size    = value.size();
+            typename Engine::context_type context_copy = GlobalVariables ? context : typename Engine::context_type();
+            typename Engine::size_type    index        = 1;
 
             BOOST_FOREACH(typename Engine::value_type const& item, value) {
                 if (LoopVariables) {
-                    copy[text("__SIZE__")]    = length;
-                    copy[text("__TOTAL__")]   = length;
-                    copy[text("__FIRST__")]   = as_int(i == 1);
-                    copy[text("__LAST__")]    = as_int(i == length);
-                    copy[text("__INNER__")]   = as_int(i != 1 && i != length);
-                    copy[text("__OUTER__")]   = as_int(i == 1 || i == length);
-                    copy[text("__ODD__")]     = as_int(i % 2 == 1);
-                    copy[text("__EVEN__")]    = as_int(i % 2 == 0);
-                    copy[text("__COUNTER__")] = i++;
+                    context_copy[text("__SIZE__")]    = size;
+                    context_copy[text("__TOTAL__")]   = size;
+                    context_copy[text("__FIRST__")]   = as_int(index == 1);
+                    context_copy[text("__LAST__")]    = as_int(index == size);
+                    context_copy[text("__INNER__")]   = as_int(index != 1 && index != size);
+                    context_copy[text("__OUTER__")]   = as_int(index == 1 || index == size);
+                    context_copy[text("__ODD__")]     = as_int(index % 2 == 1);
+                    context_copy[text("__EVEN__")]    = as_int(index % 2 == 0);
+                    context_copy[text("__COUNTER__")] = index++;
                 }
 
                 BOOST_FOREACH(typename Engine::value_type const& pair, item) {
                     typename Engine::string_type const k = pair[0].to_string();
-                    typename Engine::value_type const v = pair[1];
-                    copy[k] = v;
+                    typename Engine::value_type  const v = pair[1];
+                    context_copy[k] = v;
                 }
 
-                engine.render_block(out, body, copy, options);
+                engine.render_block(out, body, context_copy, options);
             }
         }
     };

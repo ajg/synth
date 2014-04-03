@@ -45,7 +45,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
             out << value_type(adapted_.data());
         }
         else {
-            this->list(out);
+            traits_type::adapter_traits::enumerate(*this, out);
         }
     }
 
@@ -67,26 +67,19 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
 
 }} // namespace ajg::synth
 
-namespace std {
+namespace boost {
+namespace property_tree {
 
 template <class K, class V>
-// struct less<boost::property_tree::basic_ptree<K, V> > {
-//     bool operator()( boost::property_tree::basic_ptree<K, V> const& a
-//                    , boost::property_tree::basic_ptree<K, V> const& b
-//                    ) const {
-    inline bool operator <( boost::property_tree::basic_ptree<K, V> const& a
-                          , boost::property_tree::basic_ptree<K, V> const& b
-                          ) {
-        if (a.data() < b.data()) {
-            return std::lexicographical_compare( a.ordered_begin(), a.not_found()
-                                               , b.ordered_begin(), b.not_found()
-                                               );
-        }
-        return false;
-    }
-// };
+inline bool operator <( basic_ptree<K, V> const& a
+                      , basic_ptree<K, V> const& b
+                      ) {
+    return a.data() < b.data() && std::lexicographical_compare( a.ordered_begin(), a.not_found()
+                                                              , b.ordered_begin(), b.not_found()
+                                                              );
+}
 
-} // namespace std
+}} // namespace boost::property_tree
 
 #endif // AJG_SYNTH_ADAPTERS_PTREE_HPP_INCLUDED
 

@@ -27,7 +27,7 @@ struct adapter<Traits, std::stack<T> >
   public:
 
     boolean_type test() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { this->list(out); }
+    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }
     iterator end()   { return iterator(adapted_.end()); }

@@ -52,9 +52,7 @@ struct engine : detail::nonconstructible {
 typedef engine engine_type;
 
 template <class BidirectionalIterator>
-struct definition : base_definition< BidirectionalIterator
-                                   , definition<BidirectionalIterator>
-                                   > {
+struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   private:
 
     template <class Sequence>
@@ -83,6 +81,7 @@ struct definition : base_definition< BidirectionalIterator
     typedef django::value<char_type>                                            value_type;
     typedef options<value_type>                                                 options_type;
     typedef typename value_type::traits_type                                    traits_type;
+    typedef typename value_type::none_type                                      none_type;
     typedef typename value_type::boolean_type                                   boolean_type;
     typedef typename value_type::datetime_type                                  datetime_type;
     typedef typename value_type::duration_type                                  duration_type;
@@ -351,7 +350,7 @@ struct definition : base_definition< BidirectionalIterator
 
         BOOST_FOREACH(token_type const& token, tokenizer) {
             if (std::distance(token.begin(), token.end()) == 0) {
-                sequence.push_back(value_type());
+                sequence.push_back(value_type(none_type()));
             }
             else if (xpressive::regex_match(token.begin(), token.end(), match, tokenizable_definition.chain)) {
                 try {
@@ -527,7 +526,7 @@ struct definition : base_definition< BidirectionalIterator
         match_type  const& literal = detail::unnest(match);
 
         if (literal == none_literal) {
-            value = value_type();
+            value = value_type(none_type());
             value.token(literal[0]);
         }
         else if (literal == boolean_literal) {

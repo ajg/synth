@@ -188,7 +188,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            return value.count() + arguments[0].count();
+            return value.to_number() + arguments[0].to_number();
         }
     };
 
@@ -339,7 +339,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            return value.empty() ? arguments[0] : value;
+            return value.is_none() ? arguments[0] : value;
         }
     };
 
@@ -387,8 +387,8 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            intmax_t const dividend = static_cast<intmax_t>(value.count());
-			intmax_t const divisor  = static_cast<intmax_t>(arguments[0].count());
+            intmax_t const dividend = static_cast<intmax_t>(value.to_number());
+			intmax_t const divisor  = static_cast<intmax_t>(arguments[0].to_number());
             return dividend % divisor == 0;
         }
     };
@@ -444,7 +444,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return format(static_cast<size_type>(std::abs(static_cast<intmax_t>(value.count()))));
+            return format(static_cast<size_type>(std::abs(static_cast<intmax_t>(value.to_number()))));
         }
 
         inline static string_type format(size_type const size) {
@@ -464,7 +464,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            if (!value.length()) throw_exception(std::invalid_argument("sequence"));
+            if (value.empty()) throw_exception(std::invalid_argument("sequence"));
             return value.front();
         }
     };
@@ -500,8 +500,8 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.size());
             // Get the number and the decimal places.
             string_stream_type stream;
-            int const n = arguments.empty() ? -1 : static_cast<int>(arguments[0].count());
-            number_type const number = value.count();
+            int const n = arguments.empty() ? -1 : static_cast<int>(arguments[0].to_number());
+            number_type const number = value.to_number();
 
             // If it's an integer and n < 0, we don't want decimals.
             boolean_type const is_integer = detail::is_integer(number);
@@ -541,8 +541,8 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
             try {
-                number_type const number = value.count();
-                intmax_t const position = static_cast<intmax_t>(arguments[0].count());
+                number_type const number = value.to_number();
+                intmax_t const position = static_cast<intmax_t>(arguments[0].to_number());
                 intmax_t const integer  = static_cast<intmax_t>(number);
 
                 if (position > 0) {
@@ -620,7 +620,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            if (!value.length()) throw_exception(std::invalid_argument("sequence"));
+            if (value.empty()) throw_exception(std::invalid_argument("sequence"));
             return value.back();
         }
     };
@@ -637,7 +637,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return value.length();
+            return value.size();
         }
     };
 
@@ -653,7 +653,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-			return arguments[0].to_size() == value.length();
+			return arguments[0].to_size() == value.size();
         }
     };
 
@@ -860,7 +860,7 @@ struct builtin_filters {
                 plural   = sequential_arguments[1].to_string();
             }
 
-            return value.count() == 1 ? singular : plural;
+            return value.to_number() == 1 ? singular : plural;
         }
     };
 
@@ -895,9 +895,9 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            if (size_type const length = value.length()) {
-                size_type const index  = detail::random_int(0, length - 1);
-                return value[static_cast<number_type>(index)];
+            if (size_type const size  = value.size()) {
+                size_type const index = detail::random_int(0, size - 1);
+                return value[index];
             }
             else {
                 throw_exception(std::invalid_argument("sequence"));
@@ -1019,8 +1019,10 @@ struct builtin_filters {
             sequence_type result;
             value_type const lower = sequential_arguments[0];
             value_type const upper = sequential_arguments[1];
-            range_type  range = value.slice(lower ? optional<int>(static_cast<int>(lower.count())) : none,
-                                            upper ? optional<int>(static_cast<int>(upper.count())) : none);
+            range_type  range = value.slice
+                ( lower ? optional<intmax_t>(static_cast<intmax_t>(lower.to_number())) : none
+                , upper ? optional<intmax_t>(static_cast<intmax_t>(upper.to_number())) : none
+                );
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;
         }
@@ -1425,23 +1427,6 @@ struct builtin_filters {
 
       private:
 
-        inline static boolean_type is_iterable(value_type const& item) {
-            if (item.is_string()) {
-            // Treat strings atomically.
-                return false;
-            }
-            else {
-                try {
-                    // length will throw if item
-                    // cannot be iterated over.
-                    return item.length(), true;
-                }
-                catch (bad_method const&) {
-                    return false;
-                }
-            }
-        }
-
         template <boolean_type Safe, class Stream>
         inline static void push_item( value_type  const& item
                                     , engine_type const& engine
@@ -1450,17 +1435,17 @@ struct builtin_filters {
                                     ) {
             string_type const indent(level, char_type('\t'));
 
-            if (is_iterable(item)) {
-                if (size_type const length = item.length()) {
-                    for (size_type i = 0; i < length; ++i) {
-                        value_type const& value = item[static_cast<number_type>(i)];
+            if (!item.is_string() && item.is_iterable()) {
+                if (size_type const size = item.size()) {
+                    for (size_type i = 0; i < size; ++i) {
+                        value_type const& value = item[i];
                         out << indent << "<li>";
                         Safe ? out << value : out << value.escape();
 
-                        if (++i < length) {
-                            value_type const& next = item[static_cast<number_type>(i)];
+                        if (++i < size) {
+                            value_type const& next = item[i];
 
-                            if (is_iterable(next)) {
+                            if (!next.is_string() && next.is_iterable()) {
                                 out << std::endl << indent << "<ul>" << std::endl;
                                 push_item<Safe>(next, engine, level + 1, out);
                                 out << indent << "</ul>" << std::endl << indent;
@@ -1658,7 +1643,6 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            value_type true_, false_, none_;
             sequence_type const sequential_arguments =
                 engine.template split_argument<','>(arguments[0], context, options);
 
@@ -1666,20 +1650,13 @@ struct builtin_filters {
             case 0:
             case 1:
                 throw_exception(missing_argument());
-            case 2:
-                true_  = sequential_arguments[0];
-                false_ = sequential_arguments[1];
-                none_  = sequential_arguments[1];
-                break;
             case 3:
-                true_  = sequential_arguments[0];
-                false_ = sequential_arguments[1];
-                none_  = sequential_arguments[2];
-                break;
-            default: throw_exception(superfluous_argument());
+                if (value.is_none()) return sequential_arguments[2]; // Else, fall through:
+            case 2:
+                return value ? sequential_arguments[0] : sequential_arguments[1];
+            default:
+                throw_exception(superfluous_argument());
             }
-
-            return value.empty() ? none_ : (value ? true_ : false_);
         }
     };
 }; // builtin_filters

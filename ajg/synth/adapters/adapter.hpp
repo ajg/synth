@@ -292,7 +292,7 @@ struct adapter<Traits, value_facade<Char, Value> >
     template <class T>
     typename enable_if_c<is_const_iterable<T>::value
                      && !is_base_of<base_value, T>::value>::type output_(ostream_type& out) const {
-        this->list(out);
+        traits_type::adapter_traits::enumerate(*this, out);
     }
 
     template <class T>

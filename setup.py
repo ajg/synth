@@ -8,7 +8,6 @@ import os
 import re
 import sys
 from distutils.core import setup, Extension
-# from setuptools import setup, Extension
 from glob import glob
 from os.path import join
 

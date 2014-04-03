@@ -7,48 +7,11 @@
 #define AJG_SYNTH_ENGINES_NULL_ENGINE_HPP_INCLUDED
 
 #include <map>
-#include <functional>
 
 #include <boost/mpl/void.hpp>
 
-#include <ajg/synth/value_facade.hpp>
+#include <ajg/synth/engines/null_value.hpp>
 #include <ajg/synth/engines/base_definition.hpp>
-
-namespace ajg {
-namespace synth {
-namespace detail {
-
-// TODO: Move to null_value.hpp.
-template <class Char>
-struct null_value : value_facade<Char, null_value<Char> > {
-  public:
-
-    typedef value_facade<Char, null_value> base_type;
-
-  public:
-
-    AJG_SYNTH_VALUE_CONSTRUCTORS(null_value, base_type, {})
-};
-
-}}} // namespace ajg::synth::detail
-
-namespace std {
-
-template<class Char>
-struct equal_to<ajg::synth::detail::null_value<Char> > {
-    bool operator()(ajg::synth::detail::null_value<Char> const& a, ajg::synth::detail::null_value<Char> const& b) const {
-        return true;
-    }
-};
-
-template<class Char>
-struct less<ajg::synth::detail::null_value<Char> > {
-    bool operator()(ajg::synth::detail::null_value<Char> const& a, ajg::synth::detail::null_value<Char> const& b) const {
-        return false;
-    }
-};
-
-} // namespace std
 
 namespace ajg {
 namespace synth {
@@ -74,7 +37,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     typedef typename base_type::iterator_type   iterator_type;
     typedef typename base_type::definition_type definition_type;
 
-    typedef detail::null_value<char_type>     value_type;
+    typedef null_value<char_type>             value_type;    // TODO: Use Traits::value_type?
     typedef std::vector<value_type>           sequence_type; // TODO: Use Traits::sequence_type
     typedef std::map<string_type, value_type> context_type;  // TODO: Use Traits::context_type
     typedef boost::mpl::void_                 options_type;
@@ -88,7 +51,8 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     void render( stream_type&        stream
                , frame_type   const& frame
                , context_type const& context
-               , options_type const& options) const {}
+               , options_type const& options
+               ) const {}
 
 }; // definition
 

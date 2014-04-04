@@ -83,10 +83,8 @@ struct base_definition : boost::noncopyable {
 
         self.text = +(~before(self.skipper) >> _);
 
-        // Using skip is slightly slower than the below.
-        // block = skip(text[...])(*tag[...]);
-
-        self.block = *keep // causes actions (i.e. furthest) to execute eagerly.
+        // block = skip(text[...])(*tag[...]); // Using skip is slightly slower than this:
+        self.block = *keep // Causes actions (i.e. furthest) to execute eagerly.
             ( xpressive::ref(self.tag)  [set_furthest(iterator_, _)]
             | xpressive::ref(self.text) [set_furthest(iterator_, _)]
             );

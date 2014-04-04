@@ -90,14 +90,9 @@ struct value_facade {
     inline boolean_type initialized()  const { return boolean_type(adapter_); }
     inline void         uninitialize()       { adapter_.reset(); }
 
-    // Note:
-    //     is<T>: whether exactly T (modulo const/volatile)
-    //     as<T>: cast to exactly T& (modulo const/volatile) or throw
-    //     to<T>: convert to T or throw
-
-    template <class T> inline boolean_type is() const { return this->type() == typeid(T); }
-    template <class T> inline T&           as() const { AJG_SYNTH_THROW(not_implemented("as")); }
-    template <class T> inline T            to() const { AJG_SYNTH_THROW(not_implemented("to")); }
+    template <class T> inline boolean_type is() const { return traits_type::adapter_traits::template is<T>(*this); }
+    template <class T> inline T&           as() const { return traits_type::adapter_traits::template as<T>(*this); }
+    template <class T> inline T            to() const { return traits_type::adapter_traits::template to<T>(*this); }
 
   public:
 
@@ -161,9 +156,6 @@ struct value_facade {
     inline boolean_type contains(value_type const& that) const { return traits_type::adapter_traits::contains(*this, that); }
     inline boolean_type equal   (value_type const& that) const { return traits_type::adapter_traits::equal(*this, that); }
     inline boolean_type less    (value_type const& that) const { return traits_type::adapter_traits::less(*this, that); }
-
-    template <class T>
-    inline void assign_to(T& t) { traits_type::adapter_traits::assign_to(t, *this); }
 
     inline operator boolean_type()                          const { return this->to_boolean(); }
     inline boolean_type operator!()                         const { return !this->to_boolean(); }

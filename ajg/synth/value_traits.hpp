@@ -100,7 +100,8 @@ struct default_value_traits {
     template <class To, class From>
     inline static To to(From const& from) {
         To to;
-        // Very crude conversion method for now:
+        // FIXME: Very crude conversion method for now:
+        // TODO: Unify w.r.t. adapter_traits::to
         std::basic_stringstream<char_type> stream;
         stream << from;
         stream >> to;
@@ -197,14 +198,29 @@ struct default_value_traits {
             else return false;
         }
 
+        // Note:
+        //     is<T>: whether exactly T (modulo const/volatile)
+        //     as<T>: cast to exactly T& (modulo const/volatile) or throw
+        //     to<T>: convert to T or throw
+
         template <class T>
-        inline static void assign_to(T& target, value_type const& source) {
-            if (source.template is<T>())  target = source.template as<T>();
-            else if (source.is_boolean()) target = source.to_boolean();
-            else if (source.is_numeric()) target = source.to_number();
-            else if (source.is_string())  target = source.to_string();
+        inline static boolean_type is(value_type const& value) {
+            return value.type() == typeid(T);
+        }
+
+        template <class T>
+        inline static T& as(value_type const& value) {
+            AJG_SYNTH_THROW(not_implemented("value_traits::as"));
+        }
+
+        template <class T>
+        inline static T to(value_type const& value) {
+            if (value.template is<T>())  return value.template as<T>();
+            else if (value.is_boolean()) return T(value.to_boolean());
+            else if (value.is_numeric()) return T(value.to_number());
+            else if (value.is_string())  return T(value.to_string());
             // TODO: Sequences, mappings, etc.
-            else AJG_SYNTH_THROW(not_implemented("assign_as"));
+            else AJG_SYNTH_THROW(not_implemented("value_traits::construct"));
         }
 
         inline static boolean_type equal_sequence( abstract_adapter_type const& a

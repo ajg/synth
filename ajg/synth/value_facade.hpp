@@ -91,8 +91,18 @@ struct value_facade {
     inline void         uninitialize()       { adapter_.reset(); }
 
     template <class T> inline boolean_type is() const { return traits_type::adapter_traits::template is<T>(*this); }
-    template <class T> inline T&           as() const { return traits_type::adapter_traits::template as<T>(*this); }
+    template <class T> inline T const&     as() const { return traits_type::adapter_traits::template as<T>(*this); }
     template <class T> inline T            to() const { return traits_type::adapter_traits::template to<T>(*this); }
+
+  public: // TODO: Should only be visible to {default_}value_traits.
+
+
+    // TODO: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves or using adapter().as<...> != 0
+    inline boolean_type typed_like (value_type const& that) const { return this->type() == that.type(); }
+    inline boolean_type typed_equal(value_type const& that) const { return this->adapter().equal_adapted(that.adapter()); }
+    inline boolean_type typed_less (value_type const& that) const { return this->adapter().less_adapted(that.adapter()); }
+    template <class T>
+    inline T const& typed_as() const { return this->adapter().template get_adapted<T>(); }
 
   public:
 
@@ -103,7 +113,7 @@ struct value_facade {
     inline boolean_type is_none()    const { return this->template is<none_type>(); }
     inline boolean_type is_boolean() const { return this->template is<boolean_type>(); }
     // TODO: Allow adapters to say they're adapting a numeric type even without deriving from abstract_numeric_adapter.
-    inline boolean_type is_numeric() const { return this->adapter().template as<abstract_numeric_adapter<traits_type> >() != 0; }
+    inline boolean_type is_numeric() const { return this->adapter().template get<abstract_numeric_adapter<traits_type> >() != 0; }
     inline boolean_type is_string()  const { return this->template is<string_type>(); }
     inline boolean_type is_number()  const { return this->template is<number_type>(); }
 
@@ -166,13 +176,6 @@ struct value_facade {
     inline boolean_type operator> (value_type const& that)  const { return that.less(*this); }
     inline boolean_type operator>=(value_type const& that)  const { return !this->less(*this); }
     inline value_type   operator[](value_type const& index) const { return *this->at(index); }
-
-  public: // TODO: Should only be visible to {default_}value_traits.
-
-    // FIXME: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves.
-    inline boolean_type shares_type_with(value_type const& that) const { return this->type() == that.type(); }
-    inline boolean_type typed_equal(value_type const& that)      const { return this->adapter().equal_adapted(that.adapter()); }
-    inline boolean_type typed_less(value_type const& that)       const { return this->adapter().less_adapted(that.adapter()); }
 
   protected:
 

@@ -81,7 +81,6 @@ inline std::string abbreviate(char const* s) {
     }
 
     boost::algorithm::replace_all(result, "boost::",     "b::");
-    boost::algorithm::replace_all(result, "fusion::",    "f::");
     boost::algorithm::replace_all(result, "xpressive::", "x::");
     boost::algorithm::replace_all(result, "detail::",    "d::");
     boost::algorithm::replace_all(result, "ajg::",       "a::");

@@ -53,11 +53,6 @@ typedef engine engine_type;
 
 template <class BidirectionalIterator>
 struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
-  private:
-
-    template <class Sequence>
-    struct define_sequence;
-
   public:
 
     typedef definition                                                          this_type;
@@ -322,8 +317,6 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
 
         this->initialize_grammar();
         builtin_tags_.initialize(*this);
-        // fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
-        // detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
     }
 
   public:
@@ -433,7 +426,8 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                    , options_type const& options
                    ) const {
         match_type const& match_ = detail::unnest(match);
-        id_type const id = match_.regex_id();
+        id_type    const  id     = match_.regex_id();
+
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
             tag(*this, match_, context, options, stream);
         }
@@ -857,6 +851,12 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     regex_type const comment_close;
     regex_type const variable_open;
     regex_type const variable_close;
+
+  /*private:
+
+    template <class E>                   friend struct django::builtin_tags;
+    template <class E>                   friend struct django::builtin_filters;
+    template <class I, class D, class C> friend struct synth::base_definition;*/
 
     // TODO: Parallelize the formatting:
     regex_type tag, text, block, skipper, nothing;

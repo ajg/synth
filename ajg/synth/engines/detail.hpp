@@ -78,17 +78,7 @@ namespace posix_time = boost::posix_time;
 namespace xpressive  = boost::xpressive;
 
 //
-// [deprecated] lit:
-//     String literal helper.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class To, class From, std::size_t Length>
-inline std::basic_string<To> lit(From const (&source)[Length]) {
-    return std::basic_string<To>(source, source + Length - 1);
-}
-
-//
-// string_literal:
+// [deprecated] string_literal:
 //     Helper class to help widen literals on the spot when necessary.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,6 +124,27 @@ struct string_literal {
 };
 
 //
+// [deprecated] text:
+//     Creates string_literal objects from native literals.
+//     TODO: Replace remaining uses with traits_type::literal.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class From, std::size_t Length>
+inline string_literal<From, Length> text(From const (&source)[Length]) {
+    return string_literal<From, Length>(source);
+}
+
+//
+// [deprecated] lit:
+//     String literal helper.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class To, class From, std::size_t Length>
+inline std::basic_string<To> lit(From const (&source)[Length]) {
+    return std::basic_string<To>(source, source + Length - 1);
+}
+
+//
 // AJG_CASE_OF, AJG_CASE_OF_ELSE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,186 +161,6 @@ struct string_literal {
 #define AJG_CASE_OF(value, cases) \
     AJG_CASE_OF_ELSE(value, cases, ajg::synth::detail::unreachable())
         // (BOOST_ASSERT(0), throw 0, ajg::synth::detail::unreachable(value)))
-
-//
-// [deprecated] text:
-//     Creates string_literal objects from native literals.
-//     TODO: Replace remaining uses with traits_type::literal.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class From, std::size_t Length>
-inline string_literal<From, Length> text(From const (&source)[Length]) {
-    return string_literal<From, Length>(source);
-}
-
-//
-// AJG_VECTOR_0_IF
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if (BOOST_VERSION > 104000) // 1.40+
-    #define AJG_VECTOR_0_IF(n, symbol) symbol
-#else
-    #define AJG_VECTOR_0_IF(n, symbol) BOOST_PP_EXPR_IF(n, symbol)
-#endif
-
-//
-// apply_at:
-//     Provides a way to index a compile-time Sequence at runtime
-//     using a suitable Functor, which is called exactly once. It is
-//     similar to at_c, but allows the index to be specified at runtime.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <std::size_t Size>
-struct apply_at;
-
-#define AJG_CASE(z, n, nil) case n: return functor(fusion::at_c<n>(sequence));
-
-#define AJG_APPLY_AT(z, n, nil) \
-    template <> \
-    struct apply_at <n> { \
-        template <class Sequence, class Functor> \
-        inline static typename Functor::result_type \
-                fn( std::size_t const  index \
-                  , Sequence    const& sequence \
-                  , Functor     const& functor \
-                  ) { \
-            if (index >= n) { \
-                throw_exception(std::out_of_range("index")); \
-            } \
-            \
-            switch (index) { \
-                BOOST_PP_REPEAT(n, AJG_CASE, nil) \
-                default: AJG_UNREACHABLE; \
-            } \
-        } \
-    };
-
-BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, AJG_APPLY_AT, nil)
-#undef AJG_APPLY_AT
-#undef AJG_CASE
-
-//
-// create_definitions
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, class Sequence, std::size_t Size>
-struct create_definitions;
-
-#define DEFINITION(z, n, nil) \
-    BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
-        value_at_c<Sequence, n>::type::template \
-            definition<Engine>
-
-#define CREATE_DEFINITIONS(z, n, nil) \
-    template <class Engine, class Sequence> \
-    struct create_definitions <Engine, Sequence, n> { \
-        typedef typename fusion::AJG_VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
-            AJG_VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            AJG_VECTOR_0_IF(n, >) \
-        type; \
-    };
-
-BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
-#undef CREATE_DEFINITIONS
-#undef DEFINITION
-
-//
-// create_definitions_extended
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, class Sequence, std::size_t Size>
-struct create_definitions_extended;
-
-#define DEFINITION(z, n, nil) \
-    BOOST_PP_COMMA_IF(n) typename fusion::result_of:: \
-        value_at_c<Sequence, n>::type::template \
-            definition \
-                < typename Engine::char_type \
-                , typename Engine::regex_type \
-                , typename Engine::string_type \
-                , typename Engine::context_type \
-                , typename Engine::value_type \
-                , typename Engine::size_type \
-                , typename Engine::match_type \
-                , typename Engine::this_type \
-                , typename Engine::options_type \
-                , typename Engine::sequence_type \
-                >
-
-#define CREATE_DEFINITIONS(z, n, nil) \
-    template <class Engine, class Sequence> \
-    struct create_definitions_extended <Engine, Sequence, n> { \
-        typedef typename fusion::AJG_VECTOR_0_IF(n, template) BOOST_PP_CAT(vector, n) \
-            AJG_VECTOR_0_IF(n, <) BOOST_PP_REPEAT(n, DEFINITION, nil) \
-            AJG_VECTOR_0_IF(n, >) \
-        type; \
-    };
-
-
-BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, CREATE_DEFINITIONS, nil)
-#undef CREATE_DEFINITIONS
-#undef DEFINITION
-
-#undef AJG_VECTOR_0_IF
-
-//
-// indexable_sequence
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, class Sequence, class Key,
-          template <class E, class S, std::size_t K> class Definer>
-struct indexable_sequence {
-  public:
-
-    typedef Engine                engine_type;
-    typedef Sequence              sequence_type;
-    typedef Key                   key_type;
-    typedef std::vector<key_type> index_type;
-    typedef typename Sequence::size::value_type size_type;
-    BOOST_STATIC_CONSTANT(size_type, size = Sequence::size::value);
-    typedef typename Definer<Engine, Sequence, size>::type definition_type;
-
-  public:
-
-    definition_type definition;
-    index_type      index;
-};
-
-//
-// index_sequence
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template < class Engine
-         , class Indexable
-         , Indexable Engine::*Sequence
-         , std::size_t Size>
-struct index_sequence;
-
-#define PUSH_SYNTAX(z, n, nil) \
-    typename Engine::regex_type const BOOST_PP_CAT(r, n) = \
-        fusion::at_c<n>((engine.*Sequence).definition).syntax(engine); \
-    (engine.*Sequence).index.push_back(BOOST_PP_CAT(r, n).regex_id());
-
-#define ALTERNATIVES(z, n, nil) \
-    BOOST_PP_IF(n, |, engine.tag =) BOOST_PP_CAT(r, n)
-
-#define INDEX_SEQUENCE(z, n, nil) \
-    template < class Engine \
-             , class Indexable \
-             , Indexable Engine::*Sequence> \
-    struct index_sequence <Engine, Indexable, Sequence, n> { \
-        Engine& engine; \
-        index_sequence(Engine& engine) : engine(engine) { \
-            (engine.*Sequence).index.reserve(n); \
-            BOOST_PP_REPEAT(n, PUSH_SYNTAX, nil) \
-            BOOST_PP_REPEAT(n, ALTERNATIVES, nil) BOOST_PP_EXPR_IF(n, ;) \
-        } \
-    };
-
-BOOST_PP_REPEAT(AJG_SYNTH_SEQUENCE_LIMIT, INDEX_SEQUENCE, nil)
-#undef INDEX_SEQUENCE
-#undef ALTERNATIVES
-#undef PUSH_SYNTAX
 
 //
 // set_furthest_iterator:
@@ -349,90 +180,8 @@ struct set_furthest_iterator {
 };
 
 //
-// HAS_MEMBER_FUNCTION:
-//     Adapted from Johannes Schaub (litb)'s.
-//     NOTE: Apparently will not detect inherited methods.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define AJG_DEFINE_METHOD_PREDICATE(name) \
-    template <class T, class Signature> \
-    struct BOOST_PP_CAT(base_has_, name) { \
-        template <typename U, U> struct check; \
-        template <typename V> static char (&f(check<Signature, &V::name>*))[1]; \
-        template <typename> static char (&f(...))[2]; \
-        static bool const value = sizeof(f<T>(0)) == 1; \
-    }; \
-    template <class T, class Signature> \
-    struct BOOST_PP_CAT(has_, name) : \
-        mpl::bool_<BOOST_PP_CAT(base_has_, name)<T, Signature>::value>::type {}
-
-//
-// element_initializer:
-//     Calls initialize() on the element unless the function doesn't exist.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine>
-struct element_initializer {
-  private:
-    AJG_DEFINE_METHOD_PREDICATE(initialize);
-
-  public:
-    Engine const& self;
-
-    template <class T>
-    struct has_initializer : mpl::or_
-        < has_initialize<T, void(T::*)(Engine const&)>
-        , has_initialize<T, void(T::*)(Engine const&) const>
-        >::type {};
-
-    template <class Element>
-    void operator ()(Element& element, typename
-            enable_if<has_initializer<Element> >::type* = 0) const {
-        element.initialize(self);
-    }
-
-    template <class Element>
-    void operator ()(Element& element, typename
-            disable_if<has_initializer<Element> >::type* = 0) const {
-        // Do nothing.
-    }
-};
-
-//
-// tag_renderer (only used by tmpl now)
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, bool Merge = false>
-struct tag_renderer {
-    typename Engine::this_type    const& self;
-    typename Engine::stream_type  const& stream_;
-    typename Engine::match_type   const& match_;
-    typename Engine::context_type const& context_;
-    typename Engine::options_type const& options_;
-
-    typedef void result_type;
-
-    template <class Tag>
-    void operator ()(Tag const& tag, typename disable_if_c<Merge, Tag>::type* = 0) const {
-        typedef typename Engine::options_type options_type;
-        typedef typename Engine::stream_type stream_type;
-        options_type& options = const_cast<options_type&>(options_);
-        stream_type& stream = const_cast<stream_type&>(stream_);
-        tag.render(match_, self, context_, options, stream);
-    }
-
-    template <class Tag>
-    void operator ()(Tag const& tag, typename enable_if_c<Merge, Tag>::type* = 0) const {
-        typename Engine::args_type const args = { self, match_,
-            const_cast<typename Engine::context_type&>(context_),
-            const_cast<typename Engine::options_type&>(options_),
-            const_cast<typename Engine::stream_type&>(stream_) };
-        tag.render(args);
-    }
-};
-
-//
 // abbreviate_size
+//     TODO: Rename format_size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class String, class Size>
@@ -641,54 +390,6 @@ inline String escape_entities(String const& string, bool const ascii = false) {
     else {
         return string;
     }
-}
-
-/*
-//
-// may_find_by_index
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Engine, class Sequence, class Index, class Needle, class Functor>
-inline optional<typename Functor::result_type> may_find_by_index( Engine   const& engine
-                                                                , Sequence const& sequence
-                                                                , Index    const& index
-                                                                , Needle   const& needle
-                                                                , Functor  const& functor
-                                                                ) {
-    typename Index::const_iterator const it = std::find(index.begin(), index.end(), needle);
-
-    if (it == index.end()) {
-        return boost::none;
-    }
-
-    typename Engine::size_type const distance = std::distance(index.begin(), it);
-    BOOST_STATIC_CONSTANT(typename Engine::size_type, size = Sequence::size::value);
-    return detail::template apply_at<size>::fn(distance, sequence, functor);
-}
-*/
-
-//
-// must_find_by_index
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Traits, class Sequence, class Index, class Needle, class Functor>
-inline typename Functor::result_type must_find_by_index( Sequence const& sequence
-                                                       , Index    const& index
-                                                       , Needle   const& needle
-                                                       , Functor  const& functor
-                                                       ) {
-    typename Index::const_iterator const it = std::find(index.begin(), index.end(), needle);
-
-    if (it == index.end()) {
-        // TODO: Throw missing_tag exception.
-        std::string const name = Traits::narrow(Traits::to_string(needle));
-        std::string const message = name + " not found";
-        AJG_SYNTH_THROW(std::runtime_error(message));
-    }
-
-    typename Traits::size_type const distance = std::distance(index.begin(), it);
-    BOOST_STATIC_CONSTANT(typename Traits::size_type, size = Sequence::size::value);
-    return detail::template apply_at<size>::fn(distance, sequence, functor);
 }
 
 //

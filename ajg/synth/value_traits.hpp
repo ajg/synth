@@ -75,9 +75,13 @@ struct default_value_traits {
     typedef std::size_t                                 size_type;
     typedef Value                                       value_type;
     typedef bool                                        boolean_type;
+
+    // TODO: The type number is too ambiguous; break down into integral (integer, natural), floating (long double), complex, etc.
+    //       Either that or make number general enough to hold the majority of numbers, e.g. std::complex<long double> or
+    //       even an arbitrary precision type.
     typedef double                                      number_type;
     typedef boost::gregorian::date                      date_type;
- // typedef TODO                                        time_type;
+ // typedef TODO: time{64}_t? struct tm?                time_type;
     typedef boost::posix_time::ptime                    datetime_type;
     typedef boost::posix_time::time_duration            duration_type;
     typedef std::basic_string<char_type>                string_type;

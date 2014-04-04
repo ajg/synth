@@ -48,8 +48,9 @@ inline typename Traits::datetime_type to_datetime(py::object const& obj) {
 
 template <class Value>
 inline py::object from_value(Value const& value) {
-    // TODO: Implement.
-    AJG_SYNTH_THROW(not_implemented("from_value"));
+    py::object obj;
+    value.assign_to(obj);
+    return obj;
 }
 
 template <class Arguments>

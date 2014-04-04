@@ -109,23 +109,19 @@ struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> {
 struct test_suite {
   public:
 
-    test_suite(std::string const& name)
-            : name_(name) {
+    test_suite(std::string const& name) : name_(name) {
         runner_.get().set_callback(&reporter_);
     }
 
     bool run() {
-        std::cout << "Running the " << name_
-                  << " test suite:" << std::endl;
+        std::cerr << "Running the " << name_ << " test suite:" << std::endl;
         runner_.get().run_tests();
         return reporter_.all_ok();
     }
 
     bool run(std::string const group)
     try {
-        std::cout << "Running group" << group
-                  << " of the " << name_
-                  << " test suite:" << std::endl;
+        std::cerr << "Running group" << group << " of the " << name_ << " test suite:" << std::endl;
         runner_.get().run_tests(group);
         return reporter_.all_ok();
     }

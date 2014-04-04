@@ -400,63 +400,74 @@ Future Work
      + Pass /W4 cleanly
      + Pass /Wall cleanly
    * Create Visual Studio 2012 solution & project
+
  - Distribution:
    * Pre-built OS X binaries
    * Pre-built Windows binaries
    * [Homebrew](http://brew.sh/) formula
- - Bindings:
-   * `ruby` binding based on [Rice](http://rice.rubyforge.org/)
-   * `go` binding based on [cgo](http://golang.org/cmd/cgo/)
-   * `lua` binding
-   * `node` binding
-   * `php` binding
-   * `c` binding
-   * [v1+] `haskell` binding
- - Engines:
-   * [v1+] `cheetah` engine
-   * `ctpp` engine
-   * `multi_engine`
- - Adapters:
-   * `boost::tribool` adapter
-   * `boost::fusion` sequence adapters
-   * [v2] `c++11` type adapters
-   * [v2] `c++14` type adapters
- - Templates:
-   * `descriptor_template`
-   * Clean up and make `multi_template` public
- - Django:
-   * Named arguments (e.g. for tags and filters)
-   * Option to pre-load libraries, tags and filters
-   * Implement missing date/time format specifiers
-   * Make markers dynamically configurable
- - SSI:
-   * Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
- - Command-line:
-   * Allow specifying formats option
-   * Allow specifying debug option
-   * Allow named input files
-   * Allow named output files
-   * [v1+] Allow using arbitrary programs as tags
-   * [v1+] Allow using arbitrary programs as filters
- - Python:
-   * Turn optional arguments to synth.Template into kwargs
-   * Support is_safe, needs_autoescape, and expects_localtime in custom filters
-   * Support for non-simple custom tags via token and parser objects
-     + Custom inclusion tags
-     + Custom assignment tags
-     + Custom tags with arbitrary blocks
-   * Full support for `unicode` type (not just through UTF-8)
+
  - Documentation:
    * Produce Boost-compatible documentation
    * Create `conf.py` (et al.) to enable ReadTheDocs
+
  - Testing:
    * Rewrite the majority of unit tests as a set of .in/.out files
    * Add unit tests from Cjango
    * Add way to specify expected failures; re-enable commented out tests
+
  - Optimization:
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
    * Investigate `-fvisibility-inlines-hidden`
    * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`
+
+ - Bindings:
+   * Command-line:
+     + Allow specifying formats option
+     + Allow specifying debug option
+     + Allow named input files
+     + Allow named output files
+     + [v1+] Allow using arbitrary programs as tags
+     + [v1+] Allow using arbitrary programs as filters
+   * Python:
+     + Turn optional arguments to synth.Template into kwargs
+     + Support is_safe, needs_autoescape, and expects_localtime in custom filters
+     + Support for non-simple custom tags via token and parser objects
+       ~ Custom inclusion tags
+       ~ Custom assignment tags
+       ~ Custom tags with arbitrary blocks
+     + Full support for `unicode` type (not just through UTF-8)
+   * Other:
+     + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
+     + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)
+     + Create `lua` binding
+     + Create `node` binding
+     + Create `php` binding
+     + Create `c` binding
+     + [v1+] Create `haskell` binding
+
+ - Engines:
+   * Django:
+     + Named arguments (e.g. for tags and filters)
+     + Option to pre-load libraries, tags and filters
+     + Implement missing date/time format specifiers
+     + Make markers dynamically configurable
+   * SSI:
+     + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
+   * Other:
+     + Create `ctpp` engine
+     + Create `multi_engine`
+     + [v1+] Create `cheetah` engine
+
+ - Adapters:
+   * Create `boost::tribool` adapter
+   * Create `boost::fusion` sequence adapters
+   * [v2] Create `c++11` type adapters
+   * [v2] Create `c++14` type adapters
+
+ - Templates:
+   * Create `descriptor_template`
+   * Clean up and make `multi_template` public
+
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace

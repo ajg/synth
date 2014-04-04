@@ -79,7 +79,7 @@ struct library : Options::abstract_library_type {
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
     static value_type call_tag(py::object tag, options_type&, context_type*, arguments_type& arguments) {
-        std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
+        std::pair<py::tuple, py::dict> const args = d::from_arguments(arguments);
         return tag(*args.first, **args.second);
     }
 
@@ -87,9 +87,10 @@ struct library : Options::abstract_library_type {
                                  , options_type   const&
                                  , context_type   const*
                                  , value_type     const& value
-                                 , arguments_type const& arguments) {
-        std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
-        return filter(d::from_value(value), *args.first, **args.second);
+                                 , arguments_type const& arguments
+                                 ) {
+        std::pair<py::tuple, py::dict> const args = d::from_arguments(value, arguments);
+        return filter(*args.first, **args.second);
     }
 
   private:
@@ -155,7 +156,7 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            std::pair<py::list, py::dict> const& args = d::from_arguments(arguments);
+            std::pair<py::tuple, py::dict> const args = d::from_arguments(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
             return d::to_string<string_type>(result);
         }
@@ -192,7 +193,6 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     typedef typename base_type::resolver_type    resolver_type;
     typedef typename base_type::resolvers_type   resolvers_type;
     typedef py::dict                             context_type;
-    typedef std::pair<py::list, py::dict>        args_type;
     typedef py::init< string_type
                     , string_type
                     , py::optional
@@ -268,7 +268,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
         return formats;
     }
 
-    // TODO: Rename these to_* or as_*
+    // TODO: Rename these to_*
 
     inline static directories_type get_directories(py::list dirs) {
         py::stl_input_iterator<string_type> begin(dirs), end;
@@ -281,7 +281,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
         BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
             string_type const& key = py::extract<string_type>(py::str(item[0]));
-            py::object const& lib = item[1];
+            py::object  const& lib = item[1];
             typedef typename libraries_type::value_type pair_type;
             libraries.insert(pair_type(key, library_type(new library<options_type>(lib))));
         }

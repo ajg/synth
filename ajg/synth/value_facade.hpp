@@ -162,6 +162,9 @@ struct value_facade {
     inline boolean_type equal   (value_type const& that) const { return traits_type::adapter_traits::equal(*this, that); }
     inline boolean_type less    (value_type const& that) const { return traits_type::adapter_traits::less(*this, that); }
 
+    template <class T>
+    inline void assign_to(T& t) { traits_type::adapter_traits::assign_to(t, *this); }
+
     inline operator boolean_type()                          const { return this->to_boolean(); }
     inline boolean_type operator!()                         const { return !this->to_boolean(); }
     inline boolean_type operator==(value_type const& that)  const { return this->equal(that); }

@@ -184,7 +184,7 @@ struct default_value_traits {
             else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() == b.to_boolean();
             else if (a.is_numeric() && b.is_numeric())  return a.to_number()  == b.to_number();
             else if (a.is_string()  && b.is_string())   return a.to_string()  == b.to_string();
-            // TODO: Compare sequences, etc.
+            // TODO: Sequences, mappings, etc.
             else return false;
         }
 
@@ -193,8 +193,18 @@ struct default_value_traits {
             else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() < b.to_boolean();
             else if (a.is_numeric() && b.is_numeric())  return a.to_number()  < b.to_number();
             else if (a.is_string()  && b.is_string())   return a.to_string()  < b.to_string();
-            // TODO: Compare sequences, etc.
+            // TODO: Sequences, mappings, etc.
             else return false;
+        }
+
+        template <class T>
+        inline static void assign_to(T& target, value_type const& source) {
+            if (source.template is<T>())  target = source.template as<T>();
+            else if (source.is_boolean()) target = source.to_boolean();
+            else if (source.is_numeric()) target = source.to_number();
+            else if (source.is_string())  target = source.to_string();
+            // TODO: Sequences, mappings, etc.
+            else AJG_SYNTH_THROW(not_implemented("assign_as"));
         }
 
         inline static boolean_type equal_sequence( abstract_adapter_type const& a

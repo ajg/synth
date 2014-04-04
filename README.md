@@ -453,6 +453,7 @@ Future Work
      + Option to pre-load libraries, tags and filters
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
+     + Consider using hex character entities (vs. named) to match Django's engine
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * Other:

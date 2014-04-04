@@ -7,7 +7,6 @@
 #define AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 
 #include <ajg/synth/config.hpp>
-#include <ajg/synth/vector.hpp>
 
 #include <map>
 #include <string>
@@ -23,11 +22,6 @@
 #include <boost/noncopyable.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
-
-#include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/algorithm.hpp>
-#include <boost/fusion/sequence/intrinsic/size.hpp>
-#include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>

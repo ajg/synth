@@ -3,15 +3,10 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifdef _MSC_VER
-#    pragma once
-#endif
-
 #ifndef AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED
 
 #include <ajg/synth/config.hpp>
-#include <ajg/synth/vector.hpp>
 
 #include <map>
 #include <ctime>
@@ -38,11 +33,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
-
-#include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/include/algorithm.hpp>
-#include <boost/fusion/sequence/intrinsic/size.hpp>
-#include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/seq/elem.hpp>
@@ -72,7 +62,6 @@ using boost::optional;
 
 namespace algorithm  = boost::algorithm;
 namespace date_time  = boost::date_time;
-namespace fusion     = boost::fusion;
 namespace mpl        = boost::mpl;
 namespace posix_time = boost::posix_time;
 namespace xpressive  = boost::xpressive;

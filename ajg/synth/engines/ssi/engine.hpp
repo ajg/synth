@@ -26,8 +26,8 @@
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_definition.hpp>
 #include <ajg/synth/engines/ssi/value.hpp>
-#include <ajg/synth/engines/ssi/library.hpp>
 #include <ajg/synth/engines/ssi/options.hpp>
+#include <ajg/synth/engines/ssi/builtin_tags.hpp>
 
 namespace ajg {
 namespace synth {
@@ -35,18 +35,16 @@ namespace ssi {
 
 using detail::operator ==;
 
-template < class Library = ssi::default_library
-         , class Environment = detail::standard_environment
-         , bool ThrowOnErrors = false
+template < class       Environment      = detail::standard_environment
+         , bool        ThrowOnErrors    = false
+         , std::size_t MaxRegexCaptures = 9
          >
 struct engine : detail::nonconstructible {
 
 typedef engine engine_type;
 
 template <class BidirectionalIterator>
-struct definition : base_definition< BidirectionalIterator
-                                   , definition<BidirectionalIterator>
-                                   > {
+struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
     // Constants:
 
@@ -57,33 +55,28 @@ struct definition : base_definition< BidirectionalIterator
     typedef definition                                        this_type;
     typedef base_definition<BidirectionalIterator, this_type> base_type;
 
-    typedef typename base_type::id_type         id_type;
-    typedef typename base_type::boolean_type    boolean_type;
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::char_type       char_type;
-    typedef typename base_type::match_type      match_type;
-    typedef typename base_type::regex_type      regex_type;
-    typedef typename base_type::frame_type      frame_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::stream_type     stream_type;
-    typedef typename base_type::iterator_type   iterator_type;
-    typedef typename base_type::definition_type definition_type;
+    typedef typename base_type::id_type                                         id_type;
+    typedef typename base_type::boolean_type                                    boolean_type;
+    typedef typename base_type::size_type                                       size_type;
+    typedef typename base_type::char_type                                       char_type;
+    typedef typename base_type::match_type                                      match_type;
+    typedef typename base_type::regex_type                                      regex_type;
+    typedef typename base_type::frame_type                                      frame_type;
+    typedef typename base_type::string_type                                     string_type;
+    typedef typename base_type::stream_type                                     stream_type;
+    typedef typename base_type::iterator_type                                   iterator_type;
+    typedef typename base_type::definition_type                                 definition_type;
+    typedef typename base_type::string_regex_type                               string_regex_type;
+    typedef typename base_type::string_match_type                               string_match_type;
 
-    typedef Library                             library_type;
-    typedef Environment                         environment_type;
-    typedef ssi::value<char_type>               value_type;
-    typedef std::vector<string_type>            whitelist_type;
-    typedef std::vector<value_type>             sequence_type;
-    typedef std::map<string_type, value_type>   context_type;
-    typedef library_type                        tags_type;
-    typedef options<string_type>                options_type;
-    typedef detail::indexable_sequence
-                < this_type
-                , tags_type
-                , id_type
-                , detail::create_definitions
-                >                               tag_sequence_type;
-    typedef typename value_type::traits_type    traits_type;
+    typedef builtin_tags<this_type>                                             builtin_tags_type;
+    typedef Environment                                                         environment_type;
+    typedef ssi::value<char_type>                                               value_type;
+    typedef std::vector<string_type>                                            whitelist_type;
+    typedef std::vector<value_type>                                             sequence_type;
+    typedef std::map<string_type, value_type>                                   context_type;
+    typedef options<string_type>                                                options_type;
+    typedef typename value_type::traits_type                                    traits_type;
 
     struct args_type {
         this_type   const& engine;
@@ -96,8 +89,8 @@ struct definition : base_definition< BidirectionalIterator
   public:
 
     definition()
-        : tag_start (detail::text("<!--#"))
-        , tag_end   (detail::text("-->"))
+        : tag_start (traits_type::literal("<!--#"))
+        , tag_end   (traits_type::literal("-->"))
         , environment() {
         using namespace xpressive;
 //
@@ -121,20 +114,62 @@ struct definition : base_definition< BidirectionalIterator
         attribute
             = name >> *_s >> '=' >> *_s >> quoted_value
             ;
+        raw_string
+            = /*+*/*~set[space | (set= '!', '&', '|', '$', '=',
+                  '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\', '/')]
+            ;
+        quoted_string
+            = '\'' >> *(~as_xpr('\'') | "\\'")  >> '\''
+            | '`'  >> *(~as_xpr('`')  | "\\`")  >> '`'
+            | '"'  >> *(~as_xpr('"')  | "\\\"") >> '"'
+            ;
+        regex_expression
+            = '/' >> (s1 = *(~as_xpr('/') | "\\\\")) >> '/'
+            ;
+        string_expression // A
+            = quoted_string
+            | raw_string
+            | variable
+            ;
+        expression // A
+            = xpressive::ref(and_expression)
+            | xpressive::ref(or_expression)
+            ;
+        primary_expression // A
+            = '(' >> *_s >> expression >> *_s >> ')'
+            | xpressive::ref(comparison_expression)
+            | xpressive::ref(string_expression)
+            | xpressive::ref(not_expression)
+            ;
+        not_expression // ! A
+            = '!' >> *_s >> expression
+            ;
+        comparison_operator
+            = as_xpr("=") | "==" | "!=" | "<" | ">" | "<=" | ">="
+            ;
+        comparison_expression // A op C
+            = string_expression >> *_s >> comparison_operator
+                  >> *_s >> (string_expression | regex_expression)
+            ;
+        and_expression // A (&& B)*
+            = primary_expression >> *(*_s >> "&&" >> *_s >> expression)
+            ;
+        or_expression // A (|| B)*
+            = primary_expression >> *(*_s >> "||" >> *_s >> expression)
+            ;
         skipper
             = as_xpr(tag_start);
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
-        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
+        builtin_tags_.initialize(*this);
     }
 
   public:
 
-    std::pair<string_type, string_type> parse_attribute( match_type const& attr
-                                                       , args_type  const& args
-                                                       , bool const interpolate
+    std::pair<string_type, string_type> parse_attribute( match_type   const& attr
+                                                       , args_type    const& args
+                                                       , boolean_type const  interpolate
                                                        ) const {
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
@@ -165,24 +200,23 @@ struct definition : base_definition< BidirectionalIterator
                                , string_type  const& name
                                ) const {
         // First, check the context.
-        if (optional<value_type const&> const value
-                = detail::find_value(name, context)) {
+        if (optional<value_type const&> const value = detail::find_value(name, context)) {
             return value->to_string();
         }
         // Second, check for magic variables.
-        else if (name == detail::text("DOCUMENT_NAME")) {
+        else if (name == traits_type::literal("DOCUMENT_NAME")) {
             throw_exception(not_implemented("DOCUMENT_NAME"));
         }
-        else if (name == detail::text("DOCUMENT_URI")) {
+        else if (name == traits_type::literal("DOCUMENT_URI")) {
             throw_exception(not_implemented("DOCUMENT_URI"));
         }
-        else if (name == detail::text("DATE_LOCAL")) {
+        else if (name == traits_type::literal("DATE_LOCAL")) {
             return detail::format_time(options.time_format, detail::local_now());
         }
-        else if (name == detail::text("DATE_GMT")) {
+        else if (name == traits_type::literal("DATE_GMT")) {
             return detail::format_time(options.time_format, detail::utc_now());
         }
-        else if (name == detail::text("LAST_MODIFIED")) {
+        else if (name == traits_type::literal("LAST_MODIFIED")) {
             throw_exception(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
@@ -239,20 +273,28 @@ struct definition : base_definition< BidirectionalIterator
                    , options_type const& options
                    ) const
     try {
-        using namespace detail;
-        // If there's only _one_ tag, xpressive will not
-        // "nest" the match, so we use it directly instead.
-        match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
-        tag_renderer<this_type, true> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
+        match_type const& match_ = detail::unnest(match);
+        id_type    const  id     = match_.regex_id();
+
+        if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
+            args_type const args =
+                { *this
+                , match_
+                , const_cast<context_type&>(context)
+                , const_cast<options_type&>(options)
+                , const_cast<stream_type&>(stream)
+                };
+            tag(args);
+        }
+        else {
+            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+        }
     }
     catch (std::exception const&) {
         if (throw_on_errors) throw;
-        /* xxx: Unclear on whether this'd be helpful or even allowed.
-                Also, it's distracting when doing unit tests.
+        /* xxx: Unclear whether this is helpful or even allowed; plus it's distracting in unit tests.
         else {
-            std::cerr << std::endl << "error (" << e.what() <<
-                ") in directive: " << match.str() << std::endl;
+            std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
         }*/
 
         stream << options.error_message;
@@ -263,33 +305,107 @@ struct definition : base_definition< BidirectionalIterator
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == text)  render_text(stream, match, context, options);
-        else if (match == block) render_block(stream, match, context, options);
-        else if (match == tag)   render_tag(stream, match, context, options);
+             if (match == this->text)  render_text(stream, match, context, options);
+        else if (match == this->block) render_block(stream, match, context, options);
+        else if (match == this->tag)   render_tag(stream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
-    /// Creates a regex object to parse a full SSI directive.
+    /// Creates a regex object to parse a full SSI tag ("directive").
     /// Meaning: tag_start name attribute* tag_end
     ///
     /// \param  name The identifier that follows the tag_start.
     /// \return A regex object that can match an entire tag.
     /// \pre    name is a valid identifier, character-wise.
-    /// \post   The name of the directive is stored in in s1.
+    /// \post   The name is stored in s1.
 
-    regex_type directive(string_type const& name) const {
+    regex_type make_tag(string_type const& name) const {
         using namespace xpressive;
-        return tag_start >> *_s >> (s1 = name)
-            >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
+        return tag_start >> *_s >> (s1 = name) >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
+    }
+
+    boolean_type equals_regex(args_type const& args, string_match_type const& expr) const {
+        string_type       const left    = parse_string(args, get_nested<A>(expr));
+        string_type       const right   = get_nested<C>(expr)[xpressive::s1].str();
+        string_regex_type const pattern = string_regex_type::compile(right);
+
+        for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
+            args.context.erase(traits_type::to_string(i));
+        }
+
+        string_match_type match;
+        if (xpressive::regex_search(left, match, pattern)) {
+            std::size_t const limit = (std::min)(match.size(), MaxRegexCaptures);
+
+            for (std::size_t i = 0; i <= limit; ++i) {
+                string_type const key = traits_type::to_string(i);
+                args.context.insert(std::make_pair(key, match[i].str()));
+            }
+        }
+
+        return match;
+    }
+
+    boolean_type equals(args_type const& args, string_match_type const& expr) const {
+        string_type const op = expr(this->comparison_operator).str();
+
+        if (get_nested<C>(expr) == this->regex_expression) {
+            boolean_type     const matched = equals_regex(args, expr);
+            std::logic_error const error("comparison operator");
+            return AJG_CASE_OF_ELSE(op, ((traits_type::literal("="),  matched))
+                                             ((traits_type::literal("=="), matched))
+                                             ((traits_type::literal("!="), !matched)),
+                                                 (throw_exception(error), 0));
+        }
+        else {
+            string_type const left  = parse_string(args, get_nested<A>(expr));
+            string_type const right = parse_string(args, get_nested<C>(expr));
+            return AJG_CASE_OF(op,
+                ((traits_type::literal("="),  left == right))
+                ((traits_type::literal("=="), left == right))
+                ((traits_type::literal("!="), left != right))
+                ((traits_type::literal("<"),  left <  right))
+                ((traits_type::literal(">"),  left >  right))
+                ((traits_type::literal("<="), left <= right))
+                ((traits_type::literal(">="), left >= right)));
+        }
+    }
+
+    template <class Args, class Match, class Initial, class Functor>
+    Initial fold(Args const& args, Match const& match, Initial initial, Functor const& functor) const {
+        BOOST_FOREACH(string_match_type const& operand, match.nested_results()) {
+            initial = functor(initial, args.engine.evaluate_expression(args, operand));
+        }
+
+        return initial;
+    }
+
+    string_type parse_string(args_type const& args, string_match_type const& match) const {
+            return AJG_CASE_OF(get_nested<A>(match),
+                ((raw_string,           match.str()))
+                ((regex_expression,     args.engine.extract_attribute(match)))
+                ((args.engine.variable, args.engine.interpolate(args, match.str())))
+                ((quoted_string,        args.engine.interpolate(args,
+                                            args.engine.extract_attribute(match)))));
+    }
+
+    boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
+        return AJG_CASE_OF(expr,
+            ((and_expression,        fold(args, expr, true, std::logical_and<bool>())))
+            ((or_expression,         fold(args, expr, false, std::logical_or<bool>())))
+            ((not_expression,        !evaluate_expression(args, get_nested<A>(expr))))
+            ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
+            ((expression,            evaluate_expression(args, get_nested<A>(expr))))
+            ((string_expression,     !parse_string(args, expr).empty()))
+            ((comparison_expression, equals(args, expr))));
     }
 
   private:
 
     static string_type replace_variable(args_type const& args,
             typename base_type::string_match_type const& match) {
-        return match.str() == detail::text("\\$") ? detail::text("$")
-            : args.engine.lookup_variable(args.context, args.options,
-                match[xpressive::s1].str());
+        return match.str() == traits_type::literal("\\$") ? traits_type::literal("$") :
+            args.engine.lookup_variable(args.context, args.options, match[xpressive::s1].str());
     }
 
   public:
@@ -299,16 +415,27 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    typename base_type::string_regex_type variable;
-    regex_type tag, text, block, skipper;
-    regex_type name, attribute, quoted_value;
     environment_type const environment;
-    options_type const default_options;
+    options_type     const default_options;
 
   private:
 
-    whitelist_type whitelist_;
-    tag_sequence_type tags_;
+    template <class E>                   friend struct ssi::builtin_tags;
+    template <class I, class D, class C> friend struct synth::base_definition;
+
+    regex_type tag, text, block, skipper;
+    regex_type name, attribute, quoted_value;
+
+    string_regex_type variable;
+    string_regex_type raw_string, quoted_string;
+    string_regex_type expression, primary_expression, not_expression;
+    string_regex_type and_expression, or_expression, comparison_expression;
+    string_regex_type string_expression, regex_expression, comparison_operator;
+
+  private:
+
+    whitelist_type    whitelist_;
+    builtin_tags_type builtin_tags_;
 
 }; // definition
 

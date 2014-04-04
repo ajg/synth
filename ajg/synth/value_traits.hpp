@@ -181,7 +181,7 @@ struct default_value_traits {
         inline static boolean_type equal(value_type const& a, value_type const& b) {
             // TODO: Defer to adapter even in non-same_as cases:
             //       if (...) return a.adapter()->equal(*that.adapter());
-            if (a.shares_type_with(b))                  return a.typed_equal(b);
+            if (a.typed_like(b))                        return a.typed_equal(b);
             else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() == b.to_boolean();
             else if (a.is_numeric() && b.is_numeric())  return a.to_number()  == b.to_number();
             else if (a.is_string()  && b.is_string())   return a.to_string()  == b.to_string();
@@ -190,7 +190,7 @@ struct default_value_traits {
         }
 
         inline static boolean_type less(value_type const& a, value_type const& b) {
-            if (a.shares_type_with(b))                  return a.typed_less(b);
+            if (a.typed_like(b))                        return a.typed_less(b);
             else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() < b.to_boolean();
             else if (a.is_numeric() && b.is_numeric())  return a.to_number()  < b.to_number();
             else if (a.is_string()  && b.is_string())   return a.to_string()  < b.to_string();
@@ -209,8 +209,8 @@ struct default_value_traits {
         }
 
         template <class T>
-        inline static T& as(value_type const& value) {
-            AJG_SYNTH_THROW(not_implemented("value_traits::as"));
+        inline static T const& as(value_type const& value) {
+            return value.template typed_as<T>();
         }
 
         template <class T>

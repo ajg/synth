@@ -25,6 +25,9 @@ namespace synth {
 using boost::optional;
 using boost::throw_exception;
 
+template <class Traits, class Adapted>
+struct adapter;
+
 template <class Traits>
 struct abstract_numeric_adapter;
 
@@ -95,30 +98,38 @@ struct abstract_adapter {
 
   private:
 
-    template <class Adapter> // TODO: Deal with forwarding_adapters.
-    inline Adapter const* as() const { return dynamic_cast<Adapter const*>(this); }
-
-  protected:
-
-    template <class T, class A>                   friend struct adapter;
+    template <class T, class A>                   friend struct synth::adapter;
     template <class T, class _, class A, class D> friend struct forwarding_adapter;
     template <class T>                            friend struct abstract_numeric_adapter;
     template <class C, class V, class T>          friend struct value_facade;
+
+    template <class Adapter> // TODO: Deal with forwarding_adapters.
+    inline Adapter const* get() const { return dynamic_cast<Adapter const*>(this); }
+
+    template <class T> // TODO: Deal with forwarding_adapters.
+    inline T const& get_adapted() const {
+        typedef synth::adapter<Traits, T> concrete_adapter_type;
+        concrete_adapter_type const* const concrete_adapter = this->template get<concrete_adapter_type>();
+        BOOST_ASSERT(concrete_adapter);
+        return concrete_adapter->adapted_;
+    }
+
+  protected:
 
     virtual boolean_type equal_adapted(abstract_type const& that) const = 0;
     virtual boolean_type less_adapted (abstract_type const& that) const = 0;
 
     template <class Adapter>
     inline boolean_type equal_as(abstract_type const& that) const {
-        Adapter const* const this_ = this->template as<Adapter>();
-        Adapter const* const that_ = that.template as<Adapter>();
+        Adapter const* const this_ = this->template get<Adapter>();
+        Adapter const* const that_ = that.template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 
     template <class Adapter>
     inline boolean_type less_as(abstract_type const& that) const {
-        Adapter const* const this_ = this->template as<Adapter>();
-        Adapter const* const that_ = that.template as<Adapter>();
+        Adapter const* const this_ = this->template get<Adapter>();
+        Adapter const* const that_ = that.template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 };

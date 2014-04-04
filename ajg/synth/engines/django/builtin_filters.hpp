@@ -3,8 +3,8 @@
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_ENGINES_DJANGO_FILTERS_HPP_INCLUDED
-#define AJG_SYNTH_ENGINES_DJANGO_FILTERS_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_DJANGO_BUILTIN_FILTERS_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_DJANGO_BUILTIN_FILTERS_HPP_INCLUDED
 
 #include <cmath>
 #include <stack>
@@ -1663,4 +1663,4 @@ struct builtin_filters {
 
 }}} // namespace ajg::synth::django
 
-#endif // AJG_SYNTH_ENGINES_DJANGO_FILTERS_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_DJANGO_BUILTIN_FILTERS_HPP_INCLUDED

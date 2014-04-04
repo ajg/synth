@@ -195,6 +195,8 @@ Components
    * `std::vector`
  - `memory`
    * `std::auto_ptr`
+ - `none`
+   * `boost::none_t`
  - `numeric`
    * `char`
    * `char signed`

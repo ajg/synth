@@ -52,12 +52,14 @@ inline py::object from_value(Value const& value) {
 }
 
 template <class Arguments>
-inline std::pair<py::list, py::dict> from_arguments(Arguments const& arguments) {
-    std::pair<py::list, py::dict> args;
+inline std::pair<py::tuple, py::dict> from_arguments(Arguments const& arguments) {
+    py::list list;
 
     BOOST_FOREACH(typename Arguments::first_type::value_type const& value, arguments.first) {
-        args.first.append(from_value(value));
+        list.append(from_value(value));
     }
+
+    std::pair<py::tuple, py::dict> args((py::tuple(list)), py::dict());
 
     BOOST_FOREACH(typename Arguments::second_type::value_type const& pair, arguments.second) {
         args.second[pair.first] = from_value(pair.second);

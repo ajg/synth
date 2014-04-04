@@ -387,8 +387,8 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            intmax_t const dividend = static_cast<intmax_t>(value.to_number());
-			intmax_t const divisor  = static_cast<intmax_t>(arguments[0].to_number());
+            integer_type const dividend = static_cast<integer_type>(value.to_number());
+			integer_type const divisor  = static_cast<integer_type>(arguments[0].to_number());
             return dividend % divisor == 0;
         }
     };
@@ -444,7 +444,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return format(static_cast<size_type>(std::abs(static_cast<intmax_t>(value.to_number()))));
+            return format(static_cast<size_type>(std::abs(static_cast<integer_type>(value.to_number()))));
         }
 
         inline static string_type format(size_type const size) {
@@ -541,13 +541,13 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
             try {
-                number_type const number = value.to_number();
-                intmax_t const position = static_cast<intmax_t>(arguments[0].to_number());
-                intmax_t const integer  = static_cast<intmax_t>(number);
+                number_type  const number   = value.to_number();
+                integer_type const position = static_cast<integer_type>(arguments[0].to_number());
+                integer_type const integer  = static_cast<integer_type>(number);
 
                 if (position > 0) {
-                    // Ensure the number operated on is whole.
-                    if (number == integer && integer >= 1) {
+                    // TODO: Use detail::is_integerl.
+                    if (number == integer && integer >= 1) { // Ensure the number operated on is whole.
                         string_type const text     = traits_type::to_string(integer);
 						size_type   const distance = static_cast<size_type>(position);
 
@@ -1020,8 +1020,8 @@ struct builtin_filters {
             value_type const lower = sequential_arguments[0];
             value_type const upper = sequential_arguments[1];
             range_type  range = value.slice
-                ( lower ? optional<intmax_t>(static_cast<intmax_t>(lower.to_number())) : none
-                , upper ? optional<intmax_t>(static_cast<intmax_t>(upper.to_number())) : none
+                ( lower ? optional<integer_type>(static_cast<integer_type>(lower.to_number())) : none
+                , upper ? optional<integer_type>(static_cast<integer_type>(upper.to_number())) : none
                 );
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;

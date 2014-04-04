@@ -24,6 +24,7 @@
 #endif
 
 #include <boost/assert.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options/environment_iterator.hpp>
@@ -257,6 +258,9 @@ struct pipe : boost::noncopyable {
     FILE* file_;
 };
 
+typedef boost::intmax_t integer_type;
+// typedef boost::uintmax_t natural_type;
+
 //
 // slice:
 //     Accepts the indices for a half-open range [lower, upper) and returns said range as a pair of
@@ -267,19 +271,19 @@ struct pipe : boost::noncopyable {
 template <class Container>
 inline std::pair< typename Container::const_iterator
                 , typename Container::const_iterator
-                > slice( Container                 const& container
-                       , boost::optional<intmax_t> const  lower     = boost::none
-                       , boost::optional<intmax_t> const  upper     = boost::none
+                > slice( Container                     const& container
+                       , boost::optional<integer_type> const  lower     = boost::none
+                       , boost::optional<integer_type> const  upper     = boost::none
                        ) {
     typedef typename Container::size_type size_type;
 
     size_type const size = container.size();
-    intmax_t lower_ = lower.get_value_or(0);
-    intmax_t upper_ = upper.get_value_or(size);
+    integer_type lower_ = lower.get_value_or(0);
+    integer_type upper_ = upper.get_value_or(size);
 
     // Adjust negative indices to the right position.
-    if (lower_ < 0) lower_ = static_cast<intmax_t>(size) + lower_;
-    if (upper_ < 0) upper_ = static_cast<intmax_t>(size) + upper_;
+    if (lower_ < 0) lower_ = static_cast<integer_type>(size) + lower_;
+    if (upper_ < 0) upper_ = static_cast<integer_type>(size) + upper_;
 
     // Check for indices that are out of range.
     if (lower_ < 0 || static_cast<size_type>(lower_) > size) throw_exception(std::out_of_range("lower index"));
@@ -300,11 +304,11 @@ inline std::pair< typename Container::const_iterator
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Container>
-inline typename Container::const_iterator at(Container const& container, intmax_t const index) {
+inline typename Container::const_iterator at(Container const& container, integer_type const index) {
     typedef typename Container::size_type size_type;
 
-    size_type const size   = container.size();
-    intmax_t  const index_ = index < 0 ? static_cast<intmax_t>(size) + index : index;
+    size_type    const size   = container.size();
+    integer_type const index_ = index < 0 ? static_cast<integer_type>(size) + index : index;
 
     if (index_ < 0 || static_cast<size_type>(index_) > size) throw_exception(std::out_of_range("index"));
 

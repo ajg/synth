@@ -394,9 +394,9 @@ Future Work
 
  - Build:
    * Create Visual Studio 2013 solution & project
-     ~ Pass /W3 cleanly
-     ~ Pass /W4 cleanly
-     ~ Pass /Wall cleanly
+     + Pass /W3 cleanly
+     + Pass /W4 cleanly
+     + Pass /Wall cleanly
    * Create Visual Studio 2012 solution & project
  - Distribution:
    * Pre-built OS X binaries
@@ -461,6 +461,7 @@ Future Work
      + Replace `boost::assign` use with aggregate initializers
      + Remove needlessly configurable (especially defaulted) `template` parameters
      + Remove complex redundant `typedef`s in favor of `auto`
+     + Replace <boost/cstdint.hpp> with <cstdint>
    * [v1+] Sort `#include`s alphabetically
    * [v1+] Run entire C++ codebase through clang-format
    * Change `class` in template signatures to `typename`

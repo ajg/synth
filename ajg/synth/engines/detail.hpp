@@ -435,18 +435,18 @@ struct tag_renderer {
 // abbreviate_size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class String>
-inline String abbreviate_size(uintmax_t const size) {
+template <class String, class Size>
+inline String abbreviate_size(Size const size) {
     double bucket = 1;
     String unit;
 
-         if (size > (bucket = std::pow(2, 60.0))) unit = text("EB");
-    else if (size > (bucket = std::pow(2, 50.0))) unit = text("PB");
-    else if (size > (bucket = std::pow(2, 40.0))) unit = text("TB");
-    else if (size > (bucket = std::pow(2, 30.0))) unit = text("GB");
-    else if (size > (bucket = std::pow(2, 20.0))) unit = text("MB");
-    else if (size > (bucket = std::pow(2, 10.0))) unit = text("KB");
-    else if (size >=(bucket = std::pow(2, 00.0))) unit = text("bytes");
+         if (size > (bucket = (std::pow)(2, 60.0))) unit = text("EB");
+    else if (size > (bucket = (std::pow)(2, 50.0))) unit = text("PB");
+    else if (size > (bucket = (std::pow)(2, 40.0))) unit = text("TB");
+    else if (size > (bucket = (std::pow)(2, 30.0))) unit = text("GB");
+    else if (size > (bucket = (std::pow)(2, 20.0))) unit = text("MB");
+    else if (size > (bucket = (std::pow)(2, 10.0))) unit = text("KB");
+    else if (size >=(bucket = (std::pow)(2, 00.0))) unit = text("bytes");
 
     std::basic_ostringstream<typename String::value_type> stream;
     stream << std::fixed << std::setprecision(1);
@@ -553,12 +553,11 @@ inline void validate_option( String const& value
 
 template <std::size_t Width, class Char>
 inline static std::basic_string<Char> to_hex(Char const c) {
-    // TODO: Ensure that given the width, the character
-    //       passed in won't overflow as a number.
+    // TODO: Ensure that given the width, the character passed in won't overflow as a number.
     // BOOST_STATIC_ASSERT(sizeof(Char) ... Width);
     std::basic_ostringstream<Char> stream;
     stream << std::hex << std::uppercase << std::setw(Width);
-    stream << std::setfill(Char('0')) << static_cast<uintmax_t>(c);
+    stream << std::setfill(Char('0')) << static_cast<std::size_t>(c);
     BOOST_ASSERT(stream);
     return stream.str();
 }
@@ -807,6 +806,7 @@ namespace placeholders {
 //
 // construct:
 //     Instantiates simple objects without constructors.
+//     TODO[c++11]: Replace with aggregate initializers, e.g. T{x, y, z}.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // The base case (nullary.)
@@ -934,35 +934,42 @@ uniform_random_number_generator<double> const random_double;
 //
 // find_*:
 //     Set of convenience functions to locate specific items within collections.
+//     TODO: Deprecate the esoteric ones and rename the rest get_* or such.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Needle, class Haystack, class Else>
-inline static typename Haystack::const_iterator find_or(
-        Needle const& needle, Haystack const& haystack, Else const& else_) {
-    typename Haystack::const_iterator const it =
-        std::find(haystack.begin(), haystack.end(), needle);
+inline typename Haystack::const_iterator find_or
+        ( Needle   const& needle
+        , Haystack const& haystack
+        , Else     const& else_
+        ) {
+    typename Haystack::const_iterator const it = std::find(haystack.begin(), haystack.end(), needle);
     return it == haystack.end() ? else_ : it;
 }
 
 template <class Needle, class Haystack>
-inline static optional<typename Haystack::value_type const&> find_value(
-        Needle const& needle, Haystack const& haystack) {
-    typename Haystack::const_iterator const it =
-        std::find(haystack.begin(), haystack.end(), needle);
+inline optional<typename Haystack::value_type const&> find_value
+        ( Needle   const& needle
+        , Haystack const& haystack
+        ) {
+    typename Haystack::const_iterator const it = std::find(haystack.begin(), haystack.end(), needle);
     if (it == haystack.end()) return none; else return *it;
 }
 
 template <class Container>
-inline static optional<typename Container::mapped_type const/*&*/> find_mapped_value(
-        typename Container::key_type const& needle, Container const& container/*,
-        void *const dummy = (void*) &Container::find*/) {
+inline optional<typename Container::mapped_type const/*&*/> find_mapped_value
+        ( typename Container::key_type const& needle
+        , Container                    const& container
+        ) {
     typename Container::const_iterator const it = container.find(needle);
     if (it == container.end()) return none; else return it->second;
 }
 
 template <class Needle, class Key, class Value, class Compare, class Allocator>
-inline static optional<Value const&> find_value(
-        Needle const& needle, std::map<Key, Value, Compare, Allocator> const& map) {
+inline optional<Value const&> find_value
+        ( Needle                                   const& needle
+        , std::map<Key, Value, Compare, Allocator> const& map
+        ) {
     typedef std::map<Key, Value, Compare, Allocator> map_type;
     typename map_type::const_iterator const it = map.find(needle);
     if (it == map.end()) return none; else return it->second;

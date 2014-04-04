@@ -66,6 +66,12 @@ inline std::pair<py::list, py::dict> from_arguments(Arguments const& arguments) 
     return args;
 }
 
+template <class Value, class Arguments>
+inline std::pair<py::tuple, py::dict> from_arguments(Value const& p0, Arguments arguments) {
+    arguments.first.insert(arguments.first.begin(), 1, p0);
+    return from_arguments(arguments);
+}
+
 template <class String>
 inline static String class_name(py::object const& obj) {
     return to_string<String>(obj.attr("__class__").attr("__name__"));

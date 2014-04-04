@@ -382,12 +382,12 @@ TMPL Engine
 
 ### Tags
 
- - `tmpl::comment_tag` (Technically, part of [`ctpp`](http://ctpp.havoc.ru/en/))
- - `tmpl::if_tag`
- - `tmpl::include_tag`
- - `tmpl::loop_tag`
- - `tmpl::unless_tag`
- - `tmpl::variable_tag`
+ - `tmpl::builtin_tags::comment_tag` (Technically, part of [`ctpp`](http://ctpp.havoc.ru/en/))
+ - `tmpl::builtin_tags::if_tag`
+ - `tmpl::builtin_tags::include_tag`
+ - `tmpl::builtin_tags::loop_tag`
+ - `tmpl::builtin_tags::unless_tag`
+ - `tmpl::builtin_tags::variable_tag`
 
 Future Work
 -----------
@@ -459,6 +459,7 @@ Future Work
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
+   * Move `render_tag` and `builtin_tags_` to `base_definition`
    * Replace all remaining get_nested uses with s1, s2, ... or named patterns
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates

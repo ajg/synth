@@ -23,7 +23,7 @@
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_definition.hpp>
 #include <ajg/synth/engines/tmpl/value.hpp>
-#include <ajg/synth/engines/tmpl/library.hpp>
+#include <ajg/synth/engines/tmpl/builtin_tags.hpp>
 
 namespace ajg {
 namespace synth {
@@ -37,11 +37,11 @@ enum tag_mode
 
 using detail::operator ==;
 
-template < class Library = tmpl::default_library
-         , bool CaseSensitive = false
-         , bool ShortcutSyntax = true
-         // TODO: Implement tag_mode.
-         , tag_mode TagMode = loose
+template < bool CaseSensitive   = false
+         , bool ShortcutSyntax  = true
+         , bool LoopVariables   = true
+         , bool GlobalVariables = false
+         , tag_mode TagMode     = loose // TODO: Implement.
          >
 struct engine : detail::nonconstructible {
 
@@ -52,10 +52,11 @@ struct definition : base_definition< BidirectionalIterator
                                    , definition<BidirectionalIterator>
                                    > {
   public:
-    // Constants:
 
-    BOOST_STATIC_CONSTANT(bool, case_sensitive = CaseSensitive);
-    BOOST_STATIC_CONSTANT(bool, shortcut_syntax = ShortcutSyntax);
+    BOOST_STATIC_CONSTANT(bool, case_sensitive   = CaseSensitive);
+    BOOST_STATIC_CONSTANT(bool, shortcut_syntax  = ShortcutSyntax);
+    BOOST_STATIC_CONSTANT(bool, loop_variables   = LoopVariables);
+    BOOST_STATIC_CONSTANT(bool, global_variables = GlobalVariables);
     BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode = TagMode);
 
   public:
@@ -80,31 +81,24 @@ struct definition : base_definition< BidirectionalIterator
         , std::less<string_type>
         , detail::insensitive_less<string_type>
         >::type                                          less_type;
-    typedef Library                                      library_type;
+    typedef builtin_tags<this_type>                      builtin_tags_type;
     typedef tmpl::value<char_type>                       value_type;
     typedef mpl::void_                                   options_type;
-    typedef library_type                                 tags_type;
     typedef std::map<string_type, value_type, less_type> context_type;
     typedef std::vector<value_type>                      sequence_type;
-    typedef detail::indexable_sequence
-                < this_type
-                , tags_type
-                , id_type
-                , detail::create_definitions
-                >                                        tag_sequence_type;
     typedef typename value_type::traits_type             traits_type;
 
   public:
 
     definition()
-        : tag_open      (detail::text("<"))
-        , tag_close     (detail::text(">"))
-        , tag_finish    (detail::text("/"))
-        , tag_prefix    (detail::text("TMPL_"))
-        , tag_attribute (detail::text("NAME"))
-        , alt_open      (detail::text("<!--"))
-        , alt_close     (detail::text("-->"))
-        , default_value (detail::text("")) {
+        : tag_open      (traits_type::literal("<"))
+        , tag_close     (traits_type::literal(">"))
+        , tag_finish    (traits_type::literal("/"))
+        , tag_prefix    (traits_type::literal("TMPL_"))
+        , tag_attribute (traits_type::literal("NAME"))
+        , alt_open      (traits_type::literal("<!--"))
+        , alt_close     (traits_type::literal("-->"))
+        , default_value (traits_type::literal("")) {
         using namespace xpressive;
 //
 // common grammar
@@ -132,6 +126,17 @@ struct definition : base_definition< BidirectionalIterator
             ? name_attribute = !tag_attribute_equals >> attribute
             : name_attribute = tag_attribute_equals >> attribute
             ;
+        escape_attribute
+            = icase("ESCAPE")  >> *_s >> '=' >> *_s >> attribute
+            ;
+        default_attribute
+            = icase("DEFAULT") >> *_s >> '=' >> *_s >> attribute
+            ;
+        extended_attribute
+            = escape_attribute
+            | default_attribute
+            | name_attribute
+            ;
         regex_type const prefix
         // We want to skip essentially anything that is not a tmpl tag or comment.
             = *_s >> !as_xpr(tag_finish) >> *_s >> icase(tag_prefix)
@@ -142,8 +147,7 @@ struct definition : base_definition< BidirectionalIterator
             ;
 
         this->initialize_grammar();
-        fusion::for_each(tags_.definition, detail::construct<detail::element_initializer<this_type> >(*this));
-        detail::index_sequence<this_type, tag_sequence_type, &this_type::tags_, tag_sequence_type::size>(*this);
+        builtin_tags_.initialize(*this);
     }
 
   public:
@@ -238,14 +242,16 @@ struct definition : base_definition< BidirectionalIterator
                    , context_type const& context
                    , options_type const& options
                    ) const {
-        using namespace detail;
-        // If there's only _one_ tag, xpressive will not
-        // "nest" the match, so we use it directly instead.
-        match_type const& tag = tags_type::size::value == 1 ? match : get_nested<1>(match);
-        tag_renderer<this_type> const renderer = { *this, stream, tag, context, options };
-        must_find_by_index<traits_type>(tags_.definition, tags_.index, tag.regex_id(), renderer);
-    }
+        match_type const& match_ = detail::unnest(match);
+        id_type    const  id     = match_.regex_id();
 
+        if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
+            tag(*this, match_, context, options, stream);
+        }
+        else {
+            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+        }
+    }
 
     void render_match( stream_type&        stream
                      , match_type   const& match
@@ -256,6 +262,58 @@ struct definition : base_definition< BidirectionalIterator
         else if (match == block) render_block(stream, match, context, options);
         else if (match == tag)   render_tag(stream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
+    }
+
+    struct attributes {
+        enum escape_mode { none, html, url, js };
+
+        string_type           name;
+        optional<string_type> default_;
+        optional<escape_mode> escape;
+    };
+
+    attributes parse_attributes(match_type const& match) const {
+        optional<typename attributes::escape_mode> escape;
+        optional<string_type> name;
+        optional<string_type> default_;
+
+        BOOST_FOREACH(match_type const& nested, match.nested_results()) {
+            match_type const& attr  = get_nested<A>(nested);
+            match_type const& value = attr(this->attribute);
+
+            if (attr == name_attribute) {
+                if (name) throw_exception(std::logic_error("duplicate variable name"));
+                else name = this->extract_attribute(value);
+            }
+            else if (attr == default_attribute) {
+                if (default_) throw_exception(std::logic_error("duplicate default value"));
+                else default_ = this->extract_attribute(value);
+            }
+            else if (attr == escape_attribute) {
+                if (escape) {
+                    throw_exception(std::logic_error("duplicate escape mode"));
+                }
+                else {
+                    string_type const mode = algorithm::to_lower_copy(value.str());
+
+                         if (mode == traits_type::literal("none")
+                          || mode == traits_type::literal("0"))   escape = attributes::none;
+                    else if (mode == traits_type::literal("html")
+                          || mode == traits_type::literal("1"))   escape = attributes::html;
+                    else if (mode == traits_type::literal("url")) escape = attributes::url;
+                    else if (mode == traits_type::literal("js"))  escape = attributes::js;
+                    else {
+                        throw_exception(std::invalid_argument("invalid escape mode"));
+                    }
+                }
+            }
+            else {
+                throw_exception(std::invalid_argument("invalid attribute"));
+            }
+        }
+
+        if (!name) throw_exception(std::logic_error("missing variable name"));
+        return detail::construct<attributes>(*name, default_, escape);
     }
 
   public:
@@ -270,14 +328,26 @@ struct definition : base_definition< BidirectionalIterator
 
   public:
 
-    regex_type tag, text, block, skipper;
-    regex_type name, attribute, name_attribute;
-    regex_type plain_attribute, quoted_attribute;
+    regex_type tag;
+    regex_type text;
+    regex_type block;
+    regex_type name;
+    regex_type skipper;
+    regex_type attribute;
+    regex_type plain_attribute;
+    regex_type quoted_attribute;
+    regex_type name_attribute;
+    regex_type escape_attribute;
+    regex_type default_attribute;
+    regex_type extended_attribute;
     value_type const default_value;
 
   private:
 
-    tag_sequence_type tags_;
+
+  private:
+
+    builtin_tags_type builtin_tags_;
 
 }; // definition
 

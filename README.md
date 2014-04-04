@@ -357,17 +357,17 @@ Django Engine
 SSI Engine
 ----------
 
-### Directives
+### Tags
 
- - `ssi::config_directive`
- - `ssi::echo_directive`
- - `ssi::exec_directive`
- - `ssi::fsize_directive`
- - `ssi::flastmod_directive`
- - `ssi::if_directive`
- - `ssi::include_directive`
- - `ssi::printenv_directive`
- - `ssi::set_directive`
+ - `ssi::config_tag`
+ - `ssi::echo_tag`
+ - `ssi::exec_tag`
+ - `ssi::fsize_tag`
+ - `ssi::flastmod_tag`
+ - `ssi::if_tag`
+ - `ssi::include_tag`
+ - `ssi::printenv_tag`
+ - `ssi::set_tag`
 
 ### Options
 
@@ -428,7 +428,7 @@ Future Work
    * Implement missing date/time format specifiers
    * Make markers dynamically configurable
  - SSI:
-   * Implement additional directives from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
+   * Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
  - Command-line:
    * Allow specifying formats option
    * Allow specifying debug option

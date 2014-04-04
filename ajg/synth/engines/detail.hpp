@@ -399,7 +399,7 @@ struct element_initializer {
 };
 
 //
-// tag_renderer
+// tag_renderer (only used by tmpl now)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine, bool Merge = false>

@@ -69,14 +69,14 @@ unit_test(print environment) {
     ensure(t.render_to_string().find(path) != string_type::npos);
 }}}
 
-unit_test(simple set directive) {
+unit_test(simple set_tag) {
     string_template const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#echo var='foo' -->");
     ensure_equals(t.render_to_string(), "A");
 }}}
 
-unit_test(multiple set directive) {
+unit_test(multiple set_tag) {
     string_template const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#set var='bar' value='B' -->"
@@ -85,7 +85,7 @@ unit_test(multiple set directive) {
     ensure_equals(t.render_to_string(), "ABC");
 }}}
 
-unit_test(substitution in set directive) {
+unit_test(substitution in set_tag) {
     string_template const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#set var='bar' value='${foo}_B' -->"
@@ -101,12 +101,12 @@ unit_test(escaped dollar sign) {
     ensure_equals(t.render_to_string(), "$A");
 }}}
 
-unit_test(if directive: true) {
+unit_test(if_tag: true) {
     string_template t("<!--#if expr='1' -->true<!--#endif -->");
     ensure_equals(t.render_to_string(), "true");
 }}}
 
-unit_test(if directive: false) {
+unit_test(if_tag: false) {
     string_template t("<!--#if expr='``' -->false<!--#endif -->");
     ensure_equals(t.render_to_string(), "");
 }}}
@@ -171,30 +171,30 @@ unit_test(regex substitution) {
     ensure_equals(t.render_to_string(), "oo");
 }}}
 
-unit_test(if elif directive) {
+unit_test(if_elif_tag) {
     string_template t("<!--#if expr='' -->foo"
         "<!--#elif expr='1' -->bar<!--#endif -->");
     ensure_equals(t.render_to_string(), "bar");
 }}}
 
-unit_test(if else directive) {
+unit_test(if_else_tag) {
     string_template t("<!--#if expr='' -->foo"
         "<!--#else -->bar<!--#endif -->");
     ensure_equals(t.render_to_string(), "bar");
 }}}
 
-unit_test(if elif else directive) {
+unit_test(if_elif_else_tag) {
     string_template t("<!--#if expr='' -->foo"
         "<!--#elif expr='' -->bar<!--#else -->qux<!--#endif -->");
     ensure_equals(t.render_to_string(), "qux");
 }}}
 
-unit_test(invalid if - no expr) {
+unit_test(invalid if_tag: no expr) {
     string_template const t("<!--#if -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
 }}}
 
-unit_test(invalid if - multiple expr) {
+unit_test(invalid if_tag: multiple expr) {
     string_template const t("<!--#if expr='1' expr='1' -->foo<!--#endif -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
 }}}
@@ -206,47 +206,47 @@ unit_test(magic variables) {
 }}}*/
 
 
-unit_test(multiple config attributes) {
+unit_test(multiple config_tag attributes) {
     string_template const t("<!--#config sizefmt='bytes' "
         "timefmt='%Y' echomsg='' errmsg='Error' -->");
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(invalid directive) {
+unit_test(invalid tag) {
     ensure_throws(s::parsing_error,
         string_template("<!--#e_cho -->"));
 }}}
 
-unit_test(invalid config) {
+unit_test(invalid config_tag) {
     string_template const t("<!--#config foo='bar' -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
 }}}
 
-unit_test(invalid config sizefmt) {
+unit_test(invalid config_tag sizefmt) {
     string_template const t("<!--#config sizefmt='foo' -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
 }}}
 
-unit_test(fsize directive bytes) {
+unit_test(fsize_tag bytes) {
     string_template const t("<!--#fsize file='tests/templates/ssi/1338' -->");
     ensure_equals(t.render_to_string(), "1338");
 }}}
 
-unit_test(fsize directive abbrev) {
+unit_test(fsize_tag abbrev) {
     string_template const t(
         "<!--#config sizefmt='abbrev' -->"
         "<!--#fsize file='tests/templates/ssi/1338' -->");
     ensure_equals(t.render_to_string(), "1.3 KB");
 }}}
 
-unit_test(flastmod directive) {
+unit_test(flastmod_tag) {
     string_template const t(
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), s::detail::format_time(default_options.time_format,
         boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
-unit_test(flastmod directive custom) {
+unit_test(flastmod_tag custom) {
     string_type const format("%H:%M:%S-%d/%m/%y");
     string_template const t(
         "<!--#config timefmt='" + format + "' -->"
@@ -255,7 +255,7 @@ unit_test(flastmod directive custom) {
         boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
-unit_test(directive with error) {
+unit_test(tag with error) {
     string_template const t("<!--#fsize file='non-extant' -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
 }}}
@@ -266,12 +266,12 @@ unit_test(file template) {
     ensure_equals(t.render_to_string(), "foo: " + m + "bar: " + m + "qux: " + m);
 }}}
 
-unit_test(include directive) {
+unit_test(include_tag) {
     string_template const t("<!--#include file='tests/templates/ssi/example.shtml' -->");
     ensure_equals(t.render_to_string(), "\n\n\n============\nfoo: A\nbar: B\nqux: C\n\n============\n");
 }}}
 
-unit_test(exec directive) {
+unit_test(exec_tag) {
     std::string const command = AJG_SYNTH_IF_WINDOWS("dir", "ls");
     string_template const t("<!--#exec cmd='" + command + " \"tests/templates/ssi\"' -->");
     ensure(t.render_to_string().find("example.shtml") != string_type::npos);

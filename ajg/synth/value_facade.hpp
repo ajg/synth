@@ -27,6 +27,8 @@ namespace synth {
 template <class Char, class Adapted>
 struct adapter;
 
+using detail::integer_type;
+
 //
 // value_facade
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,8 +152,8 @@ struct value_facade {
         }
     }
 
-    inline range_type slice( optional<intmax_t> const lower = none
-                           , optional<intmax_t> const upper = none
+    inline range_type slice( optional<integer_type> const lower = none
+                           , optional<integer_type> const upper = none
                            ) const { // TODO: Defer to adapter.
         return detail::slice(*this, lower, upper);
     }

@@ -54,10 +54,10 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
 
   public:
 
+    // TODO: Centralize this logic in value_traits.
     boolean_type equal(abstract_type const& that) const {
         // Exact match; e.g. double == double
-        if (numeric_adapter const *const match
-            = dynamic_cast<numeric_adapter const*>(&that)) {
+        if (numeric_adapter const *const match = dynamic_cast<numeric_adapter const*>(&that)) {
             return this->adapted_ == match->adapted_;
         }
         // Numeric match; e.g. int == double
@@ -69,10 +69,10 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
         }
     }
 
+    // TODO: Centralize this logic in value_traits.
     boolean_type less(abstract_type const& that) const {
         // Exact match; e.g. double < double
-        if (numeric_adapter const *const match
-            = dynamic_cast<numeric_adapter const*>(&that)) {
+        if (numeric_adapter const *const match = dynamic_cast<numeric_adapter const*>(&that)) {
             return this->adapted_ < match->adapted_;
         }
         // Numeric match; e.g. int < double
@@ -104,7 +104,7 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
         if (out.flags() & out.hex) {
         // If they hex is desired, we convert to an
         // integral first, and then output as hex.
-            out << static_cast<intmax_t>(adapted_);
+            out << static_cast<detail::integer_type>(adapted_);
         }
         else {
             out << adapted_;

@@ -180,10 +180,9 @@ struct fsize_directive {
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == text("file")) {
-                    uintmax_t const size = detail::stat_file(value).st_size;
-                    !abbreviate ? args.stream << size
-                                : args.stream << detail::abbreviate_size
-                                    <typename Engine::string_type>(size);
+                    typename Engine::size_type const size = detail::stat_file(value).st_size;
+                    abbreviate ? args.stream << detail::abbreviate_size<typename Engine::string_type>(size)
+                               : args.stream << size;
                 }
             );
         }

@@ -120,6 +120,7 @@ struct standard_environment {
 // AJG_UNREACHABLE:
 //     Wrapper around BOOST_ASSERT that also invokes __assume on MSVC,
 //     which (a) prevents warning C4715 and (b) eliminates wasteful code.
+//     TODO: Rename AJG_SYNTH_UNREACHABLE.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)

@@ -129,7 +129,7 @@ struct value_facade {
     inline value_type front() const { return *this->begin(); }                          // TODO: Defer to adapter.
     inline value_type back()  const { return *this->at(-1); } // return *--this->end(); // TODO: Defer to adapter.
 
-    inline const_iterator       at   (value_type const& index) const { return detail::at(*this, index.to_number()); } // TODO: Defer to adapter.
+    inline const_iterator       at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_number())); } // TODO: Defer to adapter.
     inline const_iterator       find (value_type const& value) const { return this->adapter().find(value); }
     inline optional<value_type> index(value_type const& key)   const { return this->adapter().index(key); }
 

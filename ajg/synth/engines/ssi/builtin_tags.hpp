@@ -72,7 +72,7 @@ struct builtin_tags {
             | add(engine, exec_tag::syntax(engine),      exec_tag::render)
             | add(engine, fsize_tag::syntax(engine),     fsize_tag::render)
             | add(engine, flastmod_tag::syntax(engine),  flastmod_tag::render)
-            | add(engine, if_tag::syntax(engine),      if_tag::render)
+            | add(engine, if_tag::syntax(engine),        if_tag::render)
             | add(engine, include_tag::syntax(engine),   include_tag::render)
             | add(engine, printenv_tag::syntax(engine),  printenv_tag::render)
             | add(engine, set_tag::syntax(engine),       set_tag::render)

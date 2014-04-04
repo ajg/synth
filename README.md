@@ -437,6 +437,7 @@ Future Work
        ~ Custom assignment tags
        ~ Custom tags with arbitrary blocks
      + Full support for `unicode` type (not just through UTF-8)
+     + Support for Python 3
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
      + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)

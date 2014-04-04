@@ -395,11 +395,11 @@ Future Work
 -----------
 
  - Build:
-   * Create Visual Studio 2013 solution & project
-     + Pass /W3 cleanly
+   * Visual Studio 2013:
+     + Add project for command-line tool
      + Pass /W4 cleanly
      + Pass /Wall cleanly
-   * Create Visual Studio 2012 solution & project
+   * Create Visual Studio 2012 solution & projects
 
  - Distribution:
    * Pre-built OS X binaries

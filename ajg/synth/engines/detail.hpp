@@ -124,22 +124,11 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 }
 
 //
-// [deprecated] lit:
-//     String literal helper.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class To, class From, std::size_t Length>
-inline std::basic_string<To> lit(From const (&source)[Length]) {
-    return std::basic_string<To>(source, source + Length - 1);
-}
-
-//
-// AJG_CASE_OF, AJG_CASE_OF_ELSE
+// [deprecated] AJG_CASE_OF, AJG_CASE_OF_ELSE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define AJG_TERNARY_OPERATOR(r, value, elem) \
-    (value == BOOST_PP_TUPLE_ELEM(2, 0, elem)) ? \
-        BOOST_PP_TUPLE_ELEM(2, 1, elem) :
+    (value == BOOST_PP_TUPLE_ELEM(2, 0, elem)) ? BOOST_PP_TUPLE_ELEM(2, 1, elem) :
 
 #define AJG_CASE_OF_ELSE(value, cases, default_) \
     (BOOST_PP_SEQ_FOR_EACH(AJG_TERNARY_OPERATOR, value, cases) (default_))
@@ -152,46 +141,21 @@ inline std::basic_string<To> lit(From const (&source)[Length]) {
         // (BOOST_ASSERT(0), throw 0, ajg::synth::detail::unreachable(value)))
 
 //
-// set_furthest_iterator:
-//     Function object that sets the iterator to the furthest, either itself or the submatch's end.
+// local_now
+//     TODO: Offer a local_time::local_date_time version; e.g.
+//           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct set_furthest_iterator {
-    typedef void result_type;
-
-    template <class Iterator, class Submatch>
-    void operator()
-            ( Iterator&       iterator
-            , Submatch const& submatch
-            ) const {
-        iterator = (std::max)(iterator, submatch.second);
-    }
-};
+inline posix_time::ptime local_now() {
+    return posix_time::second_clock::local_time();
+}
 
 //
-// abbreviate_size
-//     TODO: Rename format_size
+// utc_now
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class String, class Size>
-inline String abbreviate_size(Size const size) {
-    double bucket = 1;
-    String unit;
-
-         if (size > (bucket = (std::pow)(2, 60.0))) unit = text("EB");
-    else if (size > (bucket = (std::pow)(2, 50.0))) unit = text("PB");
-    else if (size > (bucket = (std::pow)(2, 40.0))) unit = text("TB");
-    else if (size > (bucket = (std::pow)(2, 30.0))) unit = text("GB");
-    else if (size > (bucket = (std::pow)(2, 20.0))) unit = text("MB");
-    else if (size > (bucket = (std::pow)(2, 10.0))) unit = text("KB");
-    else if (size >=(bucket = (std::pow)(2, 00.0))) unit = text("bytes");
-
-    std::basic_ostringstream<typename String::value_type> stream;
-    stream << std::fixed << std::setprecision(1);
-    stream << (size / bucket) << ' ' << unit;
-
-    BOOST_ASSERT(stream);
-    return stream.str();
+inline posix_time::ptime utc_now() {
+    return posix_time::second_clock::universal_time();
 }
 
 /*
@@ -219,24 +183,6 @@ inline String format_current_time(String format, bool const autoprefix = true) {
 */
 
 //
-// local_now
-//     TODO: Offer a local_time::local_date_time version; e.g.
-//           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline posix_time::ptime local_now() {
-    return posix_time::second_clock::local_time();
-}
-
-//
-// utc_now
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline posix_time::ptime utc_now() {
-    return posix_time::second_clock::universal_time();
-}
-
-//
 // format_time
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -257,32 +203,28 @@ inline String format_time(String format, Time const& time) {
 }
 
 //
-// is_one_of
+// format_size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class String>
-inline bool is_one_of( String const& string
-                     , std::vector<std::string> const& options
-                     ) {
-    BOOST_FOREACH(std::string const& option, options) {
-        if (string == String(option.begin(), option.end())) return true;
-    }
+template <class String, class Size>
+inline String format_size(Size const size) {
+    double bucket = 1;
+    String unit;
 
-    return false;
-}
+         if (size >  (bucket = (std::pow)(2, 60.0))) unit = text("EB");
+    else if (size >  (bucket = (std::pow)(2, 50.0))) unit = text("PB");
+    else if (size >  (bucket = (std::pow)(2, 40.0))) unit = text("TB");
+    else if (size >  (bucket = (std::pow)(2, 30.0))) unit = text("GB");
+    else if (size >  (bucket = (std::pow)(2, 20.0))) unit = text("MB");
+    else if (size >  (bucket = (std::pow)(2, 10.0))) unit = text("KB");
+    else if (size >= (bucket = (std::pow)(2, 00.0))) unit = text("bytes");
 
-//
-// validate_enumeration
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    std::basic_ostringstream<typename String::value_type> stream;
+    stream << std::fixed << std::setprecision(1);
+    stream << (size / bucket) << ' ' << unit;
 
-template <class String>
-inline void validate_option( String const& value
-                           , std::string const& name
-                           , std::vector<std::string> const& options
-                           ) {
-    if (!is_one_of(value, options)) {
-        throw_exception(invalid_attribute(name));
-    }
+    BOOST_ASSERT(stream);
+    return stream.str();
 }
 
 //
@@ -311,10 +253,8 @@ inline String uri_encode(String const& string) {
     typedef typename String::value_type char_type;
 
     BOOST_FOREACH(char_type const c, string) {
-        std::isalnum(c) || c == '_' || c == '-'
-                        || c == '.' || c == '/'
-            ? result += c
-            : result += char_type('%') + to_hex<2>(c);
+        result += std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '/' ?
+            String(1, c) : char_type('%') + to_hex<2>(c);
     }
 
     return result;
@@ -331,9 +271,8 @@ inline String iri_encode(String const& string) {
     typedef typename String::value_type char_type;
 
     BOOST_FOREACH(char_type const c, string) {
-        std::isalnum(c) || algorithm::is_any_of("/#%[]=:;$&()+,!?")(c)
-            ? result += c
-            : result += char_type('%') + to_hex<2>(c);
+        result += std::isalnum(c) || algorithm::is_any_of("/#%[]=:;$&()+,!?")(c) ?
+            String(1, c) : char_type('%') + to_hex<2>(c);
     }
 
     return result;
@@ -382,22 +321,9 @@ inline String escape_entities(String const& string, bool const ascii = false) {
 }
 
 //
-// advance:
-//     Simulates operator + for container iterators which lack it.
-//     NOTE: Doesn't do any bounds checking; ensure distance is valid.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Container, class Distance>
-inline static typename Container::const_iterator
-advance(Container const& container, Distance const distance) {
-    typename Container::const_iterator it = container.begin();
-    std::advance(it, distance);
-    return it;
-}
-
-//
 // operator ==:
-//     Provides a more readable way to compare match objects via regex_id's.
+//     Provides a more readable way to compare match objects via regex_ids.
+//     TODO: Rename to matches or similar to avoid confusion.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator>
@@ -458,22 +384,6 @@ select_nested(Match const& match, Regex const& regex) {
 }
 
 //
-// drop
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Container, class Number>
-inline std::pair
-        < typename Container::const_iterator
-        , typename Container::const_iterator
-        >
-drop(Container const& container, Number const number) {
-    return std::make_pair
-        ( advance(container, number)
-        , container.end()
-        );
-}
-
-//
 // [deprecated] placeholders:
 //     A symbolic way to refer to subresults within a match result object.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -491,43 +401,6 @@ namespace placeholders {
     BOOST_STATIC_CONSTANT(std::size_t, I = 9);
 
 } // namespace placeholders
-
-
-//
-// construct:
-//     Instantiates simple objects without constructors.
-//     TODO[c++11]: Replace with aggregate initializers, e.g. T{x, y, z}.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// The base case (nullary.)
-template <class T> inline T construct() { T const t; return t; }
-
-#define PARAM(n) \
-    (BOOST_PP_CAT(P, n) &               BOOST_PP_CAT(p, n)) \
-    (BOOST_PP_CAT(P, n) const&          BOOST_PP_CAT(p, n))
- // (BOOST_PP_CAT(P, n) volatile&       BOOST_PP_CAT(p, n))
- // (BOOST_PP_CAT(P, n) const volatile& BOOST_PP_CAT(p, n))
-
-#define PARAM_(z, n, nil) (PARAM(n))
-
-#define CONSTRUCT(r, product) \
-    template <class T BOOST_PP_ENUM_TRAILING_PARAMS \
-        (BOOST_PP_SEQ_SIZE(product), class P)> \
-    inline T construct BOOST_PP_SEQ_TO_TUPLE(product) { \
-        T const t = { BOOST_PP_ENUM_PARAMS(BOOST_PP_SEQ_SIZE(product), p) }; \
-        return t; \
-    }
-
-#define CONSTRUCT_N(z, n, nil) \
-    BOOST_PP_SEQ_FOR_EACH_PRODUCT(CONSTRUCT, \
-        BOOST_PP_REPEAT(BOOST_PP_ADD(n, 1), PARAM_, nil))
-
-BOOST_PP_REPEAT(AJG_SYNTH_CONSTRUCT_LIMIT, CONSTRUCT_N, nil)
-
-#undef CONSTRUCT_N
-#undef CONSTRUCT
-#undef PARAM_
-#undef PARAM
 
 //
 // insensitive_less:

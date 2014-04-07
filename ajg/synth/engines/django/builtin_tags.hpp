@@ -267,7 +267,7 @@ struct builtin_tags {
             size_type   const  total    = args.nested_results().size();
             size_type   const  current  = detail::find_mapped_value(position, options.cycles_).get_value_or(0);
 
-            match_type const& arg   = *detail::advance(args.nested_results(), current);
+            match_type const& arg   = *detail::advance_to(args.nested_results().begin(), current);
             value_type const  value = engine.evaluate(arg, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
             out << value;

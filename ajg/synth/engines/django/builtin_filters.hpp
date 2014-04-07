@@ -448,7 +448,7 @@ struct builtin_filters {
         }
 
         inline static string_type format(size_type const size) {
-            return detail::abbreviate_size<string_type>(size);
+            return detail::format_size<string_type>(size);
         }
     };
 
@@ -1542,7 +1542,7 @@ struct builtin_filters {
             static string_regex_type const url  = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
 
             string_type const body   = value.to_string();
-            formatter   const format = detail::construct<formatter>(limit, ellipsis);
+            formatter   const format = {limit, ellipsis};
             return value_type(regex_replace(body, url, format)).mark_safe();
         }
     };

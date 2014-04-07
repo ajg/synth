@@ -57,6 +57,7 @@ struct base_definition : boost::noncopyable {
 	typedef xpressive::basic_regex<iterator_type>   regex_type;
     typedef xpressive::match_results<iterator_type> frame_type;
     typedef xpressive::match_results<iterator_type> match_type;
+    typedef xpressive::sub_match<iterator_type>     sub_match_type;
     typedef std::basic_string<char_type>            string_type; // TODO: Use Traits::string_type.
     typedef std::basic_ostream<char_type>           stream_type; // TODO: Use Traits::stream_type.
     typedef std::set<string_type>                   symbols_type;
@@ -74,11 +75,23 @@ struct base_definition : boost::noncopyable {
 
   protected:
 
+//
+// set_furthest_iterator:
+//     A functor that sets the iterator to the furthest, either itself or the submatch's end.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct set_furthest_iterator {
+        typedef void result_type;
+
+        void operator()(iterator_type& iterator, sub_match_type const& sub_match) const {
+            iterator = (std::max)(iterator, sub_match.second);
+        }
+    };
+
     void initialize_grammar() {
         using namespace xpressive;
 
-        typedef detail::set_furthest_iterator f;
-        typename xpressive::function<f>::type const set_furthest = {{}};
+        typename xpressive::function<set_furthest_iterator>::type const set_furthest = {{}};
         definition_type& self = static_cast<definition_type&>(*this);
 
         self.text = +(~before(self.skipper) >> _);

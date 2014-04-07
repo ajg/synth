@@ -130,25 +130,6 @@ struct standard_environment {
 #    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
 #endif
 
-/*
-//
-// unreachable:
-//     A function to give the last, unreachable, operand to a ternary
-//     operator expression the right type, instead of void.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline T unreachable(T const&) {
-    AJG_SYNTH_UNREACHABLE;
-}
-*/
-
-struct unreachable {
-    unreachable() {}
-
-    template <class T>
-    inline operator T() const { AJG_SYNTH_UNREACHABLE; }
-};
-
 //
 // AJG_SYNTH_IF_WINDOWS:
 //     Picks the first version for Windows environments, otherwise the second.
@@ -348,44 +329,6 @@ inline std::pair<typename Container::const_iterator, typename Container::const_i
         drop(Container const& container, Number const number) {
     return std::make_pair(advance_to(container.begin(), number), container.end());
 }
-
-/*
-//
-// [deprecated] construct:
-//     Instantiates simple objects without constructors.
-//     TODO[c++11]: Replace with aggregate initializers, e.g. T{x, y, z}.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// The base case (nullary.)
-template <class T> inline T construct() { T const t; return t; }
-
-#define PARAM(n) \
-    (BOOST_PP_CAT(P, n) &               BOOST_PP_CAT(p, n)) \
-    (BOOST_PP_CAT(P, n) const&          BOOST_PP_CAT(p, n))
- // (BOOST_PP_CAT(P, n) volatile&       BOOST_PP_CAT(p, n))
- // (BOOST_PP_CAT(P, n) const volatile& BOOST_PP_CAT(p, n))
-
-#define PARAM_(z, n, nil) (PARAM(n))
-
-#define CONSTRUCT(r, product) \
-    template <class T BOOST_PP_ENUM_TRAILING_PARAMS \
-        (BOOST_PP_SEQ_SIZE(product), class P)> \
-    inline T construct BOOST_PP_SEQ_TO_TUPLE(product) { \
-        T const t = { BOOST_PP_ENUM_PARAMS(BOOST_PP_SEQ_SIZE(product), p) }; \
-        return t; \
-    }
-
-#define CONSTRUCT_N(z, n, nil) \
-    BOOST_PP_SEQ_FOR_EACH_PRODUCT(CONSTRUCT, \
-        BOOST_PP_REPEAT(BOOST_PP_ADD(n, 1), PARAM_, nil))
-
-BOOST_PP_REPEAT(AJG_SYNTH_CONSTRUCT_LIMIT, CONSTRUCT_N, nil)
-
-#undef CONSTRUCT_N
-#undef CONSTRUCT
-#undef PARAM_
-#undef PARAM
-*/
 
 }}} // namespace ajg::synth::detail
 

@@ -124,23 +124,6 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 }
 
 //
-// [deprecated] AJG_CASE_OF, AJG_CASE_OF_ELSE
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define AJG_TERNARY_OPERATOR(r, value, elem) \
-    (value == BOOST_PP_TUPLE_ELEM(2, 0, elem)) ? BOOST_PP_TUPLE_ELEM(2, 1, elem) :
-
-#define AJG_CASE_OF_ELSE(value, cases, default_) \
-    (BOOST_PP_SEQ_FOR_EACH(AJG_TERNARY_OPERATOR, value, cases) (default_))
-
-// TODO: Figure out how to use AJG_SYNTH_UNREACHABLE but without
-//       triggering warning C4702; or, how to silence the warning.
-
-#define AJG_CASE_OF(value, cases) \
-    AJG_CASE_OF_ELSE(value, cases, ajg::synth::detail::unreachable())
-        // (BOOST_ASSERT(0), throw 0, ajg::synth::detail::unreachable(value)))
-
-//
 // local_now
 //     TODO: Offer a local_time::local_date_time version; e.g.
 //           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())

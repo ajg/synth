@@ -350,24 +350,22 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
         string_type const op = expr(this->comparison_operator).str();
 
         if (get_nested<C>(expr) == this->regex_expression) {
-            boolean_type     const matched = equals_regex(args, expr);
-            std::logic_error const error("comparison operator");
-            return AJG_CASE_OF_ELSE(op, ((traits_type::literal("="),  matched))
-                                             ((traits_type::literal("=="), matched))
-                                             ((traits_type::literal("!="), !matched)),
-                                                 (throw_exception(error), 0));
+            if (op == traits_type::literal("=")
+             || op == traits_type::literal("==")) return equals_regex(args, expr);
+            if (op == traits_type::literal("!=")) return !equals_regex(args, expr);
+            throw_exception(std::logic_error("invalid regex operator"));
         }
         else {
             string_type const left  = parse_string(args, get_nested<A>(expr));
             string_type const right = parse_string(args, get_nested<C>(expr));
-            return AJG_CASE_OF(op,
-                ((traits_type::literal("="),  left == right))
-                ((traits_type::literal("=="), left == right))
-                ((traits_type::literal("!="), left != right))
-                ((traits_type::literal("<"),  left <  right))
-                ((traits_type::literal(">"),  left >  right))
-                ((traits_type::literal("<="), left <= right))
-                ((traits_type::literal(">="), left >= right)));
+            if (op == traits_type::literal("=")
+             || op == traits_type::literal("==")) return left == right;
+            if (op == traits_type::literal("!=")) return left != right;
+            if (op == traits_type::literal("<"))  return left <  right;
+            if (op == traits_type::literal(">"))  return left >  right;
+            if (op == traits_type::literal("<=")) return left <= right;
+            if (op == traits_type::literal(">=")) return left >= right;
+            throw_exception(std::logic_error("invalid string operator"));
         }
     }
 
@@ -381,23 +379,24 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     }
 
     string_type parse_string(args_type const& args, string_match_type const& match) const {
-            return AJG_CASE_OF(get_nested<A>(match),
-                ((raw_string,           match.str()))
-                ((regex_expression,     args.engine.extract_attribute(match)))
-                ((args.engine.variable, args.engine.interpolate(args, match.str())))
-                ((quoted_string,        args.engine.interpolate(args,
-                                            args.engine.extract_attribute(match)))));
+        string_match_type const& string = get_nested<A>(match);
+        if (string == raw_string)           return match.str();
+        if (string == regex_expression)     return args.engine.extract_attribute(match);
+        if (string == args.engine.variable) return args.engine.interpolate(args, match.str());
+        if (string == quoted_string)        return args.engine.interpolate(args, args.engine.extract_attribute(match));
+        throw_exception(std::logic_error("invalid string"));
     }
 
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
-        return AJG_CASE_OF(expr,
-            ((and_expression,        fold(args, expr, true, std::logical_and<bool>())))
-            ((or_expression,         fold(args, expr, false, std::logical_or<bool>())))
-            ((not_expression,        !evaluate_expression(args, get_nested<A>(expr))))
-            ((primary_expression,    evaluate_expression(args, get_nested<A>(expr))))
-            ((expression,            evaluate_expression(args, get_nested<A>(expr))))
-            ((string_expression,     !parse_string(args, expr).empty()))
-            ((comparison_expression, equals(args, expr))));
+        if (expr == and_expression)        return fold(args, expr, true, std::logical_and<bool>());
+        if (expr == or_expression)         return fold(args, expr, false, std::logical_or<bool>());
+        if (expr == not_expression)        return !evaluate_expression(args, get_nested<A>(expr));
+        if (expr == primary_expression)    return evaluate_expression(args, get_nested<A>(expr));
+        if (expr == expression)            return evaluate_expression(args, get_nested<A>(expr));
+        if (expr == string_expression)     return !parse_string(args, expr).empty();
+        if (expr == comparison_expression) return equals(args, expr);
+        throw_exception(std::logic_error("invalid expression"));
+
     }
 
   private:

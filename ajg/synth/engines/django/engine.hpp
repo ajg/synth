@@ -277,10 +277,10 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
             = name >> !(token<':'>() >> chain)
             ;
         filters
-            = *(token<'|'>() >> filter) // FIXME: No whitespace allowed around '|'
+            = *(as_xpr('|') >> filter)
             ;
         pipeline
-            = filter >> *(token<'|'>() >> filter) // FIXME: No whitespace allowed around '|'
+            = filter >> *(as_xpr('|') >> filter)
             ;
         skipper
             = block_open

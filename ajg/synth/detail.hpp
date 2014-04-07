@@ -117,18 +117,17 @@ struct standard_environment {
 };
 
 //
-// AJG_UNREACHABLE:
+// AJG_SYNTH_UNREACHABLE:
 //     Wrapper around BOOST_ASSERT that also invokes __assume on MSVC,
 //     which (a) prevents warning C4715 and (b) eliminates wasteful code.
-//     TODO: Rename AJG_SYNTH_UNREACHABLE.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
+#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
 #elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
+#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
 #else
-  #define AJG_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
+#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
 #endif
 
 /*
@@ -139,7 +138,7 @@ struct standard_environment {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline T unreachable(T const&) {
-    AJG_UNREACHABLE;
+    AJG_SYNTH_UNREACHABLE;
 }
 */
 
@@ -147,7 +146,7 @@ struct unreachable {
     unreachable() {}
 
     template <class T>
-    inline operator T() const { AJG_UNREACHABLE; }
+    inline operator T() const { AJG_SYNTH_UNREACHABLE; }
 };
 
 //
@@ -184,7 +183,7 @@ struct unreachable {
 #endif
 
 #define AJG_SYNTH_THROW(e) \
-    AJG_SYNTH_IF_MSVC((AJG_SYNTH_THROW_EXCEPTION(e), AJG_UNREACHABLE), AJG_SYNTH_THROW_EXCEPTION(e))
+    AJG_SYNTH_IF_MSVC((AJG_SYNTH_THROW_EXCEPTION(e), AJG_SYNTH_UNREACHABLE), AJG_SYNTH_THROW_EXCEPTION(e))
 
 //
 // stat_file

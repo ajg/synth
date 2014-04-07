@@ -133,7 +133,7 @@ inline string_literal<From, Length> text(From const (&source)[Length]) {
 #define AJG_CASE_OF_ELSE(value, cases, default_) \
     (BOOST_PP_SEQ_FOR_EACH(AJG_TERNARY_OPERATOR, value, cases) (default_))
 
-// TODO: Figure out how to use AJG_UNREACHABLE but without
+// TODO: Figure out how to use AJG_SYNTH_UNREACHABLE but without
 //       triggering warning C4702; or, how to silence the warning.
 
 #define AJG_CASE_OF(value, cases) \

@@ -98,7 +98,7 @@ struct multi_template {
         else if (tmpl_template_) {
             return tmpl_template_->render(stream, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
-        AJG_UNREACHABLE;
+        AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
@@ -112,7 +112,7 @@ struct multi_template {
         else if (tmpl_template_) {
             return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
-        AJG_UNREACHABLE;
+        AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
@@ -126,7 +126,7 @@ struct multi_template {
         else if (tmpl_template_) {
             return tmpl_template_->render_to_file(filepath, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         }
-        AJG_UNREACHABLE;
+        AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
   private:

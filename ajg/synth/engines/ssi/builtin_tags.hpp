@@ -169,12 +169,10 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("var")) {
                     string_type const result = args.engine.lookup_variable(args.context, args.options, value);
-
-                    args.stream <<
-                        AJG_CASE_OF(encoding,
-                            ((traits_type::literal("none"),   result))
-                            ((traits_type::literal("url"),    detail::uri_encode(result)))
-                            ((traits_type::literal("entity"), detail::escape_entities(result))));
+                    if      (encoding == traits_type::literal("none"))   args.stream << result;
+                    else if (encoding == traits_type::literal("url"))    args.stream << detail::uri_encode(result);
+                    else if (encoding == traits_type::literal("entity")) args.stream << detail::escape_entities(result);
+                    else throw_exception(invalid_attribute("encoding"));
                 }
                 else if (name == traits_type::literal("encoding")) {
                     validate_attribute("encoding", value, "none", "url", "entity");
@@ -312,8 +310,9 @@ enum { interpolated = true, raw = false };
             }
             else {
                 AJG_SYNTH_NO_ATTRIBUTES_IN(tag);
-                return AJG_CASE_OF(name, ((traits_type::literal("else"),  true))
-                                         ((traits_type::literal("endif"), false)));
+                     if (name == traits_type::literal("else"))  return true;
+                else if (name == traits_type::literal("endif")) return false;
+                else throw_exception(std::logic_error("invalid tag"));
             }
         }
     };

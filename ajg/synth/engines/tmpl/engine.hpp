@@ -272,6 +272,7 @@ struct definition : base_definition< BidirectionalIterator
         optional<escape_mode> escape;
     };
 
+    // TODO: Throw synth exceptions when possible.
     attributes parse_attributes(match_type const& match) const {
         optional<typename attributes::escape_mode> escape;
         optional<string_type> name;

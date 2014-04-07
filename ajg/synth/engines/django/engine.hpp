@@ -350,8 +350,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                         throw_exception(e);
                     }
 
-                    // A missing variable means an embedded
-                    // argument was meant as a string literal.
+                    // A missing variable means an embedded argument was meant as a string literal.
                     value_type value = string;
                     value.token(match[0]);
                     sequence.push_back(value);

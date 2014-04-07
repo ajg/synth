@@ -176,7 +176,7 @@ struct unreachable {
 // AJG_SYNTH_THROW:
 //     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
 //     types) MSVC won't get it through its head that throw_exception doesn't return, even with
-//     __declspec(noreturn) which triggers warning C4715 or error C4716.
+//     __declspec(noreturn) which in turns triggers warning C4715 or error C4716.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifndef AJG_SYNTH_THROW_EXCEPTION
@@ -327,6 +327,66 @@ inline typename Container::const_iterator at(Container const& container, integer
 
     AJG_SYNTH_THROW(std::invalid_argument("index"));
 }
+
+//
+// advance_to:
+//     Simulates operator + for iterators which lack it.
+//     NOTE: Doesn't do any bounds checking; ensure distance is valid.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Iterator, class Distance>
+inline static Iterator advance_to(Iterator iterator, Distance const distance) {
+    std::advance(iterator, distance);
+    return iterator;
+}
+
+//
+// drop
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Container, class Number>
+inline std::pair<typename Container::const_iterator, typename Container::const_iterator>
+        drop(Container const& container, Number const number) {
+    return std::make_pair(advance_to(container.begin(), number), container.end());
+}
+
+/*
+//
+// [deprecated] construct:
+//     Instantiates simple objects without constructors.
+//     TODO[c++11]: Replace with aggregate initializers, e.g. T{x, y, z}.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// The base case (nullary.)
+template <class T> inline T construct() { T const t; return t; }
+
+#define PARAM(n) \
+    (BOOST_PP_CAT(P, n) &               BOOST_PP_CAT(p, n)) \
+    (BOOST_PP_CAT(P, n) const&          BOOST_PP_CAT(p, n))
+ // (BOOST_PP_CAT(P, n) volatile&       BOOST_PP_CAT(p, n))
+ // (BOOST_PP_CAT(P, n) const volatile& BOOST_PP_CAT(p, n))
+
+#define PARAM_(z, n, nil) (PARAM(n))
+
+#define CONSTRUCT(r, product) \
+    template <class T BOOST_PP_ENUM_TRAILING_PARAMS \
+        (BOOST_PP_SEQ_SIZE(product), class P)> \
+    inline T construct BOOST_PP_SEQ_TO_TUPLE(product) { \
+        T const t = { BOOST_PP_ENUM_PARAMS(BOOST_PP_SEQ_SIZE(product), p) }; \
+        return t; \
+    }
+
+#define CONSTRUCT_N(z, n, nil) \
+    BOOST_PP_SEQ_FOR_EACH_PRODUCT(CONSTRUCT, \
+        BOOST_PP_REPEAT(BOOST_PP_ADD(n, 1), PARAM_, nil))
+
+BOOST_PP_REPEAT(AJG_SYNTH_CONSTRUCT_LIMIT, CONSTRUCT_N, nil)
+
+#undef CONSTRUCT_N
+#undef CONSTRUCT
+#undef PARAM_
+#undef PARAM
+*/
 
 }}} // namespace ajg::synth::detail
 

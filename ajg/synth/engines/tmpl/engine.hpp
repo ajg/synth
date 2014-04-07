@@ -313,7 +313,8 @@ struct definition : base_definition< BidirectionalIterator
         }
 
         if (!name) throw_exception(std::logic_error("missing variable name"));
-        return detail::construct<attributes>(*name, default_, escape);
+        attributes const attrs = {*name, default_, escape};
+        return attrs;
     }
 
   public:

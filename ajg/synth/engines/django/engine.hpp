@@ -845,7 +845,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
 
     template <class E> friend struct django::builtin_tags;
     template <class E> friend struct django::builtin_filters;
-    template friend base_engine; */
+    friend base_engine; */
 
     // TODO: Parallelize the formatting:
     regex_type tag, text, block, skipper, nothing;

@@ -417,7 +417,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
   private:
 
     template <class E> friend struct ssi::builtin_tags;
-    template friend struct base_engine;
+    friend struct base_engine;
 
     regex_type tag, text, block, skipper;
     regex_type name, attribute, quoted_value;

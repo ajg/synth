@@ -55,7 +55,6 @@ struct with_arity<0, Max> {
 namespace django {
 namespace {
 
-using detail::text;
 using boost::xpressive::_d;
 using boost::xpressive::_ln;
 using boost::xpressive::_n;
@@ -425,7 +424,7 @@ struct builtin_filters {
             result.reserve(string.size()); // Assume no escapes.
 
             BOOST_FOREACH(char_type const c, string) {
-                result += c < 32 ? string_type(text("\\x")) + detail::to_hex<2>(c) : string_type(1, c);
+                result += c < 32 ? traits_type::literal("\\x") + detail::to_hex<2>(c) : string_type(1, c);
             }
 
             return result;
@@ -482,7 +481,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
             static string_regex_type const regex = as_xpr('&') >> ~before((+_w | '#' >> +_d) >> ';');
-            return value_type(regex_replace(value.to_string(), regex, text("&amp;"))).mark_safe();
+            return value_type(regex_replace(value.to_string(), regex, traits_type::literal("&amp;"))).mark_safe();
         }
     };
 
@@ -680,7 +679,7 @@ struct builtin_filters {
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type p = safe ? value_type(line).escape().to_string() : line;
-                algorithm::replace_all(p, engine.newline, text("<br />"));
+                algorithm::replace_all(p, engine.newline, traits_type::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -853,7 +852,7 @@ struct builtin_filters {
                 engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
-            case 0: plural = text("s");                           break;
+            case 0: plural = traits_type::literal("s");                           break;
             case 1: plural = sequential_arguments[0].to_string(); break;
             default: // 2+
                 singular = sequential_arguments[0].to_string();
@@ -1083,7 +1082,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
             static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
-            return regex_replace(value.to_string(), tag, text(""));
+            return regex_replace(value.to_string(), tag, traits_type::literal(""));
         }
     };
 
@@ -1215,7 +1214,7 @@ struct builtin_filters {
             regex_iterator_type begin(last, done, engine.html_tag), end;
             std::stack<string_type> open_tags;
             size_type length = 0;
-            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
+            static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
@@ -1295,10 +1294,7 @@ struct builtin_filters {
                                                 , size_type            const  limit
                                                 , string_type          const& ellipsis
                                                 ) {
-            static string_type    const delimiters = detail::text(word_delimiters);
-            static separator_type const separator(delimiters.c_str());
-
-            tokenizer_type const tokenizer(from, to, separator);
+            tokenizer_type const tokenizer(from, to, separator_type(word_delimiters));
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
 
@@ -1328,7 +1324,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.size());
-            static string_type const boundaries = detail::text(" \t\n\v\f\r>");
+            static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
 			size_type const limit = arguments[0].to_size();
             if (limit == 0) return string_type();
 
@@ -1378,10 +1374,7 @@ struct builtin_filters {
                                                 , size_type            const  limit
                                                 , string_type          const& ellipsis
                                                 ) {
-            static string_type    const delimiters = detail::text(word_delimiters);
-            static separator_type const separator(delimiters.c_str());
-
-            tokenizer_type const tokenizer(from, to, separator);
+            tokenizer_type const tokenizer(from, to, separator_type(word_delimiters));
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
             string_iterator_type it = from;
@@ -1575,11 +1568,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            string_type const input = value.to_string();
-            string_type const delimiters = text(word_delimiters);
-            separator_type const separator(delimiters.c_str());
-            tokenizer_type const tokenizer(input, separator);
-
+            tokenizer_type const tokenizer(value.to_string(), separator_type(word_delimiters));
             return std::distance(tokenizer.begin(), tokenizer.end());
         }
     };

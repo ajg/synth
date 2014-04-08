@@ -180,6 +180,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
     typedef binding                              binding_type;
     typedef MultiTemplate                        base_type;
+    typedef typename binding_type::traits_type   traits_type;
     typedef typename base_type::boolean_type     boolean_type;
     typedef typename base_type::string_type      string_type;
     typedef typename base_type::arguments_type   arguments_type;
@@ -215,7 +216,7 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
     binding( string_type  const& source
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true
-           , string_type  const& default_value = synth::detail::text("")
+           , string_type  const& default_value = string_type()
            // TODO: Rename abbreviated parameters and expose them as kwargs.
            , py::dict     const& fmts          = py::dict()
            , boolean_type const  debug         = false

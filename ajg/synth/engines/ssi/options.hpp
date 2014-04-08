@@ -14,16 +14,19 @@ namespace ajg {
 namespace synth {
 namespace ssi {
 
-template <class String>
+template <class Value>
 struct options {
-    typedef String                   string_type;
-    typedef std::vector<string_type> directories_type;
+    typedef options                                options_type;
+    typedef Value                                  value_type;
+    typedef typename value_type::traits_type       traits_type;
+    typedef typename traits_type::string_type      string_type;
+    typedef std::vector<string_type>               directories_type;
 
-    options( string_type      const& echo_message  = detail::text("(none)")
+    options( string_type      const& echo_message  = traits_type::literal("(none)")
            , directories_type const& directories   = directories_type(/*1, "."*/)
-           , string_type      const& size_format   = detail::text("bytes")
-           , string_type      const& time_format   = detail::text("%A, %d-%b-%Y %H:%M:%S %Z")
-           , string_type      const& error_message = detail::text("[an error occurred while processing this directive]")
+           , string_type      const& size_format   = traits_type::literal("bytes")
+           , string_type      const& time_format   = traits_type::literal("%A, %d-%b-%Y %H:%M:%S %Z")
+           , string_type      const& error_message = traits_type::literal("[an error occurred while processing this directive]")
            )
         : echo_message(echo_message)
         , directories(directories)

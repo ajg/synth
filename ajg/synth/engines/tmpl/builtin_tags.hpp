@@ -23,14 +23,13 @@ namespace tmpl {
     ( as_xpr(engine.tag_open) >> content >> engine.tag_close \
     | as_xpr(engine.alt_open) >> content >> engine.alt_close \
     )
-#define NAME(name)       (icase(engine.tag_prefix + string_type(text(name))))
+#define NAME(name)       (icase(engine.tag_prefix + traits_type::literal(name)))
 #define OPEN_TAG(name)   TAG(*_s >> NAME(name) >> !(+_s >> engine.name_attribute) >> *_s)
 #define MIDDLE_TAG(name) TAG(*_s >> NAME(name) >> *_s >> !as_xpr(engine.tag_finish))
 #define SINGLE_TAG(name) TAG(*_s >> NAME(name) >> +_s >> engine.name_attribute >> *_s >> !as_xpr(engine.tag_finish))
 #define CLOSE_TAG(name)  TAG(engine.tag_finish >> *_s >> NAME(name) >> *_s)
 
 namespace {
-using detail::text;
 using detail::get_nested;
 using detail::operator ==;
 using namespace detail::placeholders;

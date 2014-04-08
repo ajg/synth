@@ -208,8 +208,7 @@ struct value : value_facade<Char, value<Char> > {
         namespace algo = boost::algorithm;
 
         std::vector<string_type> names;
-        string_type const source    = value.to_string(),
-                          delimiter = detail::text(".");
+        string_type const source = value.to_string(), delimiter = traits_type::literal(".");
         algo::split(names, source, algo::is_any_of(delimiter));
 
         sequence_type trail;

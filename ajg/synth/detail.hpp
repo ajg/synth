@@ -29,38 +29,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/program_options/environment_iterator.hpp>
 
-// TODO: Split this out to ./exceptions.hpp.
-namespace ajg {
-namespace synth {
-
-//
-// not_implemented exception
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct not_implemented : public std::runtime_error {
-    not_implemented(std::string const& feature) : std::runtime_error("not implemented: " + feature) {}
-    ~not_implemented() throw () {}
-};
-
-//
-// file_error exception
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct file_error : public std::runtime_error {
-    std::string const filepath, action, reason;
-
-    file_error( std::string const& filepath
-              , std::string const& action
-              , std::string const& reason
-              )
-        : std::runtime_error("could not " + action + " file `" + filepath + "' (" + reason + ")")
-        , filepath(filepath), action(action), reason(reason) {}
-
-    ~file_error() throw () {}
-};
-
-}} // namespace ajg::synth
-
+#include <ajg/synth/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

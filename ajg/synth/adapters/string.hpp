@@ -99,24 +99,6 @@ struct adapter<Traits, typename Traits::char_type[N]>
 
 #endif
 
-
-
-namespace detail {
-template <class From, std::size_t Length>
-struct string_literal;
-} // namespace detail
-
-//
-// specialization for detail::string_literal
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Traits, class From, std::size_t Length>
-struct adapter<Traits, detail::string_literal<From, Length> >
-    : public adapter<Traits, std::basic_string<typename Traits::char_type> > {
-    adapter(detail::string_literal<From, Length> const& value) :
-        adapter<Traits, std::basic_string<typename Traits::char_type> >(value) {}
-};
-
 }} // namespace ajg::synth
 
 #endif // AJG_SYNTH_ADAPTERS_STRING_HPP_INCLUDED

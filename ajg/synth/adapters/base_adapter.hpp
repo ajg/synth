@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
-#define AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
+#ifndef AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
+#define AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
 
 #include <string>
 #include <istream>
@@ -27,18 +27,15 @@ using boost::throw_exception;
 template <class Traits, class Adapted>
 struct adapter;
 
-template <class Traits>
-struct abstract_numeric_adapter;
-
 //
-// abstract_adapter
+// base_adapter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits>
-struct abstract_adapter {
+struct base_adapter {
   public:
 
-    typedef abstract_adapter                        abstract_type;
+    typedef base_adapter                            base_type;
     typedef Traits                                  traits_type;
 
     typedef typename traits_type::char_type         char_type;
@@ -60,32 +57,36 @@ struct abstract_adapter {
 
   public:
 
+    inline base_adapter() {}
+    virtual ~base_adapter() {}
+
+  public:
+
     // TODO: Instead of throwing bad_method here, defer default behavior to Traits.
 
     virtual std::type_info const& type() const = 0;
 
-    // TODO: Refactor these into a single to_range function.
-    virtual const_iterator begin() const { AJG_SYNTH_THROW(bad_method("begin")); }
-    virtual const_iterator end()   const { AJG_SYNTH_THROW(bad_method("end")); }
+    virtual boolean_type  is_numeric()  const { return false; }
 
-    virtual number_type   count()       const { AJG_SYNTH_THROW(bad_method("count")); } // TODO: Rename to_number
-    virtual boolean_type  test()        const { AJG_SYNTH_THROW(bad_method("test")); }  // TODO: Rename to_boolean
+    virtual number_type   to_number()   const { AJG_SYNTH_THROW(bad_method("to_number")); }
+    virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(bad_method("to_boolean")); }
     virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(bad_method("to_datetime")); }
     virtual string_type   to_string()   const { return traits_type::adapter_traits::to_string(*this); }
 
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
 
+    // TODO: Refactor these into a single to_range function.
+    virtual const_iterator begin() const { AJG_SYNTH_THROW(bad_method("begin")); }
+    virtual const_iterator end()   const { AJG_SYNTH_THROW(bad_method("end")); }
+
     virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(bad_method("find")); }
     virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(bad_method("index")); }
-
-    virtual ~abstract_adapter() {}
 
   private:
 
     template <class T, class A>                   friend struct synth::adapter;
     template <class T, class _, class A, class D> friend struct forwarding_adapter;
-    template <class T>                            friend struct abstract_numeric_adapter;
     template <class C, class V, class T>          friend struct value_facade;
 
     template <class Adapter> // TODO: Deal with forwarding_adapters.
@@ -101,18 +102,18 @@ struct abstract_adapter {
 
   protected:
 
-    virtual boolean_type equal_adapted(abstract_type const& that) const = 0;
-    virtual boolean_type less_adapted (abstract_type const& that) const = 0;
+    virtual boolean_type equal_adapted(base_type const& that) const = 0;
+    virtual boolean_type less_adapted (base_type const& that) const = 0;
 
     template <class Adapter>
-    inline boolean_type equal_as(abstract_type const& that) const {
+    inline boolean_type equal_as(base_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
         Adapter const* const that_ = that.template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 
     template <class Adapter>
-    inline boolean_type less_as(abstract_type const& that) const {
+    inline boolean_type less_as(base_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
         Adapter const* const that_ = that.template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
@@ -121,5 +122,5 @@ struct abstract_adapter {
 
 }} // namespace ajg::synth
 
-#endif // AJG_SYNTH_ADAPTERS_ABSTRACT_HPP_INCLUDED
+#endif // AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
 

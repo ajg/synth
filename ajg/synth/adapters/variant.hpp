@@ -18,7 +18,7 @@ namespace synth {
 
 template <class Traits, BOOST_VARIANT_ENUM_PARAMS(class T)>
 struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
     AJG_SYNTH_ADAPTER(variant_type)
@@ -27,9 +27,9 @@ struct adapter<Traits, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
   public:
 
     // FIXME: These should be forwarded to the real value.
-    // boolean_type equal(abstract_type const& that) const { return this->template is_equal_as<adapter>(that); }
-    number_type  count() const { return adapted_.which(); }
-    boolean_type test()  const { return true; }
+    // boolean_type equal(base_type const& that) const { return this->template is_equal_as<adapter>(that); }
+    number_type  to_number()  const { return adapted_.which(); }
+    boolean_type to_boolean() const { return true; }
 
 
     // TODO: These rely on T0 ... TN all having these operators available,

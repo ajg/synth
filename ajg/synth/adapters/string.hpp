@@ -22,7 +22,7 @@ template < class Traits
          >
 struct adapter<Traits, std::basic_string
         <typename Traits::char_type, StringTraits, Allocator> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef std::basic_string< typename Traits::char_type
                              , StringTraits
@@ -32,8 +32,8 @@ struct adapter<Traits, std::basic_string
 
   public:
 
-    number_type  count() const { return traits_type::to_number(adapted_); }
-    boolean_type test()  const { return !adapted_.empty(); }
+    number_type  to_number()  const { return traits_type::to_number(adapted_); }
+    boolean_type to_boolean() const { return !adapted_.empty(); }
     void input (istream_type& in)        { in  >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }
 

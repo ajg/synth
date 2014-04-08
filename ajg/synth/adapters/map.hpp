@@ -18,7 +18,7 @@ namespace synth {
 
 template <class Traits, class K, class V>
 struct adapter<Traits, std::map<K, V> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef K                     key_type;
     typedef std::map<key_type, V> map_type;
@@ -27,7 +27,7 @@ struct adapter<Traits, std::map<K, V> >
 
   public:
 
-    boolean_type test() const { return !adapted_.empty(); }
+    boolean_type to_boolean() const { return !adapted_.empty(); }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }
@@ -52,7 +52,7 @@ struct adapter<Traits, std::map<K, V> >
 
 template <class Traits, class K, class V>
 struct adapter<Traits, std::multimap<K, V> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef std::multimap<K, V> map_type;
     AJG_SYNTH_ADAPTER(map_type)
@@ -60,7 +60,7 @@ struct adapter<Traits, std::multimap<K, V> >
 
   public:
 
-    boolean_type test() const { return !adapted_.empty(); }
+    boolean_type to_boolean() const { return !adapted_.empty(); }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }

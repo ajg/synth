@@ -7,7 +7,9 @@
 
 #include <boost/ref.hpp>
 #include <boost/type_traits/remove_const.hpp>
+
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -18,7 +20,7 @@ namespace synth {
 
 template <class Traits, class T>
 struct adapter<Traits, reference_wrapper<T> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     // AJG_SYNTH_ADAPTER(reference_wrapper<T>)
 
@@ -37,31 +39,27 @@ struct adapter<Traits, reference_wrapper<T> >
 
     typedef adapter<Traits, typename remove_const<T>::type> wrapped_adapter_type;
 
-    virtual boolean_type equal_adapted(abstract_type const& that) const {
+    virtual boolean_type equal_adapted(base_type const& that) const {
         return adapted_.template equal_as<wrapped_adapter_type>(that);
     }
 
-    virtual boolean_type less_adapted(abstract_type const& that) const {
+    virtual boolean_type less_adapted(base_type const& that) const {
         return adapted_.template less_as<wrapped_adapter_type>(that);
     }
 
   public:
 
-    boolean_type equal(abstract_type const& that) const { return adapted_.equal(that); }
-    number_type  count() const { return adapted_.count(); }
-    boolean_type test()  const { return adapted_.test(); }
+    boolean_type equal(base_type const& that) const { return adapted_.equal(that); }
+    number_type  to_number()  const { return adapted_.to_number(); }
+    boolean_type to_boolean() const { return adapted_.to_boolean(); }
+    // integer_type to_integer() const { return adapted_.to_integer(); }
+    // string_type  to_string()  const { return adapted_.to_string(); }
     void input (istream_type& in)        { adapted_.input(in); }
     void output(ostream_type& out) const { adapted_.output(out); }
     std::type_info const& type() const { return typeid(T); }
 
-
-    /*integer_type to_integer() const { return adapted_.to_integer(); }
-    boolean_type operator !() const { return adapted_.operator !(); }
-    string_type  to_string()  const { return adapted_.to_string(); }*/
-
   private:
 
-    // adapted_type const& adapted_;
     wrapped_adapter_type adapted_;
 };
 

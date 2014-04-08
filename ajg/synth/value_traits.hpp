@@ -12,7 +12,6 @@
 #include <ostream>
 #include <sstream>
 #include <utility>
-#include <typeinfo>
 
 #include <boost/none_t.hpp>
 #include <boost/lexical_cast.hpp>
@@ -25,25 +24,7 @@ namespace ajg {
 namespace synth {
 
 template <class Traits>
-struct abstract_adapter;
-
-namespace detail {
-inline std::string get_type_name(std::type_info const& info) {
-    return info.name(); // TODO: Unmangle where needed.
-}
-} // namespace detail
-
-//
-// conversion_error (TODO: Consider renaming bad_conversion.)
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct conversion_error : public std::runtime_error {
-    conversion_error(std::type_info const& a, std::type_info const& b)
-        : std::runtime_error("could not convert value of type `"
-                                 + detail::get_type_name(a) + "' to `"
-                                 + detail::get_type_name(b) + "'") {}
-    ~conversion_error() throw () {}
-};
+struct base_adapter;
 
 //
 // default_value_traits
@@ -68,7 +49,7 @@ struct default_value_traits {
     //        set      | ?
     //
 
-    typedef default_value_traits                        self_type;
+    typedef default_value_traits                        traits_type;
     typedef boost::none_t                               none_type;
     typedef Char                                        char_type;
     typedef std::size_t                                 size_type;
@@ -95,9 +76,6 @@ struct default_value_traits {
 
     typedef std::pair<const_iterator, const_iterator>   range_type;
 
-    typedef abstract_adapter<self_type>                 abstract_adapter_type;
- // typedef typename value_type::abstract_type          abstract_adapter_type;
-
   public:
 
     template <class To, class From>
@@ -123,7 +101,7 @@ struct default_value_traits {
 
     template <class From>
     inline static number_type to_number(From const& from) {
-        return self_type::template to<number_type>(from);
+        return to<number_type>(from);
     }
 
     inline static size_type to_size(value_type const& value) {
@@ -133,7 +111,7 @@ struct default_value_traits {
     }
 
     inline static string_type literal(char const* const s) {
-        return self_type::widen(std::string(s));
+        return widen(std::string(s));
     }
 
     /* TODO:
@@ -152,23 +130,23 @@ struct default_value_traits {
     }
 
     inline static std::basic_string<char> narrow(std::basic_string<Char> const& s) {
-        return self_type::template transcode<Char, char>(s);
+        return transcode<Char, char>(s);
     }
 
     inline static std::basic_string<Char> widen(std::basic_string<char> const& s) {
-        return self_type::template transcode<char, Char>(s);
+        return transcode<char, Char>(s);
     }
 
     struct adapter_traits {
-        inline static string_type to_string(abstract_adapter_type const& adapter) {
+        inline static string_type to_string(base_adapter<traits_type> const& adapter) {
             std::basic_ostringstream<char_type> stream;
             adapter.output(stream);
             return stream.str();
         }
 
-        inline static void enumerate( abstract_adapter_type const& adapter
-                                    , ostream_type&                out
-                                    , string_type                  const delimiter = literal(", ")
+        inline static void enumerate( base_adapter<traits_type> const& adapter
+                                    , ostream_type&                    out
+                                    , string_type               const& delimiter = literal(", ")
                                     ) {
             size_type i = 0;
             BOOST_FOREACH(value_type const& value, adapter) {
@@ -226,14 +204,14 @@ struct default_value_traits {
             else AJG_SYNTH_THROW(not_implemented("value_traits::construct"));
         }
 
-        inline static boolean_type equal_sequence( abstract_adapter_type const& a
-                                                 , abstract_adapter_type const& b
+        inline static boolean_type equal_sequence( base_adapter<traits_type> const& a
+                                                 , base_adapter<traits_type> const& b
                                                  ) {
             return equal_range(a.begin(), b.begin(), a.end(), b.end());
         }
 
-        inline static boolean_type less_sequence( abstract_adapter_type const& a
-                                                , abstract_adapter_type const& b
+        inline static boolean_type less_sequence( base_adapter<traits_type> const& a
+                                                , base_adapter<traits_type> const& b
                                                 ) {
             return less_range(a.begin(), b.begin(), a.end(), b.end());
         }

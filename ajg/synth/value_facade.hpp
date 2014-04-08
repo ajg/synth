@@ -18,7 +18,7 @@
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
-#include <ajg/synth/adapters/abstract.hpp>
+#include <ajg/synth/adapters/base_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -39,10 +39,10 @@ template < class Char
 struct value_facade {
   public:
 
-    typedef value_facade             this_type;
-    typedef Value                    value_type;
-    typedef Traits                   traits_type;
-    typedef abstract_adapter<Traits> abstract_type;
+    typedef value_facade                self_type;
+    typedef Value                       value_type;
+    typedef Traits                      traits_type;
+    typedef base_adapter<traits_type>   adapter_type;
 
     typedef typename traits_type::none_type     none_type;
     typedef typename traits_type::boolean_type  boolean_type;
@@ -103,13 +103,12 @@ struct value_facade {
 
     inline boolean_type is_none()    const { return this->template is<none_type>(); }
     inline boolean_type is_boolean() const { return this->template is<boolean_type>(); }
-    // TODO: Allow adapters to say they're adapting a numeric type even without deriving from abstract_numeric_adapter.
-    inline boolean_type is_numeric() const { return this->adapter().template get<abstract_numeric_adapter<traits_type> >() != 0; }
     inline boolean_type is_string()  const { return this->template is<string_type>(); }
     inline boolean_type is_number()  const { return this->template is<number_type>(); }
+    inline boolean_type is_numeric() const { return this->adapter().is_numeric(); }
 
-    inline boolean_type  to_boolean()  const { return this->adapter().test(); }
-    inline number_type   to_number()   const { return this->adapter().count(); }
+    inline boolean_type  to_boolean()  const { return this->adapter().to_boolean(); }
+    inline number_type   to_number()   const { return this->adapter().to_number(); }
     inline datetime_type to_datetime() const { return this->adapter().to_datetime(); }
     inline string_type   to_string()   const { return this->adapter().to_string(); }
     inline size_type     to_size()     const { return traits_type::to_size(*this); }
@@ -125,8 +124,8 @@ struct value_facade {
     inline optional<value_type> index(value_type const& key)   const { return this->adapter().index(key); }
 
     // Even the non-const versions are immutable and are provided simply as a convenience.
-    inline iterator begin() { return const_cast<this_type const*>(this)->begin(); }
-    inline iterator end()   { return const_cast<this_type const*>(this)->end(); }
+    inline iterator begin() { return const_cast<self_type const*>(this)->begin(); }
+    inline iterator end()   { return const_cast<self_type const*>(this)->end(); }
 
     inline const_iterator begin() const { return this->adapter().begin(); }
     inline const_iterator end()   const {
@@ -170,7 +169,7 @@ struct value_facade {
 
   protected:
 
-    inline const abstract_type& adapter() const {
+    inline const adapter_type& adapter() const {
         if (!adapter_) {
             AJG_SYNTH_THROW(std::logic_error("uninitialized value"));
         }
@@ -197,7 +196,7 @@ struct value_facade {
 
   private:
 
-    boost::shared_ptr<abstract_type const> adapter_;
+    boost::shared_ptr<adapter_type const> adapter_;
 };
 
 // TODO[c++11]: Replace with variadic templates.

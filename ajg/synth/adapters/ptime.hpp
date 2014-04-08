@@ -18,7 +18,7 @@ namespace synth {
 
 template <class Traits>
 struct adapter<Traits, boost::posix_time::ptime>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef boost::posix_time::ptime ptime_type;
     AJG_SYNTH_ADAPTER(ptime_type)
@@ -26,7 +26,7 @@ struct adapter<Traits, boost::posix_time::ptime>
 
   public:
 
-    boolean_type test() const { return !adapted_.is_not_a_date_time(); }
+    boolean_type to_boolean() const { return !adapted_.is_not_a_date_time(); }
     datetime_type to_datetime() const { return adapted_; }
     void output(ostream_type& out) const { out << adapted_; }
 };

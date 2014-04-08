@@ -21,7 +21,7 @@ namespace synth {
 
 template <class Traits, class K, class V>
 struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef K                                              key_type;
     typedef boost::property_tree::basic_ptree<key_type, V> ptree_type;
@@ -30,7 +30,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
 
   public:
 
-    boolean_type test() const {
+    boolean_type to_boolean() const {
         if (adapted_.empty()) {
             return boolean_type(value_type(adapted_.data()));
         }

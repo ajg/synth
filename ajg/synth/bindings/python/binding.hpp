@@ -16,7 +16,7 @@
 // #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <ajg/synth/engines/exceptions.hpp>
-#include <ajg/synth/engines/django/options.hpp> // (abstract_library)
+#include <ajg/synth/engines/django/options.hpp>
 #include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
 

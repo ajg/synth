@@ -6,6 +6,7 @@
 #define AJG_SYNTH_ADAPTERS_POINTER_HPP_INCLUDED
 
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
 namespace synth {

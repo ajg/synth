@@ -31,20 +31,6 @@ template <class Traits>
 struct abstract_numeric_adapter;
 
 //
-// bad_method exception
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct bad_method : public std::invalid_argument {
-    std::string const name;
-
-    bad_method(std::string const& name)
-        : std::invalid_argument("bad method `" + name + "'")
-        , name(name) {}
-
-    ~bad_method() throw () {}
-};
-
-//
 // abstract_adapter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

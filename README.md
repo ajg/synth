@@ -472,6 +472,7 @@ Future Work
    * Clean up and make `multi_template` public
 
  - Refactoring:
+   * Rename `abstract_adapter` to `base_adapter`
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

@@ -639,8 +639,8 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (algorithm::starts_with(op, traits_type::literal("not"))
-                  && algorithm::ends_with(op, traits_type::literal("in"))) {
+            else if (boost::algorithm::starts_with(op, traits_type::literal("not"))
+                  && boost::algorithm::ends_with(op, traits_type::literal("in"))) {
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }
@@ -793,7 +793,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     }
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return algorithm::replace_all_copy(s, traits_type::literal(" "), options.nonbreaking_space);
+        return boost::algorithm::replace_all_copy(s, traits_type::literal(" "), options.nonbreaking_space);
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n

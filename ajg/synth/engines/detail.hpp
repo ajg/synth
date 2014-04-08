@@ -52,14 +52,9 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
-using boost::disable_if;
-using boost::disable_if_c;
-using boost::enable_if;
-using boost::enable_if_c;
 using boost::none;
 using boost::optional;
 
-namespace algorithm  = boost::algorithm;
 namespace date_time  = boost::date_time;
 namespace mpl        = boost::mpl;
 namespace posix_time = boost::posix_time;

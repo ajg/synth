@@ -65,6 +65,8 @@ using boost::xpressive::regex_replace;
 using boost::xpressive::s1;
 using boost::xpressive::set;
 
+namespace algo = boost::algorithm;
+
 static char const word_delimiters[] = " \t\n.,;:!?'\"-";
 
 } // namespace
@@ -208,7 +210,7 @@ struct builtin_filters {
         inline static value_type escape(value_type const& value) {
             string_type const string = value.to_string();
             // string_stream_type stream;
-            if (size_type const escapes = std::count_if(string.begin(), string.end(), algorithm::is_any_of("'\"\\"))) {
+            if (size_type const escapes = std::count_if(string.begin(), string.end(), algo::is_any_of("'\"\\"))) {
                 string_type result;
                 result.reserve(string.size() + escapes);
 
@@ -287,7 +289,7 @@ struct builtin_filters {
             detail::with_arity<1>::validate(arguments.size());
             string_type const from = value.to_string();
             string_type const what = arguments[0].to_string();
-            return algorithm::erase_all_copy(from, what);
+            return algo::erase_all_copy(from, what);
         }
     };
 
@@ -678,7 +680,7 @@ struct builtin_filters {
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type p = safe ? value_type(line).escape().to_string() : line;
-                algorithm::replace_all(p, engine.newline, traits_type::literal("<br />"));
+                algo::replace_all(p, engine.newline, traits_type::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -698,7 +700,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            string_type const text = algorithm::replace_all_copy(value.to_string(),
+            string_type const text = algo::replace_all_copy(value.to_string(),
                 engine.newline, traits_type::literal("<br />"));
             return value_type(text).mark_safe();
         }
@@ -723,7 +725,7 @@ struct builtin_filters {
             string_type  const pattern = traits_type::literal("%%0%dd. %%s");
             boolean_type const safe    = !options.autoescape || value.safe();
 
-            algorithm::split(lines, input, algorithm::is_any_of("\n"));
+            algo::split(lines, input, algo::is_any_of("\n"));
 
             size_type   const width = traits_type::to_string(lines.size()).size();
             string_type const spec  = (format_type(pattern) % width).str();
@@ -770,7 +772,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return algorithm::to_lower_copy(value.to_string());
+            return algo::to_lower_copy(value.to_string());
         }
     };
 
@@ -812,7 +814,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            string_type phone = algorithm::to_lower_copy(value.to_string());
+            string_type phone = algo::to_lower_copy(value.to_string());
             std::transform(phone.begin(), phone.end(), phone.begin(), translate);
             return phone;
         }
@@ -919,7 +921,7 @@ struct builtin_filters {
             formatter const format = { tags };
             int (*predicate)(int) = std::isspace;
             string_type const source = arguments[0].to_string();
-            algorithm::split(tags, source, predicate);
+            algo::split(tags, source, predicate);
             return regex_replace(value.to_string(), engine.html_tag, format);
         }
 
@@ -1044,10 +1046,10 @@ struct builtin_filters {
                 }
             };
 
-            string_type slug = algorithm::trim_copy(value.to_string());
+            string_type slug = algo::trim_copy(value.to_string());
             std::replace(slug.begin(), slug.end(), char_type(' '), char_type('-'));
             slug.erase(std::remove_if(slug.begin(), slug.end(), invalid::fn), slug.end());
-            return algorithm::to_lower_copy(slug);
+            return algo::to_lower_copy(slug);
         }
     };
 
@@ -1472,7 +1474,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return algorithm::to_upper_copy(value.to_string());
+            return algo::to_upper_copy(value.to_string());
         }
     };
 
@@ -1592,16 +1594,16 @@ struct builtin_filters {
       private:
 
         inline static string_type wrap( string_type const& input
-                                 , size_type   const  width
-                                 , string_type const& newline
-                                 ) {
+                                      , size_type   const  width
+                                      , string_type const& newline
+                                      ) {
             string_type word, result;
 
             size_type i    = 0;
             char_type last = '\0';
             BOOST_FOREACH(char_type const c, input) {
                 if (++i == width) {
-                    algorithm::trim_left(word);
+                    algo::trim_left(word);
                     result += newline + word;
                     i = word.length();
                     word.clear();

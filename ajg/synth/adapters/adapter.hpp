@@ -44,40 +44,21 @@ using namespace boost; // FIXME: Delete.
 
 
 // TODO: Refactor this into a concrete_adapter<T>.
-#define AJG_SYNTH_ADAPTER(adaptedT)                             \
-    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter);              \
-    \
+#define AJG_SYNTH_ADAPTER(adaptedT) \
+    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter); \
   protected: \
-    \
-    virtual boolean_type equal_adapted(abstract_type const& that) const { \
-        return this->template equal_as<adapter>(that); \
-    }    \
-    \
-    virtual boolean_type less_adapted(abstract_type const& that) const { \
-        return this->template less_as<adapter>(that); \
-    }    \
-    \
-  public:                                                       \
-                                                                \
+    virtual boolean_type equal_adapted(abstract_type const& that) const { return this->template equal_as<adapter>(that); } \
+    virtual boolean_type less_adapted(abstract_type const& that) const { return this->template less_as<adapter>(that); } \
+  public: \
     adapter(adapted_type const& adapted) : adapted_(adapted) {} \
     std::type_info const& type() const { return typeid(adaptedT); }
 
 //
-// unspecialized adapter
+// adapter (unspecialized)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits, class Adapted>
 struct adapter;
-
-/*
-//
-// an abstract forwarding type to allow comparisons
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Traits, ...>
-struct abstract_forwarding_adapter : public abstract_adapter<Traits> {};
-
-*/
 
 // TODO: Move to separate file.
 template <class Traits, class T, class Adapted, class Derived = adapter<Traits, Adapted> >
@@ -135,9 +116,8 @@ struct forwarding_adapter : public abstract_adapter<Traits> {
 
 };
 
-
 //
-// Helper function make_adapter
+// make_adapter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits, class T>
@@ -145,246 +125,10 @@ adapter<Traits, T> make_adapter(T const& t) {
     return adapter<Traits, T>(t);
 }
 
-/*
-template <class Char, class Value>
-struct value_facade;
-
-*/
-
 template <class Traits>
 struct adapter<Traits, abstract_adapter<Traits> >; // undefined
 
-//template <class Traits, class Adapted>
-//struct adapter<Traits, adapter<Adapted> >; // undefined
-/*
-//
-// specialization for value_facade
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-template <class Traits, class Char, class Value>
-struct adapter<Traits, value_facade<Char, Value> >
-    : public forwarding_adapter<Traits, value_facade<Char, Value>, value_facade<Char, Value> > {
-
-    adapter(value_facade<Char, Value> const& adapted) : adapted_(adapted) {}
-    value_facade<Char, Value> adapted_;
-
-    template <class A> A forward() const { return A(ref(adapted_)); }
-    bool valid() const { return !adapted_.empty(); }
-};
-*/
-
 }} // namespace ajg::synth
-
-
-#if 0
-
- : public abstract_adapter<Char> {
-
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted, adapter);
-
-  public:
-
-    adapter(adapted_type const& adapted) : adapted_(adapted) {}
-
-  public:
-
-    boolean_type test() const { return test_<Adapted>(); }
-    void output(ostream_type& out) const { return output_<Adapted>(out); }
-    boolean_type equal(abstract_type const& that) const { return equal_<Adapted>(that); }
-    std::type_info const& type() const { return type_<Adapted>(); }
-
-    const_iterator begin() const { return begin_<Adapted>(); }
-    const_iterator end()   const { return end_  <Adapted>(); }
-
-  private:
-
-    typedef basic_value<Char> base_value;
-
-    template <class T>
-    typename enable_if_c<is_base_of<base_value, T>::value, const_iterator>::type begin_() const {
-        return adapted_.begin();
-    }
-
-    template <class T>
-    typename enable_if_c<is_const_iterable<T>::value
-                     && !is_base_of<base_value, T>::value, const_iterator>::type begin_() const {
-        return adapted_.begin();
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value, const_iterator>::type begin_() const {
-        return abstract_type::begin();
-    }
-
-    template <class T>
-    typename enable_if_c<is_base_of<base_value, T>::value, const_iterator>::type end_() const {
-        return adapted_.end();
-    }
-
-    template <class T>
-    typename enable_if_c<is_const_iterable<T>::value
-                     && !is_base_of<base_value, T>::value, const_iterator>::type end_() const {
-        return adapted_.end();
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value, const_iterator>::type end_() const {
-        return abstract_type::end();
-    }
-
-    /*template <class T>
-    typename enable_if_c<is_const_iterable<T>::value, boolean_type>::type equal_(... const) const {
-        const_iterator const b = this->begin(), e = this->end();
-        std::size_t const distance = std::distance(b, e);
-
-        if (!distance e == b || ) {
-            return true;
-        }
-        else if (e - b
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value, boolean_type>::type equal_() const {
-        return abstract_type::equal();
-    }*/
-
-
-    template <class T>
-    typename enable_if_c<is_base_of<base_value, T>::value, boolean_type>::type test_() const {
-        return adapted_;
-    }
-
-    template <class T>
-    typename enable_if_c<is_const_iterable<T>::value
-                     && !is_base_of<base_value, T>::value, boolean_type>::type test_() const {
-        return adapted_.empty();
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value, boolean_type>::type test_() const {
-        return abstract_type::test();
-    }
-
-    template <class T>
-    typename enable_if_c<is_base_of<base_value, T>::value, boolean_type>::type equal_(abstract_type const& that) const {
-        typedef adapter<Char, reference_wrapper<T const> > cref_type;
-        return cref_type(cref(adapted_)).equal(that);
-    }
-
-    template <class T>
-    typename enable_if_c<is_const_iterable<T>::value
-                     && !is_base_of<base_value, T>::value, boolean_type>::type equal_(abstract_type const& that) const {
-        return this->equal_sequence(that);
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value, boolean_type>::type equal_(abstract_type const& that) const {
-        return abstract_type::equal_(that);
-    }
-
-    template <class T>
-    typename enable_if_c<is_base_of<base_value, T>::value>::type output_(ostream_type& out) const {
-        out << adapted_;
-    }
-
-    template <class T>
-    typename enable_if_c<is_const_iterable<T>::value
-                     && !is_base_of<base_value, T>::value>::type output_(ostream_type& out) const {
-        traits_type::adapter_traits::enumerate(*this, out);
-    }
-
-    template <class T>
-    typename disable_if_c<is_const_iterable<T>::value>::type output_(ostream_type& out) const {
-        return abstract_type::output(out);
-    }
-
-    template <class T>
-    typename enable_if<is_base_of<base_value, T>, std::type_info const&>::type type_() const {
-        return adapted_.type();
-    }
-
-    template <class T>
-    typename disable_if<is_base_of<base_value, T>, std::type_info const&>::type type_() const {
-        return typeid(T);
-    }
-
-    adapted_type adapted_;
-
-    /*typename mpl::template if_<
-        is_convertible<const adapted_type, adapted_type>,
-            adapted_type,
-            adapted_type&
-        >::type const
-    adapted_;*/
-};
-
-
-
-typedef struct { char ar[1]; } no_t;
-typedef struct { char ar[4]; } yes_t;
-
- // has_const_iterator
-
-template <typename T>
-no_t has_const_iterator_function( ... );
-
-template <typename T>
-yes_t has_const_iterator_function(typename T::const_iterator const volatile *);
-
-template <typename T>
-struct has_const_iterator {
-     typedef T test_type;
-
- private:
-     static T  t;
-
- public:
-
-     BOOST_STATIC_CONSTANT(bool, value = sizeof(has_const_iterator_function<T>(0)) == sizeof(yes_t));
-};
-
-
- // has_element_type
-
-template <typename T>
-no_t has_element_type_function( ... );
-
-template <typename T>
-yes_t has_element_type_function(typename T::element_type const volatile *);
-
-template <typename T>
-struct has_element_type {
-     typedef T test_type;
-
- private:
-     static T  t;
-
- public:
-
-     BOOST_STATIC_CONSTANT(bool, value = sizeof(has_element_type_function<T>(0)) == sizeof(yes_t));
-};
-
-
-
-
-
-
-template <typename T>
-struct is_const_iterable {
-
-    BOOST_STATIC_CONSTANT(bool, value = has_const_iterator<T>::value);
-
-};
-
-template <typename T>
-struct is_element_holder {
-
-    BOOST_STATIC_CONSTANT(bool, value = has_element_type<T>::value);
-
-};
-
-#endif // 0
 
 #endif // AJG_SYNTH_ADAPTERS_ADAPTER_HPP_INCLUDED
 

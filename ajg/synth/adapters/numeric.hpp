@@ -93,7 +93,7 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
 
     // for floating-point types
     template <class T>
-    void output_(ostream_type& out, typename disable_if<is_integral<T> >::type* = 0) const {
+    void output_(ostream_type& out, typename boost::disable_if<is_integral<T> >::type* = 0) const {
         io::basic_ios_all_saver<char_type> saver(out);
 
         if (detail::is_integer(adapted_)) {
@@ -112,7 +112,7 @@ struct numeric_adapter : public abstract_numeric_adapter<Traits> {
 
     // for integral types
     template <class T>
-    void output_(ostream_type& out, typename enable_if<is_integral<T> >::type* = 0) const {
+    void output_(ostream_type& out, typename boost::enable_if<is_integral<T> >::type* = 0) const {
         out << adapted_;
     }
 };

@@ -65,24 +65,16 @@ struct value_facade {
     value_facade() : adapter_() {}
 
     template <class T>
-    value_facade(T const& t, typename disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value_facade(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<Traits, T>(t)) {}
 
     template <class T, class U>
-    value_facade(T const& t, U const& u, typename disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value_facade(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<Traits, T>(t, u)) {}
 
     template <class T, class U, class V>
-    value_facade(T const& t, U const& u, V const& v, typename disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value_facade(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<Traits, T>(t, u, v)) {}
-
-    /*template <class Adapter>
-    inline static value_facade adapt(Adapter const& adapter) {
-        BOOST_MPL_ASSERT(( is_base_of<abstract_type, Adapter> ));
-        value_type value;
-        value.adapter_.reset(new Adapter(adapter));
-        return value;
-    }*/
 
   public:
 

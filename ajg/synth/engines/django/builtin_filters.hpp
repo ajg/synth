@@ -67,7 +67,7 @@ using boost::xpressive::set;
 
 static char const word_delimiters[] = " \t\n.,;:!?'\"-";
 
-} // anonymous
+} // namespace
 
 template <class Engine>
 struct builtin_filters {

@@ -75,7 +75,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     typedef std::vector<string_type>                                            whitelist_type;
     typedef std::vector<value_type>                                             sequence_type;
     typedef std::map<string_type, value_type>                                   context_type;
-    typedef options<string_type>                                                options_type;
+    typedef options<value_type>                                                 options_type;
     typedef typename value_type::traits_type                                    traits_type;
 
     struct args_type {

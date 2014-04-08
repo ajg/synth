@@ -149,7 +149,7 @@ struct options {
   public:
 
     options( boolean_type     const  autoescape    = true
-           , value_type       const& default_value = detail::text("")
+           , value_type       const& default_value = string_type()
            , formats_type     const& formats       = formats_type()
            , boolean_type     const  debug         = false
            , directories_type const& directories   = directories_type()
@@ -158,7 +158,7 @@ struct options {
            , resolvers_type   const& resolvers     = resolvers_type()
            )
         : autoescape(autoescape)
-        , nonbreaking_space(detail::text("&nbsp;"))
+        , nonbreaking_space(traits_type::literal("&nbsp;"))
         , default_value(default_value)
         , formats(merge_default_formats(formats))
         , debug(debug)
@@ -177,13 +177,13 @@ struct options {
     inline static formats_type merge_default_formats(formats_type formats) {
         typedef typename formats_type::value_type format_type;
         static formats_type const defaults = boost::assign::list_of<format_type>
-            (detail::text("DATE_FORMAT"),           detail::text("N j, Y"))
-            (detail::text("DATETIME_FORMAT"),       detail::text("N j, Y, P"))
-            (detail::text("MONTH_DAY_FORMAT"),      detail::text("F j"))
-            (detail::text("SHORT_DATE_FORMAT"),     detail::text("m/d/Y"))
-            (detail::text("SHORT_DATETIME_FORMAT"), detail::text("m/d/Y P"))
-            (detail::text("TIME_FORMAT"),           detail::text("P"))
-            (detail::text("YEAR_MONTH_FORMAT"),     detail::text("F Y"))
+            (traits_type::literal("DATE_FORMAT"),           traits_type::literal("N j, Y"))
+            (traits_type::literal("DATETIME_FORMAT"),       traits_type::literal("N j, Y, P"))
+            (traits_type::literal("MONTH_DAY_FORMAT"),      traits_type::literal("F j"))
+            (traits_type::literal("SHORT_DATE_FORMAT"),     traits_type::literal("m/d/Y"))
+            (traits_type::literal("SHORT_DATETIME_FORMAT"), traits_type::literal("m/d/Y P"))
+            (traits_type::literal("TIME_FORMAT"),           traits_type::literal("P"))
+            (traits_type::literal("YEAR_MONTH_FORMAT"),     traits_type::literal("F Y"))
             ;
 
         BOOST_FOREACH(format_type const& format, defaults) {

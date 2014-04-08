@@ -18,7 +18,6 @@ namespace tests {
 namespace data {
 
 using boost::assign::list_of;
-using ajg::synth::detail::text;
 
 template <class Context, class Traits, class Options = boost::mpl::void_>
 struct kitchen_sink {
@@ -33,20 +32,20 @@ struct kitchen_sink {
     typedef typename context_type::mapped_type                  value_type;
 
     kitchen_sink() {
-        context[text("foo")] = "A";
-        context[text("bar")] = "B";
-        context[text("qux")] = "C";
+        context[traits_type::literal("foo")] = "A";
+        context[traits_type::literal("bar")] = "B";
+        context[traits_type::literal("qux")] = "C";
 
         context["true_var"] = true;
         context["false_var"] = false;
 
         std::map<string_type, string_type> joe, bob, lou;
-        joe[text("name")] = "joe";
-        joe[text("age")]  = "23";
-        bob[text("name")] = "bob";
-        bob[text("age")]  = "55";
-        lou[text("name")] = "lou";
-        lou[text("age")]  = "41";
+        joe[traits_type::literal("name")] = "joe";
+        joe[traits_type::literal("age")]  = "23";
+        bob[traits_type::literal("name")] = "bob";
+        bob[traits_type::literal("age")]  = "55";
+        lou[traits_type::literal("name")] = "lou";
+        lou[traits_type::literal("age")]  = "41";
         friends[0] = joe;
         friends[1] = bob;
         friends[2] = lou;
@@ -56,45 +55,45 @@ struct kitchen_sink {
         datetime_type const past(date_type(2002, 1, 10), duration_type(1, 2, 3));
         datetime_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
 
-        context[text("past")]        = past;
-        context[text("before_past")] = past - duration_type(36, 0, 0);
-        context[text("after_past")]  = past + duration_type(1200, 20, 0);
-        context[text("future")]      = future;
+        context[traits_type::literal("past")]        = past;
+        context[traits_type::literal("before_past")] = past - duration_type(36, 0, 0);
+        context[traits_type::literal("after_past")]  = past + duration_type(1200, 20, 0);
+        context[traits_type::literal("future")]      = future;
 
         std::map<string_type, string_type> mumbai, calcutta, nyc, chicago, tokyo;
-        mumbai[text("name")]       = "Mumbai";
-        mumbai[text("population")] = "19,000,000";
-        mumbai[text("country")]    = "India";
-        calcutta[text("name")]       = "Calcutta";
-        calcutta[text("population")] = "15,000,000";
-        calcutta[text("country")]    = "India";
-        nyc[text("name")]       = "New York";
-        nyc[text("population")] = "20,000,000";
-        nyc[text("country")]    = "USA";
-        chicago[text("name")]       = "Chicago";
-        chicago[text("population")] = "7,000,000";
-        chicago[text("country")]    = "USA";
-        tokyo[text("name")]       = "Tokyo";
-        tokyo[text("population")] = "33,000,000";
-        tokyo[text("country")]    = "Japan";
+        mumbai[traits_type::literal("name")]       = "Mumbai";
+        mumbai[traits_type::literal("population")] = "19,000,000";
+        mumbai[traits_type::literal("country")]    = "India";
+        calcutta[traits_type::literal("name")]       = "Calcutta";
+        calcutta[traits_type::literal("population")] = "15,000,000";
+        calcutta[traits_type::literal("country")]    = "India";
+        nyc[traits_type::literal("name")]       = "New York";
+        nyc[traits_type::literal("population")] = "20,000,000";
+        nyc[traits_type::literal("country")]    = "USA";
+        chicago[traits_type::literal("name")]       = "Chicago";
+        chicago[traits_type::literal("population")] = "7,000,000";
+        chicago[traits_type::literal("country")]    = "USA";
+        tokyo[traits_type::literal("name")]       = "Tokyo";
+        tokyo[traits_type::literal("population")] = "33,000,000";
+        tokyo[traits_type::literal("country")]    = "Japan";
 
         cities[0] = mumbai;
         cities[1] = calcutta;
         cities[2] = nyc;
         cities[3] = chicago;
         cities[4] = tokyo;
-        context[text("cities")] = cities;
+        context[traits_type::literal("cities")] = cities;
 
         sequence_type
-            list1 = list_of<value_type>(text("Lawrence"))(text("Topeka")),
-            list2 = list_of<value_type>(text("Kansas"))(list1)(text("Illinois1"))(text("Illinois2")),
-            list3 = list_of<value_type>(text("States"))(list2),
-            list4 = list_of<value_type>(text("Parent"))(list3);
-        context[text("places")] = list4;
+            list1 = list_of<value_type>(traits_type::literal("Lawrence"))(traits_type::literal("Topeka")),
+            list2 = list_of<value_type>(traits_type::literal("Kansas"))(list1)(traits_type::literal("Illinois1"))(traits_type::literal("Illinois2")),
+            list3 = list_of<value_type>(traits_type::literal("States"))(list2),
+            list4 = list_of<value_type>(traits_type::literal("Parent"))(list3);
+        context[traits_type::literal("places")] = list4;
 
-        context[text("csrf_token")] = "ABCDEF123456";
+        context[traits_type::literal("csrf_token")] = "ABCDEF123456";
 
-        context[text("xml_var")] = "<foo><bar><qux /></bar></foo>";
+        context[traits_type::literal("xml_var")] = "<foo><bar><qux /></bar></foo>";
 
         std::vector<int> numbers;
         numbers.push_back(1);
@@ -106,7 +105,7 @@ struct kitchen_sink {
         numbers.push_back(7);
         numbers.push_back(8);
         numbers.push_back(9);
-        context[text("numbers")] = numbers;
+        context[traits_type::literal("numbers")] = numbers;
     }
 
     Context context;

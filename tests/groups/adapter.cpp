@@ -25,6 +25,7 @@ typedef s::string_template<char_type, engine_type> template_type;
 typedef template_type::context_type                context_type;
 typedef template_type::string_type                 string_type;
 typedef template_type::value_type                  value_type;
+typedef value_type::traits_type                    traits_type;
 typedef ajg::test_group<>                          group_type;
 
 group_type group_object("adapter tests");
@@ -34,22 +35,19 @@ group_type group_object("adapter tests");
 
 AJG_TESTING_BEGIN
 
-#define CHAR   // TODO: Widen/narrow as necessary.
-#define STRING ajg::synth::detail::text
-
 unit_test(assignments) {
     using namespace std;
     using namespace boost;
 
     context_type context;
 
-    string_type const X = STRING("this");
-    string_type const Y = STRING("that");
-    string_type const Two = STRING("2");
+    string_type const X = traits_type::literal("this");
+    string_type const Y = traits_type::literal("that");
+    string_type const Two = traits_type::literal("2");
     vector<string_type> some_strings;
-    some_strings.push_back(STRING("foo"));
-    some_strings.push_back(STRING("bar"));
-    some_strings.push_back(STRING("qux"));
+    some_strings.push_back(traits_type::literal("foo"));
+    some_strings.push_back(traits_type::literal("bar"));
+    some_strings.push_back(traits_type::literal("qux"));
     vector<int> doodoo;
     doodoo.push_back(1);
     doodoo.push_back(2);
@@ -61,38 +59,38 @@ unit_test(assignments) {
     doodoo.push_back(8);
     doodoo.push_back(9);
 
-    context[STRING("this_value")] = 175;
-    context[STRING("max_value")] = 200;
+    context[traits_type::literal("this_value")] = 175;
+    context[traits_type::literal("max_value")] = 200;
 
-    context[STRING("xml_var")] = STRING("<foo><bar qux='ha'>&</bar></foo>");
-    context[STRING("a_few_lines")] = STRING("this\nhas\nlines");
-    context[STRING("more_lines")] = STRING("this\nhas\nlines\n\r\nand\nsome\nmore");
-    context[STRING("a_bin_string")] = STRING("this \f string \t contains \b binary \0 indeed");
+    context[traits_type::literal("xml_var")] = traits_type::literal("<foo><bar qux='ha'>&</bar></foo>");
+    context[traits_type::literal("a_few_lines")] = traits_type::literal("this\nhas\nlines");
+    context[traits_type::literal("more_lines")] = traits_type::literal("this\nhas\nlines\n\r\nand\nsome\nmore");
+    context[traits_type::literal("a_bin_string")] = traits_type::literal("this \f string \t contains \b binary \0 indeed");
 
-    string_type const string_array[5] = { STRING("sa0"), STRING("sa1"), STRING("sa2"), STRING("sa3"), STRING("sa4") };
-    string_type const tag_list[5] = { STRING("<these>"), STRING("<are>"), STRING("<tags />"), STRING("</are>"), STRING("</these>") };
+    string_type const string_array[5] = { traits_type::literal("sa0"), traits_type::literal("sa1"), traits_type::literal("sa2"), traits_type::literal("sa3"), traits_type::literal("sa4") };
+    string_type const tag_list[5] = { traits_type::literal("<these>"), traits_type::literal("<are>"), traits_type::literal("<tags />"), traits_type::literal("</are>"), traits_type::literal("</these>") };
     float const float_array[6] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f };
 
     /// float const* float_pointer = float_array;
-    /// context[STRING("a_float_pointer")] = value(float_pointer, 6);
+    /// context[traits_type::literal("a_float_pointer")] = value(float_pointer, 6);
 
     scoped_ptr<vector<int> > scoped_(new vector<int>(3, 3));
     auto_ptr<vector<int> > auto_ptr_(new vector<int>(4, 4));
 
-    context[STRING("X")] = STRING("this"); // X;
-    context[STRING("Y")] = boost::ref(Y);
-    context[STRING("Z")] = Two;
-    context[STRING("some_strings")] = some_strings;
- // TODO: context[STRING("a_set"] = set<string_type, string_type>();
-    context[STRING("an_int_vector")] = doodoo;
-    context[STRING("a_shared_ptr")] = boost::shared_ptr<vector<int> >(new vector<int>(6, 6));
-    context[STRING("a_scoped_ptr")] = scoped_;
-    context[STRING("a_string_array")] = string_array;
-    context[STRING("tag_list")] = tag_list;
-    context[STRING("a_float_array")] = float_array;
-    context[STRING("an_auto_ptr")] = auto_ptr_;
-    context[STRING("a_char")] = CHAR('z');
-    context[STRING("an_int")] = 12;
+    context[traits_type::literal("X")] = traits_type::literal("this"); // X;
+    context[traits_type::literal("Y")] = boost::ref(Y);
+    context[traits_type::literal("Z")] = Two;
+    context[traits_type::literal("some_strings")] = some_strings;
+ // TODO: context[traits_type::literal("a_set"] = set<string_type, string_type>();
+    context[traits_type::literal("an_int_vector")] = doodoo;
+    context[traits_type::literal("a_shared_ptr")] = boost::shared_ptr<vector<int> >(new vector<int>(6, 6));
+    context[traits_type::literal("a_scoped_ptr")] = scoped_;
+    context[traits_type::literal("a_string_array")] = string_array;
+    context[traits_type::literal("tag_list")] = tag_list;
+    context[traits_type::literal("a_float_array")] = float_array;
+    context[traits_type::literal("an_auto_ptr")] = auto_ptr_;
+    context[traits_type::literal("a_char")] = char_type('z');
+    context[traits_type::literal("an_int")] = 12;
 
     scoped_array<int> a_scoped_array(new int[5]);
     a_scoped_array[0] = 666;
@@ -100,30 +98,30 @@ unit_test(assignments) {
     a_scoped_array[2] = 668;
     a_scoped_array[3] = 669;
     a_scoped_array[4] = 670;
-    context[STRING("a_scoped_array")] = value_type(a_scoped_array, 5);
+    context[traits_type::literal("a_scoped_array")] = value_type(a_scoped_array, 5);
 
     map<int, int> a_map = assign::map_list_of(1, 2)(3, 4);
-    context[STRING("a_deque")] = deque<char_type>();
-    context[STRING("a_map")] = a_map;
+    context[traits_type::literal("a_deque")] = deque<char_type>();
+    context[traits_type::literal("a_map")] = a_map;
 
     vector<vector<vector<int> > > _vectors;
-    context[STRING("some_vectors")] = _vectors;
-    context[STRING("shared_array")] = value_type(shared_array<string_type>(), 0);
+    context[traits_type::literal("some_vectors")] = _vectors;
+    context[traits_type::literal("shared_array")] = value_type(shared_array<string_type>(), 0);
 
-    context[STRING("a_complex_float")] = complex<float>();
-    context[STRING("a_pair")] = make_pair(1, 2.5);
-    context[STRING("a_boost_array")] = boost::array<double, 2>();
-    context[STRING("an_optional_float")] = optional<double>(4.5);
+    context[traits_type::literal("a_complex_float")] = complex<float>();
+    context[traits_type::literal("a_pair")] = make_pair(1, 2.5);
+    context[traits_type::literal("a_boost_array")] = boost::array<double, 2>();
+    context[traits_type::literal("an_optional_float")] = optional<double>(4.5);
 
     // FIXME:
     // auto_ptr<vector<bool> > bools_(new vector<bool>(2, false));
     // vector<bool> *const bools = bools_.get();
-    // context[STRING("a_pointer")] = bools;
+    // context[traits_type::literal("a_pointer")] = bools;
 
-    context[STRING("a_true")] = true;
-    context[STRING("a_false")] = false;
+    context[traits_type::literal("a_true")] = true;
+    context[traits_type::literal("a_false")] = false;
 
-    string_type sss = STRING("This should be a string.");
+    string_type sss = traits_type::literal("This should be a string.");
     char_type const *const ccc = sss.c_str();
-    context[STRING("char_pointer")] = ccc;
+    context[traits_type::literal("char_pointer")] = ccc;
 }}}

@@ -37,7 +37,6 @@ struct missing_attribute;
 
 namespace django {
 namespace {
-using detail::text;
 using detail::operator ==;
 using boost::xpressive::_s;
 using boost::xpressive::as_xpr;
@@ -164,8 +163,8 @@ struct builtin_tags {
             match_type  const& block   = match(engine.block);
             boolean_type autoescape = true;
 
-            if      (setting == detail::text("on"))  autoescape = true;
-            else if (setting == detail::text("off")) autoescape = false;
+                 if (setting == traits_type::literal("on"))  autoescape = true;
+            else if (setting == traits_type::literal("off")) autoescape = false;
             else throw_exception(std::invalid_argument("setting"));
 
             options_type options_copy = options; // NOTE: Don't make the copy const.
@@ -301,10 +300,10 @@ struct builtin_tags {
                           , out_type&           out
                           ) {
 
-            if (optional<value_type const&> const token = detail::find_value(text("csrf_token"), context)) {
+            if (optional<value_type const&> const token = detail::find_value(traits_type::literal("csrf_token"), context)) {
                 string_type const& s = detail::escape_entities(token->to_string());
 
-                if (s != text("NOTPROVIDED")) {
+                if (s != traits_type::literal("NOTPROVIDED")) {
                     out << "<div style='display:none'>";
                     out << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
                     out << "</div>";
@@ -383,7 +382,7 @@ struct builtin_tags {
             // available to the derived template. We don't care
             // about non-block content, so it is discarded.
             engine.render_file(null_stream, filepath, context, options_copy);
-            string_type const suffix = text("_super");
+            string_type const suffix = traits_type::literal("_super");
 
             BOOST_FOREACH(block_type const& block, blocks) {
                 context_copy[block.first + suffix] = block.second;
@@ -834,20 +833,20 @@ struct builtin_tags {
             engine.render_block(out, block, context_copy, options);
         }
 
-        typedef std::map<string_type, value_type>         entry_type;
-        typedef std::vector<entry_type>         entries_type;
+        typedef std::map<string_type, value_type>   entry_type;
+        typedef std::vector<entry_type>             entries_type;
 
         inline static entries_type regroup(value_type const& values, string_type const& attrs) {
-            static string_type const grouper_(detail::text("grouper")),
-                                list_   (detail::text("list"));
+            static string_type const grouper_name = traits_type::literal("grouper");
+            static string_type const list_name    = traits_type::literal("list");
             entries_type entries;
 
             BOOST_FOREACH(typename value_type::group_type const& group, values.group_by(attrs)) {
                 value_type const key   = group.first;
                 value_type const value = group.second;
                 entry_type entry;
-                entry[grouper_] = key;
-                entry[list_]    = value;
+                entry[grouper_name] = key;
+                entry[list_name]    = value;
                 entries.push_back(entry);
             }
 
@@ -882,7 +881,7 @@ struct builtin_tags {
             engine.render_block(stream, body, context, options);
             // TODO: Use detail::bidirectional_istream_iterator to feed directly to regex_replace.
             string_type const string = stream.str();
-            regex_replace(output, string.begin(), string.end(), gap, text("$1$2"));
+            regex_replace(output, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
         }
     };
 

@@ -67,63 +67,6 @@ namespace posix_time = boost::posix_time;
 namespace xpressive  = boost::xpressive;
 
 //
-// [deprecated] string_literal:
-//     Helper class to help widen literals on the spot when necessary.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class From, std::size_t Length>
-struct string_literal {
-    From const (&source)[Length];
-    inline string_literal(From const (&source)[Length]) : source(source) {}
-
-    // We define these to more easily interoperate
-    // with the regex_* and algorithm::* functions.
-    typedef From const* const_iterator;
-    inline const_iterator begin() const { return source; }
-    inline const_iterator end() const { return source + Length - 1; }
-
-    template <class Char, class Traits, class Allocator>
-    inline operator std::basic_string<Char, Traits, Allocator>() const {
-        return std::basic_string<Char, Traits, Allocator>(source, source + Length - 1);
-    }
-
-    template <class Char, class Traits, class Allocator>
-    inline bool operator ==(std::basic_string<Char, Traits, Allocator> const& that) const {
-        return that.compare(*this) == 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    friend inline bool operator ==( std::basic_string<Char, Traits, Allocator> const& that
-                                  , string_literal const& self
-                                  ) {
-        return that.compare(self) == 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    inline bool operator !=(std::basic_string<Char, Traits, Allocator> const& that) const {
-        return that.compare(*this) != 0;
-    }
-
-    template <class Char, class Traits, class Allocator>
-    friend inline bool operator !=( std::basic_string<Char, Traits, Allocator> const& that
-                                  , string_literal const& self
-                                  ) {
-        return that.compare(self) != 0;
-    }
-};
-
-//
-// [deprecated] text:
-//     Creates string_literal objects from native literals.
-//     TODO: Replace remaining uses with traits_type::literal.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class From, std::size_t Length>
-inline string_literal<From, Length> text(From const (&source)[Length]) {
-    return string_literal<From, Length>(source);
-}
-
-//
 // local_now
 //     TODO: Offer a local_time::local_date_time version; e.g.
 //           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
@@ -191,20 +134,20 @@ inline String format_time(String format, Time const& time) {
 
 template <class String, class Size>
 inline String format_size(Size const size) {
+    typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
+    stream << std::fixed << std::setprecision(1);
+
     double bucket = 1;
     String unit;
 
-         if (size >  (bucket = (std::pow)(2, 60.0))) unit = text("EB");
-    else if (size >  (bucket = (std::pow)(2, 50.0))) unit = text("PB");
-    else if (size >  (bucket = (std::pow)(2, 40.0))) unit = text("TB");
-    else if (size >  (bucket = (std::pow)(2, 30.0))) unit = text("GB");
-    else if (size >  (bucket = (std::pow)(2, 20.0))) unit = text("MB");
-    else if (size >  (bucket = (std::pow)(2, 10.0))) unit = text("KB");
-    else if (size >= (bucket = (std::pow)(2, 00.0))) unit = text("bytes");
-
-    std::basic_ostringstream<typename String::value_type> stream;
-    stream << std::fixed << std::setprecision(1);
-    stream << (size / bucket) << ' ' << unit;
+         if (size >  (bucket = (std::pow)(2, 60.0))) stream << (size / bucket) << " EB";
+    else if (size >  (bucket = (std::pow)(2, 50.0))) stream << (size / bucket) << " PB";
+    else if (size >  (bucket = (std::pow)(2, 40.0))) stream << (size / bucket) << " TB";
+    else if (size >  (bucket = (std::pow)(2, 30.0))) stream << (size / bucket) << " GB";
+    else if (size >  (bucket = (std::pow)(2, 20.0))) stream << (size / bucket) << " MB";
+    else if (size >  (bucket = (std::pow)(2, 10.0))) stream << (size / bucket) << " KB";
+    else if (size >= (bucket = (std::pow)(2, 00.0))) stream << (size / bucket) << " bytes";
 
     BOOST_ASSERT(stream);
     return stream.str();
@@ -215,12 +158,13 @@ inline String format_size(Size const size) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <std::size_t Width, class Char>
-inline static std::basic_string<Char> to_hex(Char const c) {
+inline static std::basic_string<Char> to_hex(Char const c, bool lowercase = false) {
     // TODO: Ensure that given the width, the character passed in won't overflow as a number.
     // BOOST_STATIC_ASSERT(sizeof(Char) ... Width);
     std::basic_ostringstream<Char> stream;
-    stream << std::hex << std::uppercase << std::setw(Width);
-    stream << std::setfill(Char('0')) << static_cast<std::size_t>(c);
+    if (!lowercase) stream << std::uppercase;
+    stream << std::hex << std::setw(Width) << std::setfill(Char('0'));
+    stream << static_cast<std::size_t>(c);
     BOOST_ASSERT(stream);
     return stream.str();
 }
@@ -231,16 +175,16 @@ inline static std::basic_string<Char> to_hex(Char const c) {
 
 template <class String>
 inline String uri_encode(String const& string) {
-    String result;
-    result.reserve(string.size()); // Assume no encodings.
     typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
 
     BOOST_FOREACH(char_type const c, string) {
-        result += std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '/' ?
-            String(1, c) : char_type('%') + to_hex<2>(c);
+        bool const allowed = std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '/';
+        allowed ? stream << c : stream << "%" << to_hex<2>(c);
     }
 
-    return result;
+    BOOST_ASSERT(stream);
+    return stream.str();
 }
 
 //
@@ -249,16 +193,16 @@ inline String uri_encode(String const& string) {
 
 template <class String>
 inline String iri_encode(String const& string) {
-    String result;
-    result.reserve(string.size()); // Assume no encodings.
     typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
 
     BOOST_FOREACH(char_type const c, string) {
-        result += std::isalnum(c) || algorithm::is_any_of("/#%[]=:;$&()+,!?")(c) ?
-            String(1, c) : char_type('%') + to_hex<2>(c);
+        bool const allowed = std::isalnum(c) || boost::algorithm::is_any_of("/#%[]=:;$&()+,!?")(c);
+        allowed ? stream << c : stream << "%" << to_hex<2>(c);
     }
 
-    return result;
+    BOOST_ASSERT(stream);
+    return stream.str();
 }
 
 //
@@ -267,40 +211,23 @@ inline String iri_encode(String const& string) {
 
 template <class String>
 inline String escape_entities(String const& string, bool const ascii = false) {
-    typedef typename String::size_type size_type;
+    typedef typename String::size_type  size_type;
     typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
 
-    if (size_type const escapes = std::count_if(string.begin(),
-        string.end(), algorithm::is_any_of("<>&'\""))) {
-
-        String result;
-        BOOST_STATIC_CONSTANT(size_type, max_length = 6);
-        result.reserve(string.size() + escapes * max_length);
-
-        BOOST_FOREACH(char_type const c, string) {
-            switch (c) {
-                case char_type('<'):  result += text("&lt;");   break;
-                case char_type('>'):  result += text("&gt;");   break;
-                case char_type('&'):  result += text("&amp;");  break;
-                case char_type('"'):  result += text("&quot;"); break;
-                case char_type('\''): result += text("&apos;"); break;
-                default: {
-                    if (ascii) {
-                        result += text("&#x");
-                        result += to_hex<4>(c);
-                    }
-                    else {
-                        result += c;
-                    }
-                }
-            }
+    BOOST_FOREACH(char_type const c, string) {
+        switch (c) {
+            case char_type('<'):  stream << "&lt;";   break;
+            case char_type('>'):  stream << "&gt;";   break;
+            case char_type('&'):  stream << "&amp;";  break;
+            case char_type('"'):  stream << "&quot;"; break;
+            case char_type('\''): stream << "&apos;"; break;
+            default: ascii ? stream << "&#x" << to_hex<4>(c) : stream << c;
         }
+    }
 
-        return result;
-    }
-    else {
-        return string;
-    }
+    BOOST_ASSERT(stream);
+    return stream.str();
 }
 
 //

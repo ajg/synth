@@ -140,7 +140,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
 
     template <typename Char, size_type M, size_type N>
     inline regex_type marker(Char const (&m)[M], Char const (&n)[N]) {
-        this->markers[detail::text(n)] = detail::text(m);
+        this->markers[traits_type::literal(n)] = traits_type::literal(m);
         return x::as_xpr(m);
     }
 
@@ -157,8 +157,8 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     }*/
 
     definition()
-        : newline        (detail::text("\n"))
-        , ellipsis       (detail::text("..."))
+        : newline        (traits_type::literal("\n"))
+        , ellipsis       (traits_type::literal("..."))
         , brace_open     (marker("{",  "openbrace"))
         , brace_close    (marker("}",  "closebrace"))
         , block_open     (marker("{%", "openblock"))
@@ -329,8 +329,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
         BOOST_ASSERT(argument.is_literal());
         token_type const& source = argument.token();
         static char_type const delimiter[2] = { Delimiter, 0 };
-        separator_type const separator(delimiter, 0, keep_empty_tokens);
-        tokenizer_type const tokenizer(source.begin(), source.end(), separator);
+        tokenizer_type const tokenizer(source, separator_type(delimiter, 0, keep_empty_tokens));
         static definition_type const tokenizable_definition;
         typename definition_type::match_type match;
         sequence_type sequence;
@@ -585,7 +584,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
-        if (op == detail::text("not")) {
+        if (op == traits_type::literal("not")) {
             return !evaluate_expression(operand, context, options);
         }
         else {
@@ -615,36 +614,36 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                 throw_exception(std::logic_error("invalid binary expression"));
             }
 
-            if (op == detail::text("==")) {
+            if (op == traits_type::literal("==")) {
                 value = value == evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text("!=")) {
+            else if (op == traits_type::literal("!=")) {
                 value = value != evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text("<")) {
+            else if (op == traits_type::literal("<")) {
                 value = value < evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text(">")) {
+            else if (op == traits_type::literal(">")) {
                 value = value > evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text("<=")) {
+            else if (op == traits_type::literal("<=")) {
                 value = value <= evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text(">=")) {
+            else if (op == traits_type::literal(">=")) {
                 value = value >= evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text("and")) {
+            else if (op == traits_type::literal("and")) {
                 value = value ? evaluate_expression(segment, context, options) : value;
             }
-            else if (op == detail::text("or")) {
+            else if (op == traits_type::literal("or")) {
                 value = value ? value : evaluate_expression(segment, context, options);
             }
-            else if (op == detail::text("in")) {
+            else if (op == traits_type::literal("in")) {
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (algorithm::starts_with(op, detail::text("not"))
-                  && algorithm::ends_with(op, detail::text("in"))) {
+            else if (algorithm::starts_with(op, traits_type::literal("not"))
+                  && algorithm::ends_with(op, traits_type::literal("in"))) {
                 value_type const elements = evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }
@@ -694,47 +693,47 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
         typedef typename transliterations_type::value_type  transliteration_type;
 
         static transliterations_type const transliterations = boost::assign::list_of<transliteration_type>
-            (char_type('%'), detail::text("%%"))
-			(char_type('a'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%P"))) // TODO: Periods; implement on Windows.
-            (char_type('A'), detail::text("%p"))
-            (char_type('b'), detail::text("%b")) // TODO: Lowercase
-            (char_type('B'), detail::text(""))   // "Not implemented" per spec.
-            (char_type('c'), detail::text("%Y-%m-%dT%H:%M:%S%z"))
-            (char_type('d'), detail::text("%d"))
-            (char_type('D'), detail::text("%a"))
-            (char_type('e'), detail::text("%z"))    // TODO: Ignored with ptimes
-            (char_type('E'), detail::text("%B"))    // TODO: Make locale-aware
-            (char_type('f'), detail::text("%l:%M")) // TODO: No leading blank, no zero minutes
-            (char_type('F'), detail::text("%B"))
-            (char_type('g'), detail::text("%l"))    // TODO: No leading blank
-            (char_type('G'), detail::text("%k"))    // TODO: No leading blank
-            (char_type('h'), detail::text("%I"))
-            (char_type('H'), detail::text("%H"))
-            (char_type('i'), detail::text("%M"))
-            (char_type('I'), detail::text(""))   // TODO: Implement
-            (char_type('j'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%e"))) // TODO: No leading blank; implement on Windows.
-            (char_type('l'), detail::text("%A"))
-            (char_type('L'), detail::text(""))   // TODO: Implement
-            (char_type('m'), detail::text("%m"))
-            (char_type('M'), detail::text("%b"))
-            (char_type('n'), detail::text("%m")) // TODO: No leading zeros
-            (char_type('N'), detail::text("%b")) // TODO: Abbreviations/periods
-            (char_type('o'), detail::text("%G"))
-            (char_type('O'), detail::text(""))   // TODO: Implement
-			(char_type('P'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%r"))) // TODO: Periods, no zero minutes, "midnight"/"noon"; implement on Windows.
-            (char_type('r'), detail::text("%a, %d %b %Y %T %z"))
-            (char_type('s'), detail::text("%S"))
-            (char_type('S'), detail::text(""))   // TODO: Implement
-            (char_type('t'), detail::text(""))   // TODO: Implement
-            (char_type('T'), detail::text(""))   // TODO: Implement
-            (char_type('u'), detail::text("%f")) // TODO: No leading period
-            (char_type('U'), detail::text(""))   // TODO: Implement
-            (char_type('w'), detail::text("%w"))
-			(char_type('W'), detail::text(AJG_SYNTH_IF_WINDOWS("", "%V"))) // TODO: No leading zeros; implement on Windows.
-            (char_type('y'), detail::text("%y"))
-            (char_type('Y'), detail::text("%Y"))
-            (char_type('z'), detail::text("%j")) // TODO: No leading zeros
-            (char_type('Z'), detail::text(""))   // TODO: Implement
+            (char_type('%'), traits_type::literal("%%"))
+			(char_type('a'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%P"))) // TODO: Periods; implement on Windows.
+            (char_type('A'), traits_type::literal("%p"))
+            (char_type('b'), traits_type::literal("%b")) // TODO: Lowercase
+            (char_type('B'), traits_type::literal(""))   // "Not implemented" per spec.
+            (char_type('c'), traits_type::literal("%Y-%m-%dT%H:%M:%S%z"))
+            (char_type('d'), traits_type::literal("%d"))
+            (char_type('D'), traits_type::literal("%a"))
+            (char_type('e'), traits_type::literal("%z"))    // TODO: Ignored with ptimes
+            (char_type('E'), traits_type::literal("%B"))    // TODO: Make locale-aware
+            (char_type('f'), traits_type::literal("%l:%M")) // TODO: No leading blank, no zero minutes
+            (char_type('F'), traits_type::literal("%B"))
+            (char_type('g'), traits_type::literal("%l"))    // TODO: No leading blank
+            (char_type('G'), traits_type::literal("%k"))    // TODO: No leading blank
+            (char_type('h'), traits_type::literal("%I"))
+            (char_type('H'), traits_type::literal("%H"))
+            (char_type('i'), traits_type::literal("%M"))
+            (char_type('I'), traits_type::literal(""))   // TODO: Implement
+            (char_type('j'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%e"))) // TODO: No leading blank; implement on Windows.
+            (char_type('l'), traits_type::literal("%A"))
+            (char_type('L'), traits_type::literal(""))   // TODO: Implement
+            (char_type('m'), traits_type::literal("%m"))
+            (char_type('M'), traits_type::literal("%b"))
+            (char_type('n'), traits_type::literal("%m")) // TODO: No leading zeros
+            (char_type('N'), traits_type::literal("%b")) // TODO: Abbreviations/periods
+            (char_type('o'), traits_type::literal("%G"))
+            (char_type('O'), traits_type::literal(""))   // TODO: Implement
+			(char_type('P'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%r"))) // TODO: Periods, no zero minutes, "midnight"/"noon"; implement on Windows.
+            (char_type('r'), traits_type::literal("%a, %d %b %Y %T %z"))
+            (char_type('s'), traits_type::literal("%S"))
+            (char_type('S'), traits_type::literal(""))   // TODO: Implement
+            (char_type('t'), traits_type::literal(""))   // TODO: Implement
+            (char_type('T'), traits_type::literal(""))   // TODO: Implement
+            (char_type('u'), traits_type::literal("%f")) // TODO: No leading period
+            (char_type('U'), traits_type::literal(""))   // TODO: Implement
+            (char_type('w'), traits_type::literal("%w"))
+			(char_type('W'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%V"))) // TODO: No leading zeros; implement on Windows.
+            (char_type('y'), traits_type::literal("%y"))
+            (char_type('Y'), traits_type::literal("%Y"))
+            (char_type('z'), traits_type::literal("%j")) // TODO: No leading zeros
+            (char_type('Z'), traits_type::literal(""))   // TODO: Implement
             ;
 
         std::basic_ostringstream<char_type> stream;
@@ -763,12 +762,12 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                                             , 60 * 60
                                             , 60
                                             };
-        static string_type const units[N] = { detail::text("year")
-                                            , detail::text("month")
-                                            , detail::text("week")
-                                            , detail::text("day")
-                                            , detail::text("hour")
-                                            , detail::text("minute")
+        static string_type const units[N] = { traits_type::literal("year")
+                                            , traits_type::literal("month")
+                                            , traits_type::literal("week")
+                                            , traits_type::literal("day")
+                                            , traits_type::literal("hour")
+                                            , traits_type::literal("minute")
                                             };
 
         if (duration.is_negative()) {
@@ -797,7 +796,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
     }
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return algorithm::replace_all_copy(s, detail::text(" "), options.nonbreaking_space);
+        return algorithm::replace_all_copy(s, traits_type::literal(" "), options.nonbreaking_space);
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n

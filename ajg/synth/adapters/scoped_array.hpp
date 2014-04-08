@@ -7,6 +7,7 @@
 
 #include <ajg/synth/adapters/array.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/forwarding_adapter.hpp>
 #include <ajg/synth/adapters/detail/smart_ptr_fwd.hpp>
 
 namespace ajg {

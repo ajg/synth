@@ -18,14 +18,14 @@ namespace synth {
 
 template <class Traits, class T>
 struct adapter<Traits, std::stack<T> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     AJG_SYNTH_ADAPTER(std::stack<T>)
     adapted_type adapted_;
 
   public:
 
-    boolean_type test() const { return !adapted_.empty(); }
+    boolean_type to_boolean() const { return !adapted_.empty(); }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }

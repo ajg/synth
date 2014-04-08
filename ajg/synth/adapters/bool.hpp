@@ -16,15 +16,15 @@ namespace synth {
 
 template <class Traits>
 struct adapter<Traits, bool>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     AJG_SYNTH_ADAPTER(bool)
     adapted_type adapted_;
 
   public:
 
-    number_type  count() const { return adapted_ ? 1 : 0; }
-    boolean_type test()  const { return adapted_; }
+    number_type  to_number()  const { return adapted_ ? 1 : 0; }
+    boolean_type to_boolean() const { return adapted_; }
     void input (istream_type& in)        { in >> adapted_; }
     // TODO: Make the true/false strings configurable via Traits.
     void output(ostream_type& out) const { out << (adapted_ ? "True" : "False"); }

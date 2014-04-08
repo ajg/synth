@@ -7,12 +7,14 @@
 
 #include <ajg/synth/config.hpp>
 
+#include <string>
 #include <limits>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <utility>
+#include <typeinfo>
 #include <exception>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -283,7 +285,7 @@ inline typename Container::const_iterator at(Container const& container, integer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator, class Distance>
-inline static Iterator advance_to(Iterator iterator, Distance const distance) {
+inline Iterator advance_to(Iterator iterator, Distance const distance) {
     std::advance(iterator, distance);
     return iterator;
 }
@@ -296,6 +298,14 @@ template <class Container, class Number>
 inline std::pair<typename Container::const_iterator, typename Container::const_iterator>
         drop(Container const& container, Number const number) {
     return std::make_pair(advance_to(container.begin(), number), container.end());
+}
+
+//
+// get_type_name
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline std::string get_type_name(std::type_info const& info) {
+    return info.name(); // TODO: Unmangle where needed.
 }
 
 }}} // namespace ajg::synth::detail

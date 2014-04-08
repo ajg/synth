@@ -23,19 +23,17 @@ namespace synth {
 
 template <class Traits, class T, std::size_t N>
 struct adapter<Traits, T[N]>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef T array_type[N];
     AJG_SYNTH_ADAPTER(array_type)
 
   public:
 
-    number_type  count() const { return N; }
-    boolean_type test()  const { return N != 0; }
+    number_type  to_number()  const { return N; }
+    boolean_type to_boolean() const { return N != 0; }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
-    boolean_type equal(abstract_type const& that) const {
-        return this->equal_sequence(that);
-    }
+    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_iterator(pointer<0>()); }
     const_iterator end()   const { return const_iterator(pointer<N>()); }
@@ -61,7 +59,7 @@ struct adapter<Traits, T[N]>
 
 template <class Traits, class T>
 struct adapter<Traits, T[]>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(T const*, adapter);
     // /*const*/ adapted_type adapted_;
@@ -70,11 +68,11 @@ struct adapter<Traits, T[]>
 
   protected:
 
-    virtual boolean_type equal_adapted(abstract_type const& that) const {
+    virtual boolean_type equal_adapted(base_type const& that) const {
         return this->template equal_as<adapter>(that);
     }
 
-    virtual boolean_type less_adapted(abstract_type const& that) const {
+    virtual boolean_type less_adapted(base_type const& that) const {
         return this->template less_as<adapter>(that);
     }
 
@@ -85,12 +83,10 @@ struct adapter<Traits, T[]>
 
   public:
 
-    number_type  count() const { return length_; }
-    boolean_type test()  const { return length_ != 0; }
+    number_type  to_number()  const { return length_; }
+    boolean_type to_boolean() const { return length_ != 0; }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
-    boolean_type equal(abstract_type const& that) const {
-        return this->equal_sequence(that);
-    }
+    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return adapted_ + 0; }
     const_iterator end()   const { return adapted_ + length_; }
@@ -111,7 +107,7 @@ struct adapter<Traits, array<T, N> > : public adapter<Traits, T[N]> {
 /*
 template <class Traits, class T, std::size_t N>
 struct adapter<Traits, array<T, N> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef array<T, N> array_type;
     AJG_SYNTH_ADAPTER(array_type)

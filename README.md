@@ -168,7 +168,6 @@ Components
 ### Templates
 
  - `file_template`
- - `multi_template`
  - `stream_template`
  - `string_template`
 
@@ -237,17 +236,17 @@ Components
  - `variant`
    * `boost::variant`
 
-### Formats
+### Input Formats
 
  - `ini`
  - `json`
  - `xml`
 
-### Bases
+### Base Components
 
+ - `base_adapter`
  - `base_engine`
  - `base_template`
- - `abstract_adapter`
 
 Django Engine
 -------------
@@ -469,10 +468,9 @@ Future Work
 
  - Templates:
    * Create `descriptor_template`
-   * Clean up and make `multi_template` public
+   * Refactor `multi_template` into `base_binding`
 
  - Refactoring:
-   * Rename `abstract_adapter` to `base_adapter`
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace

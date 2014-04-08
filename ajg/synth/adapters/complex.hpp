@@ -14,20 +14,21 @@ namespace ajg {
 namespace synth {
 
 //
-// specialization for std::complex
+// Specialization for std::complex
+//     TODO: Have is_numeric return true.
+//     TODO: Use numeric_adapter as base?
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits, class T>
-struct adapter<Traits, std::complex<T> >
-    : public abstract_adapter<Traits> {
+struct adapter<Traits, std::complex<T> > : public base_adapter<Traits> {
 
     AJG_SYNTH_ADAPTER(std::complex<T>)
     adapted_type adapted_;
 
   public:
 
-    number_type  count() const { return number_type(adapted_.real()); }
-    boolean_type test()  const { return adapted_ != T(0); }
+    number_type  to_number()  const { return number_type(adapted_.real()); }
+    boolean_type to_boolean() const { return adapted_ != T(0); }
     void input (istream_type& in)        { in >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }
 };

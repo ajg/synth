@@ -21,7 +21,7 @@ namespace synth {
 
 template <class Traits, class First, class Second>
 struct adapter<Traits, std::pair<First, Second> >
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef std::pair<First, Second> pair_type;
     typedef variant<First, Second> variant_type;
@@ -31,11 +31,9 @@ struct adapter<Traits, std::pair<First, Second> >
 
     // A pair can never be 'false', since its
     // 'length' is always non-zero (i.e. two.)
-    boolean_type test() const { return true; }
+    boolean_type to_boolean() const { return true; }
     void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out, traits_type::literal(": ")); }
-    boolean_type equal(abstract_type const& that) const {
-        return this->equal_sequence(that);
-    }
+    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_pair_iterator(adapted_, first); }
     const_iterator end()   const { return const_pair_iterator(adapted_, past); }

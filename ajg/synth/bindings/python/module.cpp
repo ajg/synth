@@ -2,9 +2,9 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-// TODO? #include <boost/python/detail/wrap_python.hpp> instead
+// TODO? #include <boost/python/detail/wrap_python.hpp>
 #include <Python.h>             // This prevents a strange macro issue in pyport.h.
-#include <ajg/synth/config.hpp> // Must come ahead of everything else, but after Python.h.
+#include <ajg/synth/config.hpp> // Must come ahead of everything except Python.h.
 
 #include <boost/python.hpp>
 

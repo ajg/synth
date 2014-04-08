@@ -26,7 +26,7 @@ namespace d = synth::python::detail;
 
 template <class Traits>
 struct adapter<Traits, py::object>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     typedef py::object object_type;
     AJG_SYNTH_ADAPTER(object_type)
@@ -38,7 +38,7 @@ struct adapter<Traits, py::object>
 
   public:
 
-    virtual boolean_type test() const { return boolean_type(adapted_); }
+    virtual boolean_type to_boolean() const { return boolean_type(adapted_); }
     virtual datetime_type to_datetime() const { return d::to_datetime<traits_type>(adapted_); }
 
  // virtual void input (istream_type& in)        { in >> adapted_; }

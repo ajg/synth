@@ -8,6 +8,7 @@
 #include <boost/optional/optional_fwd.hpp>
 
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
 namespace synth {

@@ -101,7 +101,7 @@ struct value : value_facade<Char, value<Char> > {
             if (method.name == "find") {
                 try {
                     // If that fails, try using the value as an index.
-                    return this->at(attribute.count());
+                    return this->at(attribute.to_number());
                 }
                 catch (std::exception const&) {
                     // Do nothing, and pass through to the `throw' below,
@@ -224,31 +224,5 @@ struct value : value_facade<Char, value<Char> > {
 };
 
 }}} // namespace ajg::synth::django
-
-namespace ajg {
-namespace synth {
-
-//
-// specialization for above
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*template <class Traits, class Iterator>
-struct adapter<Traits, django::value<Iterator> > {
-    adapter(django::value<Iterator> const& value);
-};*/
-
-    /*: public forwarding_adapter<Traits, django::value<Iterator>, django::value<Iterator> > {
-
-    adapter(scoped_array<T> const& adapted, size_t const length)
-        : adapted_(adapted), length_(length) {}
-    scoped_array<T> const& adapted_;
-    size_t const length_;
-
-    template <class A> A forward() const { return A(cref(*reinterpret_cast<T(*)[]>(adapted_.get())), length_); }
-    // T (&get() const)[] { return *reinterpret_cast<T(*)[]>(adapted_.get()); }
-    bool valid() const { return adapted_; }
-};*/
-
-}} // namespace ajg::synth
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED

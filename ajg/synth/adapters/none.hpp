@@ -18,15 +18,15 @@ namespace synth {
 
 template <class Traits>
 struct adapter<Traits, boost::none_t>
-    : public abstract_adapter<Traits> {
+    : public base_adapter<Traits> {
 
     AJG_SYNTH_ADAPTER(boost::none_t)
     boost::none_t const& adapted_;
 
   public:
 
-    number_type  count() const { return 0; }
-    boolean_type test()  const { return false; }
+    number_type  to_number()  const { return 0; }
+    boolean_type to_boolean() const { return false; }
 
  // void input (istream_type& in)        { in  >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }

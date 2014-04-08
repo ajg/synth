@@ -8,6 +8,7 @@
 #include <memory>
 
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
 namespace synth {

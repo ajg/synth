@@ -7,6 +7,11 @@
 
 #include <ajg/synth/config.hpp>
 
+#include <string>
+#include <typeinfo>
+#include <stdexcept>
+#include <exception>
+
 namespace ajg {
 namespace synth {
 
@@ -34,6 +39,21 @@ struct file_error : public std::runtime_error {
         , filepath(filepath), action(action), reason(reason) {}
 
     ~file_error() throw () {}
+};
+
+namespace detail { std::string get_type_name(std::type_info const&); }
+
+//
+// conversion_error
+//     TODO: Consider renaming bad_conversion.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct conversion_error : public std::runtime_error {
+    conversion_error(std::type_info const& a, std::type_info const& b)
+        : std::runtime_error("could not convert value of type `"
+                                 + detail::get_type_name(a) + "' to `"
+                                 + detail::get_type_name(b) + "'") {}
+    ~conversion_error() throw () {}
 };
 
 //

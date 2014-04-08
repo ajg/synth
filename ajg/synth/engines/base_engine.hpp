@@ -35,12 +35,14 @@ namespace synth {
 
 namespace xpressive = boost::xpressive;
 
+struct base_engine : detail::nonconstructible {
+
 template < class BidirectionalIterator
 	     , class Definition
 		 // This argument is only necessary because MSVC chokes on iterator_type::value_type:
 	     , class Char = typename BidirectionalIterator::value_type
          >
-struct base_definition : boost::noncopyable {
+struct definition : boost::noncopyable {
   public:
 
     // Parametrized types:
@@ -48,7 +50,7 @@ struct base_definition : boost::noncopyable {
     typedef Definition            definition_type;
 
     // Derived types:
-    typedef base_definition                               this_type;
+    typedef definition                                    this_type;
     typedef bool                                          boolean_type; // TODO: Use Traits::boolean_type
     typedef std::size_t                                   size_type;    // TODO: Use Traits::size_type
     typedef Char /* typename iterator_type::value_type */ char_type;    // TODO: Use Traits::char_type
@@ -137,7 +139,9 @@ struct base_definition : boost::noncopyable {
 
     xpressive::placeholder<iterator_type> iterator_;
 
-}; // base_definition
+}; // definition
+
+}; // base_engine
 
 }} // namespace ajg::synth
 

@@ -26,7 +26,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
-#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/django/value.hpp>
 #include <ajg/synth/engines/django/loader.hpp>
 #include <ajg/synth/engines/django/options.hpp>
@@ -41,16 +41,14 @@ using detail::operator ==;
 using detail::find_mapped_value;
 namespace x = boost::xpressive;
 
-struct engine : detail::nonconstructible {
-
-typedef engine engine_type;
+struct engine : base_engine {
 
 template <class BidirectionalIterator>
-struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
 
     typedef definition                                                          this_type;
-    typedef base_definition<BidirectionalIterator, this_type>                   base_type;
+    typedef base_engine::definition<BidirectionalIterator, this_type>           base_type;
     typedef django::loader<this_type>                                           loader_type;
     typedef typename base_type::id_type                                         id_type;
     typedef typename base_type::size_type                                       size_type;
@@ -389,7 +387,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        typedef file_template<char_type, engine_type> file_template_type;
+        typedef file_template<char_type, engine> file_template_type;
         std::string const filepath_ = traits_type::narrow(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
@@ -846,9 +844,9 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
 
   /*private:
 
-    template <class E>                   friend struct django::builtin_tags;
-    template <class E>                   friend struct django::builtin_filters;
-    template <class I, class D, class C> friend struct synth::base_definition;*/
+    template <class E> friend struct django::builtin_tags;
+    template <class E> friend struct django::builtin_filters;
+    template friend base_engine; */
 
     // TODO: Parallelize the formatting:
     regex_type tag, text, block, skipper, nothing;

@@ -11,20 +11,18 @@
 #include <boost/mpl/void.hpp>
 
 #include <ajg/synth/engines/null_value.hpp>
-#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/base_engine.hpp>
 
 namespace ajg {
 namespace synth {
 
-struct null_engine : detail::nonconstructible {
-
-typedef null_engine engine_type;
+struct null_engine : base_engine {
 
 template <class BidirectionalIterator>
-struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
 
-    typedef base_definition<BidirectionalIterator, definition> base_type;
+    typedef base_engine::definition<BidirectionalIterator, definition> base_type;
 
     typedef typename base_type::id_type         id_type;
     typedef typename base_type::size_type       size_type;

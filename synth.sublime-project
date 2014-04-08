@@ -47,7 +47,8 @@
             [
                 "build",
                 "dist",
-                "tests/tut-framework"
+                "tests/tut-framework",
+                "*.egg-info"
             ],
             "follow_symlinks": true,
             "path": "."

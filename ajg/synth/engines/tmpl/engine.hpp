@@ -290,7 +290,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                     throw_exception(std::logic_error("duplicate escape mode"));
                 }
                 else {
-                    string_type const mode = algorithm::to_lower_copy(value.str());
+                    string_type const mode = boost::algorithm::to_lower_copy(value.str());
 
                          if (mode == traits_type::literal("none")
                           || mode == traits_type::literal("0"))   escape = attributes::none;

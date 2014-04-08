@@ -170,8 +170,8 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                                                        ) const {
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
-        string_type const temp = extract_attribute(attr(args.engine.quoted_value));
-        string_type const name = algorithm::to_lower_copy(attr(this->name).str());
+        string_type const temp  = extract_attribute(attr(args.engine.quoted_value));
+        string_type const name  = boost::algorithm::to_lower_copy(attr(this->name).str());
         string_type const value = interpolate ? this->interpolate(args, temp) : temp;
         return std::make_pair(name, value);
     }

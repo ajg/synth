@@ -616,7 +616,7 @@ struct builtin_tags {
                 std::map<string_type, value_type> values;
 
                 BOOST_FOREACH(match_type const& arg, args.nested_results()) {
-                    string_type const s = algorithm::trim_copy(arg.str());
+                    string_type const s = boost::algorithm::trim_copy(arg.str());
                     values[s] = engine.evaluate(arg, context, options);
                 }
 

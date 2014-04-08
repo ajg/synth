@@ -32,7 +32,7 @@ namespace {
 using detail::get_nested;
 using detail::operator ==;
 using namespace detail::placeholders;
-} // anonymous
+} // namespace
 
 template <class Engine>
 struct builtin_tags {

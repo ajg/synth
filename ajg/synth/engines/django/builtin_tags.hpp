@@ -44,7 +44,7 @@ using boost::xpressive::s2;
 using boost::xpressive::s3;
 using boost::xpressive::s4;
 boost::xpressive::mark_tag const id(9);
-} // anonymous
+} // namespace
 
 template <class Engine>
 struct builtin_tags {

@@ -24,7 +24,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
-#include <ajg/synth/engines/base_definition.hpp>
+#include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/ssi/value.hpp>
 #include <ajg/synth/engines/ssi/options.hpp>
 #include <ajg/synth/engines/ssi/builtin_tags.hpp>
@@ -39,12 +39,10 @@ template < class       Environment      = detail::standard_environment
          , bool        ThrowOnErrors    = false
          , std::size_t MaxRegexCaptures = 9
          >
-struct engine : detail::nonconstructible {
-
-typedef engine engine_type;
+struct engine : base_engine {
 
 template <class BidirectionalIterator>
-struct definition : base_definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
   public:
     // Constants:
 
@@ -52,8 +50,8 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
 
   public:
 
-    typedef definition                                        this_type;
-    typedef base_definition<BidirectionalIterator, this_type> base_type;
+    typedef definition                                                          this_type;
+    typedef base_engine::definition<BidirectionalIterator, this_type>           base_type;
 
     typedef typename base_type::id_type                                         id_type;
     typedef typename base_type::boolean_type                                    boolean_type;
@@ -244,7 +242,7 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        typedef file_template<char_type, engine_type> file_template_type;
+        typedef file_template<char_type, engine> file_template_type;
         std::string const filepath_ = traits_type::narrow(filepath);
         file_template_type(filepath_, options.directories).render(stream, context, options);
     }
@@ -419,8 +417,8 @@ struct definition : base_definition<BidirectionalIterator, definition<Bidirectio
 
   private:
 
-    template <class E>                   friend struct ssi::builtin_tags;
-    template <class I, class D, class C> friend struct synth::base_definition;
+    template <class E> friend struct ssi::builtin_tags;
+    template friend struct base_engine;
 
     regex_type tag, text, block, skipper;
     regex_type name, attribute, quoted_value;

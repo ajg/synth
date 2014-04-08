@@ -245,7 +245,7 @@ Components
 
 ### Bases
 
- - `base_definition`
+ - `base_engine`
  - `base_template`
  - `abstract_adapter`
 
@@ -475,9 +475,8 @@ Future Work
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
-   * Rename `base_definition` to `base_engine`
    * Experiment with embedding a slim, modularized version of Boost and using it by default
-   * Move `render_tag` and `builtin_tags_` to `base_definition`
+   * Move `render_tag` and `builtin_tags_` to `base_engine::definition`
    * Replace all remaining get_nested uses with s1, s2, ... or named patterns
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates

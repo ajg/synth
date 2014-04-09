@@ -43,21 +43,30 @@ namespace ajg {
 namespace synth {
 namespace debug {
 
-//
-// Debugging macros
+///
+/// AJG_CERR_LEAD, AJG_CERR_TRAIL
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// FIXME: For some god-forsaken reason the compilers used by Travis CI can't find fprintf in
-//        namespace `std`. So this macro is a workaround until we find a solution.
-
-#define AJG_FPRINTF /*std::*/fprintf
 
 #define AJG_CERR_LEAD  (std::cerr << std::boolalpha << "    " << __FUNCTION__ << "() - \t")
 #define AJG_CERR_TRAIL (std::endl)
 
+///
+/// AJG_DUMP, AJG_PRINT
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define AJG_DUMP(e)  (AJG_CERR_LEAD << #e << " = `" << (e) << "`" << AJG_CERR_TRAIL)
 #define AJG_PRINT(e) (AJG_CERR_LEAD << (e)                        << AJG_CERR_TRAIL)
 
+///
+/// AJG_FPRINTF:
+///     For some god-forsaken reason the compilers used by Travis CI can't find fprintf in
+///     namespace `std`; so this macro is a workaround until we find a solution.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define AJG_FPRINTF /*std::*/fprintf
+
+///
+/// abbreviate
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline std::string abbreviate(char const* s) {

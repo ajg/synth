@@ -78,11 +78,15 @@ struct default_value_traits {
 
   public:
 
+    ///
+    ///
+    ///     An extremely crude default conversion method.
+    ///
+
     template <class To, class From>
     inline static To to(From const& from) {
         To to;
-        // FIXME: Very crude conversion method for now:
-        // TODO: Unify w.r.t. adapter_traits::to
+        // TODO: Merge with adapter_traits::to.
         std::basic_stringstream<char_type> stream;
         stream << from;
         stream >> to;
@@ -119,10 +123,11 @@ struct default_value_traits {
     inline static ... literal(C const (&n)[N]) { ... }
     */
 
-    /// transcode
-    ///     This function allows us to centralize string conversion
-    ///     in order to properly, yet orthogonally, support Unicode.
-    ////////////////////////////////////////////////////////////////////////////
+///
+/// transcode:
+///     Centralize string conversion here for uniform Unicode support.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
     template <class To, class From>
     inline static std::basic_string<To> transcode(std::basic_string<From> const& s) {
         // return boost::lexical_cast<std::basic_string<To> >(s);

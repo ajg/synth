@@ -79,7 +79,7 @@ DJANGO_TEST(string, "{{'Foo'}}",   "Foo")
 DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 
 
-/// Tags
+/// Tag tests
 ///     TODO:
 ///     django::block_tag
 ///     django::debug_tag
@@ -287,7 +287,7 @@ DJANGO_TEST(verbatim_tag,
 
 DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
-/// Filters
+/// Filter tests
 ///     TODO:
 ///     django::force_escape_filter
 ///     django::iriencode_filter

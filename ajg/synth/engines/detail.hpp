@@ -225,6 +225,43 @@ inline String escape_entities(String const& string, bool const ascii = false) {
 }
 
 //
+// quote:
+//     Can handle "string" or 'string'.
+//     TODO: Quote sequences (\n, ...), etc.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class String>
+inline String quote(String const& string, typename String::value_type quotation) {
+    typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
+    stream << quotation;
+
+    BOOST_FOREACH(char_type const c, string) {
+        bool const allowed = c != quotation;
+        allowed ? stream << c : stream << "\\" << quotation;
+    }
+
+    stream << quotation;
+    BOOST_ASSERT(stream);
+    return stream.str();
+}
+
+//
+// unquote:
+//     Can handle "string" or 'string'.
+//     TODO: Unquote sequences (\n, ...), etc.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class String>
+inline String unquote(String const& string) {
+    BOOST_ASSERT(string.size() >= 2);
+    typename String::value_type quotation = string.front();
+    BOOST_ASSERT(string.back() == quotation);
+    return string.substr(1, string.size() - 2);
+}
+
+
+//
 // operator ==:
 //     Provides a more readable way to compare match objects via regex_ids.
 //     TODO: Rename to matches or similar to avoid confusion.

@@ -353,7 +353,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 /// Filter tests
 ///     TODO:
 ///     django::force_escape_filter
-///     django::iriencode_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
@@ -415,6 +414,8 @@ DJANGO_TEST(floatformat_filter, "{{34.26000|floatformat:\"-3\" }}", "34.260")
 DJANGO_TEST(getdigit_filter, "{{ 123456789|get_digit:'2' }}",  "8")
 DJANGO_TEST(getdigit_filter, "{{ -123456789|get_digit:'2' }}", "-123456789")
 DJANGO_TEST(getdigit_filter, "{{ 'foobar'|get_digit:'2' }}",   "foobar")
+
+DJANGO_TEST(iriencode_filter, "{{ \"?test=1&me=2\"|iriencode }}", "?test=1&amp;me=2")
 
 DJANGO_TEST(ljust_filter, "{{ \"Django\"|ljust:\"10\" }}", "Django    ")
 DJANGO_TEST(ljust_filter, "{{ \"Django\"|ljust:\"2\" }}",  "Django")

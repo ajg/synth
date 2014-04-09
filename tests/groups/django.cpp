@@ -354,7 +354,6 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 ///     TODO:
 ///     django::force_escape_filter
 ///     django::iriencode_filter
-///     django::pprint_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
@@ -439,6 +438,12 @@ DJANGO_TEST(pluralize_filter, "cris{{ 2|pluralize:'is,es' }}",  "crises")
 DJANGO_TEST(pluralize_filter, "ferr{{ 0|pluralize:'y,ies' }}",  "ferries")
 DJANGO_TEST(pluralize_filter, "ferr{{ 1|pluralize:'y,ies' }}",  "ferry")
 DJANGO_TEST(pluralize_filter, "ferr{{ 2|pluralize:'y,ies' }}",  "ferries")
+
+DJANGO_TEST(pprint_filter, "{{42|pprint }}",    "42")
+DJANGO_TEST(pprint_filter, "{{6.6|pprint }}",   "6.6")
+DJANGO_TEST(pprint_filter, "{{True|pprint }}",  "True")
+DJANGO_TEST(pprint_filter, "{{'foo'|pprint }}", "&apos;foo&apos;")
+DJANGO_TEST(pprint_filter, "{{past|pprint }}",  "2002-Jan-10 01:02:03")
 
 DJANGO_TEST(removetags_filter, "{{ \"<b>Joel</b> <button>is</button> a <span>slug</span>\"|removetags:\"b span\"|safe }}", "Joel <button>is</button> a slug")
 DJANGO_TEST(removetags_filter, "{{ \"<b>Begin</b> <foo /> <foo/> </foo> <foo> <span attr='value'>End</span>\"|removetags:\"b span foo\"|safe }}", "Begin     End")

@@ -247,6 +247,34 @@ struct builtin_tags {
     };
 
 //
+// csrf_token_tag
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct csrf_token_tag {
+        static regex_type syntax(engine_type& engine) {
+            return AJG_TAG(engine.reserved("csrf_token"));
+        }
+
+        static void render( engine_type  const& engine
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , out_type&           out
+                          ) {
+
+            if (optional<value_type const&> const token = detail::find_value(traits_type::literal("csrf_token"), context)) {
+                string_type const& s = detail::escape_entities(token->to_string());
+
+                if (s != traits_type::literal("NOTPROVIDED")) {
+                    out << "<div style='display:none'>";
+                    out << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
+                    out << "</div>";
+                }
+            }
+        }
+    };
+
+//
 // cycle_tag
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -282,34 +310,6 @@ struct builtin_tags {
                 context_type context_copy = context;
                 context_copy[name] = value;
                 engine.render_block(out, block, context_copy, options);
-            }
-        }
-    };
-
-//
-// csrf_token_tag
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    struct csrf_token_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("csrf_token"));
-        }
-
-        static void render( engine_type  const& engine
-                          , match_type   const& match
-                          , context_type const& context
-                          , options_type const& options
-                          , out_type&           out
-                          ) {
-
-            if (optional<value_type const&> const token = detail::find_value(traits_type::literal("csrf_token"), context)) {
-                string_type const& s = detail::escape_entities(token->to_string());
-
-                if (s != traits_type::literal("NOTPROVIDED")) {
-                    out << "<div style='display:none'>";
-                    out << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
-                    out << "</div>";
-                }
             }
         }
     };

@@ -257,11 +257,14 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
+            size_type     const year        = datetime.date().year();
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
             boolean_type  const has_minutes = flags.M != traits_type::literal("00");
             boolean_type  const is_midnight = flags.H == "00" && !has_minutes;
             boolean_type  const is_noon     = flags.H == "12" && !has_minutes;
+            boolean_type  const is_dst      = false;  // TODO: Implement, e.g. using tm_isdst from struct tm.
+            boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
             datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
@@ -289,10 +292,10 @@ struct formatter {
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
-            cooked.I = "";       // TODO: Implement.
+            cooked.I = is_dst ? traits_type::literal("1") : traits_type::literal("0");
             cooked.j = algo::trim_left_copy_if(flags.d, algo::is_any_of("0"));
             cooked.l = flags.A;
-            cooked.L = "";       // TODO: Implement.
+            cooked.L = traits_type::to_string(is_leapyear);
             cooked.m = flags.m;
             cooked.M = flags.b;
             cooked.n = algo::trim_left_copy_if(flags.m, algo::is_any_of("0"));

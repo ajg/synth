@@ -1569,7 +1569,8 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            tokenizer_type const tokenizer(value.to_string(), separator_type(word_delimiters));
+            string_type    const string = value.to_string();
+            tokenizer_type const tokenizer(string, separator_type(word_delimiters));
             return std::distance(tokenizer.begin(), tokenizer.end());
         }
     };

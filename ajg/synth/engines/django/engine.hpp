@@ -186,7 +186,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | subscript_link
             ;
         chain
-            = literal >> *link // TODO: Consider generalizing literal to expression
+            = literal >> *link
             ;
         unary_operator
             = op("not")
@@ -204,7 +204,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | op("not") >> *_s >> op("in")
             ;
         binary_expression
-            = chain >> *(binary_operator >> *_s >> x::ref(expression))
+            = chain >> *(*_s >> binary_operator >> *_s >> x::ref(expression))
             ;
         unary_expression
             = unary_operator >> *_s >> x::ref(expression)
@@ -217,11 +217,17 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | binary_expression
             | nested_expression
             ;
-        arguments
-            = *(expression >> *_s)
+        value
+            = expression >> *_s // TODO: Generalize all values to pipelines.
             ;
-        variables
-            = name >> *(as_xpr(',') >> *_s >> name)
+        argument
+            = value // TODO: Named arguments; e.g. (name >> '=')? >> value
+            ;
+        arguments
+            = *argument
+            ;
+        variable_names
+            = name >> *(as_xpr(',') >> *_s >> name) // TODO: Check that whitespace can follow a comma.
             ;
         filter
             = name >> !(as_xpr(':') >> chain)
@@ -435,19 +441,18 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     value_type evaluate( match_type     const& match
                        , context_type   const& context
                        , options_type   const& options
-              // TODO: , arguments_type const& arguments = arguments_type()
                        ) const {
-        return evaluate_expression(match, context, options);
+        return evaluate_expression(match(this->expression), context, options);
     }
 
-    arguments_type evaluate_arguments( match_type    const& args
+    arguments_type evaluate_arguments( match_type    const& match
                                      , context_type  const& context
                                      , options_type  const& options
                                      ) const {
         arguments_type arguments;
         // TODO: Evaluate the full arguments, not just the sequential (.first) ones.
-        BOOST_FOREACH(match_type const& arg, args.nested_results()) {
-            arguments.first.push_back(this->evaluate_expression(arg, context, options));
+        BOOST_FOREACH(match_type const& arg, detail::select_nested(match, this->argument)) {
+            arguments.first.push_back(this->evaluate(arg, context, options));
         }
         return arguments;
     }
@@ -539,23 +544,18 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                               , options_type const& options
                               ) const {
         BOOST_ASSERT(match == binary_expression);
-        // First, evaluate the first segment, which is always present and always a chain.
         match_type const& chain = match(this->chain);
         value_type value = evaluate_chain(chain, context, options);
-        size_type i = 0;
         string_type op;
 
-        BOOST_FOREACH(match_type const& segment, match.nested_results()) {
-            if (!i++) continue; // Skip the first segment (the chain.)
-            else if (segment == binary_operator) {
+        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
+            if (segment == binary_operator) {
                 op = segment.str();
-                continue;
             }
             else if (!(segment == expression)) {
                 throw_exception(std::logic_error("invalid binary expression"));
             }
-
-            if (op == traits_type::literal("==")) {
+            else if (op == traits_type::literal("==")) {
                 value = value == evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("!=")) {
@@ -794,20 +794,44 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     template <class E> friend struct django::builtin_filters;
     friend base_engine; */
 
-    // TODO: Parallelize the formatting:
-    regex_type tag, text, block, skipper, nothing;
-    regex_type identifier, restricted_identifier, unreserved_identifier;
-    regex_type unreserved_name, name, names;
-    regex_type package, packages;
+    regex_type tag;
+    regex_type text;
+    regex_type block;
+    regex_type skipper;
+    regex_type nothing;
+    regex_type identifier;
+    regex_type restricted_identifier;
+    regex_type unreserved_identifier;
+    regex_type unreserved_name;
+    regex_type name;
+    regex_type names;
+    regex_type variable_names;
+    regex_type package;
+    regex_type packages;
+    regex_type argument;
     regex_type arguments;
-    regex_type variables;
-    regex_type filter, filters, pipeline;
-    regex_type chain, link, subscript_link, attribute_link;
-    regex_type unary_operator, binary_operator;
-    regex_type unary_expression, binary_expression, nested_expression, expression;
+    regex_type value;
+    regex_type filter;
+    regex_type filters;
+    regex_type pipeline;
+    regex_type chain;
+    regex_type link;
+    regex_type subscript_link;
+    regex_type attribute_link;
+    regex_type unary_operator;
+    regex_type binary_operator;
+    regex_type unary_expression;
+    regex_type binary_expression;
+    regex_type nested_expression;
+    regex_type expression;
     regex_type none_literal;
-    regex_type true_literal, false_literal, boolean_literal;
-    regex_type string_literal, number_literal, variable_literal, literal;
+    regex_type true_literal;
+    regex_type false_literal;
+    regex_type boolean_literal;
+    regex_type string_literal;
+    regex_type number_literal;
+    regex_type variable_literal;
+    regex_type literal;
 
     string_regex_type html_namechar;
     string_regex_type html_whitespace;

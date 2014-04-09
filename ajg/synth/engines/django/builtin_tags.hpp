@@ -464,7 +464,7 @@ struct builtin_tags {
 
     struct for_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("for") >> engine.variables >> engine.keyword("in") >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("for") >> engine.variable_names >> engine.keyword("in") >> engine.value) >> engine.block
               >> !(AJG_TAG(engine.reserved("empty")) >> engine.block)
                 >> AJG_TAG(engine.reserved("endfor"));
         }
@@ -475,11 +475,10 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type  const& vars   = match(engine.variables);
-            match_type  const& expr   = match(engine.expression);
+            match_type  const& vars   = match(engine.variable_names);
             match_type  const& for_   = match(engine.block, 0);
             match_type  const& empty  = match(engine.block, 1);
-            value_type  const& value  = engine.evaluate(expr, context, options);
+            value_type  const& value  = engine.evaluate(match(engine.value), context, options);
 
             typename value_type::const_iterator it(value.begin()), end(value.end());
             typename options_type::names_type const& variables = engine.extract_names(vars);
@@ -518,7 +517,7 @@ struct builtin_tags {
 
 //
 // for_empty_tag
-// NOTE: This is a no-op, since the empty clause is already handled by for_tag.
+//     NOTE: This is a no-op, since the empty clause is already handled by for_tag.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct for_empty_tag {
@@ -537,7 +536,7 @@ struct builtin_tags {
 
     struct if_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("if") >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("if") >> engine.value) >> engine.block
               >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
                 >> AJG_TAG(engine.reserved("endif"));
         }
@@ -548,10 +547,9 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type   const& expr  = match(engine.expression);
             match_type   const& if_   = match(engine.block, 0);
             match_type   const& else_ = match(engine.block, 1);
-            boolean_type const  cond_ = engine.evaluate(expr, context, options);
+            boolean_type const  cond_ = engine.evaluate(match(engine.value), context, options);
 
                  if (cond_) engine.render_block(out, if_,   context, options);
             else if (else_) engine.render_block(out, else_, context, options);
@@ -627,7 +625,7 @@ struct builtin_tags {
 
     struct ifequal_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifequal") >> engine.expression >> *_s >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("ifequal") >> engine.value >> engine.value) >> engine.block
               >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
               >>   AJG_TAG(engine.reserved("endifequal"));
         }
@@ -638,8 +636,8 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type   const& left  = match(engine.expression, 0);
-            match_type   const& right = match(engine.expression, 1);
+            match_type   const& left  = match(engine.value, 0);
+            match_type   const& right = match(engine.value, 1);
             match_type   const& if_   = match(engine.block, 0);
             match_type   const& else_ = match(engine.block, 1);
             boolean_type const  cond_ =
@@ -658,7 +656,7 @@ struct builtin_tags {
 
     struct ifnotequal_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifnotequal") >> engine.expression >> *_s >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("ifnotequal") >> engine.value >> engine.value) >> engine.block
               >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
               >>   AJG_TAG(engine.reserved("endifnotequal"));
         }
@@ -669,8 +667,8 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type   const& left  = match(engine.expression, 0);
-            match_type   const& right = match(engine.expression, 1);
+            match_type   const& left  = match(engine.value, 0);
+            match_type   const& right = match(engine.value, 1);
             match_type   const& if_   = match(engine.block, 0);
             match_type   const& else_ = match(engine.block, 1);
             boolean_type const  cond_ =
@@ -788,7 +786,7 @@ struct builtin_tags {
 
     struct regroup_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("regroup") >> engine.expression >> *_s
+            return AJG_TAG(engine.reserved("regroup") >> engine.value
                           >> engine.keyword("by") >> engine.package
                           >> engine.keyword("as") >> engine.name) >> engine.block;
         }
@@ -799,7 +797,7 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type  const& expr  = match(engine.expression);
+            match_type  const& expr  = match(engine.value);
             string_type const& attrs = match(engine.package)[id].str();
             string_type const& name  = match(engine.name)[id].str();
             match_type  const& block = match(engine.block);
@@ -934,7 +932,7 @@ struct builtin_tags {
 
     struct url_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.expression >> *_s >> engine.arguments);
+            return AJG_TAG(engine.reserved("url") >> engine.value >> engine.arguments);
         }
 
         static void render( engine_type  const& engine
@@ -943,7 +941,7 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type const& expr = match(engine.expression);
+            match_type const& expr = match(engine.value);
             match_type const& args = match(engine.arguments);
 
             value_type     const view      = engine.evaluate(expr, context, options);
@@ -964,7 +962,7 @@ struct builtin_tags {
 
     struct url_as_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.expression >> *_s >> engine.arguments
+            return AJG_TAG(engine.reserved("url") >> engine.value >> engine.arguments
                         >> engine.keyword("as") >> engine.name) >> engine.block;
         }
 
@@ -974,7 +972,7 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type  const& expr  = match(engine.expression);
+            match_type  const& expr  = match(engine.value);
             match_type  const& args  = match(engine.arguments);
             match_type  const& block = match(engine.block);
             string_type const& name  = match(engine.name)[id].str();
@@ -1011,7 +1009,7 @@ struct builtin_tags {
             value_type value;
 
             try {
-                value = engine.evaluate(expr, context, options);
+                value = engine.evaluate_expression(expr, context, options);
                 value = engine.apply_filters(value, filters, context, options);
             }
             catch (missing_variable  const&) { value = options.default_value; }
@@ -1048,10 +1046,7 @@ struct builtin_tags {
 
     struct widthratio_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("widthratio") >>
-                               engine.expression >> *_s >>
-                               engine.expression >> *_s >>
-                               engine.expression);
+            return AJG_TAG(engine.reserved("widthratio") >> engine.value >> engine.value >> engine.value);
         }
 
         template <class T>
@@ -1065,9 +1060,9 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type const& value = match(engine.expression, 0);
-            match_type const& limit = match(engine.expression, 1);
-            match_type const& width = match(engine.expression, 2);
+            match_type const& value = match(engine.value, 0);
+            match_type const& limit = match(engine.value, 1);
+            match_type const& width = match(engine.value, 2);
 
             number_type const ratio
                 = engine.evaluate(value, context, options).to_number()
@@ -1084,7 +1079,7 @@ struct builtin_tags {
 
     struct with_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("with") >> engine.expression >> *_s >> engine.keyword("as") >> engine.name) >> engine.block
+            return AJG_TAG(engine.reserved("with") >> engine.value >> engine.keyword("as") >> engine.name) >> engine.block
                 >> AJG_TAG(engine.reserved("endwith"));
         }
 
@@ -1094,12 +1089,12 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type  const& expr = match(engine.expression);
-            match_type  const& body = match(engine.block);
-            string_type const& name = match(engine.name)[id].str();
+            match_type  const& value = match(engine.value);
+            match_type  const& body  = match(engine.block);
+            string_type const& name  = match(engine.name)[id].str();
 
             context_type context_copy = context;
-            context_copy[name] = engine.evaluate(expr, context, options);
+            context_copy[name] = engine.evaluate(value, context, options);
             engine.render_block(out, body, context_copy, options);
         }
     };

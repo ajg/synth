@@ -873,12 +873,13 @@ struct builtin_tags {
     };
 
 //
-// ssi_tag
+// ssi_tag:
+//     TODO: Take into account `ALLOWED_INCLUDE_ROOTS`.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ssi_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ssi") >> (s1 = '/' >> +~_s) >> !(+_s >> (s2 = "parsed")) >> *_s);
+            return AJG_TAG(engine.reserved("ssi") >> engine.value >> !(s1 = engine.keyword("parsed")));
         }
 
         static void render( engine_type  const& engine
@@ -887,8 +888,12 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            string_type  const path   = match[s1].str();
-            boolean_type const parsed = match[s2].matched;
+            string_type  const path   = engine.evaluate(match(engine.value), context, options).to_string();
+            boolean_type const parsed = match[s1].matched;
+
+            if (!synth::detail::is_absolute(path)) {
+                throw_exception(std::invalid_argument("relative path"));
+            }
 
             if (parsed) {
                 engine.render_file(out, path, context, options);
@@ -897,7 +902,7 @@ struct builtin_tags {
                 string_type line;
                 std::string const path_ = traits_type::narrow(path);
                 std::basic_ifstream<char_type> file(path_.c_str());
-                while (std::getline(file, line)) out << line;
+                while (std::getline(file, line)) out << line << engine.newline;
             }
         }
     };

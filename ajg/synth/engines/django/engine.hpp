@@ -426,12 +426,11 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         typename options_type::filters_type::const_iterator it = options.loaded_filters.find(name);
 
         if (it != options.loaded_filters.end()) { // Let library filters override built-in ones.
-            return it->second(options, &context, value, arguments);
+            return it->second(options, context, value, arguments);
         }
 
-        // TODO: Pass the full arguments, not just the sequential (.first) ones.
         if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {
-            return filter(*this, value, arguments.first, context, options);
+            return filter(*this, value, arguments, context, options);
         }
         else {
             throw_exception(missing_filter(traits_type::narrow(name)));

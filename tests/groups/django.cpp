@@ -125,6 +125,11 @@ DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "
 DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% else %}Bad{% endifequal %}", "Good")
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Bad{% else %}Good{% endifequal %}", "Good")
 
+DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'howdy' %}Good{% endifnotequal %}",              "Good")
+DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'hello' %}Good{% endifnotequal %}",              "")
+DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'howdy' %}Good{% else %}Bad{% endifnotequal %}", "Good")
+DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'hello' %}Bad{% else %}Good{% endifnotequal %}", "Good")
+
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/empty.tpl' %}", "")
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/variables.tpl' %}", "foo: A\nbar: B\nqux: C\n")
 

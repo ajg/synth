@@ -47,8 +47,8 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    value() : base_type() {}
-    template <class T> value(T const& t) : base_type(t) {}
+    value() : base_type(), safe_(false) {}
+    template <class T> value(T const& t) : base_type(t), safe_(false) {}
 
   public:
 

@@ -122,7 +122,7 @@ struct options {
     typedef shared_ptr<abstract_resolver_type>     resolver_type; // TODO[c++11]: Use unique_ptr?
 
     typedef value_type (tag_fn_type)(options_type&, context_type*, arguments_type&);
-    typedef value_type (filter_fn_type)(options_type const&, context_type const*, value_type const&, arguments_type const&);
+    typedef value_type (filter_fn_type)(options_type const&, context_type const&, value_type const&, arguments_type const&);
 
     typedef boost::function<tag_fn_type>           tag_type;
     typedef boost::function<filter_fn_type>        filter_type;

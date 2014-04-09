@@ -84,7 +84,7 @@ struct library : Options::abstract_library_type {
 
     static value_type call_filter( py::object            filter
                                  , options_type   const&
-                                 , context_type   const*
+                                 , context_type   const&
                                  , value_type     const& value
                                  , arguments_type const& arguments
                                  ) {

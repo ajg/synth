@@ -217,15 +217,6 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | binary_expression
             | nested_expression
             ;
-        value
-            = expression >> *_s // TODO: Generalize all values to pipelines.
-            ;
-        argument
-            = value // TODO: Named arguments; e.g. (name >> '=')? >> value
-            ;
-        arguments
-            = *argument
-            ;
         variable_names
             = name >> *(as_xpr(',') >> *_s >> name) // TODO: Check that whitespace can follow a comma.
             ;
@@ -233,10 +224,16 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = name >> !(as_xpr(':') >> chain)
             ;
         filters
-            = *(as_xpr('|') >> filter)
-            ;
-        pipeline
             = filter >> *(as_xpr('|') >> filter)
+            ;
+        value
+            = expression >> *(as_xpr('|') >> filter) >> *_s
+            ;
+        argument
+            = value // TODO: Named arguments; e.g. (name >> '=')? >> value
+            ;
+        arguments
+            = *argument
             ;
         skipper
             = block_open
@@ -438,11 +435,17 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         }
     }
 
-    value_type evaluate( match_type     const& match
-                       , context_type   const& context
-                       , options_type   const& options
+    value_type evaluate( match_type   const& match
+                       , context_type const& context
+                       , options_type const& options
                        ) const {
-        return evaluate_expression(match(this->expression), context, options);
+
+        try {
+            value_type const& value = this->evaluate_expression(match(this->expression), context, options);
+            return this->apply_filters(value, match, context, options);
+        }
+        catch (missing_variable  const&) { return options.default_value; }
+        catch (missing_attribute const&) { return options.default_value; }
     }
 
     arguments_type evaluate_arguments( match_type    const& match
@@ -509,14 +512,14 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         match_type const& expr = detail::unnest(match);
 
         if (expr == unary_expression) {
-            return evaluate_unary(expr, context, options);
+            return this->evaluate_unary(expr, context, options);
         }
         else if (expr == binary_expression) {
-            return evaluate_binary(expr, context, options);
+            return this->evaluate_binary(expr, context, options);
         }
         else if (expr == nested_expression) {
             match_type const& nested = expr(this->expression);
-            return evaluate_expression(nested, context, options);
+            return this->evaluate_expression(nested, context, options);
         }
         else {
             throw_exception(std::logic_error("invalid expression"));
@@ -535,7 +538,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             return !evaluate_expression(operand, context, options);
         }
         else {
-            throw_exception(std::logic_error("invalid unary operator: " + op));
+            throw_exception(std::logic_error("invalid unary operator"));
         }
     }
 
@@ -545,7 +548,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                               ) const {
         BOOST_ASSERT(match == binary_expression);
         match_type const& chain = match(this->chain);
-        value_type value = evaluate_chain(chain, context, options);
+        value_type value = this->evaluate_chain(chain, context, options);
         string_type op;
 
         BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
@@ -556,40 +559,40 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                 throw_exception(std::logic_error("invalid binary expression"));
             }
             else if (op == traits_type::literal("==")) {
-                value = value == evaluate_expression(segment, context, options);
+                value = value == this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("!=")) {
-                value = value != evaluate_expression(segment, context, options);
+                value = value != this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("<")) {
-                value = value < evaluate_expression(segment, context, options);
+                value = value < this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal(">")) {
-                value = value > evaluate_expression(segment, context, options);
+                value = value > this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("<=")) {
-                value = value <= evaluate_expression(segment, context, options);
+                value = value <= this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal(">=")) {
-                value = value >= evaluate_expression(segment, context, options);
+                value = value >= this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("and")) {
-                value = value ? evaluate_expression(segment, context, options) : value;
+                value = value ? this->evaluate_expression(segment, context, options) : value;
             }
             else if (op == traits_type::literal("or")) {
-                value = value ? value : evaluate_expression(segment, context, options);
+                value = value ? value : this->evaluate_expression(segment, context, options);
             }
             else if (op == traits_type::literal("in")) {
-                value_type const elements = evaluate_expression(segment, context, options);
+                value_type const elements = this->evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
             else if (boost::algorithm::starts_with(op, traits_type::literal("not"))
                   && boost::algorithm::ends_with(op, traits_type::literal("in"))) {
-                value_type const elements = evaluate_expression(segment, context, options);
+                value_type const elements = this->evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }
             else {
-                throw_exception(std::logic_error("invalid binary operator: " + op));
+                throw_exception(std::logic_error("invalid binary operator"));
             }
         }
 
@@ -603,7 +606,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         match_type const& link = detail::unnest(match);
 
         if (link == this->subscript_link) { // i.e. value[attribute]
-            return evaluate(link(this->expression), context, options);
+            return this->evaluate(link(this->expression), context, options);
         }
         else if (link == this->attribute_link) { // i.e. value.attribute
             return string_type(link(this->identifier).str());
@@ -619,7 +622,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                              ) const {
         BOOST_ASSERT(match == this->chain);
         match_type const& lit = match(this->literal);
-        value_type value = evaluate_literal(lit, context, options);
+        value_type value = this->evaluate_literal(lit, context, options);
 
         BOOST_FOREACH(match_type const& link, detail::select_nested(match, this->link)) {
             value_type const attribute = this->evaluate_link(link, context, options);
@@ -813,7 +816,6 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     regex_type value;
     regex_type filter;
     regex_type filters;
-    regex_type pipeline;
     regex_type chain;
     regex_type link;
     regex_type subscript_link;

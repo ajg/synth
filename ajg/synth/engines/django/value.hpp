@@ -64,9 +64,7 @@ struct value : value_facade<Char, value<Char> > {
     inline value_type&       token(token_type const& token) { return (token_ = token), *this; }
     inline token_type const& token() const { BOOST_ASSERT(token_); return *token_; }
 
-    inline boolean_type is_literal() const {
-        return boolean_type(token_);
-    }
+    inline boolean_type is_literal() const { return boolean_type(token_); }
 
 	value_type escape() const {
         // XXX: Should this method escape binary and control characters?
@@ -96,6 +94,7 @@ struct value : value_facade<Char, value<Char> > {
     }
     */
 
+    // TODO: Move this to traits.
     optional<value_type> get_attribute(value_type const& attribute) const {
         try {
             // First try to locate the value as a key.

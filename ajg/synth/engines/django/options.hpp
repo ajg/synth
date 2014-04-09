@@ -101,6 +101,7 @@ struct options {
     typedef typename traits_type::string_type      string_type;
     typedef typename traits_type::istream_type     istream_type;
     typedef typename traits_type::ostream_type     ostream_type;
+    typedef typename traits_type::date_type        date_type;
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
     typedef typename traits_type::range_type       range_type;

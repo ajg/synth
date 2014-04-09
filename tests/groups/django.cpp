@@ -422,7 +422,7 @@ DJANGO_TEST(striptags_filter, "{{ '<b>Joel</b> <button>is</button> a <span>slug<
 
 DJANGO_TEST(stringformat_filter, "{{ 255|stringformat:'x' }}", "ff")
 
-DJANGO_TEST(time_filter, "{{ past|time }}",                           "01:02:03 AM")
+DJANGO_TEST(time_filter, "{{ past|time }}",                           "1:02 a.m.")
 DJANGO_TEST(time_filter, "{{ before_past|time:'c' }}",                "2002-01-08T13:02:03")
 DJANGO_TEST(time_filter, "{{ after_past|time:'YEAR_MONTH_FORMAT' }}", "March 2002")
 

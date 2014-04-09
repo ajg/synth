@@ -78,6 +78,12 @@ DJANGO_TEST(number floating, "{{03.30}}", "3.3")
 DJANGO_TEST(string, "{{'Foo'}}",   "Foo")
 DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 
+/// Value tests
+///     NOTE: The use of firstof is incidental; many other tags would work for these tests.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DJANGO_TEST(multiple filters,   "{% firstof 0|add:1|add:2|add:3 %}", "6")
+DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 
 /// Tag tests
 ///     TODO:

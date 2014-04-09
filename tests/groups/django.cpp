@@ -113,6 +113,15 @@ DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
+DJANGO_TEST(firstof_tag, "{% firstof true_var %}", "True")
+DJANGO_TEST(firstof_tag, "{% firstof true_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_tag, "{% firstof true_var false_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_tag, "{% firstof false_var true_var 'FALLBACK' %}", "True")
+DJANGO_TEST(firstof_tag, "{% firstof false_var %}", "")
+DJANGO_TEST(firstof_tag, "{% firstof false_var 'FALLBACK' %}", "FALLBACK")
+DJANGO_TEST(firstof_tag, "{% firstof nonextant false_var numbers cities %}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
+DJANGO_TEST(firstof_tag, "{% firstof nonextant %}", "")
+
 DJANGO_TEST(if_tag, "{% if True %}Good{% endif %}{% if False %}Bad{% endif %}", "Good")
 DJANGO_TEST(if_tag, "{% if True %}Good{% else %}Bad{% endif %}",                "Good")
 DJANGO_TEST(if_tag, "{% if False %}Bad{% else %}Good{% endif %}",               "Good")
@@ -335,15 +344,6 @@ DJANGO_TEST(divisibleby_filter, "{{ 20|divisibleby:\"3\" }}", "False")
 
 DJANGO_TEST(filesizeformat_filter, "{{ 123456789|filesizeformat }}", "117.7 MB")
 
-DJANGO_TEST(firstof_filter, "{% firstof true_var %}", "True")
-DJANGO_TEST(firstof_filter, "{% firstof true_var 'FALLBACK' %}", "True")
-DJANGO_TEST(firstof_filter, "{% firstof true_var false_var 'FALLBACK' %}", "True")
-DJANGO_TEST(firstof_filter, "{% firstof false_var true_var 'FALLBACK' %}", "True")
-DJANGO_TEST(firstof_filter, "{% firstof false_var %}", "")
-DJANGO_TEST(firstof_filter, "{% firstof false_var 'FALLBACK' %}", "FALLBACK")
-DJANGO_TEST(firstof_filter, "{% firstof nonextant false_var numbers cities %}", "1, 2, 3, 4, 5, 6, 7, 8, 9")
-DJANGO_TEST(firstof_filter, "{% firstof nonextant %}", "")
-
 DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;'|fix_ampersands }}",
                 "String &amp; with &amp; ampersands, but not &apos; or &#1234;")
 
@@ -368,8 +368,8 @@ DJANGO_TEST(ljust_filter, "{{ \"Django\"|ljust:\"2\" }}",  "Django")
 
 DJANGO_TEST(lower_filter, "{{ \"Still MAD At Yoko\"|lower }}", "still mad at yoko")
 
-DJANGO_TEST(make_list_filter, "{{ numbers|make_list}}", "[1, 2, 3, 4, 5, 6, 7, 8, 9]")
-DJANGO_TEST(make_list_filter, "{{ 12345|make_list }}",  "[1, 2, 3, 4, 5]")
+DJANGO_TEST(make_list_filter, "{{ numbers|make_list }}", "[1, 2, 3, 4, 5, 6, 7, 8, 9]")
+DJANGO_TEST(make_list_filter, "{{ 12345|make_list }}",   "[1, 2, 3, 4, 5]")
 
 DJANGO_TEST(phone2numeric_filter, "{{ \"1-800-COLLECT\"|phone2numeric }}", "1-800-2655328")
 

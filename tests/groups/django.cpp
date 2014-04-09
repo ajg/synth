@@ -88,7 +88,6 @@ DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 /// Tag tests
 ///     TODO:
 ///     django::block_tag
-///     django::debug_tag
 ///     django::extends_tag
 ///     django::ifchanged_tag
 ///     django::load_tag
@@ -118,6 +117,24 @@ DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %
 
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
+
+DJANGO_TEST(debug_tag, "{% debug %}",
+    "<h1>Context:</h1>\n"
+    "    after_past = 2002-Mar-01 01:22:03<br />\n"
+    "    bar = B<br />\n"
+    "    before_past = 2002-Jan-08 13:02:03<br />\n"
+    "    cities = country: India, name: Mumbai, population: 19,000,000, country: India, name: Calcutta, population: 15,000,000, country: USA, name: New York, population: 20,000,000, country: USA, name: Chicago, population: 7,000,000, country: Japan, name: Tokyo, population: 33,000,000<br />\n"
+    "    csrf_token = ABCDEF123456<br />\n"
+    "    false_var = False<br />\n"
+    "    foo = A<br />\n"
+    "    friends = age: 23, name: joe, age: 55, name: bob, age: 41, name: lou<br />\n"
+    "    future = 2202-Feb-11 03:02:01<br />\n"
+    "    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n"
+    "    past = 2002-Jan-10 01:02:03<br />\n"
+    "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
+    "    qux = C<br />\n"
+    "    true_var = True<br />\n"
+    "    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
 
 DJANGO_TEST(firstof_tag, "{% firstof true_var %}", "True")
 DJANGO_TEST(firstof_tag, "{% firstof true_var 'FALLBACK' %}", "True")

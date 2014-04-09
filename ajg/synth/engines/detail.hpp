@@ -255,8 +255,7 @@ inline String quote(String const& string, typename String::value_type quotation)
 template <class String>
 inline String unquote(String const& string) {
     BOOST_ASSERT(string.size() >= 2);
-    typename String::value_type quotation = string.front();
-    BOOST_ASSERT(string.back() == quotation);
+    BOOST_ASSERT(string.back() == string.front());
     return string.substr(1, string.size() - 2);
 }
 

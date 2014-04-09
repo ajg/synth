@@ -6,9 +6,17 @@
 #define AJG_SYNTH_ENGINES_DJANGO_FORMATTER_HPP_INCLUDED
 
 #include <map>
+#include <ctime>
 #include <sstream>
 
-#include <boost/assign/list_of.hpp>
+#include <boost/array.hpp>
+#include <boost/function.hpp>
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
 
@@ -30,6 +38,7 @@ struct formatter {
     typedef typename options_type::char_type                                    char_type;
     typedef typename options_type::size_type                                    size_type;
     typedef typename options_type::number_type                                  number_type;
+    typedef typename options_type::date_type                                    date_type;
     typedef typename options_type::datetime_type                                datetime_type;
     typedef typename options_type::duration_type                                duration_type;
     typedef typename options_type::string_type                                  string_type;
@@ -39,70 +48,253 @@ struct formatter {
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
+  private:
+
+    typedef typename string_type::const_iterator                                string_iterator_type;
+    typedef xpressive::match_results<string_iterator_type>                      string_match_type;
+
+///
+/// datetime_flags:
+///     See http://www.boost.org/doc/libs/release/doc/html/date_time/date_time_io.html#date_time.format_flags
+///     NOTE: Fields marked [*] are not used because their availability is platform-dependent.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct datetime_flags {
+        BOOST_STATIC_CONSTANT(size_type, total   = 45);
+        BOOST_STATIC_CONSTANT(size_type, skipped = 8);
+        BOOST_STATIC_CONSTANT(size_type, size    = total - skipped);
+
+        // Date flags
+        string_type a;
+        string_type A;
+        string_type b;
+        string_type B;
+        string_type c;
+     // string_type C; [*]
+        string_type d;
+        string_type D;
+     // string_type e; [*]
+        string_type g;
+        string_type G;
+     // string_type h; [*]
+        string_type j;
+        string_type m;
+        string_type u;
+        string_type U;
+     // string_type V; [*]
+        string_type w;
+        string_type W;
+        string_type x;
+        string_type y;
+        string_type Y;
+
+        // Time flags
+     // string_type -;
+     // string_type +;
+        string_type f;
+        string_type F;
+        string_type H;
+        string_type I;
+        string_type k;
+        string_type l;
+        string_type M;
+        string_type O;
+        string_type p;
+     // string_type P; [*]
+     // string_type r; [*]
+        string_type R;
+        string_type s;
+        string_type S;
+        string_type T;
+        string_type q;
+        string_type Q;
+        string_type X;
+        string_type z;
+        string_type Z;
+        string_type ZP;
+    };
+
   public:
 
     static string_type format_datetime( options_type  const& options
-                                      , string_type   const& format
+                                      , string_type   const& string
                                       , datetime_type const& datetime
                                       ) {
-        typedef std::map<char_type, string_type>            transliterations_type;
-        typedef typename transliterations_type::value_type  transliteration_type;
+        namespace algo = boost::algorithm;
+        static boost::array<string_type, datetime_flags::size> const format_flags = {
+            { traits_type::literal("%a")
+            , traits_type::literal("%A")
+            , traits_type::literal("%b")
+            , traits_type::literal("%B")
+            , traits_type::literal("%c")
+            , traits_type::literal("%d")
+            , traits_type::literal("%D")
+            , traits_type::literal("%g")
+            , traits_type::literal("%G")
+            , traits_type::literal("%j")
+            , traits_type::literal("%m")
+            , traits_type::literal("%u")
+            , traits_type::literal("%U")
+            , traits_type::literal("%w")
+            , traits_type::literal("%W")
+            , traits_type::literal("%x")
+            , traits_type::literal("%y")
+            , traits_type::literal("%Y")
+            , traits_type::literal("%f")
+            , traits_type::literal("%F")
+            , traits_type::literal("%H")
+            , traits_type::literal("%I")
+            , traits_type::literal("%k")
+            , traits_type::literal("%l")
+            , traits_type::literal("%M")
+            , traits_type::literal("%O")
+            , traits_type::literal("%p")
+            , traits_type::literal("%R")
+            , traits_type::literal("%s")
+            , traits_type::literal("%S")
+            , traits_type::literal("%T")
+            , traits_type::literal("%q")
+            , traits_type::literal("%Q")
+            , traits_type::literal("%X")
+            , traits_type::literal("%z")
+            , traits_type::literal("%Z")
+            , traits_type::literal("%ZP")
+            }
+        };
+        static string_type const delimiter     = string_type(1, char_type('&'));
+        static string_type const format_string = algo::join(format_flags, delimiter);
+        string_type const formatted_string = detail::format_time(format_string, datetime);
 
-        static transliterations_type const transliterations = boost::assign::list_of<transliteration_type>
-            (char_type('%'), traits_type::literal("%%"))
-            (char_type('a'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%P"))) // TODO: Periods; implement on Windows.
-            (char_type('A'), traits_type::literal("%p"))
-            (char_type('b'), traits_type::literal("%b")) // TODO: Lowercase
-            (char_type('B'), traits_type::literal(""))   // "Not implemented" per spec.
-            (char_type('c'), traits_type::literal("%Y-%m-%dT%H:%M:%S%z"))
-            (char_type('d'), traits_type::literal("%d"))
-            (char_type('D'), traits_type::literal("%a"))
-            (char_type('e'), traits_type::literal("%z"))    // TODO: Ignored with ptimes
-            (char_type('E'), traits_type::literal("%B"))    // TODO: Make locale-aware
-            (char_type('f'), traits_type::literal("%l:%M")) // TODO: No leading blank, no zero minutes
-            (char_type('F'), traits_type::literal("%B"))
-            (char_type('g'), traits_type::literal("%l"))    // TODO: No leading blank
-            (char_type('G'), traits_type::literal("%k"))    // TODO: No leading blank
-            (char_type('h'), traits_type::literal("%I"))
-            (char_type('H'), traits_type::literal("%H"))
-            (char_type('i'), traits_type::literal("%M"))
-            (char_type('I'), traits_type::literal(""))   // TODO: Implement
-            (char_type('j'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%e"))) // TODO: No leading blank; implement on Windows.
-            (char_type('l'), traits_type::literal("%A"))
-            (char_type('L'), traits_type::literal(""))   // TODO: Implement
-            (char_type('m'), traits_type::literal("%m"))
-            (char_type('M'), traits_type::literal("%b"))
-            (char_type('n'), traits_type::literal("%m")) // TODO: No leading zeros
-            (char_type('N'), traits_type::literal("%b")) // TODO: Abbreviations/periods
-            (char_type('o'), traits_type::literal("%G"))
-            (char_type('O'), traits_type::literal(""))   // TODO: Implement
-            (char_type('P'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%r"))) // TODO: Periods, no zero minutes, "midnight"/"noon"; implement on Windows.
-            (char_type('r'), traits_type::literal("%a, %d %b %Y %T %z"))
-            (char_type('s'), traits_type::literal("%S"))
-            (char_type('S'), traits_type::literal(""))   // TODO: Implement
-            (char_type('t'), traits_type::literal(""))   // TODO: Implement
-            (char_type('T'), traits_type::literal(""))   // TODO: Implement
-            (char_type('u'), traits_type::literal("%f")) // TODO: No leading period
-            (char_type('U'), traits_type::literal(""))   // TODO: Implement
-            (char_type('w'), traits_type::literal("%w"))
-            (char_type('W'), traits_type::literal(AJG_SYNTH_IF_WINDOWS("", "%V"))) // TODO: No leading zeros; implement on Windows.
-            (char_type('y'), traits_type::literal("%y"))
-            (char_type('Y'), traits_type::literal("%Y"))
-            (char_type('z'), traits_type::literal("%j")) // TODO: No leading zeros
-            (char_type('Z'), traits_type::literal(""))   // TODO: Implement
-            ;
+        std::vector<string_type> specifiers;
+        specifiers.reserve(datetime_flags::size);
+        algo::split(specifiers, formatted_string, algo::is_any_of(delimiter));
+        BOOST_ASSERT(specifiers.size() == datetime_flags::size);
+
+        datetime_flags const flags =
+            { specifiers[0]
+            , specifiers[1]
+            , specifiers[2]
+            , specifiers[3]
+            , specifiers[4]
+            , specifiers[5]
+            , specifiers[6]
+            , specifiers[7]
+            , specifiers[8]
+            , specifiers[9]
+            , specifiers[10]
+            , specifiers[11]
+            , specifiers[12]
+            , specifiers[13]
+            , specifiers[14]
+            , specifiers[15]
+            , specifiers[16]
+            , specifiers[17]
+            , specifiers[18]
+            , specifiers[19]
+            , specifiers[20]
+            , specifiers[21]
+            , specifiers[22]
+            , specifiers[23]
+            , specifiers[24]
+            , specifiers[25]
+            , specifiers[26]
+            , specifiers[27]
+            , specifiers[28]
+            , specifiers[29]
+            , specifiers[30]
+            , specifiers[31]
+            , specifiers[32]
+            , specifiers[33]
+            , specifiers[34]
+            , specifiers[35]
+            , specifiers[36]
+            };
 
         std::basic_ostringstream<char_type> stream;
-        typename options_type::formats_type::const_iterator const it = options.formats.find(format);
-        string_type const original = it == options.formats.end() ? format : it->second;
+        typename options_type::formats_type::const_iterator const it = options.formats.find(string);
+        string_type const format = it == options.formats.end() ? string : it->second;
+
+        boolean_type const is_am       = flags.p == traits_type::literal("AM");
+        boolean_type const is_pm       = flags.p == traits_type::literal("PM");
+        boolean_type const has_minutes = flags.M != traits_type::literal("00");
+        boolean_type const is_midnight = flags.H == "00" && !has_minutes;
+        boolean_type const is_noon     = flags.H == "12" && !has_minutes;
+
+        string_type const a = is_am ? traits_type::literal("a.m.") :
+                              is_pm ? traits_type::literal("p.m.") : string_type();
+        string_type const b = algo::to_lower_copy(flags.b);
+        string_type const c = flags.Y + '-' + flags.m + '-' + flags.d + 'T' + flags.H + ':' + flags.M + ':' + flags.S;
+        string_type const f = algo::trim_left_copy(flags.l) + (has_minutes ? ':' + flags.M : string_type());
+        string_type const g = algo::trim_left_copy(flags.l);
+        string_type const j = algo::trim_left_copy_if(flags.d, algo::is_any_of("0"));
+        string_type const z = algo::trim_left_copy_if(flags.j, algo::is_any_of("0"));
+        string_type const n = algo::trim_left_copy_if(flags.m, algo::is_any_of("0"));
+        string_type const u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
+        string_type const r = flags.a + ',' + ' ' + flags.d + ' ' + flags.b + ' ' + flags.Y + ' ' + flags.T;
+        string_type const G = algo::trim_left_copy(flags.k);
+        string_type const U = traits_type::to_string(to_time_t(datetime));
+        string_type const P = is_midnight ? traits_type::literal("midnight") :
+                              is_noon     ? traits_type::literal("noon")     : (f + ' ' + a);
 
         // TODO: This might not be UTF8-safe; consider using a utf8_iterator.
-        BOOST_FOREACH(char_type const c, original) {
-            stream << detail::find_mapped_value(c, transliterations).get_value_or(string_type(1, c));
+        BOOST_FOREACH(char_type const _, format) {
+            switch (_) {
+            case char_type('a'): stream << a;        break;
+            case char_type('A'): stream << flags.p;  break;
+            case char_type('b'): stream << b;        break;
+            case char_type('B'): stream << "";       break; // NOTE: "Not implemented" per spec.
+            case char_type('c'): stream << c;        break;
+            case char_type('d'): stream << flags.d;  break;
+            case char_type('D'): stream << flags.a;  break;
+            case char_type('e'): stream << flags.z;  break; // TODO: Ignored with ptimes.
+            case char_type('E'): stream << flags.B;  break; // TODO: Make locale-aware.
+            case char_type('f'): stream << f;        break;
+            case char_type('F'): stream << flags.B;  break;
+            case char_type('g'): stream << g;        break;
+            case char_type('G'): stream << G;        break;
+            case char_type('h'): stream << flags.I;  break;
+            case char_type('H'): stream << flags.H;  break;
+            case char_type('i'): stream << flags.M;  break;
+            case char_type('I'): stream << "";       break; // TODO: Implement.
+            case char_type('j'): stream << j;        break;
+            case char_type('l'): stream << flags.A;  break;
+            case char_type('L'): stream << "";       break; // TODO: Implement.
+            case char_type('m'): stream << flags.m;  break;
+            case char_type('M'): stream << flags.b;  break;
+            case char_type('n'): stream << n;        break;
+            case char_type('N'): stream << flags.b;  break; // TODO: Use A.P. style.
+            case char_type('o'): stream << flags.G;  break;
+            case char_type('O'): stream << "";       break; // TODO: Implement.
+            case char_type('P'): stream << P;        break;
+            case char_type('r'): stream << r;        break; // TODO: Include non-UTC timezones.
+            case char_type('s'): stream << flags.S;  break;
+            case char_type('S'): stream << "";       break; // TODO: Implement.
+            case char_type('t'): stream << "";       break; // TODO: Implement.
+            case char_type('T'): stream << "";       break; // TODO: Implement.
+            case char_type('u'): stream << u;        break;
+            case char_type('U'): stream << U;        break;
+            case char_type('w'): stream << flags.w;  break;
+            case char_type('W'): stream << "";       break; // TODO: Like %V but without leading zeros.
+            case char_type('y'): stream << flags.y;  break;
+            case char_type('Y'): stream << flags.Y;  break;
+            case char_type('z'): stream << z;        break;
+            case char_type('Z'): stream << "";       break; // TODO: Implement.
+            default: stream << _;
+            }
         }
 
-        return synth::detail::format_time<string_type>(stream.str(), datetime);
+        BOOST_ASSERT(stream);
+        return stream.str();
     }
+
+  private:
+
+    inline static std::time_t to_time_t(datetime_type datetime) {
+        duration_type const duration = datetime - datetime_type(date_type(1970, 1, 1));
+        return static_cast<std::time_t>(duration.seconds());
+    }
+
+  public:
 
     // TODO: Proper, localizable formatting.
     static string_type format_duration( options_type  const& options

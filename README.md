@@ -452,7 +452,6 @@ Future Work
      + Add cycle_silent tag
      + Add include_with tag
      + Add include_with_only tag
-     + Named arguments (e.g. for tags and filters)
      + Option to pre-load libraries, tags and filters
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
@@ -461,7 +460,6 @@ Future Work
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * Other:
      + Create `ctpp` engine
-     + Create `multi_engine`
      + [v1+] Create `cheetah` engine
 
  - Adapters:

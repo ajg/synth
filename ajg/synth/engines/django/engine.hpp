@@ -233,7 +233,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = +value
             ;
         argument
-            = value // TODO: Named arguments; e.g. (name >> '=')? >> value
+            = !(restricted_identifier >> as_xpr('=')) >> value
             ;
         arguments
             = *argument
@@ -456,9 +456,14 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                                      , options_type  const& options
                                      ) const {
         arguments_type arguments;
-        // TODO: Evaluate the full arguments, not just the sequential (.first) ones.
         BOOST_FOREACH(match_type const& arg, detail::select_nested(match, this->argument)) {
-            arguments.first.push_back(this->evaluate(arg, context, options));
+            value_type const& value = this->evaluate(arg(this->value), context, options);
+            if (match_type const& name = arg(this->restricted_identifier)) {
+                arguments.second[name.str()] = value; // Keyword argument.
+            }
+            else {
+                arguments.first.push_back(value); // Positional argument.
+            }
         }
         return arguments;
     }

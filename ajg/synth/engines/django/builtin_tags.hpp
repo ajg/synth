@@ -627,7 +627,7 @@ struct builtin_tags {
 
     struct ifequal_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifequal") >> engine.expression >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("ifequal") >> engine.expression >> *_s >> engine.expression) >> engine.block
               >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
               >>   AJG_TAG(engine.reserved("endifequal"));
         }
@@ -658,7 +658,7 @@ struct builtin_tags {
 
     struct ifnotequal_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifnotequal") >> engine.expression >> engine.expression) >> engine.block
+            return AJG_TAG(engine.reserved("ifnotequal") >> engine.expression >> *_s >> engine.expression) >> engine.block
               >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
               >>   AJG_TAG(engine.reserved("endifnotequal"));
         }
@@ -788,7 +788,7 @@ struct builtin_tags {
 
     struct regroup_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("regroup") >> engine.expression
+            return AJG_TAG(engine.reserved("regroup") >> engine.expression >> *_s
                           >> engine.keyword("by") >> engine.package
                           >> engine.keyword("as") >> engine.name) >> engine.block;
         }
@@ -934,7 +934,7 @@ struct builtin_tags {
 
     struct url_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.expression >> engine.arguments);
+            return AJG_TAG(engine.reserved("url") >> engine.expression >> *_s >> engine.arguments);
         }
 
         static void render( engine_type  const& engine
@@ -964,7 +964,7 @@ struct builtin_tags {
 
     struct url_as_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.expression >> engine.arguments
+            return AJG_TAG(engine.reserved("url") >> engine.expression >> *_s >> engine.arguments
                         >> engine.keyword("as") >> engine.name) >> engine.block;
         }
 
@@ -996,7 +996,7 @@ struct builtin_tags {
 
     struct variable_tag {
         static regex_type syntax(engine_type& engine) {
-            return engine.variable_open >> *_s >> engine.expression >> engine.filters
+            return engine.variable_open >> *_s >> engine.expression >> engine.filters >> *_s
                 >> engine.variable_close;
         }
 
@@ -1048,7 +1048,10 @@ struct builtin_tags {
 
     struct widthratio_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("widthratio") >> engine.expression >> engine.expression >> engine.expression);
+            return AJG_TAG(engine.reserved("widthratio") >>
+                               engine.expression >> *_s >>
+                               engine.expression >> *_s >>
+                               engine.expression);
         }
 
         template <class T>
@@ -1081,7 +1084,7 @@ struct builtin_tags {
 
     struct with_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("with") >> engine.expression >> engine.keyword("as") >> engine.name) >> engine.block
+            return AJG_TAG(engine.reserved("with") >> engine.expression >> *_s >> engine.keyword("as") >> engine.name) >> engine.block
                 >> AJG_TAG(engine.reserved("endwith"));
         }
 

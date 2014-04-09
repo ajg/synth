@@ -273,6 +273,14 @@ DJANGO_TEST(templatetag_tag, "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag, "{% templatetag closevariable %}", "}}")
 
 unit_test(url_tag) {
+    string_template const t("{% url 'x.y.z' 1 2 3 %}");
+    null_resolver<options_type>::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+
+    ensure_throws(std::runtime_error, t.render_to_string(context, options));
+}}}
+
+unit_test(url_tag) {
     string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
     null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
@@ -282,11 +290,12 @@ unit_test(url_tag) {
 }}}
 
 unit_test(url_tag) {
-    string_template const t("{% url 'x.y.z' 1 2 3 %}");
+    string_template const t("{% url 'foo.bar.qux' 1 b=2 3 %}");
     null_resolver<options_type>::patterns_type patterns;
+    patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
-    ensure_throws(std::runtime_error, t.render_to_string(context, options));
+    ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/3?b=2");
 }}}
 
 unit_test(url_as_tag) {
@@ -296,6 +305,15 @@ unit_test(url_as_tag) {
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
+}}}
+
+unit_test(url_as_tag) {
+    string_template const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}");
+    null_resolver<options_type>::patterns_type patterns;
+    patterns["foo.bar.qux"] = "/foo-bar-qux";
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+
+    ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/2?a=1&amp;c=3");
 }}}
 
 unit_test(url_as_tag) {

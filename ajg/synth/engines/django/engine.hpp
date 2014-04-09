@@ -218,7 +218,8 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | nested_expression
             ;
         variable_names
-            = name >> *(as_xpr(',') >> *_s >> name) // TODO: Check that whitespace can follow a comma.
+            // TODO: Check whether whitespace can precede or follow ','.
+            = name >> *(as_xpr(',') >> *_s >> name)
             ;
         filter
             = name >> !(as_xpr(':') >> chain)
@@ -233,6 +234,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = +value
             ;
         argument
+            // TODO: Check whether whitespace can precede or follow '='.
             = !(restricted_identifier >> as_xpr('=')) >> value
             ;
         arguments

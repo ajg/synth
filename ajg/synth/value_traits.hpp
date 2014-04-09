@@ -64,8 +64,8 @@ struct default_value_traits {
     //       Either that or make number general enough to hold the majority of numbers, e.g. std::complex<long double> or
     //       even an arbitrary precision type.
     typedef double                                      number_type;
+    // TODO: Add a time_type with optional time zome, and incorporate it into datetime_type.
     typedef boost::gregorian::date                      date_type;
- // typedef TODO: time{64}_t? struct tm?                time_type;
     typedef boost::posix_time::ptime                    datetime_type;
     typedef boost::posix_time::time_duration            duration_type;
     typedef std::basic_string<char_type>                string_type;

@@ -19,8 +19,6 @@
 #include <boost/assign/list_of.hpp>
 #include <boost/throw_exception.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -28,6 +26,9 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
+
+#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -83,6 +84,7 @@ struct builtin_filters {
     typedef typename options_type::size_type                                    size_type;
     typedef typename options_type::number_type                                  number_type;
     typedef typename options_type::datetime_type                                datetime_type;
+    typedef typename options_type::duration_type                                duration_type;
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::range_type                                   range_type;
@@ -107,6 +109,7 @@ struct builtin_filters {
     typedef typename regex_iterator_type::value_type                            sub_match_type;
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
+    typedef formatter<options_type>                                             formatter_type;
 
   public:
 
@@ -307,7 +310,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.size());
             string_type const format = arguments.empty() ?
                 traits_type::literal("DATE_FORMAT") : arguments[0].to_string();
-            return engine.format_datetime(options, format, value.to_datetime());
+            return formatter_type::format_datetime(options, format, value.to_datetime());
         }
     };
 
@@ -444,10 +447,8 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return format(static_cast<size_type>(std::abs(static_cast<integer_type>(value.to_number()))));
-        }
-
-        inline static string_type format(size_type const size) {
+            integer_type const integer = static_cast<integer_type>(value.to_number());
+            size_type    const size    = static_cast<size_type>((std::abs)(integer));
             return detail::format_size<string_type>(size);
         }
     };
@@ -1101,7 +1102,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.size());
             string_type const format = arguments.empty() ?
                 traits_type::literal("TIME_FORMAT") : arguments[0].to_string();
-            return engine.format_datetime(options, format, value.to_datetime());
+            return formatter_type::format_datetime(options, format, value.to_datetime());
         }
     };
 
@@ -1119,7 +1120,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.size());
             datetime_type const to   = value.to_datetime();
             datetime_type const from = arguments.empty() ? detail::local_now() : arguments[0].to_datetime();
-            return value_type(engine.format_duration(options, from - to)).mark_safe();
+            return value_type(formatter_type::format_duration(options, from - to)).mark_safe();
         }
     };
 
@@ -1137,7 +1138,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.size());
             datetime_type const to   = value.to_datetime();
             datetime_type const from = arguments.empty() ? detail::local_now() : arguments[0].to_datetime();
-            return value_type(engine.format_duration(options, to - from)).mark_safe();
+            return value_type(formatter_type::format_duration(options, to - from)).mark_safe();
         }
     };
 

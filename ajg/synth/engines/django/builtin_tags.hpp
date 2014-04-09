@@ -27,6 +27,7 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/utility.hpp>
 #include <ajg/synth/adapters/variant.hpp>
+#include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -58,6 +59,7 @@ struct builtin_tags {
     typedef typename options_type::size_type                                    size_type;
     typedef typename options_type::number_type                                  number_type;
     typedef typename options_type::datetime_type                                datetime_type;
+    typedef typename options_type::duration_type                                duration_type;
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::range_type                                   range_type;
@@ -81,6 +83,7 @@ struct builtin_tags {
 
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef std::map<id_type, tag_type>                                         tags_type;
+    typedef formatter<options_type>                                             formatter_type;
 
   public:
 
@@ -773,7 +776,7 @@ struct builtin_tags {
                           , out_type&           out
                           ) {
             string_type const format = engine.extract_string(match(engine.string_literal));
-            out << engine.format_datetime(options, format, detail::utc_now());
+            out << formatter_type::format_datetime(options, format, detail::utc_now());
         }
     };
 

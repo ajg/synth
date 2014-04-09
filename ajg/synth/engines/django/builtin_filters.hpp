@@ -854,7 +854,7 @@ struct builtin_filters {
                 engine.template split_argument<','>(arguments[0], context, options);
 
             switch (sequential_arguments.size()) {
-            case 0: plural = traits_type::literal("s");                           break;
+            case 0: plural = traits_type::literal("s");           break;
             case 1: plural = sequential_arguments[0].to_string(); break;
             default: // 2+
                 singular = sequential_arguments[0].to_string();

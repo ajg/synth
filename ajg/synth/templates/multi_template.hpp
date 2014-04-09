@@ -17,7 +17,6 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
-// TODO: Replace with multi_engine?
 template <class Char, template <class C, class E> class Template, class Django, class SSI, class TMPL>
 struct multi_template {
 

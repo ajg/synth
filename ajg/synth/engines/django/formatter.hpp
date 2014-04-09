@@ -257,7 +257,9 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
-            size_type     const year        = datetime.date().year();
+            date_type     const date        = datetime.date();
+            size_type     const year        = date.year();
+            size_type     const month_days  = date.end_of_month().day();
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
             boolean_type  const has_minutes = flags.M != traits_type::literal("00");
@@ -306,7 +308,7 @@ struct formatter {
             cooked.r = flags.a + ',' + ' ' + flags.d + ' ' + flags.b + ' ' + flags.Y + ' ' + flags.T; // TODO: Include non-UTC timezones.
             cooked.s = flags.S;
             cooked.S = "";       // TODO: Implement.
-            cooked.t = "";       // TODO: Implement.
+            cooked.t = traits_type::to_string(month_days);
             cooked.T = "";       // TODO: Implement.
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
             cooked.U = traits_type::to_string((datetime - epoch).seconds());

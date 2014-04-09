@@ -19,7 +19,8 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    AJG_SYNTH_VALUE_CONSTRUCTORS(value, base_type, {})
+    value() : base_type() {}
+    template <class T> value(T const& t) : base_type(t) {}
 };
 
 }}} // namespace ajg::synth::tmpl

@@ -405,7 +405,7 @@ struct builtin_filters {
                                         , options_type  const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.size());
-            return value.mark_unsafe();
+            return value.copy().mark_unsafe();
         }
     };
 

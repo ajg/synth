@@ -47,48 +47,25 @@ struct value : value_facade<Char, value<Char> > {
 
   public:
 
-    value() : base_type(), safe_(false) {}
-    template <class T> value(T const& t) : base_type(t), safe_(false) {}
+    value() : base_type(), safe_(false), token_(boost::none) {}
+    template <class T> value(T const& t) : base_type(t), safe_(false), token_(boost::none) {}
+    value(value const& that) : base_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
 
   public:
 
-    inline void safe(boolean_type const safe) { safe_ = safe; }
+    inline value_type copy() const { return *this; }
+
+    inline value_type&  safe(boolean_type const safe) { return (safe_ = safe), *this; }
     inline boolean_type safe() const { return safe_; }
 
-    inline value_type& mark_unsafe() {
-        return this->safe(false), *this;
-    }
+    inline value_type& mark_unsafe() { return this->safe(false), *this; }
+    inline value_type& mark_safe() { return this->safe(true), *this; }
 
-    inline value_type mark_unsafe() const {
-        value_type copy = *this;
-        return copy.mark_unsafe();
-    }
-
-    inline value_type& mark_safe() {
-        return this->safe(true), *this;
-    }
-
-    inline value_type mark_safe() const {
-        value_type copy = *this;
-        return copy.mark_safe();
-    }
-
-    inline void token(token_type const& token) {
-        token_ = token;
-    }
-
-    inline token_type const& token() const {
-        BOOST_ASSERT(token_);
-        return *token_;
-    }
-
-    inline value_type& with_token(token_type const& token) {
-        this->token_ = token;
-        return *this;
-    }
+    inline value_type&       token(token_type const& token) { return (token_ = token), *this; }
+    inline token_type const& token() const { BOOST_ASSERT(token_); return *token_; }
 
     inline boolean_type is_literal() const {
-        return token_;
+        return boolean_type(token_);
     }
 
 	value_type escape() const {
@@ -224,7 +201,7 @@ struct value : value_facade<Char, value<Char> > {
 
   private:
 
-    boolean_type safe_;
+    boolean_type         safe_;
     optional<token_type> token_;
 };
 

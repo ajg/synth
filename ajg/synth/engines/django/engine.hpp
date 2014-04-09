@@ -512,32 +512,32 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         string_type const  string  = match.str();
 
         if (literal == none_literal) {
-            return value_type(none_type()).with_token(literal[0]);
+            return value_type(none_type()).token(literal[0]);
         }
         else if (literal == boolean_literal) {
             match_type const& boolean = detail::unnest(literal);
 
             if (boolean == true_literal) {
-                return value_type(boolean_type(true)).with_token(literal[0]);
+                return value_type(boolean_type(true)).token(literal[0]);
             }
             else if (boolean == false_literal) {
-                return value_type(boolean_type(false)).with_token(literal[0]);
+                return value_type(boolean_type(false)).token(literal[0]);
             }
             else {
                 throw_exception(std::logic_error("invalid boolean literal"));
             }
         }
         else if (literal == number_literal) {
-            return value_type(traits_type::to_number(string)).with_token(literal[0]);
+            return value_type(traits_type::to_number(string)).token(literal[0]);
         }
         else if (literal == string_literal) {
             // Adjust the token by trimming the quotes.
             string_type const token = string_type(literal[0].first + 1, literal[0].second - 1);
-            return value_type(extract_string(literal)).with_token(token);
+            return value_type(extract_string(literal)).token(token);
         }
         else if (literal == variable_literal) {
             if (optional<value_type const&> const variable = detail::find_value(string, context)) {
-                return value_type(*variable).with_token(literal[0]);
+                return variable->copy().token(literal[0]);
             }
             else {
                 throw_exception(missing_variable(traits_type::narrow(string)));

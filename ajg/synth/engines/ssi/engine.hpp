@@ -289,7 +289,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     }
     catch (std::exception const&) {
         if (throw_on_errors) throw;
-        /* xxx: Unclear whether this is helpful or even allowed; plus it's distracting in unit tests.
+        /* XXX: It's unclear whether this is helpful or even allowed; plus it's distracting in unit tests.
         else {
             std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
         }*/

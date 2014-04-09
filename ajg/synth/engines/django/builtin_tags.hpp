@@ -280,7 +280,7 @@ struct builtin_tags {
 
     struct cycle_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("cycle") >> engine.arguments >> !(engine.keyword("as") >> engine.name)) >> engine.block;
+            return AJG_TAG(engine.reserved("cycle") >> engine.values >> !(engine.keyword("as") >> engine.name)) >> engine.block;
         }
 
         static void render( engine_type  const& engine
@@ -290,14 +290,14 @@ struct builtin_tags {
                           , out_type&           out
                           ) {
             size_type   const  position = match.position();
-            match_type  const& args     = match(engine.arguments);
+            match_type  const& vals     = match(engine.values);
             match_type  const& block    = match(engine.block);
             string_type const& name     = match(engine.name)[id].str();
-            size_type   const  total    = args.nested_results().size();
+            size_type   const  total    = vals.nested_results().size();
             size_type   const  current  = detail::find_mapped_value(position, options.cycles_).get_value_or(0);
 
-            match_type const& arg   = *detail::advance_to(args.nested_results().begin(), current);
-            value_type const  value = engine.evaluate(arg, context, options);
+            match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
+            value_type const  value = engine.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
             out << value;
 
@@ -407,7 +407,7 @@ struct builtin_tags {
 
     struct firstof_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("firstof") >> engine.arguments >> !engine.string_literal);
+            return AJG_TAG(engine.reserved("firstof") >> engine.values >> !engine.string_literal);
         }
 
         static void render( engine_type  const& engine
@@ -416,9 +416,11 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            BOOST_FOREACH(match_type const& var, match(engine.arguments).nested_results()) {
+            match_type const& vals = match(engine.values);
+
+            BOOST_FOREACH(match_type const& val, detail::select_nested(vals, engine.value)) {
                 try {
-                    if (value_type const value = engine.evaluate(var, context, options)) {
+                    if (value_type const value = engine.evaluate(val, context, options)) {
                         out << value;
                         break;
                     }
@@ -562,7 +564,7 @@ struct builtin_tags {
 
     struct ifchanged_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifchanged") >> engine.arguments) >> engine.block
+            return AJG_TAG(engine.reserved("ifchanged") >> engine.values) >> engine.block
               >> !(AJG_TAG(engine.reserved("else"))     >> engine.block)
               >>   AJG_TAG(engine.reserved("endifchanged"));
         }
@@ -573,7 +575,7 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type const& args  = match(engine.arguments);
+            match_type const& vals  = match(engine.values);
             match_type const& if_   = match(engine.block, 0);
             match_type const& else_ = match(engine.block, 1);
 
@@ -581,7 +583,7 @@ struct builtin_tags {
             optional<value_type const&> const value = detail::find_value(position, options.changes_);
 
             // This is the case with no variables (compare contents).
-            if (args.nested_results().empty()) {
+            if (vals.nested_results().empty()) {
                 string_stream_type stream;
                 engine.render_block(stream, if_, context, options);
                 string_type const result = stream.str();
@@ -601,9 +603,9 @@ struct builtin_tags {
                 // NOTE: The key is a string (rather than an int) presumably in case variables are repeated.
                 std::map<string_type, value_type> values;
 
-                BOOST_FOREACH(match_type const& arg, args.nested_results()) {
-                    string_type const s = boost::algorithm::trim_copy(arg.str());
-                    values[s] = engine.evaluate(arg, context, options);
+                BOOST_FOREACH(match_type const& val, detail::select_nested(vals, engine.value)) {
+                    string_type const s = boost::algorithm::trim_copy(val.str());
+                    values[s] = engine.evaluate(val, context, options);
                 }
 
                 if (value && *value == value_type/*ref*/(values)) {

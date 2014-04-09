@@ -229,6 +229,9 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         value
             = expression >> *(as_xpr('|') >> filter) >> *_s
             ;
+        values
+            = +value
+            ;
         argument
             = value // TODO: Named arguments; e.g. (name >> '=')? >> value
             ;
@@ -692,6 +695,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     regex_type argument;
     regex_type arguments;
     regex_type value;
+    regex_type values;
     regex_type filter;
     regex_type filters;
     regex_type chain;

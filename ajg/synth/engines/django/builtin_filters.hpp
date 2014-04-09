@@ -207,12 +207,12 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
-            return escape(value).mark_safe();
+            return escape_slashes(value).mark_safe();
         }
 
-        inline static value_type escape(value_type const& value) {
+        inline static value_type escape_slashes(value_type const& value) {
             string_type const string = value.to_string();
-            // string_stream_type stream;
+            // TODO: string_stream_type stream;
             if (size_type const escapes = std::count_if(string.begin(), string.end(), algo::is_any_of("'\"\\"))) {
                 string_type result;
                 result.reserve(string.size() + escapes);
@@ -228,7 +228,7 @@ struct builtin_filters {
 
                 return result;
             }
-            else { // no escapes
+            else { // No escapes.
                 return value;
             }
         }
@@ -779,6 +779,7 @@ struct builtin_filters {
 
 //
 // make_list_filter
+//     TODO: Investigate whether this should return a string or a list.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct make_list_filter {
@@ -877,10 +878,9 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
-            // NOTE: Since this filter is for debugging, we don't normally try
-            //       to do anything fancy. However, in the Python binding,
-            //       this filter is overridden with a call to the real pprint.
-            return value.to_string();
+            // NOTE: Since this filter is for debugging, we don't normally try to do anything fancy.
+            //       In the Python binding it can be overridden with a call to the real pprint.
+            return value.is_string() ? detail::quote(value.to_string(), '\'') : value.to_string();
         }
     };
 

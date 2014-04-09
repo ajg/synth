@@ -98,7 +98,6 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return x::as_xpr((this->markers[name] = s));
     }
 
-    inline regex_type unit    (char const c)         { return x::as_xpr(c) >> *x::_s; }
     inline regex_type word    (string_type const& s) { return x::as_xpr(s) >> x::_b; }
     inline regex_type op      (string_type const& s) { return this->word(*this->keywords_.insert(s).first); }
     inline regex_type keyword (string_type const& s) { return this->word(*this->keywords_.insert(s).first) >> *x::_s; }
@@ -180,14 +179,14 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = '.' >> identifier
             ;
         subscript_link
-            = unit('[') >> x::ref(expression) >> ']'
+            = as_xpr('[') >> *_s >> x::ref(expression) >> *_s >> ']'
             ;
         link
             = attribute_link
             | subscript_link
             ;
         chain
-            = literal >> *link >> *_s // TODO: Consider generalizing literal to expression
+            = literal >> *link // TODO: Consider generalizing literal to expression
             ;
         unary_operator
             = op("not")
@@ -211,7 +210,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = unary_operator >> *_s >> x::ref(expression)
             ;
         nested_expression
-            = unit('(') >> x::ref(expression) >> unit(')')
+            = as_xpr('(') >> *_s >> x::ref(expression) >> *_s >> ')'
             ;
         expression
             = unary_expression
@@ -219,13 +218,13 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | nested_expression
             ;
         arguments
-            = *expression
+            = *(expression >> *_s)
             ;
         variables
-            = name >> *(unit(',') >> name)
+            = name >> *(as_xpr(',') >> *_s >> name)
             ;
         filter
-            = name >> !(unit(':') >> chain)
+            = name >> !(as_xpr(':') >> chain)
             ;
         filters
             = *(as_xpr('|') >> filter)

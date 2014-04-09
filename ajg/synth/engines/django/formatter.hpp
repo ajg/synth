@@ -6,7 +6,6 @@
 #define AJG_SYNTH_ENGINES_DJANGO_FORMATTER_HPP_INCLUDED
 
 #include <map>
-#include <ctime>
 #include <sstream>
 
 #include <boost/array.hpp>
@@ -214,11 +213,12 @@ struct formatter {
         typename options_type::formats_type::const_iterator const it = options.formats.find(string);
         string_type const format = it == options.formats.end() ? string : it->second;
 
-        boolean_type const is_am       = flags.p == traits_type::literal("AM");
-        boolean_type const is_pm       = flags.p == traits_type::literal("PM");
-        boolean_type const has_minutes = flags.M != traits_type::literal("00");
-        boolean_type const is_midnight = flags.H == "00" && !has_minutes;
-        boolean_type const is_noon     = flags.H == "12" && !has_minutes;
+        boolean_type  const is_am       = flags.p == traits_type::literal("AM");
+        boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
+        boolean_type  const has_minutes = flags.M != traits_type::literal("00");
+        boolean_type  const is_midnight = flags.H == "00" && !has_minutes;
+        boolean_type  const is_noon     = flags.H == "12" && !has_minutes;
+        datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
 
         string_type const a = is_am ? traits_type::literal("a.m.") :
                               is_pm ? traits_type::literal("p.m.") : string_type();
@@ -232,7 +232,7 @@ struct formatter {
         string_type const u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
         string_type const r = flags.a + ',' + ' ' + flags.d + ' ' + flags.b + ' ' + flags.Y + ' ' + flags.T;
         string_type const G = algo::trim_left_copy(flags.k);
-        string_type const U = traits_type::to_string(to_time_t(datetime));
+        string_type const U = traits_type::to_string((datetime - epoch).seconds());
         string_type const P = is_midnight ? traits_type::literal("midnight") :
                               is_noon     ? traits_type::literal("noon")     : (f + ' ' + a);
 
@@ -285,13 +285,6 @@ struct formatter {
 
         BOOST_ASSERT(stream);
         return stream.str();
-    }
-
-  private:
-
-    inline static std::time_t to_time_t(datetime_type datetime) {
-        duration_type const duration = datetime - datetime_type(date_type(1970, 1, 1));
-        return static_cast<std::time_t>(duration.seconds());
     }
 
   public:

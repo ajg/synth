@@ -4,6 +4,7 @@
 
 #include <ctime>
 #include <string>
+#include <unistd.h>
 
 #include <ajg/testing.hpp>
 #include <ajg/synth/templates.hpp>
@@ -40,10 +41,9 @@ AJG_TESTING_BEGIN
 ///     django::block_tag
 ///     django::extends_tag
 ///     django::ifchanged_tag
-///     django::ssi_tag
-///     django::load_tag      (tested implicitly in Python binding tests.)
-///     django::load_from_tag (tested implicitly in Python binding tests.)
-///     django::library_tag   (tested implicitly in Python binding tests.)
+///     django::load_tag      (Tested implicitly in Python binding tests.)
+///     django::load_from_tag (Tested implicitly in Python binding tests.)
+///     django::library_tag   (Tested implicitly in Python binding tests.)
 
 #define DJANGO_TEST_(name, in, out, context) \
     unit_test(name) { ensure_equals(string_template(in).render_to_string(context), out); }}}
@@ -357,6 +357,15 @@ unit_test(url_as_tag) {
 
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
+
+char path_buffer[PATH_MAX] = {};
+traits_type::string_type const absolute_path = traits_type::widen(getcwd(path_buffer, PATH_MAX));
+using ajg::synth::detail::quote;
+
+DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")
+DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " parsed %}",     "")
+DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " %}",        "foo: {{ foo }}\nbar: {{ bar }}\nqux: {{ qux }}\n")
+DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
 
 DJANGO_TEST(verbatim_tag,
         "{% verbatim %}{% for v in friends %}\n"
@@ -698,12 +707,5 @@ DJANGO_TEST(safeseq_filter, "{{tags|safeseq}}", "")
 DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 */
 
-/*
-TODO:
-{% for k, v in numbers %}{% cycle k v as x %}({{x}}){% endfor %}
-
-{#% ssi /etc/adjtime parsed % -- normally unavailable on Windows and OS X #}
-{#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}
-
-{% block a_block %}This is a block{% endblock a_block %}
-*/
+// TODO: {% for k, v in numbers %}{% cycle k v as x %}({{x}}){% endfor %}
+// TODO: {% block a_block %}This is a block{% endblock a_block %}

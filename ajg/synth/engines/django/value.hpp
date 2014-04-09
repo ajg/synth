@@ -69,7 +69,7 @@ struct value : value_facade<Char, value<Char> > {
     }
 
 	value_type escape() const {
-        // xxx: Should this method escape binary and control characters?
+        // XXX: Should this method escape binary and control characters?
         return detail::escape_entities(this->to_string());
     }
 

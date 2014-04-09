@@ -156,7 +156,7 @@ inline static std::basic_string<Char> to_hex(Char const c, bool lowercase = fals
     // TODO: Ensure that given the width, the character passed in won't overflow as a number.
     // BOOST_STATIC_ASSERT(sizeof(Char) ... Width);
     std::basic_ostringstream<Char> stream;
-    if (!lowercase) stream << std::uppercase;
+    stream << (lowercase ? std::nouppercase : std::uppercase);
     stream << std::hex << std::setw(Width) << std::setfill(Char('0'));
     stream << static_cast<std::size_t>(c);
     BOOST_ASSERT(stream);

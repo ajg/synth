@@ -199,13 +199,6 @@ struct value_facade {
     boost::shared_ptr<adapter_type const> adapter_;
 };
 
-// TODO[c++11]: Replace with variadic templates.
-#define AJG_SYNTH_VALUE_CONSTRUCTORS(name, base, rest) \
-    name() : base() rest /* TODO: Remove this, and change all map[] access with insert().*/ \
-    template <class T>                   name(T const& t) : base(t) rest \
-    template <class T, class U>          name(T const& t, U const& u) : base(t, u) rest \
-    template <class T, class U, class V> name(T const& t, U const& u, V const& v) : base(t, u, v) rest
-
 }} // namespace ajg::synth
 
 #endif // AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED

@@ -48,7 +48,7 @@ def find_test_sources():
 
 def find_cxx_version(cxx):
     try:
-        # Note: '--version' alone doesn't always work with g++
+        # NOTE: '--version' alone doesn't always work with g++
         return subprocess.check_output([cxx, '--version', '--verbose'], stderr=subprocess.STDOUT)
     except OSError as e:
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)

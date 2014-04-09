@@ -184,7 +184,7 @@ struct default_value_traits {
             else return false;
         }
 
-        // Note:
+        // NOTE:
         //     is<T>: whether exactly T (modulo const/volatile)
         //     as<T>: cast to exactly T& (modulo const/volatile) or throw
         //     to<T>: convert to T or throw

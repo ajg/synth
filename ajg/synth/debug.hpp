@@ -176,7 +176,7 @@ inline void signal_handler( int        signum
     case SIGSEGV: name = "SIGSEGV"; break;
  // case SIGBUS:  name = "SIGBUS";  break;
     case SIGILL:  name = "SIGILL";  break;
-	case SIGFPE:  name = "SIGFPE";  break;
+    case SIGFPE:  name = "SIGFPE";  break;
  // case SIGPIPE: name = "SIGPIPE"; break;
     default:      name = "?";       break;
     }

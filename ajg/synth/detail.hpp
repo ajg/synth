@@ -9,6 +9,7 @@
 
 #include <string>
 #include <limits>
+#include <cctype>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -38,53 +39,6 @@ namespace synth {
 namespace detail {
 
 using boost::throw_exception;
-
-//
-// nonconstructible:
-//     Utility class to prevent instantiations of a class meant to be 'static.'
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct nonconstructible {
-  private:
-    nonconstructible();
-};
-
-//
-// standard_environment:
-//     Safer and iterable interface to the program's environment.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct standard_environment {
-  public:
-
-    typedef boost::environment_iterator         iterator;
-    typedef boost::environment_iterator         const_iterator;
-    typedef iterator::value_type                value_type;
-    typedef value_type::first_type              key_type;
-    typedef value_type::second_type             mapped_type;
-
-  public:
-
-    const_iterator begin() const {
-        return const_iterator(environ);
-    }
-
-    const_iterator end() const {
-        return const_iterator();
-    }
-
-    const_iterator find(key_type const& name) const {
-        const_iterator const end = this->end();
-
-        for (const_iterator it = begin(); it != end; ++it) {
-            if (it->first == name) {
-                return it;
-            }
-        }
-
-        return end;
-    }
-};
 
 //
 // AJG_SYNTH_UNREACHABLE:
@@ -135,6 +89,65 @@ struct standard_environment {
 
 #define AJG_SYNTH_THROW(e) \
     AJG_SYNTH_IF_MSVC((AJG_SYNTH_THROW_EXCEPTION(e), AJG_SYNTH_UNREACHABLE), AJG_SYNTH_THROW_EXCEPTION(e))
+
+//
+// nonconstructible:
+//     Utility class to prevent instantiations of a class meant to be 'static.'
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct nonconstructible {
+  private:
+    nonconstructible();
+};
+
+//
+// standard_environment:
+//     Safer and iterable interface to the program's environment.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct standard_environment {
+  public:
+
+    typedef boost::environment_iterator         iterator;
+    typedef boost::environment_iterator         const_iterator;
+    typedef iterator::value_type                value_type;
+    typedef value_type::first_type              key_type;
+    typedef value_type::second_type             mapped_type;
+
+  public:
+
+    const_iterator begin() const {
+        return const_iterator(environ);
+    }
+
+    const_iterator end() const {
+        return const_iterator();
+    }
+
+    const_iterator find(key_type const& name) const {
+        const_iterator const end = this->end();
+
+        for (const_iterator it = begin(); it != end; ++it) {
+            if (it->first == name) {
+                return it;
+            }
+        }
+
+        return end;
+    }
+};
+
+//
+// is_absolute:
+//     Returns whether a path is considered absolute, even on Windows.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class String>
+inline bool is_absolute(String path) {
+    BOOST_STATIC_CONSTANT(bool, check_drive_letter = AJG_SYNTH_IF_WINDOWS(true, false));
+    return (!path.empty() && path.front() == '/') || (check_drive_letter && path.size() >= 3
+        && (std::isalpha)(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\'));
+}
 
 //
 // stat_file

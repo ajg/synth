@@ -28,8 +28,8 @@ struct adapter<Traits, boost::none_t>
     number_type  to_number()  const { return 0; }
     boolean_type to_boolean() const { return false; }
 
- // void input (istream_type& in)        { in  >> adapted_; }
-    void output(ostream_type& out) const { out << adapted_; }
+ // void input (istream_type& in)        { in >> adapted_; }
+    void output(ostream_type& out) const { out << "None"; } // TODO: Configure via Traits.
 };
 
 }} // namespace ajg::synth

@@ -438,7 +438,7 @@ struct builtin_tags {
 
     struct filter_tag {
         static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("filter") >> engine.pipeline) >> engine.block
+            return AJG_TAG(engine.reserved("filter") >> engine.filters) >> engine.block
                 >> AJG_TAG(engine.reserved("endfilter"));
         }
 
@@ -448,12 +448,9 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type const& filters = match(engine.pipeline);
-            match_type const& body    = match(engine.block);
-
             string_stream_type stream;
-            engine.render_block(stream, body, context, options);
-            out << engine.apply_filters(stream.str(), filters, context, options);
+            engine.render_block(stream, match(engine.block), context, options);
+            out << engine.apply_filters(stream.str(), match(engine.filters), context, options);
         }
     };
 
@@ -475,10 +472,10 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type  const& vars   = match(engine.variable_names);
-            match_type  const& for_   = match(engine.block, 0);
-            match_type  const& empty  = match(engine.block, 1);
-            value_type  const& value  = engine.evaluate(match(engine.value), context, options);
+            match_type  const& vars  = match(engine.variable_names);
+            match_type  const& for_  = match(engine.block, 0);
+            match_type  const& empty = match(engine.block, 1);
+            value_type  const& value = engine.evaluate(match(engine.value), context, options);
 
             typename value_type::const_iterator it(value.begin()), end(value.end());
             typename options_type::names_type const& variables = engine.extract_names(vars);
@@ -994,8 +991,7 @@ struct builtin_tags {
 
     struct variable_tag {
         static regex_type syntax(engine_type& engine) {
-            return engine.variable_open >> *_s >> engine.expression >> engine.filters >> *_s
-                >> engine.variable_close;
+            return engine.variable_open >> *_s >> engine.value >> engine.variable_close;
         }
 
         static void render( engine_type  const& engine
@@ -1004,17 +1000,7 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-            match_type const& expr    = match(engine.expression);
-            match_type const& filters = match(engine.filters);
-            value_type value;
-
-            try {
-                value = engine.evaluate_expression(expr, context, options);
-                value = engine.apply_filters(value, filters, context, options);
-            }
-            catch (missing_variable  const&) { value = options.default_value; }
-            catch (missing_attribute const&) { value = options.default_value; }
-
+            value_type const& value = engine.evaluate(match(engine.value), context, options);
             boolean_type const safe = !options.autoescape || value.safe();
             safe ? out << value : out << value.escape();
         }

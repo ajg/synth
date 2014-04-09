@@ -225,15 +225,19 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             | string_literal
             | variable_literal
             ;
-        attribution
+        attribute_link
             = '.' >> identifier
             ;
-        subscription
-            = token<'['>() >> x::ref(expression) >> ']' // token<']'>()
+        subscript_link
+            = token<'['>() >> x::ref(expression) >> ']'
+            ;
+        link
+            = attribute_link
+            | subscript_link
             ;
         chain
             // TODO: Consider generalizing literal to expression
-            = literal >> /* *_s >>*/ *(attribution | subscription) >> *_s
+            = literal >> *link >> *_s
             ;
         unary_operator
             = xxx("not")
@@ -503,43 +507,37 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                                , context_type const& context
                                , options_type const& options
                                ) const {
-        value_type value;
         BOOST_ASSERT(match == this->literal);
-        string_type const  string  = match.str();
         match_type  const& literal = detail::unnest(match);
+        string_type const  string  = match.str();
 
         if (literal == none_literal) {
-            value = value_type(none_type());
-            value.token(literal[0]);
+            return value_type(none_type()).with_token(literal[0]);
         }
         else if (literal == boolean_literal) {
             match_type const& boolean = detail::unnest(literal);
 
             if (boolean == true_literal) {
-                value = boolean_type(true);
-                value.token(literal[0]);
+                return value_type(boolean_type(true)).with_token(literal[0]);
             }
             else if (boolean == false_literal) {
-                value = boolean_type(false);
-                value.token(literal[0]);
+                return value_type(boolean_type(false)).with_token(literal[0]);
             }
             else {
                 throw_exception(std::logic_error("invalid boolean literal"));
             }
         }
         else if (literal == number_literal) {
-            value = traits_type::to_number(string);
-            value.token(literal[0]);
+            return value_type(traits_type::to_number(string)).with_token(literal[0]);
         }
         else if (literal == string_literal) {
-            value = extract_string(literal);
             // Adjust the token by trimming the quotes.
-            value.token(std::make_pair(literal[0].first + 1, literal[0].second - 1));
+            string_type const token = string_type(literal[0].first + 1, literal[0].second - 1);
+            return value_type(extract_string(literal)).with_token(token);
         }
         else if (literal == variable_literal) {
             if (optional<value_type const&> const variable = detail::find_value(string, context)) {
-                value = *variable;
-                value.token(literal[0]);
+                return value_type(*variable).with_token(literal[0]);
             }
             else {
                 throw_exception(missing_variable(traits_type::narrow(string)));
@@ -548,8 +546,6 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         else {
             throw_exception(std::logic_error("invalid literal"));
         }
-
-        return value;
     }
 
     value_type evaluate_expression( match_type   const& match
@@ -594,8 +590,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                               , options_type const& options
                               ) const {
         BOOST_ASSERT(match == binary_expression);
-        // First, evaluate the first segment, which is
-        // always present, and which is always a chain.
+        // First, evaluate the first segment, which is always present and always a chain.
         match_type const& chain = match(this->chain);
         value_type value = evaluate_chain(chain, context, options);
         size_type i = 0;
@@ -652,30 +647,33 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return value;
     }
 
+    value_type evaluate_link( match_type   const& match
+                            , context_type const& context
+                            , options_type const& options
+                            ) const {
+        match_type const& link = detail::unnest(match);
+
+        if (link == this->subscript_link) { // i.e. value[attribute]
+            return evaluate(link(this->expression), context, options);
+        }
+        else if (link == this->attribute_link) { // i.e. value.attribute
+            return string_type(link(this->identifier).str());
+        }
+        else {
+            throw_exception(std::logic_error("invalid link"));
+        }
+    }
+
     value_type evaluate_chain( match_type   const& match
                              , context_type const& context
                              , options_type const& options
                              ) const {
         BOOST_ASSERT(match == this->chain);
-        // First, evaluate the first segment, which is
-        // always present, and which is always a literal.
         match_type const& lit = match(this->literal);
         value_type value = evaluate_literal(lit, context, options);
 
-        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
-            match_type const& nested = detail::unnest(segment);
-            value_type attribute;
-
-            if (segment == subscription) { // i.e. value [ attribute ]
-                attribute = evaluate(nested, context, options);
-            }
-            else if (segment == attribution) { // i.e. value.attribute
-                attribute = nested.str();
-            }
-            else {
-                throw_exception(std::logic_error("invalid chain"));
-            }
-
+        BOOST_FOREACH(match_type const& link, detail::select_nested(match, this->link)) {
+            value_type const attribute = this->evaluate_link(link, context, options);
             value = value.must_get_attribute(attribute);
         }
 
@@ -855,7 +853,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     regex_type arguments;
     regex_type variables;
     regex_type filter, filters, pipeline;
-    regex_type chain, subscription, attribution;
+    regex_type chain, link, subscript_link, attribute_link;
     regex_type unary_operator, binary_operator;
     regex_type unary_expression, binary_expression, nested_expression, expression;
     regex_type none_literal;

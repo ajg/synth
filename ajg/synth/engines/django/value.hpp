@@ -72,14 +72,18 @@ struct value : value_facade<Char, value<Char> > {
         return copy.mark_safe();
     }
 
-    template <class Token>
-    inline void token(Token const& token) {
-        token_ = token_type(token.first, token.second);
+    inline void token(token_type const& token) {
+        token_ = token;
     }
 
     inline token_type const& token() const {
         BOOST_ASSERT(token_);
         return *token_;
+    }
+
+    inline value_type& with_token(token_type const& token) {
+        this->token_ = token;
+        return *this;
     }
 
     inline boolean_type is_literal() const {

@@ -258,6 +258,7 @@ struct formatter {
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
             date_type     const date        = datetime.date();
+            size_type     const day         = date.day();
             size_type     const year        = date.year();
             size_type     const month_days  = date.end_of_month().day();
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
@@ -307,7 +308,7 @@ struct formatter {
             cooked.P = informal;
             cooked.r = flags.a + ',' + ' ' + flags.d + ' ' + flags.b + ' ' + flags.Y + ' ' + flags.T; // TODO: Include non-UTC timezones.
             cooked.s = flags.S;
-            cooked.S = "";       // TODO: Implement.
+            cooked.S = ordinal_suffix(day);
             cooked.t = traits_type::to_string(month_days);
             cooked.T = "";       // TODO: Implement.
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
@@ -319,6 +320,16 @@ struct formatter {
             cooked.z = algo::trim_left_copy_if(flags.j, algo::is_any_of("0"));
             cooked.Z = "";       // TODO: Implement.
             return cooked;
+        }
+
+        inline static string_type ordinal_suffix(int const n) {
+            BOOST_ASSERT(n > 0 && n <= 31);
+            switch (n) {
+            case 1: case 21: return traits_type::literal("st");
+            case 2: case 22: return traits_type::literal("nd");
+            case 3: case 23: return traits_type::literal("rd");
+            default:         return traits_type::literal("th");
+            }
         }
     };
 

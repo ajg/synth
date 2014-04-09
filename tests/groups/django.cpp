@@ -90,12 +90,11 @@ DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 ///     django::block_tag
 ///     django::extends_tag
 ///     django::ifchanged_tag
-///     django::load_tag
-///     django::load_from_tag
 ///     django::now_tag
 ///     django::ssi_tag
-///     django::widthratio_tag
-///     django::library_tag
+///     django::load_tag      (tested implicitly in Python binding tests.)
+///     django::load_from_tag (tested implicitly in Python binding tests.)
+///     django::library_tag   (tested implicitly in Python binding tests.)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing tag) {
@@ -271,6 +270,20 @@ DJANGO_TEST(spaceless_tag,
 
 DJANGO_TEST(templatetag_tag, "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag, "{% templatetag closevariable %}", "}}")
+
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 100 100 %}", "100")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 100 200 %}", "200")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 100 300 %}", "300")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 300 200 %}", "67")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 200 100 %}", "50")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 200 200 %}", "100")
+DJANGO_TEST(widthratio_tag, "{% widthratio 100 200 300 %}", "150")
+DJANGO_TEST(widthratio_tag, "{% widthratio 200 100 300 %}", "600")
+DJANGO_TEST(widthratio_tag, "{% widthratio 200 300 100 %}", "67")
+DJANGO_TEST(widthratio_tag, "{% widthratio 300 100 100 %}", "300")
+DJANGO_TEST(widthratio_tag, "{% widthratio 300 100 200 %}", "600")
+DJANGO_TEST(widthratio_tag, "{% widthratio 300 100 300 %}", "900")
+DJANGO_TEST(widthratio_tag, "{% widthratio 300 200 100 %}", "150")
 
 unit_test(url_tag) {
     string_template const t("{% url 'x.y.z' 1 2 3 %}");
@@ -666,8 +679,6 @@ DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 /*
 TODO:
 {% for k, v in numbers %}{% cycle k v as x %}({{x}}){% endfor %}
-
-<img src="bar.gif" height="10" width="{% widthratio this_value max_value 100 %}" />
 
 {#% ssi /etc/adjtime parsed % -- normally unavailable on Windows and OS X #}
 {#% ssi /etc/adjtime % -- normally unavailable on Windows and OS X #}

@@ -38,15 +38,19 @@ struct default_value_traits {
     // TODO:
     //        specific | general
     //       ----------+----------
-    //        none_t   | none/nil
+    //        void     | unit?
+    //        none_t   | none/nil/nullary/nothing?
     //        bool     | boolean
     //        char     | character
     //        number   | numeric
-    //        string   | text?
+    //        string   | text/textual?
     //        datetime | chronological
-    //        vector   | sequential
-    //        map      | mapping/indexed/associative
-    //        set      | ?
+    //        array    | sequential+homogenous+fixed?
+    //        vector   | sequential+homogenous+dynamic?
+    //        tuple    | sequential+heterogenous+fixed?
+    //        list     | sequential+heterogenous+dynamic?
+    //        set      | mapping/indexed/associative+simple?
+    //        map      | mapping/indexed/associative+pair?
     //
 
     typedef default_value_traits                        traits_type;

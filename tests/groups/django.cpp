@@ -2,6 +2,7 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
+#include <ctime>
 #include <string>
 
 #include <ajg/testing.hpp>
@@ -33,6 +34,16 @@ group_type group_object("django");
 } // namespace
 
 AJG_TESTING_BEGIN
+
+///     TODO:
+///     django::force_escape_filter
+///     django::block_tag
+///     django::extends_tag
+///     django::ifchanged_tag
+///     django::ssi_tag
+///     django::load_tag      (tested implicitly in Python binding tests.)
+///     django::load_from_tag (tested implicitly in Python binding tests.)
+///     django::library_tag   (tested implicitly in Python binding tests.)
 
 #define DJANGO_TEST_(name, in, out, context) \
     unit_test(name) { ensure_equals(string_template(in).render_to_string(context), out); }}}
@@ -86,15 +97,6 @@ DJANGO_TEST(multiple filters,   "{% firstof 0|add:1|add:2|add:3 %}", "6")
 DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 
 /// Tag tests
-///     TODO:
-///     django::block_tag
-///     django::extends_tag
-///     django::ifchanged_tag
-///     django::now_tag
-///     django::ssi_tag
-///     django::load_tag      (tested implicitly in Python binding tests.)
-///     django::load_from_tag (tested implicitly in Python binding tests.)
-///     django::library_tag   (tested implicitly in Python binding tests.)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing tag) {
@@ -197,6 +199,22 @@ DJANGO_TEST(for_tag-key-value,
     "{% for k, v in friends %}[{{ k }}. {{ v }}]{% endfor %}",
     "[0. age: 23, name: joe][1. age: 55, name: bob][2. age: 41, name: lou]")
 */
+
+unit_test(now_tag) {
+    string_template const t("{% now 'y' %}");
+
+    std::time_t time = std::time(0);
+    string_type s = t.render_to_string(context);
+    ensure(s == traits_type::to_string(std::localtime(&time)->tm_year % 100));
+}}}
+
+unit_test(now_tag) {
+    string_template const t("{% now 'Y' %}");
+
+    std::time_t time = std::time(0);
+    string_type s = t.render_to_string(context);
+    ensure(s == traits_type::to_string(std::localtime(&time)->tm_year + 1900));
+}}}
 
 DJANGO_TEST(regroup_tag,
     "{% regroup cities by country as country_list %}\n"
@@ -351,8 +369,6 @@ DJANGO_TEST(verbatim_tag,
 DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
 /// Filter tests
-///     TODO:
-///     django::force_escape_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {

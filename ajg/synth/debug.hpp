@@ -45,10 +45,11 @@ namespace debug {
 
 ///
 /// AJG_CERR_LEAD, AJG_CERR_TRAIL
+//      TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_CERR_LEAD  (std::cerr << std::boolalpha << "    " << __FUNCTION__ << "() - \t")
-#define AJG_CERR_TRAIL (std::endl)
+#define AJG_CERR_LEAD  (std::cerr << std::endl << std::boolalpha << "    in " << __FUNCTION__ << "():\t")
+#define AJG_CERR_TRAIL ("")
 
 ///
 /// AJG_DUMP, AJG_PRINT

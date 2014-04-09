@@ -367,6 +367,13 @@ DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " %}",        "foo: {{ foo }}\nbar: {{ bar }}\nqux: {{ qux }}\n")
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
 
+unit_test(ssi_tag) {
+    ensure_throws(std::invalid_argument, string_template("{% ssi '../foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template("{% ssi './foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template("{% ssi 'foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template("{% ssi '' %}").render_to_string());
+}}}
+
 DJANGO_TEST(verbatim_tag,
         "{% verbatim %}{% for v in friends %}\n"
         "    <p>{{ v }}</p>\n"

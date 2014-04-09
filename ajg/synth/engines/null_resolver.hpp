@@ -23,6 +23,8 @@ using boost::optional;
 template <class Options>
 struct null_resolver : Options::abstract_resolver_type {
     typedef Options                               options_type;
+    typedef typename options_type::traits_type    traits_type;
+    typedef typename options_type::size_type      size_type;
     typedef typename options_type::string_type    string_type;
     typedef typename options_type::value_type     value_type;
     typedef typename options_type::context_type   context_type;
@@ -41,16 +43,22 @@ struct null_resolver : Options::abstract_resolver_type {
                                          , context_type   const& context
                                          , options_type   const& options
                                          ) {
+        // NOTE: This resolver is only meant to be used in tests, as it does no escaping.
         typename patterns_type::const_iterator it = patterns_.find(name);
         if (it == patterns_.end()) {
             return boost::none;
         }
 
-        string_type suffix;
+        string_type path, query;
         BOOST_FOREACH(value_type const& arg, arguments.first) {
-            suffix += "/" + arg.to_string();
+            path += traits_type::literal("/") + arg.to_string();
         }
-        return it->second + suffix;
+        size_type i = 0;
+        BOOST_FOREACH(typename arguments_type::second_type::value_type const& karg, arguments.second) {
+            query += i++ ? traits_type::literal("&") : traits_type::literal("?");
+            query += karg.first + traits_type::literal("=") + karg.second.to_string();
+        }
+        return it->second + path + query;
     }
 
     explicit null_resolver(patterns_type patterns) : patterns_(patterns) {}

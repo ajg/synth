@@ -145,7 +145,7 @@ struct standard_environment {
 template <class String>
 inline bool is_absolute(String path) {
     BOOST_STATIC_CONSTANT(bool, check_drive_letter = AJG_SYNTH_IF_WINDOWS(true, false));
-    return (!path.empty() && path.front() == '/') || (check_drive_letter && path.size() >= 3
+    return (!path.empty() && path[0] == '/') || (check_drive_letter && path.size() >= 3
         && (std::isalpha)(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\'));
 }
 

@@ -176,15 +176,6 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return std::make_pair(name, value);
     }
 
-    string_type interpolate( args_type   const& args
-                           , string_type const& string
-                           ) const {
-        typedef typename base_type::string_match_type match_type;
-        boost::function<string_type(match_type const&)> const
-            formatter = boost::bind(replace_variable, boost::cref(args), _1);
-        return xpressive::regex_replace(string, variable, formatter);
-    }
-
     template <class Match>
     string_type extract_attribute(Match const& attr) const {
         string_type const string = attr.str();
@@ -394,6 +385,13 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         if (expr == comparison_expression) return equals(args, expr);
         throw_exception(std::logic_error("invalid expression"));
 
+    }
+
+    string_type interpolate(args_type const& args, string_type const& string) const {
+        typedef typename base_type::string_match_type match_type;
+        boost::function<string_type(match_type const&)> const formatter =
+            boost::bind(replace_variable, boost::cref(args), _1);
+        return xpressive::regex_replace(string, variable, formatter);
     }
 
   private:

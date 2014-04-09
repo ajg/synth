@@ -56,7 +56,7 @@ DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /
 /// Literal tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// FIXME: DJANGO_TEST(boolean, "{{None}}",   "None")
+DJANGO_TEST(none, "{{None}}", "None")
 
 DJANGO_TEST(boolean, "{{True}}",   "True")
 DJANGO_TEST(boolean, "{{False}}",  "False")

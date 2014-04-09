@@ -35,10 +35,11 @@
 namespace ajg {
 namespace synth {
 namespace django {
-
+namespace {
 using detail::operator ==;
 using detail::find_mapped_value;
 namespace x = boost::xpressive;
+} // namespace
 
 struct engine : base_engine {
 
@@ -91,79 +92,29 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
 
   public:
 
-    std::map<string_type, string_type> markers;
+    std::map<string_type, string_type> markers; // TODO[c++11]: unordered_map.
 
-    inline regex_type word(string_type const& n) {
-        namespace x = boost::xpressive;
-        return x::as_xpr(n) >> x::_b;
+    inline regex_type marker(string_type const& s, string_type const& name) {
+        return x::as_xpr((this->markers[name] = s));
     }
 
-    inline regex_type reserved(string_type const& n) {
-        namespace x = boost::xpressive;
-        this->reserved_.insert(n);
-        return x::as_xpr(n) >> x::_b >> *x::_s;
-    }
-
-    inline regex_type keyword(string_type const& k) {
-        namespace x = boost::xpressive;
-        this->keywords_.insert(k);
-        return x::as_xpr(k) >> x::_b >> *x::_s;
-    }
-
-    inline regex_type xxx(string_type const& k) {
-        namespace x = boost::xpressive;
-        this->keywords_.insert(k);
-        return x::as_xpr(k) >> x::_b;
-    }
-
-    inline regex_type yyy(string_type const& k) {
-        namespace x = boost::xpressive;
-        return x::as_xpr(k) >> x::_b;
-    }
-
-    template <char_type C>
-    inline static regex_type token() {
-        namespace x = boost::xpressive;
-        return x::as_xpr(C) >> *x::_s;
-    }
-
-    /*
-    template <char_type C, char_type D>
-    inline static regex_type token() {
-        namespace x = boost::xpressive;
-        return x::as_xpr(C) >> x::as_xpr(D) >> *x::_s;
-    }
-    */
-
-    template <typename Char, size_type M, size_type N>
-    inline regex_type marker(Char const (&m)[M], Char const (&n)[N]) {
-        this->markers[traits_type::literal(n)] = traits_type::literal(m);
-        return x::as_xpr(m);
-    }
-
-    /*
-    inline static regex_type token(char_type const* const s) {
-        namespace x = boost::xpressive;
-        return x::as_xpr(s) >> *x::_s;
-    }
-    */
-
-    /*inline static regex_type token(string_type const& t) {
-        namespace x = boost::xpressive;
-        return x::as_xpr(t) >> *x::_s;
-    }*/
+    inline regex_type unit    (char const c)         { return x::as_xpr(c) >> *x::_s; }
+    inline regex_type word    (string_type const& s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type op      (string_type const& s) { return this->word(*this->keywords_.insert(s).first); }
+    inline regex_type keyword (string_type const& s) { return this->word(*this->keywords_.insert(s).first) >> *x::_s; }
+    inline regex_type reserved(string_type const& s) { return this->word(*this->reserved_.insert(s).first) >> *x::_s; }
 
     definition()
         : newline        (traits_type::literal("\n"))
         , ellipsis       (traits_type::literal("..."))
-        , brace_open     (marker("{",  "openbrace"))
-        , brace_close    (marker("}",  "closebrace"))
-        , block_open     (marker("{%", "openblock"))
-        , block_close    (marker("%}", "closeblock"))
-        , comment_open   (marker("{#", "opencomment"))
-        , comment_close  (marker("#}", "closecomment"))
-        , variable_open  (marker("{{", "openvariable"))
-        , variable_close (marker("}}", "closevariable")) {
+        , brace_open     (marker(traits_type::literal("{"),  traits_type::literal("openbrace")))
+        , brace_close    (marker(traits_type::literal("}"),  traits_type::literal("closebrace")))
+        , block_open     (marker(traits_type::literal("{%"), traits_type::literal("openblock")))
+        , block_close    (marker(traits_type::literal("%}"), traits_type::literal("closeblock")))
+        , comment_open   (marker(traits_type::literal("{#"), traits_type::literal("opencomment")))
+        , comment_close  (marker(traits_type::literal("#}"), traits_type::literal("closecomment")))
+        , variable_open  (marker(traits_type::literal("{{"), traits_type::literal("openvariable")))
+        , variable_close (marker(traits_type::literal("}}"), traits_type::literal("closevariable"))) {
         using namespace xpressive;
 //
 // common grammar
@@ -229,30 +180,29 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = '.' >> identifier
             ;
         subscript_link
-            = token<'['>() >> x::ref(expression) >> ']'
+            = unit('[') >> x::ref(expression) >> ']'
             ;
         link
             = attribute_link
             | subscript_link
             ;
         chain
-            // TODO: Consider generalizing literal to expression
-            = literal >> *link >> *_s
+            = literal >> *link >> *_s // TODO: Consider generalizing literal to expression
             ;
         unary_operator
-            = xxx("not")
+            = op("not")
             ;
         binary_operator
-            = yyy("==")
-            | yyy("!=")
-            | yyy("<=")
-            | yyy(">=")
-            | yyy("<")
-            | yyy(">")
-            | xxx("and")
-            | xxx("or")
-            | xxx("in")
-            | xxx("not") >> *_s >> xxx("in")
+            = op("==")
+            | op("!=")
+            | op("<=")
+            | op(">=")
+            | op("<")
+            | op(">")
+            | op("and")
+            | op("or")
+            | op("in")
+            | op("not") >> *_s >> op("in")
             ;
         binary_expression
             = chain >> *(binary_operator >> *_s >> x::ref(expression))
@@ -261,7 +211,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = unary_operator >> *_s >> x::ref(expression)
             ;
         nested_expression
-            = token<'('>() >> x::ref(expression) >> token<')'>()
+            = unit('(') >> x::ref(expression) >> unit(')')
             ;
         expression
             = unary_expression
@@ -272,10 +222,10 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             = *expression
             ;
         variables
-            = name >> *(token<','>() >> name)
+            = name >> *(unit(',') >> name)
             ;
         filter
-            = name >> !(token<':'>() >> chain)
+            = name >> !(unit(':') >> chain)
             ;
         filters
             = *(as_xpr('|') >> filter)

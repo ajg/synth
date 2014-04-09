@@ -326,23 +326,11 @@ struct builtin_tags {
                           , options_type const& options
                           , out_type&           out
                           ) {
-          /*
-          #ifdef NDEBUG
-            out << "NDEBUG is defined." << std::endl;
-          #else
-            out << "NDEBUG is not defined." << std::endl;
-          #endif
-          #ifdef _DEBUG
-            out << "_DEBUG is defined." << std::endl;
-          #else
-            out << "_DEBUG is not defined." << std::endl;
-          #endif
-          */
-            out << "\ncontext_type:\n" << std::endl;
+            out << "<h1>Context:</h1>" << std::endl;
 
             BOOST_FOREACH(typename context_type::value_type const& p, context) {
                 out << "    " << value_type(p.first).escape()
-                    << " = "  << value_type(p.second).escape() << std::endl;
+                    << " = "  << value_type(p.second).escape() << "<br />" << std::endl;
             }
         }
     };

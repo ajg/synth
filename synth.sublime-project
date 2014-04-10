@@ -19,7 +19,7 @@
             "working_dir": "${project_path}"
         },
         {
-            "cmd": "scons debug=1 test && ./test && scons debug=1 && python setup.py clean --all install && python tests/harness.py",
+            "cmd": "scons debug=1 test && ./test && python setup.py clean --all install && python tests/harness.py && scons debug=1 synth",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build All & Run Tests (debug)",

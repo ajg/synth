@@ -4,6 +4,8 @@
 
 language: cpp
 
+# TODO: Add debug/non-debug build environments.
+
 compiler:
   - g++
   - clang++
@@ -14,10 +16,10 @@ before_install:
 before_script:
   # - sudo apt-get install gdb
   - sudo apt-get install valgrind
-
-script:
   # Prevent slow builds from dying by echoing something every 5 minutes.
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
+
+script:
   - scons && ./test && valgrind --track-origins=yes ./test
   # FIXME: For some reason these SIGSEGV on Travis machines:
-  # - sudo python setup.py install && ls tests/python/binding*.py | xargs -n 1 python
+  # - sudo python setup.py install && python tests/harness.py

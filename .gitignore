@@ -16,7 +16,7 @@
 
 # Executables
 /synth
-/test
+/tests/harness
 /examples/all
 
 # Sublime Text

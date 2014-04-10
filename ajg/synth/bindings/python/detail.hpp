@@ -73,11 +73,6 @@ inline std::pair<py::tuple, py::dict> from_arguments(Value const& p0, Arguments 
     return from_arguments(arguments);
 }
 
-template <class String>
-inline static String class_name(py::object const& obj) {
-    return to_string<String>(obj.attr("__class__").attr("__name__"));
-}
-
 }}}} // namespace ajg::synth::python::detail
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_DETAIL_HPP_INCLUDED

@@ -106,7 +106,7 @@ struct adapter<Traits, py::object>
             return I(stl_iterator_type(py::list(obj)));
         }
         else {
-            string_type const& type = d::class_name<std::string>(obj);
+            string_type const& type = traits_type::narrow(class_name(obj));
             throw_exception(std::runtime_error(type + " object is not iterable"));
         }
     }
@@ -114,6 +114,10 @@ struct adapter<Traits, py::object>
     template <class I>
     inline static I end(py::object const& obj) {
         return I(stl_iterator_type());
+    }
+
+    inline static string_type class_name(py::object const& obj) {
+        return d::to_string<string_type>(obj.attr("__class__").attr("__name__"));
     }
 };
 

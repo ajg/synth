@@ -2,10 +2,10 @@
 ##  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-import synth, sys
-from difflib import unified_diff
+import sys
 
-print('Loaded synth; version: ' + synth.version())
+def get():
+    return (context, golden, source, 'django', (True, '', {}, False, [], {}, [library_loader], []))
 
 class Library(object):
     def __init__(self, tags={}, filters={}):
@@ -25,6 +25,7 @@ def library_loader(name):
 def flip(string):
     return ''.join(map(lambda c: c.upper() if c.islower() else c.lower(), string))
 
+
 context = {'motto': 'May the Force be with you.'}
 source = """
 
@@ -35,15 +36,7 @@ source = """
 {{ motto }}
 {{ motto|flip }}
 
-""".encode('utf-8')
-
-
-template = synth.Template(source, 'django', True, '', {}, False, [], {}, [library_loader], [])
-print('Parsing succeeded!')
-
-string = template.render_to_string(context)
-print('Rendering succeeded!')
-
+"""
 golden = """
 
 
@@ -54,9 +47,3 @@ May the Force be with you.
 mAY THE fORCE BE WITH YOU.
 
 """
-
-if string != golden:
-    diff = ''.join(unified_diff(golden.splitlines(True), string.splitlines(True)))
-    raise Exception("MISMATCH:\n" + diff)
-
-print('Matching succeeded!')

@@ -19,5 +19,5 @@ before_script:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
 script:
-  - scons && ./test && valgrind --track-origins=yes ./test
+  - scons && tests/harness && valgrind --track-origins=yes tests/harness
   - sudo python setup.py install # FIXME: && python tests/harness.py (Segfaults only in Travis)

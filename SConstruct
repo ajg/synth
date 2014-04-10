@@ -31,6 +31,12 @@ def create_targets(env):
         source = ['tests/harness.cpp'] + find_test_sources(),
     )
 
+    examples = env.Clone()
+    examples.Program(
+        target = 'examples/all',
+        source = ['examples/simple_ssi.cpp', 'examples/simple_ssi_wide.cpp'],
+    )
+
     command_line_tool = env.Clone()
     command_line_tool.Program(
         target = 'synth',
@@ -38,7 +44,7 @@ def create_targets(env):
         LIBS   = ['boost_program_options'],
     )
 
-    return [test_harness, command_line_tool]
+    return [test_harness, examples, command_line_tool]
 
 def find_test_sources():
     if group:

@@ -69,9 +69,9 @@ struct multi_template {
                   , loaders_type     const& loaders
                   , resolvers_type   const& resolvers
                   )
-        : django_template_(engine_name == "django" ? new django_template_type(source) : 0)
-        , ssi_template_   (engine_name == "ssi"    ? new ssi_template_type   (source) : 0)
-        , tmpl_template_  (engine_name == "tmpl"   ? new tmpl_template_type  (source) : 0)
+        : django_template_(engine_name == traits_type::literal("django") ? new django_template_type(source) : 0)
+        , ssi_template_   (engine_name == traits_type::literal("ssi")    ? new ssi_template_type   (source) : 0)
+        , tmpl_template_  (engine_name == traits_type::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
         , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders, resolvers)
         , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message, ...
         , tmpl_options_() {                        // TODO: directories, debug, ...

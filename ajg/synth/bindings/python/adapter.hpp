@@ -60,17 +60,19 @@ struct adapter<Traits, py::object>
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
 
-        PyObject *const o = adapted_.ptr();
-        string_type const k = what.to_string();
+        PyObject   *const o = adapted_.ptr();
+        std::string const k = traits_type::narrow(what.to_string());
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
+            // TODO: If value is a py::object, use PyMapping_HasKey(o, <value>.ptr())
             if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
                 return value_type(py::object(adapted_[py::str(k)]));
             }
         }
 
         // 2. Attribute lookup
+        // TODO: If value is a py::object, use PyObject_HasAttr(o, <value>.ptr()) and attr(...)
         if (PyObject_HasAttrString(o, k.c_str())) {
             py::object obj = adapted_.attr(py::str(k));
 
@@ -106,7 +108,7 @@ struct adapter<Traits, py::object>
             return I(stl_iterator_type(py::list(obj)));
         }
         else {
-            string_type const& type = traits_type::narrow(class_name(obj));
+            std::string const& type = traits_type::narrow(class_name(obj));
             throw_exception(std::runtime_error(type + " object is not iterable"));
         }
     }

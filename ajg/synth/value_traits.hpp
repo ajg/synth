@@ -143,7 +143,7 @@ struct default_value_traits {
         return transcode<char, C>(s);
     }
 
-    inline static std::basic_string<Char> const& narrow(std::basic_string<Char> const& s) {
+    inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) {
         return s;
     }
 
@@ -157,21 +157,12 @@ struct default_value_traits {
     }
 
     /*
-    // template <class C>
     inline static std::basic_string<char> narrow(std::basic_string<Char> const& s) {
         return transcode<Char, char>(s);
     }
 
-    inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) {
-        return s;
-    }
-
     inline static std::basic_string<Char> widen(std::basic_string<char> const& s) {
         return transcode<char, Char>(s);
-    }
-
-    inline static std::basic_string<Char> const& widen(std::basic_string<Char> const& s) {
-        return s;
     }
     */
 

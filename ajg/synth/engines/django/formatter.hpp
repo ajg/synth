@@ -264,8 +264,8 @@ struct formatter {
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
             boolean_type  const has_minutes = flags.M != traits_type::literal("00");
-            boolean_type  const is_midnight = flags.H == "00" && !has_minutes;
-            boolean_type  const is_noon     = flags.H == "12" && !has_minutes;
+            boolean_type  const is_midnight = flags.H == traits_type::literal("00") && !has_minutes;
+            boolean_type  const is_noon     = flags.H == traits_type::literal("12") && !has_minutes;
             boolean_type  const is_dst      = false;  // TODO: Implement, e.g. using tm_isdst from struct tm.
             boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
             datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
@@ -273,17 +273,17 @@ struct formatter {
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
             string_type   const succint     = algo::trim_left_copy(flags.l)
-                                            + (has_minutes ? ':' + flags.M : string_type());
+                                            + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
-                                            : (succint + ' ' + meridiem);
+                                            : (succint + char_type(' ') + meridiem);
 
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
             cooked.b = algo::to_lower_copy(flags.b);
-            cooked.B = "";       // NOTE: "Not implemented" per the spec.
-            cooked.c = flags.Y + '-' + flags.m + '-' + flags.d + 'T' + flags.H + ':' + flags.M + ':' + flags.S;
+            cooked.B = string_type(); // NOTE: "Not implemented" per the spec.
+            cooked.c = flags.Y + char_type('-') + flags.m + char_type('-') + flags.d + char_type('T') + flags.H + char_type(':') + flags.M + char_type(':') + flags.S;
             cooked.d = flags.d;
             cooked.D = flags.a;
             cooked.e = flags.z;  // TODO: Ignored with ptimes.
@@ -304,21 +304,21 @@ struct formatter {
             cooked.n = algo::trim_left_copy_if(flags.m, algo::is_any_of("0"));
             cooked.N = flags.b;  // TODO: Use A.P. style.
             cooked.o = flags.G;
-            cooked.O = "";       // TODO: Implement.
+            cooked.O = traits_type::literal("");       // TODO: Implement.
             cooked.P = informal;
-            cooked.r = flags.a + ',' + ' ' + flags.d + ' ' + flags.b + ' ' + flags.Y + ' ' + flags.T; // TODO: Include non-UTC timezones.
+            cooked.r = flags.a + char_type(',') + char_type(' ') + flags.d + char_type(' ') + flags.b + char_type(' ') + flags.Y + char_type(' ') + flags.T; // TODO: Include non-UTC timezones.
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = traits_type::to_string(month_days);
-            cooked.T = "";       // TODO: Implement.
+            cooked.T = traits_type::literal("");       // TODO: Implement.
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
             cooked.U = traits_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
-            cooked.W = "";       // TODO: Like %V but without leading zeros.
+            cooked.W = traits_type::literal("");       // TODO: Like %V but without leading zeros.
             cooked.y = flags.y;
             cooked.Y = flags.Y;
             cooked.z = algo::trim_left_copy_if(flags.j, algo::is_any_of("0"));
-            cooked.Z = "";       // TODO: Implement.
+            cooked.Z = traits_type::literal("");       // TODO: Implement.
             return cooked;
         }
 

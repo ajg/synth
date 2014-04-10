@@ -495,7 +495,6 @@ Future Work
    * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
      + [v1+] Consider making `context`s top-level `value`s instead of `map`s
      + [v1+] Consider switching to unordered_map/unordered_set where possible
-   * [v2] Test or drop support for non-`char` types (e.g. `wchar_t`)
    * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
    * [v1] Rename `this_type` to `self_type` unless it's actually a pointer
    * [v1] Reformat all operator _()'s to operator_()

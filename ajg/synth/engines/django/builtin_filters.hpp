@@ -68,8 +68,6 @@ using boost::xpressive::set;
 
 namespace algo = boost::algorithm;
 
-static char const word_delimiters[] = " \t\n.,;:!?'\"-";
-
 } // namespace
 
 template <class Engine>
@@ -110,6 +108,14 @@ struct builtin_filters {
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
     typedef formatter<options_type>                                             formatter_type;
+
+  private:
+
+    inline static separator_type const& separator() {
+        static string_type    const word_delimiters(traits_type::literal(" \t\n.,;:!?'\"-"));
+        static separator_type const separator(word_delimiters.c_str());
+        return separator;
+    }
 
   public:
 
@@ -1296,7 +1302,7 @@ struct builtin_filters {
                                                 , size_type            const  limit
                                                 , string_type          const& ellipsis
                                                 ) {
-            tokenizer_type const tokenizer(from, to, separator_type(word_delimiters));
+            tokenizer_type const tokenizer(from, to, separator());
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
 
@@ -1376,7 +1382,7 @@ struct builtin_filters {
                                                 , size_type            const  limit
                                                 , string_type          const& ellipsis
                                                 ) {
-            tokenizer_type const tokenizer(from, to, separator_type(word_delimiters));
+            tokenizer_type const tokenizer(from, to, separator());
             typename tokenizer_type::const_iterator       word = tokenizer.begin();
             typename tokenizer_type::const_iterator const stop = tokenizer.end();
             string_iterator_type it = from;
@@ -1519,13 +1525,13 @@ struct builtin_filters {
             template <class Match>
             string_type operator()(Match const& match) const {
                 string_stream_type stream;
-                string_type const link = match.str();
-                string_type const full = match.str();
-                string_type const text = full.substr(0, limit);
+                string_type  const link   = match.str();
+                string_type  const full   = match.str();
+                string_type  const text   = full.substr(0, limit);
                 boolean_type const scheme = !match[xpressive::s1];
-                boolean_type const more = text.size() < full.size();
+                boolean_type const more   = text.size() < full.size();
                 stream << "<a href='" << (scheme ? "http://" : "") << link;
-                stream << "'>" << text << (more ? ellipsis : "") << "</a>";
+                stream << "'>" << text << (more ? ellipsis : string_type()) << "</a>";
                 return stream.str();
             }
         };
@@ -1571,7 +1577,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
             string_type    const string = value.to_string();
-            tokenizer_type const tokenizer(string, separator_type(word_delimiters));
+            tokenizer_type const tokenizer(string, separator());
             return std::distance(tokenizer.begin(), tokenizer.end());
         }
     };

@@ -17,6 +17,7 @@
 # Executables
 /synth
 /test
+/examples/all
 
 # Sublime Text
 *.sublime-workspace

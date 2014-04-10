@@ -27,7 +27,7 @@ def create_targets(env):
     test_harness = env.Clone()
     test_harness.Append(CPPPATH = ['tests/tut-framework/include'])
     test_harness.Program(
-        target = 'test',
+        target = 'tests/harness',
         source = ['tests/harness.cpp'] + find_test_sources(),
     )
 

@@ -29,7 +29,7 @@ Examples
 echo '{"user": "Dolph Lundgren"}' > 'ctx.json'
 echo 'Howdy, {{ user }}!' > 'tpl.txt'
 
-cat tpl.txt | synth -e django -c ctx.json
+cat tpl.txt | ./synth -e django -c ctx.json
 ```
 
 ### Python
@@ -46,16 +46,13 @@ def simple_tmpl_example():
     return tpl.render_to_string(ctx)
 ```
 
-### C++
+### [C++](./examples/simple_ssi.cpp)
 
 ```c++
-#include <map>
-#include <string>
 #include <iostream>
-
 #include <ajg/synth.hpp>
 
-std::string simple_ssi_example() {
+int main() {
     using namespace ajg::synth;
 
     typedef string_template<char, ssi::engine<> > template_type;
@@ -63,11 +60,11 @@ std::string simple_ssi_example() {
     template_type::context_type ctx;
     ctx["user"] = "Dolph Lundgren";
 
+    // Render to different targets:
     tpl.render(std::cout);
-    // or, e.g.:
     tpl.render_to_file("greeting.txt", ctx);
-    // or, e.g.:
-    return tpl.render_to_string(ctx);
+    std::cout << tpl.render_to_string(ctx);
+    return 0;
 }
 ```
 
@@ -135,7 +132,7 @@ Installation
 
  4. [Optional] Build (and install) the Python module:
 
-        python setup.py install
+        python setup.py install # Add `sudo` as needed.
 
 (Pre-built binaries are [in the works](#future-work).)
 
@@ -143,13 +140,13 @@ Installation
 
 Install [Boost](#installing-boost), then:
 
-    pip install synth
+    pip install synth # Add `sudo` as needed.
 
 ### Using Easy Install:
 
 Install [Boost](#installing-boost), then:
 
-    easy_install synth
+    easy_install synth # Add `sudo` as needed.
 
 Components
 ----------
@@ -231,6 +228,7 @@ Components
    * `boost::shared_ptr`
  - `string`
    * `std::basic_string`
+   * `char*`, `char[N]`
  - `utility`
    * `std::pair`
  - `variant`
@@ -461,6 +459,7 @@ Future Work
    * Other:
      + Create `ctpp` engine
      + [v1+] Create `cheetah` engine
+     + [v1+] Create `xslt` engine
 
  - Adapters:
    * Create `boost::tribool` adapter

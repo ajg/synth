@@ -98,10 +98,11 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return x::as_xpr((this->markers[name] = s));
     }
 
-    inline regex_type word    (string_type const& s) { return x::as_xpr(s) >> x::_b; }
-    inline regex_type op      (string_type const& s) { return this->word(*this->keywords_.insert(s).first); }
-    inline regex_type keyword (string_type const& s) { return this->word(*this->keywords_.insert(s).first) >> *x::_s; }
-    inline regex_type reserved(string_type const& s) { return this->word(*this->reserved_.insert(s).first) >> *x::_s; }
+    inline regex_type word    (string_type const s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type word    (char const* const s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
+    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *x::_s; }
+    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *x::_s; }
 
     definition()
         : newline        (traits_type::literal("\n"))

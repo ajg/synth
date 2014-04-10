@@ -78,7 +78,7 @@ struct file_template
                                         , paths_type const& directories
                                         ) {
         info_type const& info = locate_file(path, directories);
-        return info.second == 0 ? Iterator() : Iterator(info.first);
+        return info.second == 0 ? Iterator() : Iterator(traits_type::narrow(info.first));
     }
 
     inline static info_type locate_file( path_type  const& path

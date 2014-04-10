@@ -220,7 +220,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    std::time_t const stamp = detail::stat_file(value).st_mtime;
+                    std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
                     args.stream << detail::format_time(args.options.time_format,
                         posix_time::from_time_t(stamp));
                 }
@@ -247,7 +247,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    size_type const size = detail::stat_file(value).st_size;
+                    size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
                     abbreviate ? args.stream << detail::format_size<string_type>(size) : args.stream << size;
                 }
             );

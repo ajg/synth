@@ -25,6 +25,7 @@ typedef s::django::engine                                                       
 typedef s::file_template<char_type, engine_type>                                file_template;
 typedef s::string_template<char_type, engine_type>                              string_template;
 typedef string_template::traits_type                                            traits_type;
+typedef traits_type::string_type                                                string_type;
 typedef string_template::context_type                                           context_type;
 typedef string_template::options_type                                           options_type;
 struct data_type : tests::data::kitchen_sink<context_type, traits_type, options_type> {};
@@ -359,7 +360,7 @@ DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 
 char path_buffer[PATH_MAX] = {};
-traits_type::string_type const absolute_path = traits_type::widen(getcwd(path_buffer, PATH_MAX));
+string_type const absolute_path = traits_type::widen(string_type(getcwd(path_buffer, PATH_MAX)));
 using ajg::synth::detail::quote;
 
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")

@@ -197,8 +197,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("exec cgi"));
                 }
                 else if (name == traits_type::literal("cmd")) {
-                    std::string const command = traits_type::narrow(value);
-                    detail::pipe pipe(command);
+                    detail::pipe pipe(traits_type::narrow(value));
                     pipe.read_into(args.stream);
                 }
             );

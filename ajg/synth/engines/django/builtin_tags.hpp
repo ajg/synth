@@ -197,8 +197,7 @@ struct builtin_tags {
 
             if (!close.empty() && name != close) {
                 std::string const original = traits_type::narrow(name);
-                std::string const message  = "mismatched endblock tag for " + original;
-                throw_exception(std::logic_error(message));
+                throw_exception(std::logic_error("mismatched endblock tag for " + original));
             }
 
             if (options.blocks_) { // We're being inherited from.

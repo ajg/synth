@@ -393,6 +393,7 @@ Future Work
 -----------
 
  - Build:
+   * Pre-commit script/hook
    * Visual Studio 2013:
      + Add project for command-line tool
      + Pass /W4 cleanly

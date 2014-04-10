@@ -46,70 +46,75 @@ struct file_template
 
   public:
 
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::boolean_type    boolean_type;
-    typedef std::string                         filepath_type;
-    typedef std::vector<filepath_type>          directories_type;
-    typedef std::pair<filepath_type, size_type> info_type;
+    typedef typename base_type::traits_type                                     traits_type;
+    typedef typename base_type::char_type                                       char_type;
+    typedef typename base_type::size_type                                       size_type;
+    typedef typename base_type::boolean_type                                    boolean_type;
+    typedef typename base_type::string_type                                     string_type;
+    typedef string_type                                                         path_type;
+    typedef std::vector<path_type>                                              paths_type;
+    typedef std::pair<path_type, size_type>                                     info_type;
 
   public:
 
-    file_template( filepath_type    const& filepath
-                 , directories_type const& directories = directories_type(/*1, "."*/)
+    file_template( path_type  const& path
+                 , paths_type const& directories = paths_type(/*1, "."*/)
                  )
-        : base_member_type(make_iterator(filepath, directories))
+        : base_member_type(make_iterator(path, directories))
         , base_type( base_member_type::member
                    , base_member_type::member ? base_member_type::member.make_end() : base_member_type::member
                      // This chicken dance is needed because file_iterator can't handle empty files.
                    , boolean_type(base_member_type::member)
                    )
-        , filepath_(filepath) {} // TODO: Use info.first instead.
+        , path_(path) {} // TODO: Use info.first instead.
 
   public:
 
-    filepath_type const& filepath() const { return filepath_; }
+    path_type const& path() const { return path_; }
 
   private:
 
-    inline static Iterator make_iterator( filepath_type    const& filepath
-                                        , directories_type const& directories
+    inline static Iterator make_iterator( path_type  const& path
+                                        , paths_type const& directories
                                         ) {
-        info_type const& info = locate_file(filepath, directories);
+        info_type const& info = locate_file(path, directories);
         return info.second == 0 ? Iterator() : Iterator(info.first);
     }
 
-    inline static info_type locate_file( filepath_type    const& filepath
-                                       , directories_type const& directories
+    inline static info_type locate_file( path_type  const& path
+                                       , paths_type const& directories
                                        ) {
         struct stat file;
         namespace algo = boost::algorithm;
 
         // First try looking in the directories specified.
-        BOOST_FOREACH(filepath_type const& directory, directories) {
-            filepath_type const& base = algo::trim_right_copy_if(directory, algo::is_any_of("/"));
-            filepath_type const& path = base + "/" + filepath;
-            if (stat(path.c_str(), &file) == 0) { // Found it.
-                return info_type(path, file.st_size);
+        BOOST_FOREACH(path_type const& directory, directories) {
+            path_type const& base = algo::trim_right_copy_if(directory, algo::is_any_of("/"));
+            path_type const& full = base + char_type('/') + path;
+            if (stat(traits_type::narrow(full).c_str(), &file) == 0) { // Found it.
+                return info_type(full, file.st_size);
             }
         }
 
+        std::string const narrow_path = traits_type::narrow(path);
+
         // Then try the current directory.
-        if (stat(filepath.c_str(), &file) != 0) {
-            throw_exception(file_error(filepath, "read", std::strerror(errno)));
+        if (stat(narrow_path.c_str(), &file) != 0) {
+            throw_exception(file_error(narrow_path, "read", std::strerror(errno)));
         }
 
-        return info_type(filepath, file.st_size);
+        return info_type(path, file.st_size);
     }
 
     /*
-    inline static filepath_type const& check_exists(filepath_type const& filepath) {
+    inline static std::string const& check_exists(std::string const& path) {
         struct stat file;
 
-        if (stat(filepath.c_str(), &file) != 0) {
-            throw_exception(file_error(filepath, "read", std::strerror(errno)));
+        if (stat(path.c_str(), &file) != 0) {
+            throw_exception(file_error(path, "read", std::strerror(errno)));
         }
         else if (file.st_size == 0) {
-            throw_exception(file_error(filepath, "read", "file is empty"));
+            throw_exception(file_error(path, "read", "file is empty"));
         }
 
         // Using fopen:
@@ -119,17 +124,17 @@ struct file_template
         // else { throw }
 
         // Using access:
-        // if (access(filepath.c_str(), R_OK | F_OK) != 0) {
-        //    throw_exception(file_error(filepath, "read", std::strerror(errno)));
+        // if (access(path.c_str(), R_OK | F_OK) != 0) {
+        //    throw_exception(file_error(path, "read", std::strerror(errno)));
         // }
 
-        return filepath;
+        return path;
     }
     */
 
   private:
 
-    filepath_type const filepath_;
+    path_type const path_;
 };
 
 template < class Char

@@ -233,8 +233,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                     , options_type const& options
                     ) const {
         typedef file_template<char_type, engine> file_template_type;
-        std::string const filepath_ = traits_type::narrow(filepath);
-        file_template_type(filepath_, options.directories).render(stream, context, options);
+        file_template_type(filepath, options.directories).render(stream, context, options);
     }
 
     void render_text( stream_type&        stream

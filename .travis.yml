@@ -15,9 +15,11 @@ before_install:
 
 before_script:
   - sudo apt-get install valgrind
-  # Prevent slow builds from dying by echoing something every 5 minutes.
+  # Prevent slow builds from dying by echoing something every 5 minutes:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
 script:
-  - scons && tests/harness && valgrind --track-origins=yes tests/harness
+  - scons tests/harness && tests/harness && valgrind --track-origins=yes tests/harness
+  - scons synth && tests/harness.sh
+  - scons # Make sure every other target builds successfully.
   - sudo python setup.py install # FIXME: && python tests/harness.py (Segfaults only in Travis)

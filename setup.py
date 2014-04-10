@@ -64,6 +64,7 @@ def get_extension():
     )
 
 # TODO: Allow some of these to be overridden via environment variable:
+char_type   = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ in Python < 3.
 is_debug    = False
 is_static   = True
 is_threaded = True
@@ -112,6 +113,8 @@ def get_extra_compile_args():
         return [
             '-Wno-unsequenced',
             '-Wno-unused-value',
+            # TODO: if clang, '-ferror-limit=1',
+            # TODO: if clang, '-ftemplate-backtrace-limit=1',
         ]
 
 def get_include_dirs():
@@ -151,7 +154,8 @@ def get_synth_version():
     return (major, minor, patch)
 
 def get_define_macros():
-    return [] if is_debug else [('NDEBUG', None)]
+    defines = [('AJG_SYNTH_DEFAULT_CHAR_TYPE', char_type)]
+    return defines if is_debug else defines + [('NDEBUG', None)]
 
 def get_undef_macros():
     return ['NDEBUG'] if is_debug else []
@@ -160,7 +164,9 @@ def get_language():
     return 'c++'
 
 def get_sources():
-    return [join(synth_base, 'bindings', 'python', 'module.cpp')]
+    return [
+        join(synth_base, 'bindings', 'python', 'module.cpp'),
+    ]
 
 def get_data_files():
     data_files = []

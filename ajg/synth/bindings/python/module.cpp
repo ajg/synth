@@ -19,7 +19,7 @@ BOOST_PYTHON_MODULE(synth)
     namespace synth = ajg::synth;
 
     typedef synth::python::binding<synth::detail::multi_template
-        < char
+        < AJG_SYNTH_DEFAULT_CHAR_TYPE
         , synth::string_template_identity
         , synth::django::engine
         , synth::ssi::engine<>

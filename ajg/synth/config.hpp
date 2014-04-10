@@ -5,6 +5,10 @@
 #ifndef AJG_SYNTH_CONFIG_HPP_INCLUDED
 #define AJG_SYNTH_CONFIG_HPP_INCLUDED
 
+#ifndef AJG_SYNTH_DEFAULT_CHAR_TYPE
+#define AJG_SYNTH_DEFAULT_CHAR_TYPE char
+#endif
+
 #include <ajg/synth/version.hpp>
 
 #ifndef AJG_SYNTH_SEQUENCE_LIMIT

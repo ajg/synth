@@ -2,17 +2,15 @@
 ##  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-import synth
-from difflib import unified_diff
+directory = 'tests/templates/django/'
 
-print('Loaded synth; version: ' + synth.version())
+def get():
+    return (context, golden, source, 'django', (True, 'INVALID_VALUE', {}, False, [directory]))
 
 class User:
     def __init__(self):
         self.is_staff = False
         self.is_authenticated = True
-
-directory = 'tests/templates/django/'
 
 context = {
     'request': {
@@ -22,14 +20,7 @@ context = {
     'title': 'Default Title',
     'messages': ["Foo", "Bar", "Qux"],
 }
-source = open(directory + 'layout.html').read().encode('utf-8')
-
-template = synth.Template(source, 'django', True, 'INVALID_VALUE', {}, False, [directory])
-print('Parsing succeeded!')
-
-string = template.render_to_string(context)
-print('Rendering succeeded!')
-
+source = open(directory + 'layout.html').read()
 golden = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
   <head>
@@ -134,9 +125,3 @@ golden = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www
   </body>
 </html>
 """
-
-if string != golden:
-    diff = ''.join(unified_diff(golden.splitlines(True), string.splitlines(True)))
-    raise Exception("MISMATCH:\n" + diff)
-
-print('Matching succeeded!')

@@ -2,15 +2,26 @@
 ##  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-import synth
 from datetime import datetime
-from difflib import unified_diff
 
-print('Loaded synth; version: ' + synth.version())
+def get():
+    return (context, golden, source, 'django')
 
-# TODO: Golden-file tests like these are brittle and ugly;
-#       refactor and figure out how to reuse the native unit tests.
-
+context = {
+    'bool_true':        True,
+    'bool_false':       False,
+    'int_0':            0,
+    'int_42':           42,
+    'str_empty':        "",
+    'str_test':         "test",
+    'list_empty':       [],
+    'list_12345':       [1, 2, 3, 4, 5],
+    'dict_empty':       {},
+    'dict_abc':         {'a': 'A', 'b': 'B', 'c': 'C'},
+    'datetime_one':     datetime(1, 1, 1),
+    'datetime_id4':     datetime(1776, 7, 4),
+    'datetime_1984':    datetime(1984, 11, 2),
+}
 source = """
 True:   {{ True }}; {% if True %}Good{% else %}Bad{% endif %}
 False:  {{ False }}; {% if False %}Bad{% else %}Good{% endif %}
@@ -65,29 +76,7 @@ dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 {# TODO: {{ datetime_1984|timeuntil:datetime_id4 }} #}
 {{ datetime_id4|timeuntil:datetime_1984 }}
 
-""".encode('utf-8')
-context = {
-    'bool_true':        True,
-    'bool_false':       False,
-    'int_0':            0,
-    'int_42':           42,
-    'str_empty':        "",
-    'str_test':         "test",
-    'list_empty':       [],
-    'list_12345':       [1, 2, 3, 4, 5],
-    'dict_empty':       {},
-    'dict_abc':         {'a': 'A', 'b': 'B', 'c': 'C'},
-    'datetime_one':     datetime(1, 1, 1),
-    'datetime_id4':     datetime(1776, 7, 4),
-    'datetime_1984':    datetime(1984, 11, 2),
-}
-
-template = synth.Template(source, 'django')
-print('Parsing succeeded!')
-
-string = template.render_to_string(context)
-print('Rendering succeeded!')
-
+"""
 golden = """
 True:   True; Good
 False:  False; Good
@@ -143,9 +132,3 @@ bar
 0&nbsp;minutes
 
 """
-
-if string != golden:
-    diff = ''.join(unified_diff(golden.splitlines(True), string.splitlines(True)))
-    raise Exception("MISMATCH:\n" + diff)
-
-print('Matching succeeded!')

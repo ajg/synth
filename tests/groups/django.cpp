@@ -206,7 +206,7 @@ unit_test(now_tag) {
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure(s == traits_type::to_string(std::localtime(&time)->tm_year % 100));
+    ensure_equals(s, traits_type::to_string(std::localtime(&time)->tm_year % 100));
 }}}
 
 unit_test(now_tag) {
@@ -214,7 +214,7 @@ unit_test(now_tag) {
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure(s == traits_type::to_string(std::localtime(&time)->tm_year + 1900));
+    ensure_equals(s, traits_type::to_string(std::localtime(&time)->tm_year + 1900));
 }}}
 
 DJANGO_TEST(regroup_tag,

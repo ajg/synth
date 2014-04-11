@@ -472,34 +472,34 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         BOOST_ASSERT(match == this->literal);
         match_type  const& literal = detail::unnest(match);
         string_type const  string  = match.str();
+        string_type const  token   = literal[0];
 
         if (literal == none_literal) {
-            return value_type(none_type()).token(literal[0]);
+            return value_type(none_type()).token(token);
         }
         else if (literal == boolean_literal) {
             match_type const& boolean = detail::unnest(literal);
 
             if (boolean == true_literal) {
-                return value_type(boolean_type(true)).token(literal[0]);
+                return value_type(boolean_type(true)).token(token);
             }
             else if (boolean == false_literal) {
-                return value_type(boolean_type(false)).token(literal[0]);
+                return value_type(boolean_type(false)).token(token);
             }
             else {
                 throw_exception(std::logic_error("invalid boolean literal"));
             }
         }
         else if (literal == number_literal) {
-            return value_type(traits_type::to_number(string)).token(literal[0]);
+            return value_type(traits_type::to_number(string)).token(token);
         }
         else if (literal == string_literal) {
-            // Adjust the token by trimming the quotes.
-            string_type const token = string_type(literal[0].first + 1, literal[0].second - 1);
-            return value_type(extract_string(literal)).token(token);
+            BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:
+            return value_type(extract_string(literal)).token(token.substr(1, token.length() - 2));
         }
         else if (literal == variable_literal) {
             if (optional<value_type const&> const variable = detail::find_value(string, context)) {
-                return variable->copy().token(literal[0]);
+                return variable->copy().token(token);
             }
             else {
                 throw_exception(missing_variable(traits_type::narrow(string)));

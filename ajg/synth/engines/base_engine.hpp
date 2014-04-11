@@ -129,7 +129,7 @@ struct definition : boost::noncopyable {
 
         // On failure, throw a semi-informative exception.
         size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
-        string_type const site(furthest, furthest + (std::min)(room, limit));
+        string_type const site(furthest, detail::advance_to(furthest, (std::min)(room, limit)));
         string_type const line(site.begin(), detail::find_or('\n', site, site.end()));
         throw_exception(parsing_error(traits_type::narrow(line)));
     }

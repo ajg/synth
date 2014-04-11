@@ -53,9 +53,8 @@ struct base_template : boost::noncopyable {
                  , iterator_type const& end
                  , boolean_type  const  parse = true
                  )
-            : engine_(&shared_engine()) {
-        range_ = range_type(begin, end);
-        if (parse) engine_->parse(begin, end, frame_);
+            : engine_(&shared_engine()), range_(begin, end) {
+        if (parse) engine_->parse(range_.first, range_.second, frame_);
     }
 
   public:
@@ -113,12 +112,14 @@ struct base_template : boost::noncopyable {
         return engine;
     }
 
+    /*
     void mutate_locally() {
         if (!local_engine_) {
             local_engine_.reset(new engine_type(shared_engine()));
             std::swap(engine_, local_engine_.get());
         }
     }
+    */
 
   private:
 

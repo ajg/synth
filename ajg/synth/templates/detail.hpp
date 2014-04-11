@@ -5,88 +5,100 @@
 #ifndef AJG_SYNTH_TEMPLATES_DETAIL_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_DETAIL_HPP_INCLUDED
 
-#include <iterator>
-
 #include <ajg/synth/config.hpp>
 
-#include <boost/optional.hpp>
-#include <boost/iterator/iterator_facade.hpp>
-#include <boost/spirit/home/support/multi_pass.hpp>
+#include <limits>
+#include <vector>
+#include <iterator>
 
 namespace ajg {
 namespace synth {
 namespace detail {
 
-using boost::optional;
-using boost::throw_exception;
+template <class InputStream>
+struct bidirectional_input_stream {
+  public:
 
-//
-// bidirectional_istream_iterator
-//     This horrid creature is needed because of the following reasons:
-//         - istreams only provide InputIterators
-//         - spirit's multi_pass can only upgrade them to ForwardIterators
-//         - xpressive requires BidirectionalIterators in order to backtrack
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Stream, class Char = typename Stream::char_type>
-struct bidirectional_istream_iterator
-    : boost::iterator_facade< bidirectional_istream_iterator<Stream, Char>
-                            , Char
-                            , boost::bidirectional_traversal_tag
-                            , Char // This forces the 'reference' type to be
-                            > {    // a real Value, not an actual reference.
-  private:
-
-    typedef Char                                           char_type;
-    typedef Stream                                         stream_type;
-    typedef std::istream_iterator<char_type>               input_iterator_type;
-    typedef boost::spirit::multi_pass<input_iterator_type> forward_iterator_type;
+    typedef InputStream                             input_stream_type;
+    typedef typename input_stream_type::char_type   char_type;
+    typedef typename input_stream_type::off_type    position_type;
 
   public:
 
-    typedef typename forward_iterator_type::difference_type difference_type;
+    struct iterator {
+
+      public:
+        typedef char_type                           value_type;
+        typedef char_type const*                    pointer;
+        typedef char_type const&                    reference;
+        typedef position_type                       difference_type;
+        typedef std::bidirectional_iterator_tag     iterator_category;
+
+        iterator() : stream_(0), position_(0) {} // For Xpressive.
+        iterator(bidirectional_input_stream* const stream, position_type const position)
+            : stream_(stream), position_(position) {}
+
+        bool      operator==(iterator const& other) const { return this->at(other.position_); }
+        bool      operator< (iterator const& other) const { return this->position_ < other.position_; }
+        bool      operator!=(iterator const& other) const { return !(*this == other); }
+        iterator& operator++()      { ++this->position_; return *this; }
+        iterator  operator++(int)   { iterator rc(*this); this->operator++(); return rc; }
+        iterator  operator--(int)   { iterator rc(*this); this->operator--(); return rc; }
+        iterator& operator--()      { this->maybe_read(); --this->position_; return *this; }
+        char_type operator*() const { return this->stream_->get(this->position_); }
+
+      private:
+
+        inline bool at(position_type const position) const {
+            return this->position_ == position || (this->position_ == this->stream_->current_size()
+                && !this->stream_->expand() && position == std::numeric_limits<position_type>::max());
+        }
+
+        inline void maybe_read() {
+            if (this->position_ == std::numeric_limits<position_type>::max()) {
+                this->position_ = this->stream_->read_all();
+            }
+        }
+
+        bidirectional_input_stream* stream_;
+        position_type               position_;
+    };
+
+    typedef iterator                              const_iterator;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
   public:
 
-    bidirectional_istream_iterator() : forward_iterator_(), stream_() {}
+    bidirectional_input_stream(input_stream_type& stream): stream_(stream) {}
 
-    bidirectional_istream_iterator(stream_type& stream)
-        : forward_iterator_(std::istream_iterator<Char>(stream))
-        , stream_(stream) {}
+    iterator         begin()  { return iterator(this, 0); }
+    iterator         end()    { return iterator(this, std::numeric_limits<position_type>::max()); }
+    reverse_iterator rbegin() { return reverse_iterator(this->begin()); }
+    reverse_iterator rend()   { return reverse_iterator(this->end()); }
 
-    bidirectional_istream_iterator( forward_iterator_type const& forward_iterator
-                                  , stream_type&                 stream
-                                  )
-        : forward_iterator_(forward_iterator)
-        , stream_(stream) {}
-
-  // private:
-
-    bool equal(bidirectional_istream_iterator const& that) const {
-        return forward_iterator_ == that.forward_iterator_;
+    bool expand() {
+        BOOST_STATIC_CONSTANT(std::size_t, N = 1024);
+        char_type buffer[N];
+        this->stream_.read(buffer, N);
+        this->buffer_.insert(this->buffer_.end(), buffer, buffer + this->stream_.gcount());
+        return 0 < this->stream_.gcount();
     }
 
-    void increment() { ++forward_iterator_; }
-    void decrement() { throw_exception(not_implemented("decrement")); } // { --iterator; }
-
-    char_type dereference() const { return *forward_iterator_; }
-
-    difference_type distance_to(bidirectional_istream_iterator const& that) const {
-        return std::distance(this->forward_iterator_, that.forward_iterator_);
+    position_type read_all() {
+        this->buffer_.insert(this->buffer_.end(),
+                             std::istreambuf_iterator<char_type>(this->stream_),
+                             std::istreambuf_iterator<char_type>());
+        return this->buffer_.size();
     }
 
-    bidirectional_istream_iterator advance(difference_type const distance) {
-        std::advance(this->forward_iterator_, distance);
-        return *this;
-    }
+    char_type     get(position_type const index) { return this->buffer_[index]; }
+    position_type current_size()    const { return this->buffer_.size(); }
 
   private:
 
-    friend class iterator_core_access;
-    template <class S, class C> friend struct bidirectional_istream_iterator;
-
-    forward_iterator_type         forward_iterator_;
-    boost::optional<stream_type&> stream_;
+    input_stream_type&     stream_;
+    std::vector<char_type> buffer_;
 };
 
 }}} // namespace ajg::synth::detail

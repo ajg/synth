@@ -27,7 +27,7 @@ typedef template_type::value_type                  value_type;
 typedef value_type::traits_type                    traits_type;
 typedef ajg::test_group<>                          group_type;
 
-group_type group_object("adapter tests");
+group_type group_object("adapter");
 
 } // namespace
 

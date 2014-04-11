@@ -63,7 +63,7 @@ struct file_template
         : base_member_type(make_iterator(path, directories))
         , base_type( base_member_type::member
                    , base_member_type::member ? base_member_type::member.make_end() : base_member_type::member
-                     // This chicken dance is needed because file_iterator can't handle empty files.
+                     // This chicken dance is needed because spirit's file_iterator can't handle empty files.
                    , boolean_type(base_member_type::member)
                    )
         , path_(path) {} // TODO: Use info.first instead.

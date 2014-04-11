@@ -8,6 +8,7 @@
 #include <istream>
 
 #include <boost/mpl/identity.hpp>
+#include <boost/utility/base_from_member.hpp>
 
 #include <ajg/synth/templates/detail.hpp>
 #include <ajg/synth/templates/base_template.hpp>
@@ -18,10 +19,11 @@ namespace synth {
 template < class Char
          , class Engine
          , class Stream   = std::basic_istream<Char>
-         , class Iterator = detail::bidirectional_istream_iterator<Stream>
+         , class Iterator = typename detail::bidirectional_input_stream<Stream>::iterator
          >
 struct stream_template
-    : public base_template<Engine, Iterator> {
+    : private boost::base_from_member<detail::bidirectional_input_stream<Stream> >
+    , public base_template<Engine, Iterator> {
 
   public:
 
@@ -30,18 +32,15 @@ struct stream_template
 
   private:
 
-    typedef base_template<Engine, Iterator> base_type;
+    typedef detail::bidirectional_input_stream<stream_type>                     input_stream_type;
+    typedef boost::base_from_member<input_stream_type>                          base_member_type;
+    typedef base_template<Engine, iterator_type>                                base_type;
 
   public:
 
     stream_template(stream_type& stream)
-        : base_type(iterator_type(stream), iterator_type()) {}
-
-  /*
-  public:
-
-    stream_type const& stream() const { return stream_; }
-  */
+        : base_member_type(input_stream_type(stream))
+        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
 };
 
 template < class Char

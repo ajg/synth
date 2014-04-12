@@ -15,6 +15,7 @@
 *.lib-*
 
 # Executables
+/a.out
 /synth
 /tests/harness
 /examples/all

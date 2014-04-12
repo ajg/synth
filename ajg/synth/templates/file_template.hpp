@@ -18,11 +18,9 @@
 #endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
-#include <boost/mpl/identity.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/utility/base_from_member.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
 #include <ajg/synth/detail.hpp>
@@ -30,90 +28,77 @@
 
 namespace ajg {
 namespace synth {
+namespace {
+using boost::spirit::classic::file_iterator;
+} // namespace
 
-template < class Char
-         , class Engine
-         , class Iterator = boost::spirit::classic::file_iterator<Char>
-         >
-struct file_template
-    : private boost::base_from_member<Iterator >
-    , public  base_template<Engine, Iterator> {
+template <class Engine>
+struct file_template : base_template<Engine, file_iterator<typename Engine::char_type> > {
+  public:
 
-  private:
+    typedef file_template                                                       template_type;
+    typedef Engine                                                              engine_type;
+    typedef typename file_template::kernel_type                                 kernel_type;
+    typedef typename kernel_type::iterator_type                                 iterator_type;
+    typedef typename kernel_type::range_type                                    range_type;
+    typedef typename engine_type::traits_type                                   traits_type;
 
-    typedef boost::base_from_member<Iterator>                                   base_member_type;
-    typedef base_template<Engine, Iterator>                                     base_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::path_type                                     path_type;
+    typedef typename traits_type::paths_type                                    paths_type;
+
+    typedef std::pair<path_type, size_type>                                     file_type;
 
   public:
 
-    typedef typename base_type::traits_type                                     traits_type;
-    typedef typename base_type::char_type                                       char_type;
-    typedef typename base_type::size_type                                       size_type;
-    typedef typename base_type::boolean_type                                    boolean_type;
-    typedef typename base_type::string_type                                     string_type;
-    typedef string_type                                                         path_type;
-    typedef std::vector<path_type>                                              paths_type;
-    typedef std::pair<path_type, size_type>                                     info_type;
-
-  public:
-
-    file_template( path_type  const& path
-                 , paths_type const& directories = paths_type(/*1, "."*/)
-                 )
-        : base_member_type(make_iterator(path, directories))
-        , base_type( base_member_type::member
-                   , base_member_type::member ? base_member_type::member.make_end() : base_member_type::member
-                     // This chicken dance is needed because spirit's file_iterator can't handle empty files.
-                   , boolean_type(base_member_type::member)
-                   )
-        , path_(path) {} // TODO: Use info.first instead.
-
-  public:
-
-    path_type const& path() const { return path_; }
-
-  private:
-
-    inline static Iterator make_iterator( path_type  const& path
-                                        , paths_type const& directories
-                                        ) {
-        info_type const& info = locate_file(path, directories);
-        return info.second == 0 ? Iterator() : Iterator(traits_type::narrow(info.first));
+    file_template(path_type const& path, paths_type const& directories = paths_type())
+            : file_(locate_file(path, directories)) {
+        if (boolean_type const empty_file = this->file_.second == 0) {
+            this->reset();
+        }
+        else {
+            iterator_type begin(traits_type::narrow(this->file_.first));
+            iterator_type end = begin ? begin.make_end() : iterator_type();
+            this->reset(begin, end);
+        }
     }
 
-    inline static info_type locate_file( path_type  const& path
-                                       , paths_type const& directories
-                                       ) {
-        struct stat file;
+  private:
+
+    inline static file_type locate_file(path_type const& path, paths_type const& directories) {
+        struct stat stats;
         namespace algo = boost::algorithm;
 
         // First try looking in the directories specified.
         BOOST_FOREACH(path_type const& directory, directories) {
             path_type const& base = algo::trim_right_copy_if(directory, algo::is_any_of("/"));
             path_type const& full = base + char_type('/') + path;
-            if (stat(traits_type::narrow(full).c_str(), &file) == 0) { // Found it.
-                return info_type(full, file.st_size);
+            if (stat(traits_type::narrow(full).c_str(), &stats) == 0) { // Found it.
+                return file_type(full, stats.st_size);
             }
         }
 
         std::string const narrow_path = traits_type::narrow(path);
 
         // Then try the current directory.
-        if (stat(narrow_path.c_str(), &file) != 0) {
+        if (stat(narrow_path.c_str(), &stats) != 0) { // TODO: Use wstat where applicable.
             throw_exception(file_error(narrow_path, "read", std::strerror(errno)));
         }
 
-        return info_type(path, file.st_size);
+        return file_type(path, stats.st_size);
     }
 
     /*
     inline static std::string const& check_exists(std::string const& path) {
-        struct stat file;
+        struct stat stats;
 
-        if (stat(path.c_str(), &file) != 0) {
+        if (stat(path.c_str(), &stats) != 0) {
             throw_exception(file_error(path, "read", std::strerror(errno)));
         }
-        else if (file.st_size == 0) {
+        else if (stats.st_size == 0) {
             throw_exception(file_error(path, "read", "file is empty"));
         }
 
@@ -132,15 +117,14 @@ struct file_template
     }
     */
 
+  public:
+
+    file_type const& file() const { return this->file_; }
+
   private:
 
-    path_type const path_;
+    file_type const file_;
 };
-
-template < class Char
-         , class Engine
-         >
-struct file_template_identity : boost::mpl::identity<file_template<Char, Engine> > {};
 
 }} // namespace ajg::synth
 

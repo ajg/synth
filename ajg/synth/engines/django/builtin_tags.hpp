@@ -47,84 +47,85 @@ using boost::xpressive::s4;
 boost::xpressive::mark_tag const id(9);
 } // namespace
 
-template <class Engine>
+template <class Kernel>
 struct builtin_tags {
+  private:
+
+    typedef Kernel                                                              kernel_type;
+    typedef typename kernel_type::id_type                                       id_type;
+    typedef typename kernel_type::regex_type                                    regex_type;
+    typedef typename kernel_type::match_type                                    match_type;
+    typedef typename kernel_type::engine_type                                   engine_type;
+
+    typedef typename engine_type::context_type                                  context_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename engine_type::value_type                                    value_type;
+    typedef typename engine_type::traits_type                                   traits_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+
   public:
 
-    typedef Engine                                                              engine_type;
-    typedef typename engine_type::options_type                                  options_type;
-    typedef typename options_type::traits_type                                  traits_type;
-    typedef typename options_type::boolean_type                                 boolean_type;
-    typedef typename options_type::char_type                                    char_type;
-    typedef typename options_type::size_type                                    size_type;
-    typedef typename options_type::number_type                                  number_type;
-    typedef typename options_type::datetime_type                                datetime_type;
-    typedef typename options_type::duration_type                                duration_type;
-    typedef typename options_type::string_type                                  string_type;
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::range_type                                   range_type;
-    typedef typename options_type::sequence_type                                sequence_type;
-    typedef typename options_type::arguments_type                               arguments_type;
-    typedef typename options_type::context_type                                 context_type;
-
-    typedef typename engine_type::id_type                                       id_type;
-    typedef typename engine_type::regex_type                                    regex_type;
-    typedef typename engine_type::match_type                                    match_type;
-    typedef typename engine_type::stream_type                                   out_type; // TODO: Rename ostream_type.
-
-    typedef void (*tag_type)( engine_type  const& engine
+    typedef void (*tag_type)( kernel_type  const& kernel
                             , match_type   const& match
                             , context_type const& context
                             , options_type const& options
-                            , out_type&           out
+                            , ostream_type&       ostream
                             );
 
   private:
 
-    typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef std::map<id_type, tag_type>                                         tags_type;
-    typedef formatter<options_type>                                             formatter_type;
+    typedef std::basic_ostringstream<char_type>                                 string_stream_type;
+    typedef django::formatter<options_type>                                     formatter_type;
+    typedef typename options_type::arguments_type                               arguments_type;
 
   public:
 
-    inline void initialize(engine_type& engine) {
-        engine.tag
-            = add(engine, autoescape_tag::syntax(engine),  autoescape_tag::render)
-            | add(engine, block_tag::syntax(engine),       block_tag::render)
-            | add(engine, comment_tag::syntax(engine),     comment_tag::render)
-            | add(engine, csrf_token_tag::syntax(engine),  csrf_token_tag::render)
-            | add(engine, cycle_tag::syntax(engine),       cycle_tag::render)
-            | add(engine, debug_tag::syntax(engine),       debug_tag::render)
-            | add(engine, extends_tag::syntax(engine),     extends_tag::render)
-            | add(engine, filter_tag::syntax(engine),      filter_tag::render)
-            | add(engine, firstof_tag::syntax(engine),     firstof_tag::render)
-            | add(engine, for_tag::syntax(engine),         for_tag::render)
-            | add(engine, for_empty_tag::syntax(engine),   for_empty_tag::render)
-            | add(engine, if_tag::syntax(engine),          if_tag::render)
-            | add(engine, ifchanged_tag::syntax(engine),   ifchanged_tag::render)
-            | add(engine, ifequal_tag::syntax(engine),     ifequal_tag::render)
-            | add(engine, ifnotequal_tag::syntax(engine),  ifnotequal_tag::render)
-            | add(engine, include_tag::syntax(engine),     include_tag::render)
-            | add(engine, load_tag::syntax(engine),        load_tag::render)
-            | add(engine, load_from_tag::syntax(engine),   load_from_tag::render)
-            | add(engine, now_tag::syntax(engine),         now_tag::render)
-            | add(engine, regroup_tag::syntax(engine),     regroup_tag::render)
-            | add(engine, spaceless_tag::syntax(engine),   spaceless_tag::render)
-            | add(engine, ssi_tag::syntax(engine),         ssi_tag::render)
-            | add(engine, templatetag_tag::syntax(engine), templatetag_tag::render)
-            | add(engine, url_tag::syntax(engine),         url_tag::render)
-            | add(engine, url_as_tag::syntax(engine),      url_as_tag::render)
-            | add(engine, variable_tag::syntax(engine),    variable_tag::render)
-            | add(engine, verbatim_tag::syntax(engine),    verbatim_tag::render)
-            | add(engine, widthratio_tag::syntax(engine),  widthratio_tag::render)
-            | add(engine, with_tag::syntax(engine),        with_tag::render)
-            | add(engine, library_tag::syntax(engine),     library_tag::render)
+    inline void initialize(kernel_type& kernel) {
+        kernel.tag
+            = add(kernel, autoescape_tag::syntax(kernel),  autoescape_tag::render)
+            | add(kernel, block_tag::syntax(kernel),       block_tag::render)
+            | add(kernel, comment_tag::syntax(kernel),     comment_tag::render)
+            | add(kernel, csrf_token_tag::syntax(kernel),  csrf_token_tag::render)
+            | add(kernel, cycle_tag::syntax(kernel),       cycle_tag::render)
+            | add(kernel, debug_tag::syntax(kernel),       debug_tag::render)
+            | add(kernel, extends_tag::syntax(kernel),     extends_tag::render)
+            | add(kernel, filter_tag::syntax(kernel),      filter_tag::render)
+            | add(kernel, firstof_tag::syntax(kernel),     firstof_tag::render)
+            | add(kernel, for_tag::syntax(kernel),         for_tag::render)
+            | add(kernel, for_empty_tag::syntax(kernel),   for_empty_tag::render)
+            | add(kernel, if_tag::syntax(kernel),          if_tag::render)
+            | add(kernel, ifchanged_tag::syntax(kernel),   ifchanged_tag::render)
+            | add(kernel, ifequal_tag::syntax(kernel),     ifequal_tag::render)
+            | add(kernel, ifnotequal_tag::syntax(kernel),  ifnotequal_tag::render)
+            | add(kernel, include_tag::syntax(kernel),     include_tag::render)
+            | add(kernel, load_tag::syntax(kernel),        load_tag::render)
+            | add(kernel, load_from_tag::syntax(kernel),   load_from_tag::render)
+            | add(kernel, now_tag::syntax(kernel),         now_tag::render)
+            | add(kernel, regroup_tag::syntax(kernel),     regroup_tag::render)
+            | add(kernel, spaceless_tag::syntax(kernel),   spaceless_tag::render)
+            | add(kernel, ssi_tag::syntax(kernel),         ssi_tag::render)
+            | add(kernel, templatetag_tag::syntax(kernel), templatetag_tag::render)
+            | add(kernel, url_tag::syntax(kernel),         url_tag::render)
+            | add(kernel, url_as_tag::syntax(kernel),      url_as_tag::render)
+            | add(kernel, variable_tag::syntax(kernel),    variable_tag::render)
+            | add(kernel, verbatim_tag::syntax(kernel),    verbatim_tag::render)
+            | add(kernel, widthratio_tag::syntax(kernel),  widthratio_tag::render)
+            | add(kernel, with_tag::syntax(kernel),        with_tag::render)
+            | add(kernel, library_tag::syntax(kernel),     library_tag::render)
             ;
     }
 
   private:
 
-    inline regex_type const& add(engine_type& engine, regex_type const& regex, tag_type const tag) {
+    inline regex_type const& add(kernel_type& kernel, regex_type const& regex, tag_type const tag) {
         tags_[regex.regex_id()] = tag;
         return regex;
     }
@@ -143,26 +144,26 @@ struct builtin_tags {
     }
 
 // TODO: Replace with function.
-#define AJG_TAG(content) engine.block_open >> *_s >> content >> *_s >> engine.block_close
+#define AJG_TAG(content) kernel.block_open >> *_s >> content >> *_s >> kernel.block_close
 
 //
 // autoescape_tag
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct autoescape_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("autoescape") >> engine.name) >> engine.block
-                >> AJG_TAG(engine.reserved("endautoescape"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("autoescape") >> kernel.name) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endautoescape"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_type const& setting = match(engine.name)[id].str();
-            match_type  const& block   = match(engine.block);
+            string_type const& setting = match(kernel.name)[id].str();
+            match_type  const& block   = match(kernel.block);
             boolean_type autoescape = true;
 
                  if (setting == traits_type::literal("on"))  autoescape = true;
@@ -171,7 +172,7 @@ struct builtin_tags {
 
             options_type options_copy = options; // NOTE: Don't make the copy const.
             options_copy.autoescape = autoescape;
-            engine.render_block(out, block, context, options_copy);
+            kernel.render_block(ostream, block, context, options_copy);
         }
     };
 
@@ -180,18 +181,18 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct block_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("block") >> (s1 = engine.name)) >> engine.block
-                >> AJG_TAG(engine.reserved("endblock") >> !(s2 = engine.name));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("block") >> (s1 = kernel.name)) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endblock") >> !(s2 = kernel.name));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& block = match(engine.block);
+            match_type  const& block = match(kernel.block);
             string_type const& name  = match(s1)[id].str();
             string_type const& close = match(s2)[id].str();
 
@@ -203,18 +204,18 @@ struct builtin_tags {
             if (options.blocks_) { // We're being inherited from.
                 if (optional<string_type const&> const overriden =
                     detail::find_value(name, *options.blocks_)) {
-                    out << *overriden;
+                    ostream << *overriden;
                 }
                 else {
-                    string_stream_type stream;
-                    engine.render_block(stream, block, context, options);
-                    string_type const result = stream.str();
+                    string_stream_type ss;
+                    kernel.render_block(ss, block, context, options);
+                    string_type const result = ss.str();
                     (*options.blocks_)[name] = result;
-                    out << result;
+                    ostream << result;
                 }
             }
             else { // We're being rendered directly.
-                engine.render_block(out, block, context, options);
+                kernel.render_block(ostream, block, context, options);
             }
         }
     };
@@ -225,21 +226,21 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct comment_tag {
-        static regex_type syntax(engine_type& engine) {
+        static regex_type syntax(kernel_type& kernel) {
             namespace x = boost::xpressive;
             return // Short form; assert no closing token or newlines.
-                   engine.comment_open >> *(~x::before(engine.comment_close | x::_n) >> x::_)
-                >> engine.comment_close
+                   kernel.comment_open >> *(~x::before(kernel.comment_close | x::_n) >> x::_)
+                >> kernel.comment_close
                    // Long form
-                |  AJG_TAG(engine.reserved("comment")) >> engine.block
-                >> AJG_TAG(engine.reserved("endcomment"));
+                |  AJG_TAG(kernel.reserved("comment")) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endcomment"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
             // Do nothing.
         }
@@ -250,24 +251,24 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct csrf_token_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("csrf_token"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("csrf_token"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
 
             if (optional<value_type const&> const token = detail::find_value(traits_type::literal("csrf_token"), context)) {
                 string_type const& s = detail::escape_entities(token->to_string());
 
                 if (s != traits_type::literal("NOTPROVIDED")) {
-                    out << "<div style='display:none'>";
-                    out << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
-                    out << "</div>";
+                    ostream << "<div style='display:none'>";
+                    ostream << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
+                    ostream << "</div>";
                 }
             }
         }
@@ -278,37 +279,37 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct cycle_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("cycle") >> engine.values >> !(engine.keyword("as") >> engine.name)) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("cycle") >> kernel.values >> !(kernel.keyword("as") >> kernel.name)) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
             size_type   const  position = match.position();
-            match_type  const& vals     = match(engine.values);
-            match_type  const& block    = match(engine.block);
-            string_type const& name     = match(engine.name)[id].str();
+            match_type  const& vals     = match(kernel.values);
+            match_type  const& block    = match(kernel.block);
+            string_type const& name     = match(kernel.name)[id].str();
             size_type   const  total    = vals.nested_results().size();
             size_type   const  current  = detail::find_mapped_value(position, options.cycles_).get_value_or(0);
 
             match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
-            value_type const  value = engine.evaluate(val, context, options);
+            value_type const  value = kernel.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
-            out << value;
+            ostream << value;
 
             if (name.empty()) {
                 // E.g. cycle foo
-                engine.render_block(out, block, context, options);
+                kernel.render_block(ostream, block, context, options);
             }
             else {
                 // E.g. cycle foo as bar
                 context_type context_copy = context;
                 context_copy[name] = value;
-                engine.render_block(out, block, context_copy, options);
+                kernel.render_block(ostream, block, context_copy, options);
             }
         }
     };
@@ -318,20 +319,20 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct debug_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("debug"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("debug"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            out << "<h1>Context:</h1>" << std::endl;
+            ostream << "<h1>Context:</h1>" << std::endl;
 
             BOOST_FOREACH(typename context_type::value_type const& p, context) {
-                out << "    " << value_type(p.first).escape()
+                ostream << "    " << value_type(p.first).escape()
                     << " = "  << value_type(p.second).escape() << "<br />" << std::endl;
             }
         }
@@ -342,22 +343,22 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct extends_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("extends") >> engine.string_literal) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("extends") >> kernel.string_literal) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
             typedef typename options_type::blocks_type    blocks_type;
             typedef typename blocks_type::value_type block_type;
 
-            match_type  const& string   = match(engine.string_literal);
-            match_type  const& body     = match(engine.block);
-            string_type const  filepath = engine.extract_string(string);
+            match_type  const& string   = match(kernel.string_literal);
+            match_type  const& body     = match(kernel.block);
+            string_type const  filepath = kernel.extract_string(string);
 
             std::basic_ostream<char_type> null_stream(0);
             blocks_type blocks, supers;
@@ -370,7 +371,7 @@ struct builtin_tags {
             // stand-alone, so that we can make block.super
             // available to the derived template. We don't care
             // about non-block content, so it is discarded.
-            engine.render_file(null_stream, filepath, context, options_copy);
+            kernel.render_file(null_stream, filepath, context, options_copy);
             string_type const suffix = traits_type::literal("_super");
 
             BOOST_FOREACH(block_type const& block, blocks) {
@@ -387,7 +388,7 @@ struct builtin_tags {
             // making the parent template's versions available
             // for the derivee to use as block.super. The derivee's
             // non-block content is irrelevant so it is discarded.
-            engine.render_block(null_stream, body, context_copy, options_copy);
+            kernel.render_block(null_stream, body, context_copy, options_copy);
 
             // We only care about the blocks; any other
             // modifications to the options are discarded.
@@ -396,7 +397,7 @@ struct builtin_tags {
 
             // Finally, we render the parent template with the
             // potentially overriden blocks already rendered.
-            engine.render_file(out, filepath, context, options_copy);
+            kernel.render_file(ostream, filepath, context, options_copy);
         }
     };
 
@@ -405,22 +406,22 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct firstof_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("firstof") >> engine.values >> !engine.string_literal);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("firstof") >> kernel.values >> !kernel.string_literal);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type const& vals = match(engine.values);
+            match_type const& vals = match(kernel.values);
 
-            BOOST_FOREACH(match_type const& val, detail::select_nested(vals, engine.value)) {
+            BOOST_FOREACH(match_type const& val, detail::select_nested(vals, kernel.value)) {
                 try {
-                    if (value_type const value = engine.evaluate(val, context, options)) {
-                        out << value;
+                    if (value_type const value = kernel.evaluate(val, context, options)) {
+                        ostream << value;
                         break;
                     }
                 }
@@ -430,8 +431,8 @@ struct builtin_tags {
             }
 
             // Use the fallback, if there is one.
-            if (match_type const& fallback = match(engine.string_literal)) {
-                out << engine.extract_string(fallback);
+            if (match_type const& fallback = match(kernel.string_literal)) {
+                ostream << kernel.extract_string(fallback);
             }
         }
     };
@@ -441,20 +442,20 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct filter_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("filter") >> engine.filters) >> engine.block
-                >> AJG_TAG(engine.reserved("endfilter"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("filter") >> kernel.filters) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endfilter"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_stream_type stream;
-            engine.render_block(stream, match(engine.block), context, options);
-            out << engine.apply_filters(stream.str(), match(engine.filters), context, options);
+            string_stream_type ss;
+            kernel.render_block(ss, match(kernel.block), context, options);
+            ostream << kernel.apply_filters(ss.str(), match(kernel.filters), context, options);
         }
     };
 
@@ -464,29 +465,29 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct for_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("for") >> engine.variable_names >> engine.keyword("in") >> engine.value) >> engine.block
-              >> !(AJG_TAG(engine.reserved("empty")) >> engine.block)
-                >> AJG_TAG(engine.reserved("endfor"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("for") >> kernel.variable_names >> kernel.keyword("in") >> kernel.value) >> kernel.block
+              >> !(AJG_TAG(kernel.reserved("empty")) >> kernel.block)
+                >> AJG_TAG(kernel.reserved("endfor"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& vars  = match(engine.variable_names);
-            match_type  const& for_  = match(engine.block, 0);
-            match_type  const& empty = match(engine.block, 1);
-            value_type  const& value = engine.evaluate(match(engine.value), context, options);
+            match_type  const& vars  = match(kernel.variable_names);
+            match_type  const& for_  = match(kernel.block, 0);
+            match_type  const& empty = match(kernel.block, 1);
+            value_type  const& value = kernel.evaluate(match(kernel.value), context, options);
 
             typename value_type::const_iterator it(value.begin()), end(value.end());
-            typename options_type::names_type const& variables = engine.extract_names(vars);
+            typename options_type::names_type const& variables = kernel.extract_names(vars);
 
             if (it == end) {
                 if (empty) { // for ... empty ... endfor case.
-                    engine.render_block(out, empty, context, options);
+                    kernel.render_block(ostream, empty, context, options);
                 }
                 return;
             }
@@ -511,7 +512,7 @@ struct builtin_tags {
                     }
                 }
 
-                engine.render_block(out, for_, context_copy, options);
+                kernel.render_block(ostream, for_, context_copy, options);
             }
         }
     };
@@ -522,12 +523,12 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct for_empty_tag {
-        static regex_type syntax(engine_type& engine) { return engine.nothing; }
-        static void render( engine_type  const& engine
+        static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {}
     };
 
@@ -536,24 +537,24 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct if_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("if") >> engine.value) >> engine.block
-              >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
-                >> AJG_TAG(engine.reserved("endif"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("if") >> kernel.value) >> kernel.block
+              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
+                >> AJG_TAG(kernel.reserved("endif"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type   const& if_   = match(engine.block, 0);
-            match_type   const& else_ = match(engine.block, 1);
-            boolean_type const  cond_ = engine.evaluate(match(engine.value), context, options);
+            match_type   const& if_   = match(kernel.block, 0);
+            match_type   const& else_ = match(kernel.block, 1);
+            boolean_type const  cond_ = kernel.evaluate(match(kernel.value), context, options);
 
-                 if (cond_) engine.render_block(out, if_,   context, options);
-            else if (else_) engine.render_block(out, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, else_, context, options);
         }
     };
 
@@ -562,39 +563,39 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ifchanged_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifchanged") >> engine.values) >> engine.block
-              >> !(AJG_TAG(engine.reserved("else"))     >> engine.block)
-              >>   AJG_TAG(engine.reserved("endifchanged"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("ifchanged") >> kernel.values) >> kernel.block
+              >> !(AJG_TAG(kernel.reserved("else"))     >> kernel.block)
+              >>   AJG_TAG(kernel.reserved("endifchanged"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type const& vals  = match(engine.values);
-            match_type const& if_   = match(engine.block, 0);
-            match_type const& else_ = match(engine.block, 1);
+            match_type const& vals  = match(kernel.values);
+            match_type const& if_   = match(kernel.block, 0);
+            match_type const& else_ = match(kernel.block, 1);
 
             size_type const position = match.position();
             optional<value_type const&> const value = detail::find_value(position, options.changes_);
 
             // This is the case with no variables (compare contents).
             if (vals.nested_results().empty()) {
-                string_stream_type stream;
-                engine.render_block(stream, if_, context, options);
-                string_type const result = stream.str();
+                string_stream_type ss;
+                kernel.render_block(ss, if_, context, options);
+                string_type const result = ss.str();
 
                 if (value && *value == value_type/*ref*/(result)) {
                     if (else_) {
-                        engine.render_block(out, else_, context, options);
+                        kernel.render_block(ostream, else_, context, options);
                     }
                 }
                 else {
                     const_cast<options_type&>(options).changes_[position] = result;
-                    out << result;
+                    ostream << result;
                 }
             }
             // Here, we compare variables.
@@ -602,19 +603,19 @@ struct builtin_tags {
                 // NOTE: The key is a string (rather than an int) presumably in case variables are repeated.
                 std::map<string_type, value_type> values;
 
-                BOOST_FOREACH(match_type const& val, detail::select_nested(vals, engine.value)) {
+                BOOST_FOREACH(match_type const& val, detail::select_nested(vals, kernel.value)) {
                     string_type const s = boost::algorithm::trim_copy(val.str());
-                    values[s] = engine.evaluate(val, context, options);
+                    values[s] = kernel.evaluate(val, context, options);
                 }
 
                 if (value && *value == value_type/*ref*/(values)) {
                     if (else_) {
-                        engine.render_block(out, else_, context, options);
+                        kernel.render_block(ostream, else_, context, options);
                     }
                 }
                 else {
                     const_cast<options_type&>(options).changes_[position] = values;
-                    engine.render_block(out, if_, context, options);
+                    kernel.render_block(ostream, if_, context, options);
                 }
             }
         }
@@ -625,28 +626,28 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ifequal_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifequal") >> engine.value >> engine.value) >> engine.block
-              >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
-              >>   AJG_TAG(engine.reserved("endifequal"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("ifequal") >> kernel.value >> kernel.value) >> kernel.block
+              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
+              >>   AJG_TAG(kernel.reserved("endifequal"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type   const& left  = match(engine.value, 0);
-            match_type   const& right = match(engine.value, 1);
-            match_type   const& if_   = match(engine.block, 0);
-            match_type   const& else_ = match(engine.block, 1);
+            match_type   const& left  = match(kernel.value, 0);
+            match_type   const& right = match(kernel.value, 1);
+            match_type   const& if_   = match(kernel.block, 0);
+            match_type   const& else_ = match(kernel.block, 1);
             boolean_type const  cond_ =
-                engine.evaluate(left, context, options) ==
-                engine.evaluate(right, context, options);
+                kernel.evaluate(left, context, options) ==
+                kernel.evaluate(right, context, options);
 
-                 if (cond_) engine.render_block(out, if_,   context, options);
-            else if (else_) engine.render_block(out, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, else_, context, options);
         }
     };
 
@@ -656,28 +657,28 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ifnotequal_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ifnotequal") >> engine.value >> engine.value) >> engine.block
-              >> !(AJG_TAG(engine.reserved("else")) >> engine.block)
-              >>   AJG_TAG(engine.reserved("endifnotequal"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("ifnotequal") >> kernel.value >> kernel.value) >> kernel.block
+              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
+              >>   AJG_TAG(kernel.reserved("endifnotequal"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type   const& left  = match(engine.value, 0);
-            match_type   const& right = match(engine.value, 1);
-            match_type   const& if_   = match(engine.block, 0);
-            match_type   const& else_ = match(engine.block, 1);
+            match_type   const& left  = match(kernel.value, 0);
+            match_type   const& right = match(kernel.value, 1);
+            match_type   const& if_   = match(kernel.block, 0);
+            match_type   const& else_ = match(kernel.block, 1);
             boolean_type const  cond_ =
-                engine.evaluate(left, context, options) !=
-                engine.evaluate(right, context, options);
+                kernel.evaluate(left, context, options) !=
+                kernel.evaluate(right, context, options);
 
-                 if (cond_) engine.render_block(out, if_,   context, options);
-            else if (else_) engine.render_block(out, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, else_, context, options);
         }
     };
 
@@ -686,18 +687,18 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct include_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("include") >> engine.string_literal);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("include") >> kernel.string_literal);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_type const path = engine.extract_string(match(engine.string_literal));
-            engine.render_file(out, path, context, options);
+            string_type const path = kernel.extract_string(match(kernel.string_literal));
+            kernel.render_file(ostream, path, context, options);
         }
     };
 
@@ -706,27 +707,27 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct load_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("load") >> engine.packages) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("load") >> kernel.packages) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type const& packages = match(engine.packages);
-            match_type const& block    = match(engine.block);
+            match_type const& packages = match(kernel.packages);
+            match_type const& block    = match(kernel.block);
             options_type options_copy  = options;
             context_type context_copy  = context;
 
-            BOOST_FOREACH(match_type const& package, detail::select_nested(packages, engine.package)) {
+            BOOST_FOREACH(match_type const& package, detail::select_nested(packages, kernel.package)) {
                 string_type const& library = package[id].str();
-                engine.load_library(context_copy, options_copy, library);
+                kernel.load_library(context_copy, options_copy, library);
             }
 
-            engine.render_block(out, block, context_copy, options_copy);
+            kernel.render_block(ostream, block, context_copy, options_copy);
         }
     };
 
@@ -735,29 +736,29 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct load_from_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("load") >> engine.names >> engine.keyword("from") >> engine.package) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("load") >> kernel.names >> kernel.keyword("from") >> kernel.package) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& names   = match(engine.names);
-            match_type  const& block   = match(engine.block);
-            string_type const& library = match(engine.package)[id].str();
+            match_type  const& names   = match(kernel.names);
+            match_type  const& block   = match(kernel.block);
+            string_type const& library = match(kernel.package)[id].str();
             std::vector<string_type> components;
 
-            BOOST_FOREACH(match_type const& name, detail::select_nested(names, engine.name)) {
+            BOOST_FOREACH(match_type const& name, detail::select_nested(names, kernel.name)) {
                 components.push_back(name[id].str());
             }
 
             options_type options_copy = options;
             context_type context_copy = context;
-            engine.load_library(context_copy, options_copy, library, &components);
-            engine.render_block(out, block, context_copy, options_copy);
+            kernel.load_library(context_copy, options_copy, library, &components);
+            kernel.render_block(ostream, block, context_copy, options_copy);
         }
     };
 
@@ -766,18 +767,18 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct now_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("now") >> engine.string_literal);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("now") >> kernel.string_literal);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_type const format = engine.extract_string(match(engine.string_literal));
-            out << formatter_type::format_datetime(options, format, detail::utc_now());
+            string_type const format = kernel.extract_string(match(kernel.string_literal));
+            ostream << formatter_type::format_datetime(options, format, detail::utc_now());
         }
     };
 
@@ -786,27 +787,27 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct regroup_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("regroup") >> engine.value
-                          >> engine.keyword("by") >> engine.package
-                          >> engine.keyword("as") >> engine.name) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("regroup") >> kernel.value
+                          >> kernel.keyword("by") >> kernel.package
+                          >> kernel.keyword("as") >> kernel.name) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& expr  = match(engine.value);
-            string_type const& attrs = match(engine.package)[id].str();
-            string_type const& name  = match(engine.name)[id].str();
-            match_type  const& block = match(engine.block);
+            match_type  const& expr  = match(kernel.value);
+            string_type const& attrs = match(kernel.package)[id].str();
+            string_type const& name  = match(kernel.name)[id].str();
+            match_type  const& block = match(kernel.block);
 
             value_type        values;
             entries_type entries;
             try {
-                values = engine.evaluate(expr, context, options);
+                values = kernel.evaluate(expr, context, options);
             }
             // Fail silently in these cases:
             catch (missing_variable  const&) { goto done; }
@@ -816,7 +817,7 @@ struct builtin_tags {
           done:
             context_type context_copy = context;
             context_copy[name] = entries;
-            engine.render_block(out, block, context_copy, options);
+            kernel.render_block(ostream, block, context_copy, options);
         }
 
         typedef std::map<string_type, value_type>   entry_type;
@@ -845,29 +846,29 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct spaceless_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("spaceless")) >> engine.block
-                >> AJG_TAG(engine.reserved("endspaceless"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("spaceless")) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endspaceless"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            // TODO: Reuse engine.html_tag if possible.
-            static typename engine_type::string_regex_type const tag = '<' >> *~(as_xpr('>')) >> '>';
-            static typename engine_type::string_regex_type const gap = (s1 = tag) >> +_s >> (s2 = tag);
+            // TODO: Reuse kernel.html_tag if possible.
+            static typename kernel_type::string_regex_type const tag = '<' >> *~(as_xpr('>')) >> '>';
+            static typename kernel_type::string_regex_type const gap = (s1 = tag) >> +_s >> (s2 = tag);
 
-            string_stream_type stream;
-            std::ostreambuf_iterator<char_type> output(out);
+            string_stream_type ss;
+            std::ostreambuf_iterator<char_type> it(ostream);
 
-            match_type const& body = match(engine.block);
-            engine.render_block(stream, body, context, options);
-            // TODO: Use detail::bidirectional_istream_iterator to feed directly to regex_replace.
-            string_type const string = stream.str();
-            regex_replace(output, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
+            match_type const& body = match(kernel.block);
+            kernel.render_block(ss, body, context, options);
+            // TODO: Use detail::bidirectional_input_stream to feed directly to regex_replace.
+            string_type const string = ss.str();
+            regex_replace(it, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
         }
     };
 
@@ -877,17 +878,17 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ssi_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("ssi") >> engine.value >> !(s1 = engine.keyword("parsed")));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("ssi") >> kernel.value >> !(s1 = kernel.keyword("parsed")));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_type  const path   = engine.evaluate(match(engine.value), context, options).to_string();
+            string_type  const path   = kernel.evaluate(match(kernel.value), context, options).to_string();
             boolean_type const parsed = match[s1].matched;
 
             if (!synth::detail::is_absolute(path)) {
@@ -895,13 +896,13 @@ struct builtin_tags {
             }
 
             if (parsed) {
-                engine.render_file(out, path, context, options);
+                kernel.render_file(ostream, path, context, options);
             }
             else {
                 string_type line;
                 std::string const path_ = traits_type::narrow(path);
                 std::basic_ifstream<char_type> file(path_.c_str());
-                while (std::getline(file, line)) out << line << engine.newline;
+                while (std::getline(file, line)) ostream << line << kernel.newline;
             }
         }
     };
@@ -911,23 +912,23 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct templatetag_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("templatetag") >> engine.name);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("templatetag") >> kernel.name);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            string_type const name = match(engine.name)[id].str();
+            string_type const name = match(kernel.name)[id].str();
 
-            if (optional<string_type const> const& marker = detail::find_mapped_value(name, engine.markers)) {
-                out << *marker;
+            if (optional<string_type const> const& marker = detail::find_mapped_value(name, kernel.markers)) {
+                ostream << *marker;
             }
             else {
-                out << options.default_value;
+                ostream << options.default_value;
             }
         }
     };
@@ -937,24 +938,24 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct url_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.value >> engine.arguments);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type const& expr = match(engine.value);
-            match_type const& args = match(engine.arguments);
+            match_type const& expr = match(kernel.value);
+            match_type const& args = match(kernel.arguments);
 
-            value_type     const view      = engine.evaluate(expr, context, options);
-            arguments_type const arguments = engine.evaluate_arguments(args, context, options);
+            value_type     const view      = kernel.evaluate(expr, context, options);
+            arguments_type const arguments = kernel.evaluate_arguments(args, context, options);
 
-            if (optional<string_type> const& url = engine.get_view_url(view, arguments, context, options)) {
-                out << *url;
+            if (optional<string_type> const& url = kernel.get_view_url(view, arguments, context, options)) {
+                ostream << *url;
             }
             else {
                 throw_exception(std::runtime_error("view not found"));
@@ -967,30 +968,30 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct url_as_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("url") >> engine.value >> engine.arguments
-                        >> engine.keyword("as") >> engine.name) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments
+                        >> kernel.keyword("as") >> kernel.name) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& expr  = match(engine.value);
-            match_type  const& args  = match(engine.arguments);
-            match_type  const& block = match(engine.block);
-            string_type const& name  = match(engine.name)[id].str();
+            match_type  const& expr  = match(kernel.value);
+            match_type  const& args  = match(kernel.arguments);
+            match_type  const& block = match(kernel.block);
+            string_type const& name  = match(kernel.name)[id].str();
 
-            value_type     const view      = engine.evaluate(expr, context, options);
-            arguments_type const arguments = engine.evaluate_arguments(args, context, options);
-            string_type    const url       = engine.get_view_url(view, arguments, context, options)
+            value_type     const view      = kernel.evaluate(expr, context, options);
+            arguments_type const arguments = kernel.evaluate_arguments(args, context, options);
+            string_type    const url       = kernel.get_view_url(view, arguments, context, options)
                                                    .get_value_or(string_type());
 
             context_type context_copy = context;
             context_copy[name] = url;
-            engine.render_block(out, block, context_copy, options);
+            kernel.render_block(ostream, block, context_copy, options);
         }
     };
 
@@ -999,19 +1000,19 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct variable_tag {
-        static regex_type syntax(engine_type& engine) {
-            return engine.variable_open >> *_s >> engine.value >> engine.variable_close;
+        static regex_type syntax(kernel_type& kernel) {
+            return kernel.variable_open >> *_s >> kernel.value >> kernel.variable_close;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            value_type const& value = engine.evaluate(match(engine.value), context, options);
+            value_type const& value = kernel.evaluate(match(kernel.value), context, options);
             boolean_type const safe = !options.autoescape || value.safe();
-            safe ? out << value : out << value.escape();
+            safe ? ostream << value : ostream << value.escape();
         }
     };
 
@@ -1020,18 +1021,18 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct verbatim_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("verbatim")) >> engine.block
-                >> AJG_TAG(engine.reserved("endverbatim"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("verbatim")) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endverbatim"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            out << match(engine.block).str();
+            ostream << match(kernel.block).str();
         }
     };
 
@@ -1040,8 +1041,8 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct widthratio_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("widthratio") >> engine.value >> engine.value >> engine.value);
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("widthratio") >> kernel.value >> kernel.value >> kernel.value);
         }
 
         template <class T>
@@ -1049,22 +1050,22 @@ struct builtin_tags {
             return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type const& value = match(engine.value, 0);
-            match_type const& limit = match(engine.value, 1);
-            match_type const& width = match(engine.value, 2);
+            match_type const& value = match(kernel.value, 0);
+            match_type const& limit = match(kernel.value, 1);
+            match_type const& width = match(kernel.value, 2);
 
             number_type const ratio
-                = engine.evaluate(value, context, options).to_number()
-                / engine.evaluate(limit, context, options).to_number()
-                * engine.evaluate(width, context, options).to_number();
+                = kernel.evaluate(value, context, options).to_number()
+                / kernel.evaluate(limit, context, options).to_number()
+                * kernel.evaluate(width, context, options).to_number();
 
-            out << round(ratio);
+            ostream << round(ratio);
         }
     };
 
@@ -1073,24 +1074,24 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct with_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.reserved("with") >> engine.value >> engine.keyword("as") >> engine.name) >> engine.block
-                >> AJG_TAG(engine.reserved("endwith"));
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.reserved("with") >> kernel.value >> kernel.keyword("as") >> kernel.name) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endwith"));
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
-            match_type  const& value = match(engine.value);
-            match_type  const& body  = match(engine.block);
-            string_type const& name  = match(engine.name)[id].str();
+            match_type  const& value = match(kernel.value);
+            match_type  const& body  = match(kernel.block);
+            string_type const& name  = match(kernel.name)[id].str();
 
             context_type context_copy = context;
-            context_copy[name] = engine.evaluate(value, context, options);
-            engine.render_block(out, body, context_copy, options);
+            context_copy[name] = kernel.evaluate(value, context, options);
+            kernel.render_block(ostream, body, context_copy, options);
         }
     };
 
@@ -1099,31 +1100,31 @@ struct builtin_tags {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct library_tag {
-        static regex_type syntax(engine_type& engine) {
-            return AJG_TAG(engine.unreserved_name >> engine.arguments) >> engine.block;
+        static regex_type syntax(kernel_type& kernel) {
+            return AJG_TAG(kernel.unreserved_name >> kernel.arguments) >> kernel.block;
         }
 
-        static void render( engine_type  const& engine
+        static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
-                          , out_type&           out
+                          , ostream_type&       ostream
                           ) {
             typedef typename options_type::tag_type tag_type;
 
-            string_type const& name = match(engine.unreserved_name)[id].str();
-            match_type  const& args = match(engine.arguments);
-            match_type  const& body = match(engine.block);
+            string_type const& name = match(kernel.unreserved_name)[id].str();
+            match_type  const& args = match(kernel.arguments);
+            match_type  const& body = match(kernel.block);
             tag_type    const& tag  = get_library_tag(name, context, options);
 
-            arguments_type arguments    = engine.evaluate_arguments(args, context, options);
+            arguments_type arguments    = kernel.evaluate_arguments(args, context, options);
             context_type   context_copy = context;
             options_type   options_copy = options;
 
             if (value_type const& value = tag(options_copy, &context_copy, arguments)) {
-                out << value;
+                ostream << value;
             }
-            engine.render_block(out, body, context_copy, options_copy);
+            kernel.render_block(ostream, body, context_copy, options_copy);
         }
 
       private:

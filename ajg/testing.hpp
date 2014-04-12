@@ -98,7 +98,7 @@ namespace {
 template <class T = detail::empty>
 struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> {
     typedef tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> base_type;
-    template <class U> test_group(U const& u) : base_type(u) {}
+    test_group(char const* const name) : base_type(name) {}
 };
 
 //

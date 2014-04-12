@@ -17,19 +17,31 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
-template <class Char, template <class C, class E> class Template, class Django, class SSI, class TMPL>
+template < class Char
+         , template <class C>          class Traits
+         , template <class T, class E> class Template
+         , class Django
+         , class SSI
+         , class TMPL
+         >
 struct multi_template {
 
   public:
 
-    typedef Char   char_type;
+    typedef Traits<Char>                          traits_type;
+    typedef typename traits_type::boolean_type    boolean_type;
+    typedef typename traits_type::char_type       char_type;
+    typedef typename traits_type::string_type     string_type;
+    typedef typename traits_type::ostream_type    stream_type;
+    typedef typename traits_type::paths_type      paths_type;
+
     typedef Django django_engine_type;
     typedef SSI    ssi_engine_type;
     typedef TMPL   tmpl_engine_type;
 
-    typedef typename Template<char_type, django_engine_type>::type django_template_type;
-    typedef typename Template<char_type, ssi_engine_type>::type    ssi_template_type;
-    typedef typename Template<char_type, tmpl_engine_type>::type   tmpl_template_type;
+    typedef typename Template<traits_type, django_engine_type>::type django_template_type;
+    typedef typename Template<traits_type, ssi_engine_type>::type    ssi_template_type;
+    typedef typename Template<traits_type, tmpl_engine_type>::type   tmpl_template_type;
 
     typedef typename django_template_type::context_type django_context_type;
     typedef typename ssi_template_type::context_type    ssi_context_type;
@@ -39,13 +51,7 @@ struct multi_template {
     typedef typename ssi_template_type::options_type    ssi_options_type;
     typedef typename tmpl_template_type::options_type   tmpl_options_type;
 
-    typedef bool                          boolean_type;
-    typedef std::basic_string<char_type>  string_type;
-    typedef std::basic_ostream<char_type> stream_type;
-    typedef std::vector<string_type>      directories_type;
-
     typedef django_options_type                          options_type;
-    typedef typename django_options_type::traits_type    traits_type;
     typedef typename django_options_type::arguments_type arguments_type;
     typedef typename django_options_type::formats_type   formats_type;
     typedef typename django_options_type::library_type   library_type;
@@ -58,23 +64,23 @@ struct multi_template {
   public:
 
     template <class Source>
-    multi_template( Source&                 source // NOTE: Not const for when it's e.g. a stream.
-                  , string_type      const& engine_name
-                  , boolean_type     const  autoescape
-                  , string_type      const& default_value
-                  , formats_type     const& formats
-                  , boolean_type     const& debug
-                  , directories_type const& directories
-                  , libraries_type   const& libraries
-                  , loaders_type     const& loaders
-                  , resolvers_type   const& resolvers
+    multi_template( Source&               source // NOTE: Not const for when it's e.g. a stream.
+                  , string_type    const& engine_name
+                  , boolean_type   const  autoescape
+                  , string_type    const& default_value
+                  , formats_type   const& formats
+                  , boolean_type   const& debug
+                  , paths_type     const& paths
+                  , libraries_type const& libraries
+                  , loaders_type   const& loaders
+                  , resolvers_type const& resolvers
                   )
         : django_template_(engine_name == traits_type::literal("django") ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == traits_type::literal("ssi")    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == traits_type::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, formats, debug, directories, libraries, loaders, resolvers)
-        , ssi_options_(default_value, directories) // TODO: size_format, time_format, formats, debug, error_message, ...
-        , tmpl_options_() {                        // TODO: directories, debug, ...
+        , django_options_(autoescape, default_value, formats, debug, paths, libraries, loaders, resolvers)
+        , ssi_options_(default_value, paths) // TODO: size_format, time_format, formats, debug, error_message, ...
+        , tmpl_options_() {                  // TODO: paths, debug, ...
 
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
             throw_exception(std::invalid_argument("engine_name"));

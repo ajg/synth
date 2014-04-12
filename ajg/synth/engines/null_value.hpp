@@ -12,37 +12,38 @@
 namespace ajg {
 namespace synth {
 
-template <class Char>
-struct null_value : value_facade<Char, null_value<Char> > {
+template <class Traits>
+struct null_value : value_facade<Traits, null_value> {
   public:
 
-    typedef value_facade<Char, null_value> base_type;
+    typedef null_value                          value_type;
+    typedef typename value_type::facade_type    facade_type;
 
   public:
 
-    null_value() : base_type() {}
-    template <class T>                   null_value(T const& t) : base_type(t) {}
-    template <class T, class U>          null_value(T const& t, U const& u) : base_type(t, u) {}
-    template <class T, class U, class V> null_value(T const& t, U const& u, V const& v) : base_type(t, u, v) {}
+                                         null_value() : facade_type() {}
+    template <class T>                   null_value(T const& t) : facade_type(t) {}
+    template <class T, class U>          null_value(T const& t, U const& u) : facade_type(t, u) {}
+    template <class T, class U, class V> null_value(T const& t, U const& u, V const& v) : facade_type(t, u, v) {}
 };
 
 }} // namespace ajg::synth
 
 namespace std {
 
-template<class Char>
-struct equal_to<ajg::synth::null_value<Char> > {
-    bool operator()( ajg::synth::null_value<Char> const& a
-                   , ajg::synth::null_value<Char> const& b
+template <class Traits>
+struct equal_to<ajg::synth::null_value<Traits> > {
+    bool operator()( ajg::synth::null_value<Traits> const& a
+                   , ajg::synth::null_value<Traits> const& b
                    ) const {
         return true;
     }
 };
 
-template<class Char>
-struct less<ajg::synth::null_value<Char> > {
-    bool operator()( ajg::synth::null_value<Char> const& a
-                   , ajg::synth::null_value<Char> const& b
+template <class Traits>
+struct less<ajg::synth::null_value<Traits> > {
+    bool operator()( ajg::synth::null_value<Traits> const& a
+                   , ajg::synth::null_value<Traits> const& b
                    ) const {
         return false;
     }

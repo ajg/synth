@@ -25,12 +25,23 @@ using detail::operator ==;
 using namespace detail::placeholders;
 } // namespace
 
-template <class Engine>
+template <class Kernel>
 struct builtin_tags {
-  public:
+  private:
 
-    typedef Engine                                                              engine_type;
+    typedef Kernel                                                              kernel_type;
+    typedef typename kernel_type::id_type                                       id_type;
+    typedef typename kernel_type::regex_type                                    regex_type;
+    typedef typename kernel_type::match_type                                    match_type;
+    typedef typename kernel_type::string_regex_type                             string_regex_type;
+    typedef typename kernel_type::string_match_type                             string_match_type;
+    typedef typename kernel_type::args_type                                     args_type;
+    typedef typename kernel_type::engine_type                                   engine_type;
+
+    typedef typename engine_type::environment_type                              environment_type;
+    typedef typename engine_type::context_type                                  context_type;
     typedef typename engine_type::options_type                                  options_type;
+    typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::traits_type                                   traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -39,20 +50,9 @@ struct builtin_tags {
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::string_type                                   string_type;
-    typedef typename traits_type::value_type                                    value_type;
-    typedef typename traits_type::range_type                                    range_type;
-    typedef typename traits_type::sequence_type                                 sequence_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef typename engine_type::context_type                                  context_type;
-    typedef typename engine_type::args_type                                     args_type;
-
-    typedef typename engine_type::id_type                                       id_type;
-    typedef typename engine_type::regex_type                                    regex_type;
-    typedef typename engine_type::match_type                                    match_type;
-
-    typedef typename engine_type::environment_type                              environment_type;
-    typedef typename engine_type::string_regex_type                             string_regex_type;
-    typedef typename engine_type::string_match_type                             string_match_type;
+  public:
 
     typedef void (*tag_type)(args_type const&);
 
@@ -62,23 +62,23 @@ struct builtin_tags {
 
   public:
 
-    inline void initialize(engine_type& engine) {
-        engine.tag
-            = add(engine, config_tag::syntax(engine),    config_tag::render)
-            | add(engine, echo_tag::syntax(engine),      echo_tag::render)
-            | add(engine, exec_tag::syntax(engine),      exec_tag::render)
-            | add(engine, fsize_tag::syntax(engine),     fsize_tag::render)
-            | add(engine, flastmod_tag::syntax(engine),  flastmod_tag::render)
-            | add(engine, if_tag::syntax(engine),        if_tag::render)
-            | add(engine, include_tag::syntax(engine),   include_tag::render)
-            | add(engine, printenv_tag::syntax(engine),  printenv_tag::render)
-            | add(engine, set_tag::syntax(engine),       set_tag::render)
+    inline void initialize(kernel_type& kernel) {
+        kernel.tag
+            = add(kernel, config_tag::syntax(kernel),    config_tag::render)
+            | add(kernel, echo_tag::syntax(kernel),      echo_tag::render)
+            | add(kernel, exec_tag::syntax(kernel),      exec_tag::render)
+            | add(kernel, fsize_tag::syntax(kernel),     fsize_tag::render)
+            | add(kernel, flastmod_tag::syntax(kernel),  flastmod_tag::render)
+            | add(kernel, if_tag::syntax(kernel),        if_tag::render)
+            | add(kernel, include_tag::syntax(kernel),   include_tag::render)
+            | add(kernel, printenv_tag::syntax(kernel),  printenv_tag::render)
+            | add(kernel, set_tag::syntax(kernel),       set_tag::render)
             ;
     }
 
   private:
 
-    inline regex_type const& add(engine_type& engine, regex_type const& regex, tag_type const tag) {
+    inline regex_type const& add(kernel_type& kernel, regex_type const& regex, tag_type const tag) {
         tags_[regex.regex_id()] = tag;
         return regex;
     }
@@ -105,7 +105,7 @@ enum { interpolated = true, raw = false };
 
 #define AJG_SYNTH_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
     BOOST_FOREACH(match_type const& attr, get_nested<A>(x).nested_results()) { \
-        std::pair<string_type, string_type> const attribute = args.engine.parse_attribute(attr, args, how); \
+        std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
         if_statement else throw_exception(invalid_attribute(traits_type::narrow(name))); \
     } \
@@ -135,8 +135,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct config_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("config"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("config"));
         }
 
         static void render(args_type const& args) {
@@ -158,18 +158,18 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct echo_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("echo"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("echo"));
         }
 
         static void render(args_type const& args) {
             string_type encoding = traits_type::literal("entity");
             AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("var")) {
-                    string_type const result = args.engine.lookup_variable(args.context, args.options, value);
-                    if      (encoding == traits_type::literal("none"))   args.stream << result;
-                    else if (encoding == traits_type::literal("url"))    args.stream << detail::uri_encode(result);
-                    else if (encoding == traits_type::literal("entity")) args.stream << detail::escape_entities(result);
+                    string_type const result = args.kernel.lookup_variable(args.context, args.options, value);
+                    if      (encoding == traits_type::literal("none"))   args.ostream << result;
+                    else if (encoding == traits_type::literal("url"))    args.ostream << detail::uri_encode(result);
+                    else if (encoding == traits_type::literal("entity")) args.ostream << detail::escape_entities(result);
                     else throw_exception(invalid_attribute("encoding"));
                 }
                 else if (name == traits_type::literal("encoding")) {
@@ -185,8 +185,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct exec_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("exec"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("exec"));
         }
 
         static void render(args_type const& args) {
@@ -198,7 +198,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("cmd")) {
                     detail::pipe pipe(traits_type::narrow(value));
-                    pipe.read_into(args.stream);
+                    pipe.read_into(args.ostream);
                 }
             );
         }
@@ -209,8 +209,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct flastmod_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("flastmod"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("flastmod"));
         }
 
         static void render(args_type const& args) {
@@ -221,7 +221,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("file")) {
                     std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
-                    args.stream << detail::format_time(args.options.time_format,
+                    args.ostream << detail::format_time(args.options.time_format,
                         posix_time::from_time_t(stamp));
                 }
             );
@@ -233,8 +233,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct fsize_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("fsize"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("fsize"));
         }
 
         static void render(args_type const& args) {
@@ -248,7 +248,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("file")) {
                     size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
-                    abbreviate ? args.stream << detail::format_size<string_type>(size) : args.stream << size;
+                    abbreviate ? args.ostream << detail::format_size<string_type>(size) : args.ostream << size;
                 }
             );
         }
@@ -259,20 +259,20 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct if_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return  (engine.make_tag(traits_type::literal("if"))   >> engine.block)
-                >> *(engine.make_tag(traits_type::literal("elif")) >> engine.block)
-                >> !(engine.make_tag(traits_type::literal("else")) >> engine.block)
-                >>  (engine.make_tag(traits_type::literal("endif")));
+        static regex_type syntax(kernel_type const& kernel) {
+            return  (kernel.make_tag(traits_type::literal("if"))   >> kernel.block)
+                >> *(kernel.make_tag(traits_type::literal("elif")) >> kernel.block)
+                >> !(kernel.make_tag(traits_type::literal("else")) >> kernel.block)
+                >>  (kernel.make_tag(traits_type::literal("endif")));
         }
 
         static void render(args_type const& args) {
             boolean_type condition = false;
 
             BOOST_FOREACH(match_type const& nested, args.match.nested_results()) {
-                if (nested == args.engine.block) {
+                if (nested == args.kernel.block) {
                     if (condition) {
-                        args.engine.render_block(args.stream, nested, args.context, args.options);
+                        args.kernel.render_block(args.ostream, nested, args.context, args.options);
                         break;
                     }
                 }
@@ -293,8 +293,8 @@ enum { interpolated = true, raw = false };
                         if (!has_expr) has_expr = true;
                         else throw_exception(duplicate_attribute("expr"));
 
-                        if (xpressive::regex_match(value, match, args.engine.expression)) {
-                            result = args.engine.evaluate_expression(args, match);
+                        if (xpressive::regex_match(value, match, args.kernel.expression)) {
+                            result = args.kernel.evaluate_expression(args, match);
                         }
                         else {
                             throw_exception(invalid_attribute("expr"));
@@ -319,8 +319,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct include_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("include"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("include"));
         }
 
         static void render(args_type const& args) {
@@ -330,7 +330,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("include virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    args.engine.render_file(args.stream, value, args.context, args.options);
+                    args.kernel.render_file(args.ostream, value, args.context, args.options);
                 }
             );
         }
@@ -341,14 +341,14 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct printenv_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("printenv"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("printenv"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_NO_ATTRIBUTES_IN(args.match);
-            BOOST_FOREACH(typename environment_type::value_type const& nv, args.engine.environment) {
-                args.stream << traits_type::widen(nv.first) << '=' << traits_type::widen(nv.second) << std::endl;
+            BOOST_FOREACH(typename environment_type::value_type const& nv, args.kernel.environment) {
+                args.ostream << traits_type::widen(nv.first) << '=' << traits_type::widen(nv.second) << std::endl;
             }
         }
     };
@@ -358,8 +358,8 @@ enum { interpolated = true, raw = false };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct set_tag {
-        static regex_type syntax(engine_type const& engine) {
-            return engine.make_tag(traits_type::literal("set"));
+        static regex_type syntax(kernel_type const& kernel) {
+            return kernel.make_tag(traits_type::literal("set"));
         }
 
         static void render(args_type const& args) {

@@ -34,58 +34,91 @@ enum tag_mode
     , loose
     };
 
-using detail::operator ==;
-
-template < bool CaseSensitive   = false
+// TODO: Move these options to options or a traits-like type.
+template < class Traits
+         , bool CaseSensitive   = false
          , bool ShortcutSyntax  = true
          , bool LoopVariables   = true
          , bool GlobalVariables = false
          , tag_mode TagMode     = loose // TODO: Implement.
          >
-struct engine : base_engine {
-
-template <class BidirectionalIterator>
-struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+struct engine : base_engine<Traits> {
   public:
 
-    BOOST_STATIC_CONSTANT(bool, case_sensitive   = CaseSensitive);
-    BOOST_STATIC_CONSTANT(bool, shortcut_syntax  = ShortcutSyntax);
-    BOOST_STATIC_CONSTANT(bool, loop_variables   = LoopVariables);
-    BOOST_STATIC_CONSTANT(bool, global_variables = GlobalVariables);
-    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode = TagMode);
+    typedef engine                                                              engine_type;
+    typedef Traits                                                              traits_type;
 
-  public:
+    typedef typename traits_type::void_type                                     void_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef definition                                                  this_type;
-    typedef base_engine::definition<BidirectionalIterator, this_type>   base_type;
-
-    typedef typename base_type::id_type         id_type;
-    typedef typename base_type::boolean_type    boolean_type;
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::char_type       char_type;
-    typedef typename base_type::match_type      match_type;
-    typedef typename base_type::regex_type      regex_type;
-    typedef typename base_type::frame_type      frame_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::stream_type     stream_type;
-    typedef typename base_type::iterator_type   iterator_type;
-    typedef typename base_type::definition_type definition_type;
-
-    typedef typename mpl::if_c
-        < CaseSensitive
-        , std::less<string_type>
-        , detail::insensitive_less<string_type>
-        >::type                                          less_type;
-    typedef builtin_tags<this_type>                      builtin_tags_type;
-    typedef tmpl::value<char_type>                       value_type;
-    typedef mpl::void_                                   options_type;
-    typedef std::map<string_type, value_type, less_type> context_type;
-    typedef std::vector<value_type>                      sequence_type;
-    typedef typename value_type::traits_type             traits_type;
+    typedef typename mpl::if_c< CaseSensitive, std::less<string_type>
+                              , detail::insensitive_less<string_type> >::type   less_type;
+    typedef tmpl::value<traits_type>                                            value_type;
+    typedef std::map<string_type, value_type, less_type>                        context_type;
+    typedef void_type                                                           options_type;
 
   public:
 
-    definition()
+    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = CaseSensitive);
+    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = ShortcutSyntax);
+    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = LoopVariables);
+    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = GlobalVariables);
+    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = TagMode);
+
+  private:
+
+    template <class K> friend struct tmpl::builtin_tags;
+
+    struct attributes {
+        enum escape_mode { none, html, url, js };
+
+        string_type           name;
+        optional<string_type> default_;
+        optional<escape_mode> escape;
+    };
+
+  public:
+
+    template <class Iterator>
+    struct kernel;
+
+}; // engine
+
+namespace {
+using detail::operator ==;
+}
+
+template < class T, bool CS, bool SS, bool LV, bool GV, tag_mode TM>
+template <class Iterator>
+struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::template kernel<Iterator> {
+  public:
+
+    typedef kernel                                                              kernel_type;
+    typedef Iterator                                                            iterator_type;
+
+  protected:
+
+    typedef builtin_tags<kernel_type>                                           builtin_tags_type;
+    typedef typename kernel_type::id_type                                       id_type;
+    typedef typename kernel_type::regex_type                                    regex_type;
+    typedef typename kernel_type::match_type                                    match_type;
+
+  public:
+
+    typedef match_type                                                          frame_type;
+    typedef engine_type                                                         engine_type;
+
+  private:
+
+    template <class K> friend struct tmpl::builtin_tags;
+
+  public:
+
+    kernel()
         : tag_open      (traits_type::literal("<"))
         , tag_close     (traits_type::literal(">"))
         , tag_finish    (traits_type::literal("/"))
@@ -136,7 +169,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         // We want to skip essentially anything that is not a tmpl tag or comment.
             = *_s >> !as_xpr(tag_finish) >> *_s >> icase(tag_prefix)
             ;
-        skipper
+        this->skipper
             = tag_open >> prefix >> +(~before(tag_close) >> _) >> tag_close
             | alt_open >> prefix >> +(~before(alt_close) >> _) >> alt_close
             ;
@@ -196,42 +229,41 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return evaluate_attribute(attr, context, options);
     }
 
-    void render( stream_type&        stream
+    void render( ostream_type&       ostream
                , frame_type   const& frame
                , context_type const& context
                , options_type const& options
                ) const {
-        render_block(stream, frame, context, options);
+        render_block(ostream, frame, context, options);
     }
 
-    void render_file( stream_type&        stream
+    void render_file( ostream_type&       ostream
                     , string_type  const& filepath
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        typedef file_template<char_type, engine> file_template_type;
-        file_template_type(filepath).render(stream, context, options);
+        file_template<engine_type>(filepath).render(ostream, context, options);
     }
 
-    void render_text( stream_type&        stream
+    void render_text( ostream_type&       ostream
                     , match_type   const& text
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        stream << text.str();
+        ostream << text.str();
     }
 
-    void render_block( stream_type&        stream
+    void render_block( ostream_type&       ostream
                      , match_type   const& block
                      , context_type const& context
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
-            render_match(stream, nested, context, options);
+            render_match(ostream, nested, context, options);
         }
     }
 
-    void render_tag( stream_type&        stream
+    void render_tag( ostream_type&       ostream
                    , match_type   const& match
                    , context_type const& context
                    , options_type const& options
@@ -240,31 +272,23 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         id_type    const  id     = match_.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
-            tag(*this, match_, context, options, stream);
+            tag(*this, match_, context, options, ostream);
         }
         else {
-            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+            throw_exception(std::logic_error("missing built-in tag"));
         }
     }
 
-    void render_match( stream_type&        stream
+    void render_match( ostream_type&       ostream
                      , match_type   const& match
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == text)  render_text(stream, match, context, options);
-        else if (match == block) render_block(stream, match, context, options);
-        else if (match == tag)   render_tag(stream, match, context, options);
+             if (match == this->text)  render_text(ostream, match, context, options);
+        else if (match == this->block) render_block(ostream, match, context, options);
+        else if (match == this->tag)   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
-
-    struct attributes {
-        enum escape_mode { none, html, url, js };
-
-        string_type           name;
-        optional<string_type> default_;
-        optional<escape_mode> escape;
-    };
 
     // TODO: Throw synth exceptions when possible.
     attributes parse_attributes(match_type const& match) const {
@@ -314,6 +338,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
 
   public:
 
+    // TODO: Move these out of the kernel.
     string_type const tag_open;
     string_type const tag_close;
     string_type const tag_finish;
@@ -321,14 +346,11 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     string_type const tag_attribute;
     string_type const alt_open;
     string_type const alt_close;
+    value_type  const default_value;
 
   public:
 
-    regex_type tag;
-    regex_type text;
-    regex_type block;
     regex_type name;
-    regex_type skipper;
     regex_type attribute;
     regex_type plain_attribute;
     regex_type quoted_attribute;
@@ -336,18 +358,12 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     regex_type escape_attribute;
     regex_type default_attribute;
     regex_type extended_attribute;
-    value_type const default_value;
-
-  private:
-
 
   private:
 
     builtin_tags_type builtin_tags_;
 
-}; // definition
-
-}; // engine
+}; // kernel
 
 }}} // namespace ajg::synth::tmpl
 

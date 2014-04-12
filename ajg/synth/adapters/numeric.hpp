@@ -21,11 +21,11 @@
 namespace ajg {
 namespace synth {
 
-#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type)                          \
-    template <class Traits>                                                 \
-    struct adapter<Traits, type> : public numeric_adapter<Traits, type> {   \
-        adapter(type const value) : numeric_adapter<Traits, type>(value) {} \
-    }                                                                       \
+#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type) \
+    template <class Behavior> \
+    struct adapter<Behavior, type> : public numeric_adapter<Behavior, type> { \
+        adapter(type const value) : numeric_adapter<Behavior, type>(value) {} \
+    } \
 
 //
 // Integral specializations
@@ -44,11 +44,9 @@ AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(int unsigned);
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long);
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long unsigned);
 
-#ifndef BOOST_NO_INTRINSIC_WCHAR_T
-#ifndef DISABLE_WIDE_CHAR_SUPPORT
+#ifndef AJG_SYNTH_NO_WCHAR_T
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(wchar_t);
-#endif // !DISABLE_WIDE_CHAR_SUPPORT
-#endif // !BOOST_NO_INTRINSIC_WCHAR_T
+#endif
 
 #ifdef BOOST_HAS_LONG_LONG
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long long);

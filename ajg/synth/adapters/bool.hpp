@@ -14,9 +14,9 @@ namespace synth {
 // specialization for bool
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits>
-struct adapter<Traits, bool>
-    : public base_adapter<Traits> {
+template <class Behavior>
+struct adapter<Behavior, bool>
+    : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER(bool)
     adapted_type adapted_;

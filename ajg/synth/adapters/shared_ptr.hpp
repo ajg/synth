@@ -16,9 +16,9 @@ namespace synth {
 // specialization for boost::shared_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, shared_ptr<T> >
-    : public forwarding_adapter<Traits, T, shared_ptr<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, shared_ptr<T> >
+    : public forwarding_adapter<Behavior, T, shared_ptr<T> > {
 
     adapter(shared_ptr<T> const& adapted) : adapted_(adapted) {}
     shared_ptr<T> adapted_;

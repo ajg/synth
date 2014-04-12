@@ -26,30 +26,30 @@ namespace ajg {
 namespace synth {
 namespace django {
 
-template <class Char>
-struct value : value_facade<Char, value<Char> > {
+template <class Traits>
+struct value : value_facade<Traits, value> {
   public:
 
-    typedef value                               value_type;
-    typedef Char                                char_type;
-    typedef value_facade<char_type, value_type> base_type;
+    typedef value                                                               value_type;
+    typedef Traits                                                              traits_type;
+    typedef typename value_type::facade_type                                    facade_type;
 
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::traits_type     traits_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::string_type     token_type;
-    typedef typename base_type::boolean_type    boolean_type;
-    typedef typename base_type::number_type     number_type;
-    typedef typename base_type::datetime_type   datetime_type;
-    typedef typename base_type::const_iterator  const_iterator;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::string_type                                   string_type;
 
-    typedef std::vector<value_type>             sequence_type; // TODO: Use the traits' type.
+    typedef typename value_type::const_iterator                                 const_iterator;
+
+    typedef std::vector<value_type>                                             sequence_type; // TODO: Derive from behavior_type.
+    typedef std::map<string_type, value_type>                                   mapping_type; // TODO: Derive from behavior_type.
 
   public:
 
-    value() : base_type(), safe_(false), token_(boost::none) {}
-    template <class T> value(T const& t) : base_type(t), safe_(false), token_(boost::none) {}
-    value(value const& that) : base_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
+    value() : facade_type(), safe_(false), token_(boost::none) {}
+    template <class T> value(T const& t) : facade_type(t), safe_(false), token_(boost::none) {}
+    value(value const& that) : facade_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
 
   public:
 
@@ -61,8 +61,8 @@ struct value : value_facade<Char, value<Char> > {
     inline value_type& mark_unsafe() { return this->safe(false), *this; }
     inline value_type& mark_safe() { return this->safe(true), *this; }
 
-    inline value_type&       token(token_type const& token) { return (token_ = token), *this; }
-    inline token_type const& token() const { BOOST_ASSERT(token_); return *token_; }
+    inline value_type&        token(string_type const& token) { return (token_ = token), *this; }
+    inline string_type const& token() const { BOOST_ASSERT(token_); return *token_; }
 
     inline boolean_type is_literal() const { return boolean_type(token_); }
 
@@ -200,8 +200,8 @@ struct value : value_facade<Char, value<Char> > {
 
   private:
 
-    boolean_type         safe_;
-    optional<token_type> token_;
+    boolean_type          safe_;
+    optional<string_type> token_;
 };
 
 }}} // namespace ajg::synth::django

@@ -15,11 +15,16 @@ namespace ssi {
 
 template <class Value>
 struct options {
+  public:
+
     typedef options                                options_type;
     typedef Value                                  value_type;
+
     typedef typename value_type::traits_type       traits_type;
     typedef typename traits_type::string_type      string_type;
-    typedef std::vector<string_type>               directories_type;
+    typedef std::vector<string_type>               directories_type; // TODO: Use paths_type.
+
+  public:
 
     options( string_type      const& echo_message  = traits_type::literal("(none)")
            , directories_type const& directories   = directories_type(/*1, "."*/)

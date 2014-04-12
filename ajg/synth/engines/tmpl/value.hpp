@@ -11,16 +11,17 @@ namespace ajg {
 namespace synth {
 namespace tmpl {
 
-template <class Char>
-struct value : value_facade<Char, value<Char> > {
+template <class Traits>
+struct value : value_facade<Traits, value> {
   public:
 
-    typedef value_facade<Char, value> base_type;
+    typedef value                               value_type;
+    typedef typename value_type::facade_type    facade_type;
 
   public:
 
-    value() : base_type() {}
-    template <class T> value(T const& t) : base_type(t) {}
+    value() : facade_type() {}
+    template <class T> value(T const& t) : facade_type(t) {}
 };
 
 }}} // namespace ajg::synth::tmpl

@@ -19,8 +19,8 @@ namespace synth {
 //     TODO: Use numeric_adapter as base?
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, std::complex<T> > : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, std::complex<T> > : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER(std::complex<T>)
     adapted_type adapted_;

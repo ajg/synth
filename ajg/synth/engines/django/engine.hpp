@@ -35,76 +35,90 @@
 namespace ajg {
 namespace synth {
 namespace django {
+
+template <class Traits>
+struct engine : base_engine<Traits> {
+  public:
+
+    typedef engine                                                              engine_type;
+    typedef Traits                                                              traits_type;
+
+    typedef typename traits_type::void_type                                     void_type;
+    typedef typename traits_type::none_type                                     none_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::symbols_type                                  symbols_type;
+
+    typedef django::loader<engine_type>                                         loader_type;
+    typedef django::value<traits_type>                                          value_type;
+    typedef options<value_type>                                                 options_type;
+
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::names_type                                   names_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+
+    typedef typename value_type::behavior_type                                  behavior_type;
+    typedef typename value_type::sequence_type                                  sequence_type;
+
+
+  private:
+
+    template <class K> friend struct django::builtin_tags;
+    template <class K> friend struct django::builtin_filters;
+
+  public:
+
+    template <class Iterator>
+    struct kernel;
+
+}; // engine
+
 namespace {
 using detail::operator ==;
 using detail::find_mapped_value;
 namespace x = boost::xpressive;
-} // namespace
+}
 
-struct engine : base_engine {
-
-template <class BidirectionalIterator>
-struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+template <class T>
+template <class Iterator>
+struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
   public:
 
-    typedef definition                                                          this_type;
-    typedef base_engine::definition<BidirectionalIterator, this_type>           base_type;
-    typedef django::loader<this_type>                                           loader_type;
-    typedef typename base_type::id_type                                         id_type;
-    typedef typename base_type::size_type                                       size_type;
-    typedef typename base_type::char_type                                       char_type;
-    typedef typename base_type::match_type                                      match_type;
-    typedef typename base_type::regex_type                                      regex_type;
-    typedef typename base_type::frame_type                                      frame_type;
-    typedef typename base_type::string_type                                     string_type;
-    typedef typename base_type::stream_type                                     stream_type;
-    typedef typename base_type::symbols_type                                    symbols_type;
-    typedef typename base_type::iterator_type                                   iterator_type;
-    typedef typename base_type::definition_type                                 definition_type;
-    typedef typename base_type::string_regex_type                               string_regex_type;
+    typedef kernel                                                              kernel_type;
+    typedef Iterator                                                            iterator_type;
 
-    typedef builtin_tags<this_type>                                             builtin_tags_type;
-    typedef builtin_filters<this_type>                                          builtin_filters_type;
-    typedef django::value<char_type>                                            value_type;
-    typedef options<value_type>                                                 options_type;
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename value_type::none_type                                      none_type;
-    typedef typename value_type::boolean_type                                   boolean_type;
-    typedef typename value_type::datetime_type                                  datetime_type;
-    typedef typename value_type::duration_type                                  duration_type;
-    typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::names_type                                   names_type;
-    typedef typename options_type::sequence_type                                sequence_type;
-    typedef typename options_type::arguments_type                               arguments_type;
+  protected:
+
+    typedef builtin_tags<kernel_type>                                           builtin_tags_type;
+    typedef builtin_filters<kernel_type>                                        builtin_filters_type;
+    typedef std::map<string_type, string_type>                                  markers_type; // TODO[c++11]: unordered_map.
+
+    typedef typename kernel_type::id_type                                       id_type;
+    typedef typename kernel_type::regex_type                                    regex_type;
+    typedef typename kernel_type::match_type                                    match_type;
+    typedef typename kernel_type::string_regex_type                             string_regex_type;
+    typedef typename kernel_type::string_match_type                             string_match_type;
+
+  public:
+
+    typedef match_type                                                          frame_type;
+    typedef engine_type                                                         engine_type;
 
   private:
 
-    symbols_type keywords_, reserved_;
-
-    struct not_in {
-        symbols_type const& symbols;
-        explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
-
-        bool operator ()(typename match_type::value_type const& match) const {
-            return this->symbols.find(match.str()) == this->symbols.end();
-        }
-    };
+    template <class I> friend struct kernel;
+    template <class K> friend struct django::builtin_tags;
+    template <class K> friend struct django::builtin_filters;
 
   public:
 
-    std::map<string_type, string_type> markers; // TODO[c++11]: unordered_map.
-
-    inline regex_type marker(string_type const& s, string_type const& name) {
-        return x::as_xpr((this->markers[name] = s));
-    }
-
-    inline regex_type word    (string_type const s) { return x::as_xpr(s) >> x::_b; }
-    inline regex_type word    (char const* const s) { return x::as_xpr(s) >> x::_b; }
-    inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
-    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *x::_s; }
-    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *x::_s; }
-
-    definition()
+    kernel()
         : newline        (traits_type::literal("\n"))
         , ellipsis       (traits_type::literal("..."))
         , brace_open     (marker(traits_type::literal("{"),  traits_type::literal("openbrace")))
@@ -241,16 +255,13 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         arguments
             = *argument
             ;
-        skipper
+        this->skipper
             = block_open
             | block_close
             | comment_open
             | comment_close
             | variable_open
             | variable_close
-            ;
-        nothing
-            = as_xpr('\0') // Xpressive barfs when default-constructed.
             ;
         html_namechar
             = ~(set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
@@ -272,6 +283,29 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         builtin_tags_.initialize(*this);
     }
 
+  private:
+
+    struct not_in {
+        symbols_type const& symbols;
+        explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
+
+        bool operator ()(typename match_type::value_type const& match) const {
+            return this->symbols.find(match.str()) == this->symbols.end();
+        }
+    };
+
+  public:
+
+    inline regex_type marker(string_type const& s, string_type const& name) {
+        return x::as_xpr((this->markers[name] = s));
+    }
+
+    inline regex_type word    (string_type const s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type word    (char const* const s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
+    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *x::_s; }
+    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *x::_s; }
+
   public:
 
     template <char_type Delimiter>
@@ -279,27 +313,28 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                                 , context_type const& context
                                 , options_type const& options
                                 ) const {
-        typedef boost::char_separator<char_type>                                separator_type;
-        typedef typename value_type::token_type                                 token_type;
-        typedef typename token_type::const_iterator                             iterator_type;
-        typedef boost::tokenizer<separator_type, iterator_type, token_type>     tokenizer_type;
-        typedef definition<iterator_type>                                       definition_type;
+        typedef typename string_type::const_iterator                                string_iterator_type;
+        typedef kernel<string_iterator_type>                                        string_kernel_type;
+        typedef typename string_kernel_type::match_type                             string_match_type;
+
+        typedef boost::char_separator<char_type>                                    separator_type;
+        typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
 
         BOOST_ASSERT(argument.is_literal());
-        token_type const& source = argument.token();
+        string_type const& source = argument.token();
         static char_type const delimiter[2] = { Delimiter, 0 };
         tokenizer_type const tokenizer(source, separator_type(delimiter, 0, keep_empty_tokens));
-        static definition_type const tokenizable_definition;
-        typename definition_type::match_type match;
+        static string_kernel_type const string_kernel;
+        string_match_type match;
         sequence_type sequence;
 
-        BOOST_FOREACH(token_type const& token, tokenizer) {
+        BOOST_FOREACH(string_type const& token, tokenizer) {
             if (std::distance(token.begin(), token.end()) == 0) {
                 sequence.push_back(value_type(none_type()));
             }
-            else if (xpressive::regex_match(token.begin(), token.end(), match, tokenizable_definition.chain)) {
+            else if (xpressive::regex_match(token.begin(), token.end(), match, string_kernel.chain)) {
                 try {
-                    sequence.push_back(tokenizable_definition.evaluate_chain(match, context, options));
+                    sequence.push_back(string_kernel.evaluate_chain(match, context, options));
                 }
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
@@ -332,41 +367,40 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         return names;
     }
 
-    void render( stream_type&        stream
+    void render( ostream_type&       ostream
                , frame_type   const& frame
                , context_type const& context
                , options_type const& options) const {
-        render_block(stream, frame, context, options);
+        render_block(ostream, frame, context, options);
     }
 
-    void render_file( stream_type&        stream
+    void render_file( ostream_type&       ostream
                     , string_type  const& filepath
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        typedef file_template<char_type, engine> file_template_type;
-        file_template_type(filepath, options.directories).render(stream, context, options);
+        file_template<engine>(filepath, options.directories).render(ostream, context, options);
     }
 
-    void render_text( stream_type&        stream
+    void render_text( ostream_type&       ostream
                     , match_type   const& text
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        stream << text.str();
+        ostream << text.str();
     }
 
-    void render_block( stream_type&        stream
+    void render_block( ostream_type&       ostream
                      , match_type   const& block
                      , context_type const& context
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
-            render_match(stream, nested, context, options);
+            render_match(ostream, nested, context, options);
         }
     }
 
-    void render_tag( stream_type&        stream
+    void render_tag( ostream_type&       ostream
                    , match_type   const& match
                    , context_type const& context
                    , options_type const& options
@@ -375,21 +409,21 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         id_type    const  id     = match_.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
-            tag(*this, match_, context, options, stream);
+            tag(*this, match_, context, options, ostream);
         }
         else {
-            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+            throw_exception(std::logic_error("missing built-in tag"));
         }
     }
 
-    void render_match( stream_type&        stream
+    void render_match( ostream_type&       ostream
                      , match_type   const& match
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == text)  render_text(stream, match, context, options);
-        else if (match == block) render_block(stream, match, context, options);
-        else if (match == tag)   render_tag(stream, match, context, options);
+             if (match == this->text)  render_text(ostream, match, context, options);
+        else if (match == this->block) render_block(ostream, match, context, options);
+        else if (match == this->tag)   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
@@ -491,7 +525,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             }
         }
         else if (literal == number_literal) {
-            return value_type(traits_type::to_number(string)).token(token);
+            return value_type(boost::lexical_cast<number_type>(string)).token(token);
         }
         else if (literal == string_literal) {
             BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:
@@ -660,31 +694,30 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         loader_type::load(context, options, library, names);
     }
 
+  private:
+
+    // NOTE: These must be near the top so they are initialized by the time they're needed.
+    symbols_type       keywords_;
+    symbols_type       reserved_;
+    markers_type       markers;
+
   public:
 
-    string_type const newline;
-    string_type const ellipsis;
+    // TODO: Move these out of the kernel.
+    string_type  const newline;
+    string_type  const ellipsis;
 
-    regex_type const brace_open;
-    regex_type const brace_close;
-    regex_type const block_open;
-    regex_type const block_close;
-    regex_type const comment_open;
-    regex_type const comment_close;
-    regex_type const variable_open;
-    regex_type const variable_close;
+    regex_type   const brace_open;
+    regex_type   const brace_close;
+    regex_type   const block_open;
+    regex_type   const block_close;
+    regex_type   const comment_open;
+    regex_type   const comment_close;
+    regex_type   const variable_open;
+    regex_type   const variable_close;
 
-  /*private:
+  protected:
 
-    template <class E> friend struct django::builtin_tags;
-    template <class E> friend struct django::builtin_filters;
-    friend base_engine; */
-
-    regex_type tag;
-    regex_type text;
-    regex_type block;
-    regex_type skipper;
-    regex_type nothing;
     regex_type identifier;
     regex_type restricted_identifier;
     regex_type unreserved_identifier;
@@ -727,9 +760,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
 
     builtin_tags_type builtin_tags_;
 
-}; // definition
-
-}; // engine
+}; // kernel
 
 }}} // namespace ajg::synth::django
 

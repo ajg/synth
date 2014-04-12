@@ -16,9 +16,9 @@ namespace synth {
 // specialization for boost::none_t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits>
-struct adapter<Traits, boost::none_t>
-    : public base_adapter<Traits> {
+template <class Behavior>
+struct adapter<Behavior, boost::none_t>
+    : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER(boost::none_t)
     boost::none_t const& adapted_;

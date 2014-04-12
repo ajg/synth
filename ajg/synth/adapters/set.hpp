@@ -16,9 +16,9 @@ namespace synth {
 // specialization for std::set
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, std::set<T> >
-    : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, std::set<T> >
+    : public base_adapter<Behavior> {
 
     typedef std::set<T> set_type;
     AJG_SYNTH_ADAPTER(set_type)
@@ -27,7 +27,7 @@ struct adapter<Traits, std::set<T> >
   public:
 
     boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }
     iterator end()   { return iterator(adapted_.end()); }
@@ -40,9 +40,9 @@ struct adapter<Traits, std::set<T> >
 // specialization for std::multiset
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, std::multiset<T> >
-    : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, std::multiset<T> >
+    : public base_adapter<Behavior> {
 
     typedef std::multiset<T> set_type;
     AJG_SYNTH_ADAPTER(set_type)
@@ -51,7 +51,7 @@ struct adapter<Traits, std::multiset<T> >
   public:
 
     boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }
     iterator end()   { return iterator(adapted_.end()); }

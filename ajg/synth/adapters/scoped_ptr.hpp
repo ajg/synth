@@ -16,9 +16,9 @@ namespace synth {
 // specialization for boost::scoped_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, scoped_ptr<T> >
-    : public forwarding_adapter<Traits, T, scoped_ptr<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, scoped_ptr<T> >
+    : public forwarding_adapter<Behavior, T, scoped_ptr<T> > {
 
     adapter(scoped_ptr<T> const& adapted) : adapted_(adapted) {}
     scoped_ptr<T> const& adapted_;

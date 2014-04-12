@@ -5,60 +5,39 @@
 #ifndef AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED
 
-#include <string>
-
-#include <boost/mpl/identity.hpp>
-#include <boost/utility/base_from_member.hpp>
-#include <boost/type_traits/remove_reference.hpp>
 #include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
 namespace synth {
 
-template < class Char
-         , class Engine
-         , class String = std::basic_string<Char>
-         , class Iterator = typename String::const_iterator
-         >
-struct string_template
-    : private boost::base_from_member<String>
-    , public base_template<Engine, Iterator> {
+template <class Engine>
+struct string_template : base_template<Engine, typename Engine::traits_type::string_type::const_iterator> {
+  public:
 
-  private:
-
-    typedef boost::base_from_member<String>                                     base_member_type;
+    typedef string_template                                                     template_type;
+    typedef Engine                                                              engine_type;
+    typedef typename engine_type::traits_type                                   traits_type;
+    typedef typename traits_type::string_type                                   string_type;
 
   public:
 
-    // Do this in case String happens to be a reference type
-    // e.g. to eliminate copies, in which case we want to avoid
-    // creating references to references, which are illegal.
-    typedef typename boost::remove_reference<String>::type string_type;
-
-  private:
-
-    typedef base_template<Engine, Iterator> base_type;
-
-  public:
-
-    string_template(string_type const& string)
-        : base_member_type(string)
-        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
+    string_template(string_type const& string) : string_(string) {
+        this->reset(this->string_.begin(), this->string_.end());
+    }
 
     template <class I>
-    string_template(I const& begin, I const& end)
-        : base_member_type(begin, end)
-        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
+    string_template(I const& begin, I const& end) : string_(begin, end) {
+        this->reset(this->string_.begin(), this->string_.end());
+    }
 
   public:
 
-    string_type const& str() const { return base_member_type::member; }
-};
+    string_type const& string() const { return this->string_; }
 
-template < class Char
-         , class Engine
-         >
-struct string_template_identity : boost::mpl::identity<string_template<Char, Engine> > {};
+  private:
+
+    string_type const string_;
+};
 
 }} // namespace ajg::synth
 

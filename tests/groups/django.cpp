@@ -15,23 +15,29 @@
 #include <tests/data/kitchen_sink.hpp>
 
 namespace {
-
 namespace s = ajg::synth;
+
 using boost::optional;
 using s::null_resolver;
 
-typedef char                                                                    char_type;
-typedef s::django::engine                                                       engine_type;
-typedef s::file_template<char_type, engine_type>                                file_template;
-typedef s::string_template<char_type, engine_type>                              string_template;
-typedef string_template::traits_type                                            traits_type;
-typedef traits_type::string_type                                                string_type;
-typedef string_template::context_type                                           context_type;
-typedef string_template::options_type                                           options_type;
-struct data_type : tests::data::kitchen_sink<context_type, traits_type, options_type> {};
-typedef ajg::test_group<data_type>                                              group_type;
+typedef s::default_traits<char>                                                 traits_type;
+typedef s::django::engine<traits_type>                                          engine_type;
 
-group_type group_object("django");
+typedef s::file_template<engine_type>                                           file_template_type;
+typedef s::string_template<engine_type>                                         string_template_type;
+
+typedef engine_type::traits_type                                                traits_type;
+typedef engine_type::context_type                                               context_type;
+typedef engine_type::options_type                                               options_type;
+typedef engine_type::value_type                                                 value_type;
+
+typedef traits_type::char_type                                                  char_type;
+typedef traits_type::string_type                                                string_type;
+
+typedef value_type::behavior_type                                               behavior_type;
+
+struct data_type  : tests::data::kitchen_sink<engine_type> {};
+struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("django") {} } const group;
 
 } // namespace
 
@@ -47,7 +53,7 @@ AJG_TESTING_BEGIN
 ///     django::library_tag   (Tested implicitly in Python binding tests.)
 
 #define DJANGO_TEST_(name, in, out, context) \
-    unit_test(name) { ensure_equals(string_template(in).render_to_string(context), out); }}}
+    unit_test(name) { ensure_equals(string_template_type(in).render_to_string(context), out); }}}
 
 #define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
 
@@ -101,7 +107,7 @@ DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing tag) {
-    string_template const t("{% xyz 42 %}");
+    string_template_type const t("{% xyz 42 %}");
     ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
 
@@ -202,19 +208,19 @@ DJANGO_TEST(for_tag-key-value,
 */
 
 unit_test(now_tag) {
-    string_template const t("{% now 'y' %}");
+    string_template_type const t("{% now 'y' %}");
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure_equals(s, traits_type::to_string(std::localtime(&time)->tm_year % 100));
+    ensure_equals(s, behavior_type::to_string(std::localtime(&time)->tm_year % 100));
 }}}
 
 unit_test(now_tag) {
-    string_template const t("{% now 'Y' %}");
+    string_template_type const t("{% now 'Y' %}");
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure_equals(s, traits_type::to_string(std::localtime(&time)->tm_year + 1900));
+    ensure_equals(s, behavior_type::to_string(std::localtime(&time)->tm_year + 1900));
 }}}
 
 DJANGO_TEST(regroup_tag,
@@ -305,7 +311,7 @@ DJANGO_TEST(widthratio_tag, "{% widthratio 300 100 300 %}", "900")
 DJANGO_TEST(widthratio_tag, "{% widthratio 300 200 100 %}", "150")
 
 unit_test(url_tag) {
-    string_template const t("{% url 'x.y.z' 1 2 3 %}");
+    string_template_type const t("{% url 'x.y.z' 1 2 3 %}");
     null_resolver<options_type>::patterns_type patterns;
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
@@ -313,7 +319,7 @@ unit_test(url_tag) {
 }}}
 
 unit_test(url_tag) {
-    string_template const t("{% url 'foo.bar.qux' 1 2 3 %}");
+    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 %}");
     null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
@@ -322,7 +328,7 @@ unit_test(url_tag) {
 }}}
 
 unit_test(url_tag) {
-    string_template const t("{% url 'foo.bar.qux' 1 b=2 3 %}");
+    string_template_type const t("{% url 'foo.bar.qux' 1 b=2 3 %}");
     null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
@@ -331,7 +337,7 @@ unit_test(url_tag) {
 }}}
 
 unit_test(url_as_tag) {
-    string_template const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
+    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
     null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
@@ -340,7 +346,7 @@ unit_test(url_as_tag) {
 }}}
 
 unit_test(url_as_tag) {
-    string_template const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}");
+    string_template_type const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}");
     null_resolver<options_type>::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
@@ -349,7 +355,7 @@ unit_test(url_as_tag) {
 }}}
 
 unit_test(url_as_tag) {
-    string_template const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
+    string_template_type const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
     null_resolver<options_type>::patterns_type patterns;
     options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
 
@@ -369,10 +375,10 @@ DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
 
 unit_test(ssi_tag) {
-    ensure_throws(std::invalid_argument, string_template("{% ssi '../foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template("{% ssi './foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template("{% ssi 'foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template("{% ssi '' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi '../foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi './foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi 'foo' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi '' %}").render_to_string());
 }}}
 
 DJANGO_TEST(verbatim_tag,
@@ -389,7 +395,7 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
-    string_template const t("{{ 42|xyz }}");
+    string_template_type const t("{{ 42|xyz }}");
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
 
@@ -688,7 +694,7 @@ DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'6' }}", "False")
 
 // TODO: Better test for random_filter, maybe by making randomness a value trait or engine option.
 unit_test(random_filter) {
-    string_template const t("{{ 'abcde'|random }}");
+    string_template_type const t("{{ 'abcde'|random }}");
     string_type s = t.render_to_string(context);
     ensure(s == "a" || s == "b" || s == "c" || s == "d" || s == "e");
 }}}

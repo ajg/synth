@@ -17,6 +17,7 @@
 
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/value_traits.hpp>
+#include <ajg/synth/value_iterator.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
 
@@ -32,32 +33,30 @@ using detail::integer_type;
 // value_facade
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template < class Char
-         , class Value
-         , class Traits = default_value_traits<Char, Value>
-         >
+template <class Traits, template <class T> class Value>
 struct value_facade {
   public:
 
-    typedef value_facade                self_type;
-    typedef Value                       value_type;
-    typedef Traits                      traits_type;
-    typedef base_adapter<traits_type>   adapter_type;
+    typedef value_facade                                                        facade_type;
+    typedef Traits                                                              traits_type;
+    typedef Value<traits_type>                                                  value_type;
+    typedef default_value_behavior<traits_type, Value>                          behavior_type;
+    typedef base_adapter<behavior_type>                                         adapter_type;
 
-    typedef typename traits_type::none_type     none_type;
-    typedef typename traits_type::boolean_type  boolean_type;
-    typedef typename traits_type::size_type     size_type;
-    typedef typename traits_type::char_type     char_type;
-    typedef typename traits_type::range_type    range_type;
-    typedef typename traits_type::string_type   string_type;
-    typedef typename traits_type::number_type   number_type;
-    typedef typename traits_type::datetime_type datetime_type;
-    typedef typename traits_type::duration_type duration_type;
-    typedef typename traits_type::istream_type  istream_type;
-    typedef typename traits_type::ostream_type  ostream_type;
+    typedef typename traits_type::none_type                                     none_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::istream_type                                  istream_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef typename traits_type::iterator       iterator;
-    typedef typename traits_type::const_iterator const_iterator;
+    typedef value_iterator<value_type const>                                    iterator;
+    typedef value_iterator<value_type const>                                    const_iterator;
+    typedef std::pair<const_iterator, const_iterator>                           range_type;
 
   protected:
 
@@ -66,24 +65,25 @@ struct value_facade {
 
     template <class T>
     value_facade(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<Traits, T>(t)) {}
+        : adapter_(new synth::adapter<behavior_type, T>(t)) {}
 
     template <class T, class U>
     value_facade(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<Traits, T>(t, u)) {}
+        : adapter_(new synth::adapter<behavior_type, T>(t, u)) {}
 
     template <class T, class U, class V>
     value_facade(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<Traits, T>(t, u, v)) {}
+        : adapter_(new synth::adapter<behavior_type, T>(t, u, v)) {}
 
   public:
 
     inline boolean_type initialized()  const { return boolean_type(adapter_); }
     inline void         uninitialize()       { adapter_.reset(); }
 
-    template <class T> inline boolean_type is() const { return traits_type::adapter_traits::template is<T>(*this); }
-    template <class T> inline T const&     as() const { return traits_type::adapter_traits::template as<T>(*this); }
-    template <class T> inline T            to() const { return traits_type::adapter_traits::template to<T>(*this); }
+    template <class T> inline boolean_type is()  const { return behavior_type::template is<T>(*this); }
+    template <class T> inline T const&     as()  const { return behavior_type::template as<T>(*this); }
+    template <class T> inline T            to()  const { return behavior_type::template to<T>(*this); }
+    template <class T> inline T            to_() const { return behavior_type::template to_<T>(*this); }
 
   public: // TODO: Should only be visible to {default_}value_traits.
 
@@ -99,7 +99,7 @@ struct value_facade {
 
     inline std::type_info const& type() const { return this->adapter().type(); }
 
-    // TODO: Defer all these to traits.
+    // TODO: Defer all these to behavior_type.
 
     inline boolean_type is_none()    const { return this->template is<none_type>(); }
     inline boolean_type is_boolean() const { return this->template is<boolean_type>(); }
@@ -111,7 +111,7 @@ struct value_facade {
     inline number_type   to_number()   const { return this->adapter().to_number(); }
     inline datetime_type to_datetime() const { return this->adapter().to_datetime(); }
     inline string_type   to_string()   const { return this->adapter().to_string(); }
-    inline size_type     to_size()     const { return traits_type::to_size(*this); }
+    inline size_type     to_size()     const { return behavior_type::to_size(*this); }
 
     inline size_type empty()  const { return this->size() == 0; }             // TODO: Defer to adapter.
     inline size_type size()   const { return std::distance(begin(), end()); } // TODO: Defer to adapter.
@@ -124,8 +124,8 @@ struct value_facade {
     inline optional<value_type> index(value_type const& key)   const { return this->adapter().index(key); }
 
     // Even the non-const versions are immutable and are provided simply as a convenience.
-    inline iterator begin() { return const_cast<self_type const*>(this)->begin(); }
-    inline iterator end()   { return const_cast<self_type const*>(this)->end(); }
+    inline iterator begin() { return const_cast<facade_type const*>(this)->begin(); }
+    inline iterator end()   { return const_cast<facade_type const*>(this)->end(); }
 
     inline const_iterator begin() const { return this->adapter().begin(); }
     inline const_iterator end()   const {
@@ -153,9 +153,9 @@ struct value_facade {
         return detail::slice(*this, lower, upper);
     }
 
-    inline boolean_type contains(value_type const& that) const { return traits_type::adapter_traits::contains(*this, that); }
-    inline boolean_type equal   (value_type const& that) const { return traits_type::adapter_traits::equal(*this, that); }
-    inline boolean_type less    (value_type const& that) const { return traits_type::adapter_traits::less(*this, that); }
+    inline boolean_type contains(value_type const& that) const { return behavior_type::contains(*this, that); }
+    inline boolean_type equal   (value_type const& that) const { return behavior_type::equal(*this, that); }
+    inline boolean_type less    (value_type const& that) const { return behavior_type::less(*this, that); }
 
     inline operator boolean_type()                          const { return this->to_boolean(); }
     inline boolean_type operator!()                         const { return !this->to_boolean(); }
@@ -178,8 +178,8 @@ struct value_facade {
 
   private:
 
-    template <class V>                   friend struct value_iterator;
-    template <class C, class V, class T> friend struct value_facade;
+    template <class V>                                           friend struct value_iterator;
+ // template <template <class T, template <class> class Value> > friend struct value_facade;
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         /* if (!value.initialized()) {

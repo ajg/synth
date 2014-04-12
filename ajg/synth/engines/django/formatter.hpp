@@ -36,29 +36,29 @@ struct formatter {
 
     typedef Options                                                             options_type;
     typedef typename options_type::traits_type                                  traits_type;
-    typedef typename options_type::boolean_type                                 boolean_type;
-    typedef typename options_type::char_type                                    char_type;
-    typedef typename options_type::size_type                                    size_type;
-    typedef typename options_type::number_type                                  number_type;
-    typedef typename options_type::date_type                                    date_type;
-    typedef typename options_type::datetime_type                                datetime_type;
-    typedef typename options_type::duration_type                                duration_type;
-    typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::range_type                                   range_type;
-    typedef typename options_type::sequence_type                                sequence_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
-  private:
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::date_type                                     date_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::string_type                                   string_type;
 
-    typedef typename string_type::const_iterator                                string_iterator_type;
-    typedef xpressive::match_results<string_iterator_type>                      string_match_type;
+    typedef typename value_type::behavior_type                                  behavior_type;
+    typedef typename value_type::range_type                                     range_type;
+    typedef typename value_type::sequence_type                                  sequence_type;
+
+  private:
 
 ///
 /// native_flags:
-///     The flag specifiers native to Boost.DateTime. See
-///     http://www.boost.org/doc/libs/release/doc/html/date_time/date_time_io.html#date_time.format_flags
+///     The flag specifiers native to Boost.DateTime.
+///     See [http://www.boost.org/doc/html/date_time/date_time_io.html#date_time.format_flags]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct native_flags {
@@ -298,7 +298,7 @@ struct formatter {
             cooked.I = is_dst ? traits_type::literal("1") : traits_type::literal("0");
             cooked.j = algo::trim_left_copy_if(flags.d, algo::is_any_of("0"));
             cooked.l = flags.A;
-            cooked.L = traits_type::to_string(is_leapyear);
+            cooked.L = behavior_type::to_string(is_leapyear);
             cooked.m = flags.m;
             cooked.M = flags.b;
             cooked.n = algo::trim_left_copy_if(flags.m, algo::is_any_of("0"));
@@ -309,10 +309,10 @@ struct formatter {
             cooked.r = flags.a + char_type(',') + char_type(' ') + flags.d + char_type(' ') + flags.b + char_type(' ') + flags.Y + char_type(' ') + flags.T; // TODO: Include non-UTC timezones.
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
-            cooked.t = traits_type::to_string(month_days);
+            cooked.t = behavior_type::to_string(month_days);
             cooked.T = traits_type::literal("");       // TODO: Implement.
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
-            cooked.U = traits_type::to_string((datetime - epoch).seconds());
+            cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
             cooked.W = traits_type::literal("");       // TODO: Like %V but without leading zeros.
             cooked.y = flags.y;
@@ -455,7 +455,7 @@ struct formatter {
                                             , options_type const& options
                                             ) {
         string_type const suffix = n == 1 ? string_type() : traits_type::literal("s");
-        return traits_type::to_string(n) + options.nonbreaking_space + s + suffix;
+        return behavior_type::to_string(n) + options.nonbreaking_space + s + suffix;
     }
 };
 

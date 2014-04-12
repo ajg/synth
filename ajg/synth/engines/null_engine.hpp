@@ -7,51 +7,51 @@
 
 #include <map>
 
-#include <boost/mpl/void.hpp>
-
 #include <ajg/synth/engines/null_value.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 
 namespace ajg {
 namespace synth {
 
-struct null_engine : base_engine {
-
-template <class BidirectionalIterator>
-struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
+template <class Traits>
+struct null_engine : base_engine<Traits> {
   public:
 
-    typedef base_engine::definition<BidirectionalIterator, definition> base_type;
+    typedef null_engine                                                         engine_type;
+    typedef Traits                                                              traits_type;
 
-    typedef typename base_type::id_type         id_type;
-    typedef typename base_type::size_type       size_type;
-    typedef typename base_type::char_type       char_type;
-    typedef typename base_type::match_type      match_type;
-    typedef typename base_type::regex_type      regex_type;
-    typedef typename base_type::frame_type      frame_type;
-    typedef typename base_type::string_type     string_type;
-    typedef typename base_type::stream_type     stream_type;
-    typedef typename base_type::iterator_type   iterator_type;
-    typedef typename base_type::definition_type definition_type;
+    typedef typename traits_type::void_type                                     void_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef null_value<char_type>             value_type;    // TODO: Use Traits::value_type?
-    typedef std::vector<value_type>           sequence_type; // TODO: Use Traits::sequence_type
-    typedef std::map<string_type, value_type> context_type;  // TODO: Use Traits::context_type
-    typedef boost::mpl::void_                 options_type;
+    typedef null_value<traits_type>                                             value_type;
+    typedef std::map<string_type, value_type> /* TODO: void_type */             context_type;
+    typedef void_type                                                           options_type;
+
+template <class Iterator>
+struct kernel : base_engine<traits_type>::template kernel<Iterator> {
+  public:
+
+    typedef kernel                                                              kernel_type;
+    typedef Iterator                                                            iterator_type;
+    typedef typename kernel_type::frame_type                                    frame_type;
+    typedef engine_type                                                         engine_type;
 
   public:
 
-    definition() {}
+    kernel() {}
 
   public:
 
-    void render( stream_type&        stream
-               , frame_type   const& frame
-               , context_type const& context
-               , options_type const& options
-               ) const {}
+    template <class I> void parse(std::pair<I, I> const&, frame_type&) const {}
+    template <class I> void parse(I const&, I const&, frame_type&)     const {}
 
-}; // definition
+    void render(ostream_type&, frame_type const&, context_type const&, options_type const&) const {}
+
+}; // kernel
 
 }; // null_engine
 

@@ -20,13 +20,13 @@ using namespace boost; // FIXME: Delete.
   public: \
     typedef thisT                                   this_type; \
     typedef adaptedT                                adapted_type; \
-    typedef Traits                                  traits_type; \
-    typedef base_adapter<traits_type>               base_type; \
+    typedef Behavior                                behavior_type; \
+    typedef base_adapter<behavior_type>             base_type; \
+    typedef typename behavior_type::value_type      value_type; \
+    typedef typename behavior_type::traits_type     traits_type; \
     \
     typedef typename traits_type::char_type         char_type; \
     typedef typename traits_type::size_type         size_type; \
-    typedef typename traits_type::range_type        range_type; \
-    typedef typename traits_type::value_type        value_type; \
     typedef typename traits_type::boolean_type      boolean_type; \
     typedef typename traits_type::number_type       number_type; \
     typedef typename traits_type::string_type       string_type; \
@@ -35,10 +35,11 @@ using namespace boost; // FIXME: Delete.
     typedef typename traits_type::istream_type      istream_type; \
     typedef typename traits_type::ostream_type      ostream_type; \
     \
-    typedef typename traits_type::iterator          iterator; \
-    typedef typename traits_type::const_iterator    const_iterator; \
+    typedef typename value_type::iterator           iterator; \
+    typedef typename value_type::const_iterator     const_iterator; \
+    typedef typename value_type::range_type         range_type; \
     \
-    friend struct base_adapter<traits_type>
+    friend struct base_adapter<behavior_type>
 
 // TODO: Refactor this into a concrete_adapter<T>.
 #define AJG_SYNTH_ADAPTER(adaptedT) \
@@ -54,11 +55,11 @@ using namespace boost; // FIXME: Delete.
 // adapter (unspecialized)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class Adapted>
+template <class Behavior, class Adapted>
 struct adapter;
 
-template <class Traits>
-struct adapter<Traits, base_adapter<Traits> >; // undefined
+template <class Behavior>
+struct adapter<Behavior, base_adapter<Behavior> >; // undefined
 
 }} // namespace ajg::synth
 

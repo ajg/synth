@@ -18,9 +18,9 @@ namespace synth {
 // specialization for boost::reference_wrapper
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, reference_wrapper<T> >
-    : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, reference_wrapper<T> >
+    : public base_adapter<Behavior> {
 
     // AJG_SYNTH_ADAPTER(reference_wrapper<T>)
 
@@ -37,7 +37,7 @@ struct adapter<Traits, reference_wrapper<T> >
 
   protected:
 
-    typedef adapter<Traits, typename remove_const<T>::type> wrapped_adapter_type;
+    typedef adapter<Behavior, typename remove_const<T>::type> wrapped_adapter_type;
 
     virtual boolean_type equal_adapted(base_type const& that) const {
         return adapted_.template equal_as<wrapped_adapter_type>(that);
@@ -66,13 +66,13 @@ struct adapter<Traits, reference_wrapper<T> >
 
 
 /*
-template <class Traits, class T>
-struct adapter<Traits, reference_wrapper<T> >
-    : public forwarding_adapter<Traits, T, reference_wrapper<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, reference_wrapper<T> >
+    : public forwarding_adapter<Behavior, T, reference_wrapper<T> > {
 
     adapter(reference_wrapper<T const> const& adapted) : adapted_(adapted) {}
-    adapter<Traits, T> adapted_;
-    // adapter<Traits, typename remove_const<T>::type> adapted_;
+    adapter<Behavior, T> adapted_;
+    // adapter<Behavior, typename remove_const<T>::type> adapted_;
     // T const& adapted_;
 
     bool   valid() const { return true; }

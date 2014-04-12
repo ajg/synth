@@ -23,32 +23,32 @@ struct binding : MultiTemplate {
 
   public:
 
-    typedef MultiTemplate                                      base_type;
-    typedef typename base_type::stream_type                    stream_type;
-    typedef typename base_type::boolean_type                   boolean_type;
-    typedef typename base_type::string_type                    string_type;
-    typedef typename base_type::formats_type                   formats_type;
-    typedef typename base_type::directories_type               directories_type;
-    typedef typename base_type::libraries_type                 libraries_type;
-    typedef typename base_type::loaders_type                   loaders_type;
-    typedef typename base_type::resolvers_type                 resolvers_type;
-    typedef typename pt::basic_ptree<string_type, string_type> context_type; // TODO: basic_ptree<string_type, value_type>
+    typedef MultiTemplate                                                       base_type;
+    typedef typename base_type::stream_type                                     stream_type;
+    typedef typename base_type::boolean_type                                    boolean_type;
+    typedef typename base_type::string_type                                     string_type;
+    typedef typename base_type::formats_type                                    formats_type;
+    typedef typename base_type::paths_type                                      paths_type;
+    typedef typename base_type::libraries_type                                  libraries_type;
+    typedef typename base_type::loaders_type                                    loaders_type;
+    typedef typename base_type::resolvers_type                                  resolvers_type;
+    typedef typename pt::basic_ptree<string_type, string_type>                  context_type; // TODO: basic_ptree<string_type, value_type>
 
   public:
 
     template <class Source>
-    binding( Source&                 source
-           , string_type      const& engine_name
-           , boolean_type     const  autoescape
-           , string_type      const& default_value
-           , directories_type const& directories
+    binding( Source&             source
+           , string_type  const& engine_name
+           , boolean_type const  autoescape
+           , string_type  const& default_value
+           , paths_type   const& paths
            ) : base_type( source
                         , engine_name
                         , autoescape
                         , default_value
                         , formats_type()
                         , boolean_type()
-                        , directories
+                        , paths
                         , libraries_type()
                         , loaders_type()
                         , resolvers_type()
@@ -56,9 +56,9 @@ struct binding : MultiTemplate {
 
   public:
 
-    void render( stream_type&        stream
-               , context_type const& context = context_type()
-            // , options_type const& options = options_type()
+    void render( ostream_type&        ostream
+               , context_type  const& context = context_type()
+            // , options_type  const& options = options_type()
                ) const {
         return base_type::template render<binding>(stream, context);
     }

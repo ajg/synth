@@ -163,19 +163,24 @@ inline struct stat stat_file(std::string const& filepath) {
     return file;
 }
 
+#ifndef PIPE_BUF
+#ifdef BUFSIZ
+#define PIPE_BUF BUFSIZ
+#else
+#define PIPE_BUF 4096
+#endif
+#endif
+
 //
 // read_file:
 //     Slurps a whole file directly into a stream, using a buffer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PIPE_BUF
-  #define PIPE_BUF 4096
-#endif
 
-template <class Stream>
+template <class Stream> // TODO[c++11]: Make buffer_size a (defaulted) template parameter.
 void read_file(FILE *const file, Stream& stream) {
     typedef typename Stream::char_type char_type;
-    BOOST_STATIC_CONSTANT(std::size_t, buffer_size = PIPE_BUF /*BUFSIZ*/ / sizeof(char_type));
+    BOOST_STATIC_CONSTANT(std::size_t, buffer_size = PIPE_BUF / sizeof(char_type));
     char_type buffer[buffer_size];
     BOOST_ASSERT(file != 0);
 
@@ -183,6 +188,51 @@ void read_file(FILE *const file, Stream& stream) {
         stream.write(buffer, items);
     }
 }
+
+#if AJG_SYNTH_UNUSED
+
+template <class Char>
+std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
+    std::string const path = traits_type::narrow(filepath);
+    std::basic_ifstream<Char> file;
+
+    try {
+        file.open(path.c_str(), std::ios::binary);
+        return read_stream<std::basic_string<Char> >(file);
+    }
+    catch (std::exception const& e) {
+        throw_exception(file_error(path, "read", e.what()));
+    }
+}
+
+template <class String, class Stream>
+inline String read_stream
+        ( Stream& stream
+        , optional<typename Stream::size_type> const size = none
+        ) {
+    BOOST_STATIC_CONSTANT(typename String::size_type, buffer_size = 4096);
+
+    if (!stream.good()) {
+        throw_exception(std::runtime_error("bad stream"));
+    }
+
+    String result;
+    if (size) result.reserve(*size);
+    typename String::value_type buffer[buffer_size];
+
+    while (!stream.eof()) {
+        stream.read(buffer, buffer_size);
+        result.append(buffer, stream.gcount());
+    }
+
+    if (stream.bad()) {
+        throw_exception(std::runtime_error("bad stream"));
+    }
+
+    return result;
+}
+
+#endif // AJG_SYNTH_UNUSED
 
 //
 // pipe:

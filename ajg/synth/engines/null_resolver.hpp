@@ -9,7 +9,6 @@
 #include <string>
 
 #include <boost/optional.hpp>
-#include <boost/mpl/void.hpp>
 
 namespace ajg {
 namespace synth {

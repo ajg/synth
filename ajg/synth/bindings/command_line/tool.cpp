@@ -19,8 +19,9 @@ namespace {
 namespace synth = ajg::synth;
 
 typedef synth::command_line::binding<synth::detail::multi_template
-    < char
-    , synth::stream_template_identity
+    < AJG_SYNTH_DEFAULT_CHAR_TYPE
+    , synth::default_traits
+    , synth::stream_template
     , synth::django::engine
     , synth::ssi::engine<>
     , synth::tmpl::engine<>

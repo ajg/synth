@@ -20,7 +20,8 @@ BOOST_PYTHON_MODULE(synth)
 
     typedef synth::python::binding<synth::detail::multi_template
         < AJG_SYNTH_DEFAULT_CHAR_TYPE
-        , synth::string_template_identity
+        , synth::default_traits
+        , synth::string_template
         , synth::django::engine
         , synth::ssi::engine<>
         , synth::tmpl::engine<>

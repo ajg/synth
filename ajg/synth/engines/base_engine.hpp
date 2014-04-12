@@ -25,50 +25,54 @@
 #include <boost/xpressive/regex_algorithms.hpp>
 #include <boost/xpressive/regex_primitives.hpp>
 
-#include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {
+namespace {
+namespace x = boost::xpressive;
+}
 
-namespace xpressive = boost::xpressive;
-
+template <class Traits>
 struct base_engine : detail::nonconstructible {
 
-template < class BidirectionalIterator
-	     , class Definition
-		 // This argument is only necessary because MSVC chokes on iterator_type::value_type:
-	     , class Char = typename BidirectionalIterator::value_type
-         >
-struct definition : boost::noncopyable {
+    typedef base_engine                                                         engine_type;
+    typedef Traits                                                              traits_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::istream_type                                  istream_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::path_type                                     path_type;
+    typedef typename traits_type::paths_type                                    paths_type;
+    typedef typename traits_type::symbols_type                                  symbols_type;
+
+template <class Iterator>
+struct kernel : boost::noncopyable {
   public:
 
-    // Parametrized types:
-    typedef BidirectionalIterator iterator_type;
-    typedef Definition            definition_type;
+    typedef kernel                                                              kernel_type;
+    typedef Iterator                                                            iterator_type;
+    typedef std::pair<iterator_type, iterator_type>                             range_type;
 
-    // Derived types:
-    typedef definition                                    this_type;
-    typedef bool                                          boolean_type; // TODO: Use Traits::boolean_type
-    typedef std::size_t                                   size_type;    // TODO: Use Traits::size_type
-    typedef Char /* typename iterator_type::value_type */ char_type;    // TODO: Use Traits::char_type
+  protected:
 
-    typedef xpressive::regex_id_type                id_type;
-	typedef xpressive::basic_regex<iterator_type>   regex_type;
-    typedef xpressive::match_results<iterator_type> frame_type;
-    typedef xpressive::match_results<iterator_type> match_type;
-    typedef xpressive::sub_match<iterator_type>     sub_match_type;
-    typedef std::basic_string<char_type>            string_type; // TODO: Use Traits::string_type.
-    typedef std::basic_ostream<char_type>           stream_type; // TODO: Use Traits::stream_type.
-    typedef std::set<string_type>                   symbols_type;
+    typedef x::regex_id_type                                                    id_type;
+	typedef x::basic_regex<iterator_type>                                       regex_type;
+    typedef x::match_results<iterator_type>                                     match_type;
+    typedef x::sub_match<iterator_type>                                         sub_match_type;
+    typedef x::placeholder<iterator_type>                                       placeholder_type;
 
-    // Define string iterators/regexes specifically. This is useful when
-    // they are different from the main iterator_type and regex_type (e.g.
-    // when the latter two involve the use of a file_iterator.)
-    typedef typename string_type::const_iterator           string_iterator_type;
-    typedef xpressive::basic_regex<string_iterator_type>   string_regex_type;
-    typedef xpressive::match_results<string_iterator_type> string_match_type;
+    // Define string iterators/regexes specifically. This is useful when they are different from the
+    // main iterator_type and regex_type (e.g. when the latter two involve the use of a file_iterator.)
+    typedef typename string_type::const_iterator                                string_iterator_type;
+    typedef x::basic_regex<string_iterator_type>                                string_regex_type;
+    typedef x::match_results<string_iterator_type>                              string_match_type;
+
+    typedef match_type                                                          frame_type;
 
   public:
 
@@ -76,31 +80,18 @@ struct definition : boost::noncopyable {
 
   protected:
 
-//
-// set_furthest_iterator:
-//     A functor that sets the iterator to the furthest, either itself or the submatch's end.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    struct set_furthest_iterator {
-        typedef void result_type;
-
-        void operator()(iterator_type& iterator, sub_match_type const& sub_match) const {
-            iterator = (std::max)(iterator, sub_match.second);
-        }
-    };
+    kernel()
+        : nothing(x::as_xpr('\0')) {} // Xpressive barfs when default-constructed.
 
     void initialize_grammar() {
-        using namespace xpressive;
+        typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
 
-        typename xpressive::function<set_furthest_iterator>::type const set_furthest = {{}};
-        definition_type& self = static_cast<definition_type&>(*this);
-
-        self.text = +(~before(self.skipper) >> _);
+        this->text = +(~x::before(this->skipper) >> x::_);
 
         // block = skip(text[...])(*tag[...]); // Using skip is slightly slower than this:
-        self.block = *keep // Causes actions (i.e. furthest) to execute eagerly.
-            ( xpressive::ref(self.tag)  [set_furthest(iterator_, _)]
-            | xpressive::ref(self.text) [set_furthest(iterator_, _)]
+        this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
+            ( x::ref(this->tag)  [set_furthest(iterator_, x::_)]
+            | x::ref(this->text) [set_furthest(iterator_, x::_)]
             );
     }
 
@@ -108,20 +99,17 @@ struct definition : boost::noncopyable {
 
     template <class I>
     void parse(std::pair<I, I> const& range, frame_type& frame) const {
-        return parse(range.first, range.second, frame);
+        return this->parse(range.first, range.second, frame);
     }
 
     template <class I>
     void parse(I const& begin, I const& end, frame_type& frame) const {
-        typedef typename definition_type::traits_type traits_type;
+        iterator_type const  begin_   = begin;
+        iterator_type const  end_     = end;
+        iterator_type        furthest = begin_;
 
-        definition_type const& self = static_cast<definition_type const&>(*this);
-        iterator_type const begin_ = begin;
-        iterator_type const end_ = end;
-        iterator_type furthest = begin_;
-        frame.let(self.iterator_ = furthest);
-
-        if (xpressive::regex_match(begin_, end_, frame, self.block)) {
+        frame.let(this->iterator_ = furthest);
+        if (x::regex_match(begin_, end_, frame, this->block)) {
             // On success, all input should have been consumed.
             BOOST_ASSERT(furthest == end_);
             return;
@@ -136,9 +124,30 @@ struct definition : boost::noncopyable {
 
   protected:
 
-    xpressive::placeholder<iterator_type> iterator_;
+    regex_type tag;
+    regex_type text;
+    regex_type block;
+    regex_type nothing;
+    regex_type skipper;
 
-}; // definition
+  private:
+
+    placeholder_type iterator_;
+
+//
+// set_furthest_iterator:
+//     A functor that sets the iterator to the furthest, either itself or the submatch's end.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct set_furthest_iterator {
+        typedef void result_type;
+
+        void operator()(iterator_type& iterator, sub_match_type const& sub_match) const {
+            iterator = (std::max)(iterator, sub_match.second);
+        }
+    };
+
+}; // kernel
 
 }; // base_engine
 

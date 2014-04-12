@@ -11,8 +11,8 @@ namespace ajg {
 namespace synth {
 
 // TODO: Move to separate file.
-template <class Traits, class T, class Adapted, class Derived = adapter<Traits, Adapted> >
-struct forwarding_adapter : public base_adapter<Traits> {
+template <class Behavior, class T, class Adapted, class Derived = adapter<Behavior, Adapted> >
+struct forwarding_adapter : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted, forwarding_adapter);
 
@@ -24,11 +24,11 @@ struct forwarding_adapter : public base_adapter<Traits> {
   protected:
 
     virtual boolean_type equal_adapted(base_type const& that) const {
-        return forward().template equal_as<adapter<Traits, T> >(that);
+        return forward().template equal_as<adapter<Behavior, T> >(that);
     }
 
     virtual boolean_type less_adapted(base_type const& that) const {
-        return forward().template less_as<adapter<Traits, T> >(that);
+        return forward().template less_as<adapter<Behavior, T> >(that);
     }
 
   public:
@@ -51,8 +51,8 @@ struct forwarding_adapter : public base_adapter<Traits> {
   private:
 
     typedef typename boost::remove_reference<T>::type               T_noref;
-    typedef adapter<Traits, reference_wrapper<T> >                  ref_type;
-    typedef adapter<Traits, reference_wrapper<T_noref const> >      cref_type;
+    typedef adapter<Behavior, reference_wrapper<T> >                  ref_type;
+    typedef adapter<Behavior, reference_wrapper<T_noref const> >      cref_type;
 
   private:
 

@@ -15,9 +15,9 @@ namespace synth {
 // specialization for native pointers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, T*>
-    : public forwarding_adapter<Traits, T, T*> {
+template <class Behavior, class T>
+struct adapter<Behavior, T*>
+    : public forwarding_adapter<Behavior, T, T*> {
 
     adapter(T* adapted) : adapted_(adapted) {}
     T* adapted_;

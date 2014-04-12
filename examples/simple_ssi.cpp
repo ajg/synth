@@ -2,10 +2,12 @@
 #include <iostream>
 #include <ajg/synth.hpp>
 
-int main() {
-    using namespace ajg::synth;
+namespace synth = ajg::synth;
 
-    typedef string_template<char, ssi::engine<> > template_type;
+typedef synth::default_traits<char>                                 traits_type;
+typedef synth::string_template<traits_type, synth::ssi::engine<> >  template_type;
+
+int main() {
     template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
     template_type::context_type ctx;
     ctx["user"] = "Dolph Lundgren";

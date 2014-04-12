@@ -47,7 +47,7 @@ inline typename Traits::datetime_type to_datetime(py::object const& obj) {
 
 template <class Value>
 inline py::object from_value(Value const& value) {
-    return value.template to<py::object>();
+    return value.template to_<py::object>();
 }
 
 template <class Arguments>

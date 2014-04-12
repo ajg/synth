@@ -21,9 +21,9 @@ namespace synth {
 // specialization for native arrays of statically known size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T, std::size_t N>
-struct adapter<Traits, T[N]>
-    : public base_adapter<Traits> {
+template <class Behavior, class T, std::size_t N>
+struct adapter<Behavior, T[N]>
+    : public base_adapter<Behavior> {
 
     typedef T array_type[N];
     AJG_SYNTH_ADAPTER(array_type)
@@ -32,7 +32,7 @@ struct adapter<Traits, T[N]>
 
     number_type  to_number()  const { return N; }
     boolean_type to_boolean() const { return N != 0; }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_iterator(pointer<0>()); }
@@ -57,9 +57,9 @@ struct adapter<Traits, T[N]>
 // specialization for native arrays of statically unknown size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, T[]>
-    : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, T[]>
+    : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(T const*, adapter);
     // /*const*/ adapted_type adapted_;
@@ -85,7 +85,7 @@ struct adapter<Traits, T[]>
 
     number_type  to_number()  const { return length_; }
     boolean_type to_boolean() const { return length_ != 0; }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return adapted_ + 0; }
@@ -97,17 +97,17 @@ struct adapter<Traits, T[]>
 // specialization for boost::array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T, std::size_t N>
-struct adapter<Traits, array<T, N> > : public adapter<Traits, T[N]> {
+template <class Behavior, class T, std::size_t N>
+struct adapter<Behavior, array<T, N> > : public adapter<Behavior, T[N]> {
     typedef T array_type[N];
-    adapter(array<T, N> const& value) : adapter<Traits, array_type>
+    adapter(array<T, N> const& value) : adapter<Behavior, array_type>
         (*reinterpret_cast<const array_type*>(value.data())) {}
 };
 
 /*
-template <class Traits, class T, std::size_t N>
-struct adapter<Traits, array<T, N> >
-    : public base_adapter<Traits> {
+template <class Behavior, class T, std::size_t N>
+struct adapter<Behavior, array<T, N> >
+    : public base_adapter<Behavior> {
 
     typedef array<T, N> array_type;
     AJG_SYNTH_ADAPTER(array_type)

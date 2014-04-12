@@ -18,15 +18,24 @@
 namespace ajg {
 namespace synth {
 namespace django {
-
+namespace {
 using boost::optional;
+}
 
 template <class Options>
 struct abstract_loader {
-    typedef abstract_loader                     this_type;
-    typedef Options                             options_type;
-    typedef typename options_type::string_type  string_type;
-    typedef typename options_type::library_type library_type;
+  public:
+
+    typedef abstract_loader                                                     abstract_loader_type;
+    typedef Options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::library_type                                 library_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
 
     virtual library_type load_library(string_type const& name) = 0;
 
@@ -35,11 +44,20 @@ struct abstract_loader {
 
 template <class Options>
 struct abstract_resolver {
-    typedef abstract_resolver                     this_type;
-    typedef Options                               options_type;
-    typedef typename options_type::string_type    string_type;
-    typedef typename options_type::context_type   context_type;
-    typedef typename options_type::arguments_type arguments_type;
+  public:
+
+    typedef abstract_resolver                                                   abstract_resolver_type;
+    typedef Options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
 
     virtual optional<string_type> resolve( string_type  const& path
                                          , context_type const& context
@@ -56,20 +74,28 @@ struct abstract_resolver {
 
 template <class Options>
 struct abstract_library {
-    typedef abstract_library                      this_type;
-    typedef Options                               options_type;
-    typedef typename options_type::boolean_type   boolean_type;
-    typedef typename options_type::string_type    string_type;
-    typedef typename options_type::value_type     value_type;
-    typedef typename options_type::context_type   context_type;
-    typedef typename options_type::names_type     names_type;
-    typedef typename options_type::arguments_type arguments_type;
-    typedef typename options_type::tag_type       tag_type;
-    typedef typename options_type::tags_type      tags_type;
-    typedef typename options_type::filter_type    filter_type;
-    typedef typename options_type::filters_type   filters_type;
-    typedef typename options_type::library_type   library_type;
-    typedef typename options_type::libraries_type libraries_type;
+  public:
+
+    typedef abstract_library                                                    abstract_library_type;
+    typedef Options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::names_type                                   names_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+
+    typedef typename options_type::tag_type                                     tag_type;
+    typedef typename options_type::tags_type                                    tags_type;
+    typedef typename options_type::filter_type                                  filter_type;
+    typedef typename options_type::filters_type                                 filters_type;
+    typedef typename options_type::library_type                                 library_type;
+    typedef typename options_type::libraries_type                               libraries_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
 
     virtual boolean_type has_tag(string_type const& name) const    = 0;
     virtual boolean_type has_filter(string_type const& name) const = 0;
@@ -81,6 +107,10 @@ struct abstract_library {
     virtual ~abstract_library() {}
 };
 
+template <class T> struct engine;
+template <class K> struct builtin_tags;
+template <class K> struct builtin_filters;
+template <class E> struct loader;
 
 //
 // options
@@ -88,31 +118,35 @@ struct abstract_library {
 
 template <class Value>
 struct options {
-
   public:
 
     typedef options                                options_type;
     typedef Value                                  value_type;
+
+    typedef typename value_type::behavior_type     behavior_type;
+    typedef typename value_type::range_type        range_type;
+    typedef typename value_type::sequence_type     sequence_type;
+    typedef typename value_type::mapping_type      mapping_type;
     typedef typename value_type::traits_type       traits_type;
+
     typedef typename traits_type::boolean_type     boolean_type;
     typedef typename traits_type::char_type        char_type;
     typedef typename traits_type::size_type        size_type;
     typedef typename traits_type::number_type      number_type;
-    typedef typename traits_type::string_type      string_type;
-    typedef typename traits_type::istream_type     istream_type;
-    typedef typename traits_type::ostream_type     ostream_type;
     typedef typename traits_type::date_type        date_type;
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
-    typedef typename traits_type::range_type       range_type;
-    typedef typename traits_type::sequence_type    sequence_type;
-    typedef typename traits_type::mapping_type     mapping_type;
-    typedef std::map<string_type, value_type>      context_type; // TODO: value_type keys.
-    typedef std::vector<string_type>               names_type;   // TODO: Maybe rename to symbols_type and the latter to scope_type.
-    typedef std::pair<sequence_type, mapping_type> arguments_type;
+    typedef typename traits_type::string_type      string_type;
+    typedef typename traits_type::istream_type     istream_type;
+    typedef typename traits_type::ostream_type     ostream_type;
 
-    typedef std::map<string_type, string_type>     formats_type;
-    typedef std::vector<string_type>               directories_type;
+    typedef std::map<string_type, value_type>      context_type;     // TODO: value_type keys.
+    typedef std::vector<string_type>               names_type;       // TODO: scope_type? namespace_type?
+
+    typedef std::pair<sequence_type, mapping_type> arguments_type;
+    typedef std::map<string_type, string_type>     formats_type;     // TODO: definitions_type?
+    typedef std::vector<string_type>               directories_type; // TODO: Use paths_type
+
     typedef abstract_library<options_type>         abstract_library_type;
     typedef abstract_loader<options_type>          abstract_loader_type;
     typedef abstract_resolver<options_type>        abstract_resolver_type;
@@ -134,17 +168,19 @@ struct options {
     typedef std::vector<loader_type>               loaders_type;
     typedef std::vector<resolver_type>             resolvers_type;
 
-  public:
+  private:
 
-    boolean_type      autoescape;
-    string_type       nonbreaking_space;
-    value_type        default_value;
-    formats_type      formats;
-    boolean_type      debug;
-    directories_type  directories;
-    libraries_type    libraries;
-    loaders_type      loaders;
-    resolvers_type    resolvers;
+    typedef size_type                          marker_type; // FIXME: pair<filename, size_type>
+    typedef std::map<string_type, string_type> blocks_type;
+    typedef std::map<marker_type, size_type>   cycles_type;
+    typedef std::map<marker_type, value_type>  changes_type;
+
+  private:
+
+    template <class T> friend struct django::engine;
+    template <class K> friend struct django::builtin_tags;
+    template <class K> friend struct django::builtin_filters;
+    template <class E> friend struct django::loader;
 
   public:
 
@@ -195,19 +231,24 @@ struct options {
         return formats;
     }
 
+  public:
+
+    boolean_type      autoescape;
+    string_type       nonbreaking_space;
+    value_type        default_value;
+    formats_type      formats;
+    boolean_type      debug;
+    directories_type  directories;
+    libraries_type    libraries;
+    loaders_type      loaders;
+    resolvers_type    resolvers;
+
+  protected:
+
+    tags_type     loaded_tags;
+    filters_type  loaded_filters;
+
   private:
-
-    tags_type         loaded_tags;
-    filters_type      loaded_filters;
-
-    typedef size_type                          marker_type; // FIXME: pair<filename, size_type>
-    typedef std::map<string_type, string_type> blocks_type;
-    typedef std::map<marker_type, size_type>   cycles_type;
-    typedef std::map<marker_type, value_type>  changes_type;
-
-    friend struct engine;
-    template <class> friend struct builtin_tags;
-    template <class> friend struct loader;
 
     blocks_type*  blocks_;
     cycles_type   cycles_;

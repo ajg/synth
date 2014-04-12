@@ -52,10 +52,12 @@ def simple_tmpl_example():
 #include <iostream>
 #include <ajg/synth.hpp>
 
-int main() {
-    using namespace ajg::synth;
+namespace synth = ajg::synth;
 
-    typedef string_template<char, ssi::engine<> > template_type;
+typedef synth::default_traits<char>                                 traits_type;
+typedef synth::string_template<traits_type, synth::ssi::engine<> >  template_type;
+
+int main() {
     template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
     template_type::context_type ctx;
     ctx["user"] = "Dolph Lundgren";
@@ -436,6 +438,7 @@ Future Work
        ~ Custom assignment tags
        ~ Custom tags with arbitrary blocks
      + Full support for `unicode` type (not just through UTF-8)
+     + Set docstrings where appropriate
      + Support for Python 3
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
@@ -469,19 +472,28 @@ Future Work
    * [v2] Create `c++14` type adapters
 
  - Templates:
-   * Create `descriptor_template`
    * Refactor `multi_template` into `base_binding`
+   * Rename `file_template` to `path_template`
+     ~ Rename `render_to_file` to `render_to_path`
+   * Create `descriptor_template` (using `int descriptor`)
+     ~ Add `render_to_descriptor` (using `int descriptor`)
+   * Create new `file_template` (using `FILE* file`)
+     ~ Add `render_to_file` (using `FILE* file`)
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
+   * Move `null_*` components to own folder and namespace
+   * Make documentation comments uniformly `///`
+   * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default
    * Move `render_tag` and `builtin_tags_` to `base_engine::definition`
    * Replace all remaining get_nested uses with s1, s2, ... or named patterns
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
+     + Replace `BOOST_STATIC_CONSTANT` with `static const`
      + Replace `boost::assign` use with aggregate initializers
      + Remove needlessly configurable (especially defaulted) `template` parameters
      + Remove complex redundant `typedef`s in favor of `auto`
@@ -499,6 +511,8 @@ Future Work
    * [v1] Rename `this_type` to `self_type` unless it's actually a pointer
    * [v1] Reformat all operator _()'s to operator_()
    * [v2+] Factor out values & adapters into separate library for generic language interop
+   * [v1+] Remove header guard closing comments
+   * [v1+] Remove namespace closing comments
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

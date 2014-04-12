@@ -13,19 +13,20 @@
 #include <ajg/testing.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/null_engine.hpp>
+#include <ajg/synth/templates/string_template.hpp>
 
 namespace {
 
 namespace s = ajg::synth;
 
-typedef char                                       char_type;
-typedef s::null_engine                             engine_type;
-typedef s::string_template<char_type, engine_type> template_type;
-typedef template_type::context_type                context_type;
-typedef template_type::string_type                 string_type;
-typedef template_type::value_type                  value_type;
-typedef value_type::traits_type                    traits_type;
-typedef ajg::test_group<>                          group_type;
+typedef s::default_traits<char>                                                 traits_type;
+typedef s::null_engine<traits_type>                                             engine_type;
+typedef s::string_template<engine_type>                                         template_type;
+typedef engine_type::context_type                                               context_type;
+typedef engine_type::value_type                                                 value_type;
+typedef traits_type::char_type                                                  char_type;
+typedef traits_type::string_type                                                string_type;
+typedef ajg::test_group<>                                                       group_type;
 
 group_type group_object("adapter");
 

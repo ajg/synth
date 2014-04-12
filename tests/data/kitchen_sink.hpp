@@ -6,29 +6,38 @@
 #define TESTS_DATA_KITCHEN_SINK_HPP_INCLUDED
 
 #include <map>
+#include <deque>
 #include <string>
+#include <vector>
 
-#include <boost/mpl/void.hpp>
 #include <boost/assign/list_of.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
 
 namespace tests {
 namespace data {
-
+namespace {
 using boost::assign::list_of;
+}
 
-template <class Context, class Traits, class Options = boost::mpl::void_>
+template <class Engine>
 struct kitchen_sink {
-    typedef Context                                             context_type;
-    typedef Traits                                              traits_type;
-    typedef Options                                             options_type;
+  public:
+
+    typedef kitchen_sink                                        kitchen_sink_type;
+    typedef Engine                                              engine_type;
+
+    typedef typename engine_type::value_type                    value_type;
+    typedef typename engine_type::traits_type                   traits_type;
+    typedef typename engine_type::context_type                  context_type;
+    typedef typename engine_type::options_type                  options_type;
+
     typedef typename traits_type::string_type                   string_type;
-    typedef typename traits_type::sequence_type                 sequence_type;
     typedef typename traits_type::date_type                     date_type;
     typedef typename traits_type::datetime_type                 datetime_type;
     typedef typename traits_type::duration_type                 duration_type;
-    typedef typename context_type::mapped_type                  value_type;
+
+  public:
 
     kitchen_sink() {
         context[traits_type::literal("foo")] = "A";
@@ -83,11 +92,10 @@ struct kitchen_sink {
         cities[4] = tokyo;
         context[traits_type::literal("cities")] = cities;
 
-        sequence_type
-            list1 = list_of<value_type>(traits_type::literal("Lawrence"))(traits_type::literal("Topeka")),
-            list2 = list_of<value_type>(traits_type::literal("Kansas"))(list1)(traits_type::literal("Illinois1"))(traits_type::literal("Illinois2")),
-            list3 = list_of<value_type>(traits_type::literal("States"))(list2),
-            list4 = list_of<value_type>(traits_type::literal("Parent"))(list3);
+        std::deque<value_type> const list1 = list_of<value_type>(traits_type::literal("Lawrence"))(traits_type::literal("Topeka"));
+        std::deque<value_type> const list2 = list_of<value_type>(traits_type::literal("Kansas"))(list1)(traits_type::literal("Illinois1"))(traits_type::literal("Illinois2"));
+        std::deque<value_type> const list3 = list_of<value_type>(traits_type::literal("States"))(list2);
+        std::deque<value_type> const list4 = list_of<value_type>(traits_type::literal("Parent"))(list3);
         context[traits_type::literal("places")] = list4;
 
         context[traits_type::literal("csrf_token")] = "ABCDEF123456";
@@ -107,10 +115,10 @@ struct kitchen_sink {
         context[traits_type::literal("numbers")] = numbers;
     }
 
-    Context context;
-    Options options;
-    std::map<std::string, std::string> friends[3];
-    std::map<std::string, std::string> cities[5];
+    context_type                        context;
+    options_type                        options;
+    std::map<string_type, std::string>  friends[3];
+    std::map<string_type, std::string>  cities[5];
 }; // kitchen_sink
 
 }} // namespace tests::data

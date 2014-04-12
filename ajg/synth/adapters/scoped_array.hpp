@@ -17,18 +17,18 @@ namespace synth {
 // specialization for boost::scoped_array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, scoped_array<T> >
-    : public adapter<Traits, T[]> {
+template <class Behavior, class T>
+struct adapter<Behavior, scoped_array<T> >
+    : public adapter<Behavior, T[]> {
 
     adapter(scoped_array<T> const& adapted, size_t const length)
-        : adapter<Traits, T[]>(adapted.get(), length) {}
+        : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
 
 /*
-template <class Traits, class T>
-struct adapter<Traits, scoped_array<T> >
-    : public forwarding_adapter<Traits, T[], scoped_array<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, scoped_array<T> >
+    : public forwarding_adapter<Behavior, T[], scoped_array<T> > {
 
     adapter(scoped_array<T> const& adapted, size_t const length)
         : adapted_(adapted), length_(length) {}

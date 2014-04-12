@@ -32,60 +32,91 @@ namespace ajg {
 namespace synth {
 namespace ssi {
 
-using detail::operator ==;
-
-template < class       Environment      = detail::standard_environment
+// TODO: Move these options to options or a traits-like type.
+template < class       Traits
+         , class       Environment      = detail::standard_environment
          , bool        ThrowOnErrors    = false
          , std::size_t MaxRegexCaptures = 9
          >
-struct engine : base_engine {
-
-template <class BidirectionalIterator>
-struct definition : base_engine::definition<BidirectionalIterator, definition<BidirectionalIterator> > {
-  public:
-    // Constants:
-
-    BOOST_STATIC_CONSTANT(bool, throw_on_errors = ThrowOnErrors);
-
+struct engine : base_engine<Traits> {
   public:
 
-    typedef definition                                                          this_type;
-    typedef base_engine::definition<BidirectionalIterator, this_type>           base_type;
-
-    typedef typename base_type::id_type                                         id_type;
-    typedef typename base_type::boolean_type                                    boolean_type;
-    typedef typename base_type::size_type                                       size_type;
-    typedef typename base_type::char_type                                       char_type;
-    typedef typename base_type::match_type                                      match_type;
-    typedef typename base_type::regex_type                                      regex_type;
-    typedef typename base_type::frame_type                                      frame_type;
-    typedef typename base_type::string_type                                     string_type;
-    typedef typename base_type::stream_type                                     stream_type;
-    typedef typename base_type::iterator_type                                   iterator_type;
-    typedef typename base_type::definition_type                                 definition_type;
-    typedef typename base_type::string_regex_type                               string_regex_type;
-    typedef typename base_type::string_match_type                               string_match_type;
-
-    typedef builtin_tags<this_type>                                             builtin_tags_type;
+    typedef engine                                                              engine_type;
+    typedef Traits                                                              traits_type;
     typedef Environment                                                         environment_type;
-    typedef ssi::value<char_type>                                               value_type;
+
+    typedef typename traits_type::void_type                                     void_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+
     typedef std::vector<string_type>                                            whitelist_type;
-    typedef std::vector<value_type>                                             sequence_type;
+    typedef ssi::value<traits_type>                                             value_type;
     typedef std::map<string_type, value_type>                                   context_type;
     typedef options<value_type>                                                 options_type;
-    typedef typename value_type::traits_type                                    traits_type;
 
+    typedef typename value_type::behavior_type                                  behavior_type;
+
+  public:
+
+    BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = ThrowOnErrors);
+    BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = MaxRegexCaptures);
+
+  private:
+
+    template <class K> friend struct ssi::builtin_tags;
+
+  public:
+
+    template <class Iterator>
+    struct kernel;
+
+}; // engine
+
+namespace {
+using detail::operator ==;
+}
+
+template <class T, class E, bool TOE, std::size_t MaxRegexCaptures>
+template <class Iterator>
+struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::template kernel<Iterator> {
+  public:
+
+    typedef kernel                                                              kernel_type;
+    typedef Iterator                                                            iterator_type;
+
+  protected:
+
+    typedef builtin_tags<kernel_type>                                           builtin_tags_type;
+    typedef typename kernel_type::id_type                                       id_type;
+    typedef typename kernel_type::regex_type                                    regex_type;
+    typedef typename kernel_type::match_type                                    match_type;
+    typedef typename kernel_type::string_regex_type                             string_regex_type;
+    typedef typename kernel_type::string_match_type                             string_match_type;
+
+  public:
+
+    typedef match_type                                                          frame_type;
+    typedef engine_type                                                         engine_type;
+
+  private:
+
+    template <class K> friend struct ssi::builtin_tags;
+
+    // TODO: Rename to parameters_type or such to avoid confusion with other kinds of arguments.
     struct args_type {
-        this_type   const& engine;
-        match_type  const& match;
-        context_type&      context;
-        options_type&      options;
-        stream_type&       stream;
+        kernel_type   const& kernel;
+        match_type    const& match;
+        context_type&        context;
+        options_type&        options;
+        ostream_type&        ostream;
     };
 
   public:
 
-    definition()
+    kernel()
         : tag_start (traits_type::literal("<!--#"))
         , tag_end   (traits_type::literal("-->"))
         , environment() {
@@ -154,7 +185,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         or_expression // A (|| B)*
             = primary_expression >> *(*_s >> "||" >> *_s >> expression)
             ;
-        skipper
+        this->skipper
             = as_xpr(tag_start);
             ;
 
@@ -170,7 +201,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                                                        ) const {
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
-        string_type const temp  = extract_attribute(attr(args.engine.quoted_value));
+        string_type const temp  = extract_attribute(attr(args.kernel.quoted_value));
         string_type const name  = boost::algorithm::to_lower_copy(attr(this->name).str());
         string_type const value = interpolate ? this->interpolate(args, temp) : temp;
         return std::make_pair(name, value);
@@ -218,43 +249,43 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         }
     }
 
-    void render( stream_type&        stream
+    void render( ostream_type&       ostream
                , frame_type   const& frame
                , context_type const& context
-               , options_type const& options) const {
+               , options_type const& options
+               ) const {
         // Make a non-const copy so that #set can modify it.
         context_type copy = context;
-        render_block(stream, frame, copy, options);
+        render_block(ostream, frame, copy, options);
     }
 
-    void render_file( stream_type&        stream
+    void render_file( ostream_type&       ostream
                     , string_type  const& filepath
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        typedef file_template<char_type, engine> file_template_type;
-        file_template_type(filepath, options.directories).render(stream, context, options);
+        file_template<engine_type>(filepath, options.directories).render(ostream, context, options);
     }
 
-    void render_text( stream_type&        stream
+    void render_text( ostream_type&       ostream
                     , match_type   const& text
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        stream << text.str();
+        ostream << text.str();
     }
 
-    void render_block( stream_type&        stream
+    void render_block( ostream_type&       ostream
                      , match_type   const& block
                      , context_type const& context
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
-            render_match(stream, nested, context, options);
+            render_match(ostream, nested, context, options);
         }
     }
 
-    void render_tag( stream_type&        stream
+    void render_tag( ostream_type&       ostream
                    , match_type   const& match
                    , context_type const& context
                    , options_type const& options
@@ -269,12 +300,12 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
                 , match_
                 , const_cast<context_type&>(context)
                 , const_cast<options_type&>(options)
-                , const_cast<stream_type&>(stream)
+                , const_cast<ostream_type&>(ostream)
                 };
             tag(args);
         }
         else {
-            throw_exception(missing_tag(traits_type::narrow(traits_type::to_string(id))));
+            throw_exception(std::logic_error("missing built-in tag"));
         }
     }
     catch (std::exception const&) {
@@ -284,25 +315,25 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
         }*/
 
-        stream << options.error_message;
+        ostream << options.error_message;
     }
 
-    void render_match( stream_type&        stream
+    void render_match( ostream_type&       ostream
                      , match_type   const& match
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == this->text)  render_text(stream, match, context, options);
-        else if (match == this->block) render_block(stream, match, context, options);
-        else if (match == this->tag)   render_tag(stream, match, context, options);
+             if (match == this->text)  render_text(ostream, match, context, options);
+        else if (match == this->block) render_block(ostream, match, context, options);
+        else if (match == this->tag)   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
-    /// Creates a regex object to parse a full SSI tag ("directive").
+    /// Creates a regex instance to parse a full SSI tag ("directive").
     /// Meaning: tag_start name attribute* tag_end
     ///
     /// \param  name The identifier that follows the tag_start.
-    /// \return A regex object that can match an entire tag.
+    /// \return A `regex_type` instance that can match an entire tag.
     /// \pre    name is a valid identifier, character-wise.
     /// \post   The name is stored in s1.
 
@@ -317,7 +348,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
         string_regex_type const pattern = string_regex_type::compile(right);
 
         for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
-            args.context.erase(traits_type::to_string(i));
+            args.context.erase(behavior_type::to_string(i));
         }
 
         string_match_type match;
@@ -325,7 +356,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
             std::size_t const limit = (std::min)(match.size(), MaxRegexCaptures);
 
             for (std::size_t i = 0; i <= limit; ++i) {
-                string_type const key = traits_type::to_string(i);
+                string_type const key = behavior_type::to_string(i);
                 args.context.insert(std::make_pair(key, match[i].str()));
             }
         }
@@ -359,7 +390,7 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     template <class Args, class Match, class Initial, class Functor>
     Initial fold(Args const& args, Match const& match, Initial initial, Functor const& functor) const {
         BOOST_FOREACH(string_match_type const& operand, match.nested_results()) {
-            initial = functor(initial, args.engine.evaluate_expression(args, operand));
+            initial = functor(initial, args.kernel.evaluate_expression(args, operand));
         }
 
         return initial;
@@ -368,9 +399,9 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     string_type parse_string(args_type const& args, string_match_type const& match) const {
         string_match_type const& string = get_nested<A>(match);
         if (string == raw_string)           return match.str();
-        if (string == regex_expression)     return args.engine.extract_attribute(match);
-        if (string == args.engine.variable) return args.engine.interpolate(args, match.str());
-        if (string == quoted_string)        return args.engine.interpolate(args, args.engine.extract_attribute(match));
+        if (string == regex_expression)     return args.kernel.extract_attribute(match);
+        if (string == args.kernel.variable) return args.kernel.interpolate(args, match.str());
+        if (string == quoted_string)        return args.kernel.interpolate(args, args.kernel.extract_attribute(match));
         throw_exception(std::logic_error("invalid string"));
     }
 
@@ -387,52 +418,52 @@ struct definition : base_engine::definition<BidirectionalIterator, definition<Bi
     }
 
     string_type interpolate(args_type const& args, string_type const& string) const {
-        typedef typename base_type::string_match_type match_type;
-        boost::function<string_type(match_type const&)> const formatter =
+        boost::function<string_type(string_match_type const&)> const formatter =
             boost::bind(replace_variable, boost::cref(args), _1);
         return xpressive::regex_replace(string, variable, formatter);
     }
 
   private:
 
-    static string_type replace_variable(args_type const& args,
-            typename base_type::string_match_type const& match) {
+    static string_type replace_variable(args_type const& args, string_match_type const& match) {
         return match.str() == traits_type::literal("\\$") ? traits_type::literal("$") :
-            args.engine.lookup_variable(args.context, args.options, match[xpressive::s1].str());
+            args.kernel.lookup_variable(args.context, args.options, match[xpressive::s1].str());
     }
 
   public:
 
+    // TODO: Move these out of the kernel.
     string_type const tag_start;
     string_type const tag_end;
-
-  public:
 
     environment_type const environment;
     options_type     const default_options;
 
   private:
 
-    template <class E> friend struct ssi::builtin_tags;
-    friend struct base_engine;
-
-    regex_type tag, text, block, skipper;
-    regex_type name, attribute, quoted_value;
+    regex_type name;
+    regex_type attribute;
+    regex_type quoted_value;
 
     string_regex_type variable;
-    string_regex_type raw_string, quoted_string;
-    string_regex_type expression, primary_expression, not_expression;
-    string_regex_type and_expression, or_expression, comparison_expression;
-    string_regex_type string_expression, regex_expression, comparison_operator;
+    string_regex_type raw_string;
+    string_regex_type quoted_string;
+    string_regex_type expression;
+    string_regex_type primary_expression;
+    string_regex_type not_expression;
+    string_regex_type and_expression;
+    string_regex_type or_expression;
+    string_regex_type comparison_expression;
+    string_regex_type string_expression;
+    string_regex_type regex_expression;
+    string_regex_type comparison_operator;
 
   private:
 
     whitelist_type    whitelist_;
     builtin_tags_type builtin_tags_;
 
-}; // definition
-
-}; // engine
+}; // kernel
 
 }}} // namespace ajg::synth::ssi
 

@@ -5,48 +5,43 @@
 #ifndef AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
 
-#include <istream>
-
-#include <boost/mpl/identity.hpp>
-#include <boost/utility/base_from_member.hpp>
-
 #include <ajg/synth/templates/detail.hpp>
 #include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
 namespace synth {
 
-template < class Char
-         , class Engine
-         , class Stream   = std::basic_istream<Char>
-         , class Iterator = typename detail::bidirectional_input_stream<Stream>::iterator
-         >
-struct stream_template
-    : private boost::base_from_member<detail::bidirectional_input_stream<Stream> >
-    , public base_template<Engine, Iterator> {
+template <class Engine>
+struct stream_template : base_template<Engine,
+      typename detail::bidirectional_input_stream<
+          typename Engine::traits_type::istream_type>::iterator> {
 
   public:
 
-    typedef Stream   stream_type;
-    typedef Iterator iterator_type;
+    typedef stream_template                                                     template_type;
+    typedef Engine                                                              engine_type;
+    typedef typename engine_type::traits_type                                   traits_type;
+    typedef typename traits_type::istream_type                                  istream_type;
 
   private:
 
-    typedef detail::bidirectional_input_stream<stream_type>                     input_stream_type;
-    typedef boost::base_from_member<input_stream_type>                          base_member_type;
-    typedef base_template<Engine, iterator_type>                                base_type;
+    typedef detail::bidirectional_input_stream<istream_type>                    bidi_istream_type;
 
   public:
 
-    stream_template(stream_type& stream)
-        : base_member_type(input_stream_type(stream))
-        , base_type(base_member_type::member.begin(), base_member_type::member.end()) {}
-};
+    stream_template(istream_type& istream) : istream_(istream), bidi_istream_(istream_) {
+        this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end());
+    }
 
-template < class Char
-         , class Engine
-         >
-struct stream_template_identity : boost::mpl::identity<stream_template<Char, Engine> > {};
+  public:
+
+    istream_type const& stream() const { return this->istream_; }
+
+  private:
+
+    istream_type&     istream_;
+    bidi_istream_type bidi_istream_;
+};
 
 }} // namespace ajg::synth
 

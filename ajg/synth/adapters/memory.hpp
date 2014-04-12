@@ -17,9 +17,9 @@ namespace synth {
 // specialization for std::auto_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, std::auto_ptr<T> >
-    : public forwarding_adapter<Traits, T, std::auto_ptr<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, std::auto_ptr<T> >
+    : public forwarding_adapter<Behavior, T, std::auto_ptr<T> > {
 
     adapter(std::auto_ptr<T> const& adapted) : adapted_(adapted) {}
     std::auto_ptr<T> const& adapted_;

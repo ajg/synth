@@ -16,9 +16,9 @@ namespace synth {
 // specialization for boost::posix_time::ptime
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits>
-struct adapter<Traits, boost::posix_time::ptime>
-    : public base_adapter<Traits> {
+template <class Behavior>
+struct adapter<Behavior, boost::posix_time::ptime>
+    : public base_adapter<Behavior> {
 
     typedef boost::posix_time::ptime ptime_type;
     AJG_SYNTH_ADAPTER(ptime_type)

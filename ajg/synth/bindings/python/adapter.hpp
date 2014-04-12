@@ -24,9 +24,9 @@ namespace d = synth::python::detail;
 // specialization for boost::python::object
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits>
-struct adapter<Traits, py::object>
-    : public base_adapter<Traits> {
+template <class Behavior>
+struct adapter<Behavior, py::object>
+    : public base_adapter<Behavior> {
 
     typedef py::object object_type;
     AJG_SYNTH_ADAPTER(object_type)

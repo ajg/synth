@@ -19,9 +19,9 @@ namespace synth {
 // specialization for std::pair
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class First, class Second>
-struct adapter<Traits, std::pair<First, Second> >
-    : public base_adapter<Traits> {
+template <class Behavior, class First, class Second>
+struct adapter<Behavior, std::pair<First, Second> >
+    : public base_adapter<Behavior> {
 
     typedef std::pair<First, Second> pair_type;
     typedef variant<First, Second> variant_type;
@@ -32,7 +32,7 @@ struct adapter<Traits, std::pair<First, Second> >
     // A pair can never be 'false', since its
     // 'length' is always non-zero (i.e. two.)
     boolean_type to_boolean() const { return true; }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out, traits_type::literal(": ")); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out, traits_type::literal(": ")); }
     boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_pair_iterator(adapted_, first); }

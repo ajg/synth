@@ -16,9 +16,9 @@ namespace synth {
 // specialization for std::deque
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, std::deque<T> >
-    : public base_adapter<Traits> {
+template <class Behavior, class T>
+struct adapter<Behavior, std::deque<T> >
+    : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER(std::deque<T>)
     adapted_type adapted_;
@@ -26,7 +26,7 @@ struct adapter<Traits, std::deque<T> >
   public:
 
     boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { traits_type::adapter_traits::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
 
     iterator begin() { return iterator(adapted_.begin()); }
     iterator end()   { return iterator(adapted_.end()); }

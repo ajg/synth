@@ -18,6 +18,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 
@@ -26,36 +27,41 @@ namespace synth {
 
 using boost::throw_exception;
 
-template < class Engine
-         , class Iterator
-         >
+template <class Engine, class Iterator>
 struct base_template : boost::noncopyable {
+  protected:
+
+    typedef base_template                                                       template_type;
+    typedef Engine                                                              engine_type;
+    typedef Iterator                                                            iterator_type;
+    typedef typename engine_type::template kernel<iterator_type>                kernel_type;
+    typedef boost::scoped_ptr<kernel_type const>                                local_kernel_type;
+
   public:
 
-    typedef typename Engine::template definition<Iterator>                      engine_type;
-    typedef typename engine_type::boolean_type                                  boolean_type;
-    typedef typename engine_type::char_type                                     char_type;
-    typedef typename engine_type::size_type                                     size_type;
-    typedef typename engine_type::sequence_type                                 sequence_type;
+    typedef typename kernel_type::range_type                                    range_type;
+    typedef typename kernel_type::frame_type                                    frame_type;
+
     typedef typename engine_type::value_type                                    value_type;
-    typedef typename engine_type::string_type                                   string_type;
-    typedef typename engine_type::stream_type                                   stream_type;
-    typedef typename engine_type::frame_type                                    frame_type;
     typedef typename engine_type::context_type                                  context_type;
     typedef typename engine_type::options_type                                  options_type;
-    typedef typename engine_type::iterator_type                                 iterator_type;
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef std::pair<iterator_type, iterator_type>                             range_type;
+    typedef typename engine_type::traits_type                                   traits_type;
 
-  public:
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::istream_type                                  istream_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::path_type                                     path_type;
+    typedef typename traits_type::paths_type                                    paths_type;
 
-    base_template( iterator_type const& begin
-                 , iterator_type const& end
-                 , boolean_type  const  parse = true
-                 )
-            : engine_(&shared_engine()), range_(begin, end) {
-        if (parse) engine_->parse(range_.first, range_.second, frame_);
-    }
+
+  protected:
+
+    base_template() : kernel_(&shared_kernel()) {}
+    base_template(range_type const& range) : kernel_(&shared_kernel()) { this->reset(range); }
+    base_template(iterator_type const& begin, iterator_type const& end) : kernel_(&shared_kernel()) { this->reset(begin, end); }
 
   public:
 
@@ -63,11 +69,11 @@ struct base_template : boost::noncopyable {
 // render
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void render( stream_type&        stream
+    void render( ostream_type&       stream
                , context_type const& context = context_type()
                , options_type const& options = options_type()
                ) const {
-        engine_->render(stream, frame_, context, options);
+        kernel_->render(stream, frame_, context, options);
     }
 
 //
@@ -78,102 +84,69 @@ struct base_template : boost::noncopyable {
                                 , options_type const& options = options_type()
                                 ) const {
         std::basic_ostringstream<char_type> stream;
-        engine_->render(stream, frame_, context, options);
+        kernel_->render(stream, frame_, context, options);
         return stream.str();
     }
 
-    void render_to_file( string_type  const& filepath
+    void render_to_file( path_type    const& path
                        , context_type const& context = context_type()
                        , options_type const& options = options_type()
                        ) const {
-        std::string const path = traits_type::narrow(filepath);
+        std::string const narrow_path = traits_type::narrow(path);
         std::basic_ofstream<char_type> file;
 
         try {
-            file.open(path.c_str(), std::ios::binary);
+            file.open(narrow_path.c_str(), std::ios::binary);
         }
         catch (std::exception const& e) {
-            throw_exception(file_error(path, "write", e.what()));
+            throw_exception(file_error(narrow_path, "write", e.what()));
         }
 
-        engine_->render(file, frame_, context, options);
+        kernel_->render(file, this->frame_, context, options);
     }
 
-    range_type& range() const { return range_; }
-
-    string_type text() const {
-        return string_type(range_.first, range_.second);
-    }
+    range_type const& range() const { return this->range_; }
+    string_type       text()  const { return string_type(this->range_.first, this->range_.second); }
 
   private:
 
-    inline static engine_type& shared_engine() {
-        static engine_type engine;
-        return engine;
+    inline static kernel_type const& shared_kernel() {
+        static kernel_type const kernel;
+        return kernel;
     }
 
     /*
     void mutate_locally() {
-        if (!local_engine_) {
-            local_engine_.reset(new engine_type(shared_engine()));
-            std::swap(engine_, local_engine_.get());
+        if (!local_kernel_) {
+            local_kernel_.reset(new kernel_type(shared_kernel()));
+            std::swap(kernel_, local_kernel_.get());
         }
     }
     */
 
+  protected:
+
+    inline void reset() {
+        this->range_ = range_type();
+        this->frame_ = frame_type();
+    }
+
+    inline void reset(range_type const& range) {
+        this->range_ = range;
+        kernel_->parse(this->range_.first, this->range_.second, this->frame_);
+    }
+
+    inline void reset(iterator_type const& begin, iterator_type const& end) {
+        this->reset(range_type(begin, end));
+    }
+
   private:
 
-    boost::scoped_ptr<engine_type>      local_engine_;
-    engine_type*                        engine_;
-    frame_type                          frame_;
-    range_type                          range_;
+    local_kernel_type   local_kernel_;
+    kernel_type const*  kernel_;
+    frame_type          frame_;
+    range_type          range_;
 };
-
-
-#if AJG_SYNTH_OBSOLETE
-
-template <class Char>
-std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
-    std::string const path = traits_type::narrow(filepath);
-    std::basic_ifstream<Char> file;
-
-    try {
-        file.open(path.c_str(), std::ios::binary);
-        return read_stream<std::basic_string<Char> >(file);
-    }
-    catch (std::exception const& e) {
-        throw_exception(file_error(path, "read", e.what()));
-    }
-}
-
-template <class String, class Stream>
-inline String read_stream
-        ( Stream& stream
-        , optional<typename Stream::size_type> const size = none
-        ) {
-    BOOST_STATIC_CONSTANT(typename String::size_type, buffer_size = 4096);
-
-    if (!stream.good()) {
-        throw_exception(std::runtime_error("bad stream"));
-    }
-
-    String result;
-    if (size) result.reserve(*size);
-    typename String::value_type buffer[buffer_size];
-
-    while (!stream.eof()) {
-        stream.read(buffer, buffer_size);
-        result.append(buffer, stream.gcount());
-    }
-
-    if (stream.bad()) {
-        throw_exception(std::runtime_error("bad stream"));
-    }
-
-    return result;
-}
-
-#endif // AJG_SYNTH_OBSOLETE
 
 }} // namespace ajg::synth
 

@@ -17,18 +17,18 @@ namespace synth {
 // specialization for boost::shared_array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, shared_array<T> >
-    : public adapter<Traits, T[]> {
+template <class Behavior, class T>
+struct adapter<Behavior, shared_array<T> >
+    : public adapter<Behavior, T[]> {
 
     adapter(shared_array<T> const& adapted, size_t const length)
-        : adapter<Traits, T[]>(adapted.get(), length) {}
+        : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
 
 /*
-template <class Traits, class T>
-struct adapter<Traits, shared_array<T> >
-    : public forwarding_adapter<Traits, T[], shared_array<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, shared_array<T> >
+    : public forwarding_adapter<Behavior, T[], shared_array<T> > {
 
     adapter(shared_array<T> const& adapted, size_t const length)
         : adapted_(adapted), length_(length) {}

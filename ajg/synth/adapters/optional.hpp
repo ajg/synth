@@ -17,9 +17,9 @@ namespace synth {
 // specialization for boost::optional
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class T>
-struct adapter<Traits, optional<T> >
-    : public forwarding_adapter<Traits, T, optional<T> > {
+template <class Behavior, class T>
+struct adapter<Behavior, optional<T> >
+    : public forwarding_adapter<Behavior, T, optional<T> > {
 
     adapter(optional<T> const& adapted) : adapted_(adapted) {}
     optional<T> adapted_;

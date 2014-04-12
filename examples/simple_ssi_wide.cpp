@@ -2,10 +2,14 @@
 #include <iostream>
 #include <ajg/synth.hpp>
 
-int wmain() {
-    using namespace ajg::synth;
+namespace synth = ajg::synth;
 
-    typedef string_template<wchar_t, ssi::engine<> > template_type;
+#ifndef AJG_SYNTH_NO_WCHAR_T
+
+typedef synth::default_traits<wchar_t>                              traits_type;
+typedef synth::string_template<traits_type, synth::ssi::engine<> >  template_type;
+
+int wmain() {
     template_type const tpl(L"Howdy, <!--#echo var=\"user\" -->!");
     template_type::context_type ctx;
     ctx[L"user"] = L"Dolph Lundgren";
@@ -16,3 +20,5 @@ int wmain() {
     std::wcout << tpl.render_to_string(ctx);
     return 0;
 }
+
+#endif

@@ -19,9 +19,9 @@ namespace synth {
 // specialization for boost::property_tree::basic_ptree
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class K, class V>
-struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
-    : public base_adapter<Traits> {
+template <class Behavior, class K, class V>
+struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >
+    : public base_adapter<Behavior> {
 
     typedef K                                              key_type;
     typedef boost::property_tree::basic_ptree<key_type, V> ptree_type;
@@ -44,7 +44,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
             out << value_type(adapted_.data());
         }
         else {
-            traits_type::adapter_traits::enumerate(*this, out);
+            behavior_type::enumerate(*this, out);
         }
     }
 
@@ -55,7 +55,7 @@ struct adapter<Traits, boost::property_tree::basic_ptree<K, V> >
     const_iterator end()   const { return const_iterator(adapted_.end()); }
 
     optional<value_type> index(value_type const& what) const {
-        key_type const key = traits_type::template to<key_type>(what);
+        key_type const key = behavior_type::template to<key_type>(what);
         typename ptree_type::const_assoc_iterator const it = adapted_.find(key);
         if (it == adapted_.not_found()) {
             return boost::none;

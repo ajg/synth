@@ -25,8 +25,8 @@ namespace synth {
 //     Base adapter implementation for primitive numeric types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits, class Numeric>
-struct numeric_adapter : public base_adapter<Traits> {
+template <class Behavior, class Numeric>
+struct numeric_adapter : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Numeric, numeric_adapter);
     adapted_type /*const*/ adapted_;

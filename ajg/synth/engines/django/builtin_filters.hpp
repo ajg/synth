@@ -70,27 +70,33 @@ namespace algo = boost::algorithm;
 
 } // namespace
 
-template <class Engine>
+template <class Kernel>
 struct builtin_filters {
   public:
 
-    typedef Engine                                                              engine_type;
+    typedef Kernel                                                              kernel_type;
+    typedef typename kernel_type::engine_type                                   engine_type;
     typedef typename engine_type::options_type                                  options_type;
-    typedef typename options_type::traits_type                                  traits_type;
-    typedef typename options_type::boolean_type                                 boolean_type;
-    typedef typename options_type::char_type                                    char_type;
-    typedef typename options_type::size_type                                    size_type;
-    typedef typename options_type::number_type                                  number_type;
-    typedef typename options_type::datetime_type                                datetime_type;
-    typedef typename options_type::duration_type                                duration_type;
-    typedef typename options_type::string_type                                  string_type;
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::range_type                                   range_type;
-    typedef typename options_type::sequence_type                                sequence_type;
+    typedef typename engine_type::value_type                                    value_type;
+
+    typedef typename value_type::behavior_type                                  behavior_type;
+    typedef typename value_type::range_type                                     range_type;
+    typedef typename value_type::sequence_type                                  sequence_type;
+    typedef typename value_type::mapping_type                                   mapping_type;
+    typedef typename value_type::traits_type                                    traits_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::string_type                                   string_type;
+
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
-    typedef value_type (*filter_type)( engine_type    const&
+    typedef value_type (*filter_type)( kernel_type    const&
                                      , value_type     const&
                                      , arguments_type const&
                                      , context_type   const&
@@ -101,13 +107,14 @@ struct builtin_filters {
 
     typedef boost::basic_format<char_type>                                      format_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
-    typedef typename engine_type::string_regex_type                             string_regex_type;
+    typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename string_type::const_iterator                                string_iterator_type;
     typedef xpressive::regex_token_iterator<string_iterator_type>               regex_iterator_type;
     typedef typename regex_iterator_type::value_type                            sub_match_type;
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
-    typedef formatter<options_type>                                             formatter_type;
+    typedef django::formatter<options_type>                                     formatter_type;
+    typedef std::map<string_type, filter_type>                                  filters_type;
 
   private:
 
@@ -121,7 +128,7 @@ struct builtin_filters {
 
     inline static filter_type get(string_type const& name) {
         // TODO: Consider replacing with fastmatch.h switch or unordered_map.
-        static std::map<string_type, filter_type> const filters = boost::assign::map_list_of
+        static filters_type const filters = boost::assign::map_list_of
             (traits_type::literal("add"),                add_filter::process)
             (traits_type::literal("addslashes"),         addslashes_filter::process)
             (traits_type::literal("capfirst"),           capfirst_filter::process)
@@ -190,7 +197,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct add_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -206,7 +213,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct addslashes_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -245,7 +252,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct capfirst_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -263,7 +270,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct center_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -289,7 +296,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct cut_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -307,7 +314,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct date_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -325,7 +332,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct default_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -341,7 +348,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct default_if_none_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -357,7 +364,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct dictsort_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -373,7 +380,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct dictsortreversed_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -389,7 +396,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct divisibleby_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -407,7 +414,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct escape_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -423,7 +430,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct escapejs_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -446,7 +453,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct filesizeformat_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -464,7 +471,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct first_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -481,7 +488,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct fix_ampersands_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -498,7 +505,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct floatformat_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -524,7 +531,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct force_escape_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -540,7 +547,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct get_digit_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -553,9 +560,9 @@ struct builtin_filters {
                 integer_type const integer  = static_cast<integer_type>(number);
 
                 if (position > 0) {
-                    // TODO: Use detail::is_integerl.
+                    // TODO: Use detail::is_integer.
                     if (number == integer && integer >= 1) { // Ensure the number operated on is whole.
-                        string_type const text     = traits_type::to_string(integer);
+                        string_type const text     = behavior_type::to_string(integer);
 						size_type   const distance = static_cast<size_type>(position);
 
 						if (distance <= text.length()) {
@@ -576,7 +583,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct iriencode_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -592,7 +599,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct join_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -620,7 +627,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct last_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -637,7 +644,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct length_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -653,7 +660,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct length_is_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -669,7 +676,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct linebreaks_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -680,14 +687,14 @@ struct builtin_filters {
             static string_regex_type const newlines = _ln >> +_ln;
 
             string_stream_type stream;
-            string_type const input = regex_replace(value.to_string(), newline, engine.newline);
+            string_type const input = regex_replace(value.to_string(), newline, kernel.newline);
 
             regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
             boolean_type const safe = !options.autoescape || value.safe();
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type p = safe ? value_type(line).escape().to_string() : line;
-                algo::replace_all(p, engine.newline, traits_type::literal("<br />"));
+                algo::replace_all(p, kernel.newline, traits_type::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -700,7 +707,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct linebreaksbr_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -708,7 +715,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
             string_type const text = algo::replace_all_copy(value.to_string(),
-                engine.newline, traits_type::literal("<br />"));
+                kernel.newline, traits_type::literal("<br />"));
             return value_type(text).mark_safe();
         }
     };
@@ -718,7 +725,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct linenumbers_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -734,7 +741,7 @@ struct builtin_filters {
 
             algo::split(lines, input, algo::is_any_of("\n"));
 
-            size_type   const width = traits_type::to_string(lines.size()).size();
+            size_type   const width = behavior_type::to_string(lines.size()).size();
             string_type const spec  = (format_type(pattern) % width).str();
 
             size_type i = 1;
@@ -752,7 +759,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct ljust_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -772,7 +779,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct lower_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -789,7 +796,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct make_list_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -815,7 +822,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct phone2numeric_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -849,7 +856,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct pluralize_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -858,7 +865,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
-                engine.template split_argument<','>(arguments.first[0], context, options);
+                kernel.template split_argument<','>(arguments.first[0], context, options);
 
             switch (args.size()) {
             case 0: plural = traits_type::literal("s");           break;
@@ -877,7 +884,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct pprint_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -895,7 +902,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct random_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -917,7 +924,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct removetags_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -929,7 +936,7 @@ struct builtin_filters {
             int (*predicate)(int) = std::isspace;
             string_type const source = arguments.first[0].to_string();
             algo::split(tags, source, predicate);
-            return regex_replace(value.to_string(), engine.html_tag, format);
+            return regex_replace(value.to_string(), kernel.html_tag, format);
         }
 
       private:
@@ -950,7 +957,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct rjust_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -970,7 +977,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct safe_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -988,7 +995,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct safeseq_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1011,7 +1018,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct slice_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1020,7 +1027,7 @@ struct builtin_filters {
             detail::with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
-                engine.template split_argument<':'>(arguments.first[0], context, options);
+                kernel.template split_argument<':'>(arguments.first[0], context, options);
             if (args.size() < 2) throw_exception(missing_argument());
 
             sequence_type result;
@@ -1040,7 +1047,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct slugify_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1065,7 +1072,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct stringformat_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1082,7 +1089,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct striptags_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1099,7 +1106,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct time_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1117,7 +1124,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct timesince_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1135,7 +1142,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct timeuntil_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1153,7 +1160,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct title_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1176,7 +1183,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct truncatechars_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1186,12 +1193,12 @@ struct builtin_filters {
 			size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
-            size_type   const ellip = engine.ellipsis.length();
+            size_type   const ellip = kernel.ellipsis.length();
             string_type const text  = value.to_string();
 
             if (text.length() > limit) {
                 size_type const trunc = ellip < limit ? limit - ellip : 0;
-                return text.substr(0, trunc) + engine.ellipsis;
+                return text.substr(0, trunc) + kernel.ellipsis;
             }
             else {
                 return text;
@@ -1204,7 +1211,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct truncatechars_html_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1214,12 +1221,12 @@ struct builtin_filters {
 			size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
-            size_type   const ellip = engine.ellipsis.length();
+            size_type   const ellip = kernel.ellipsis.length();
             string_type const input = value.to_string();
             string_stream_type stream;
 
             string_iterator_type last = input.begin(), done = input.end();
-            regex_iterator_type begin(last, done, engine.html_tag), end;
+            regex_iterator_type begin(last, done, kernel.html_tag), end;
             std::stack<string_type> open_tags;
             size_type length = 0;
             static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
@@ -1234,7 +1241,7 @@ struct builtin_filters {
 
                 if ((length += text.length()) > limit) {
                     size_type const trunc = current + ellip < limit ? limit - (current + ellip) : 0;
-                    stream << text.substr(0, trunc) + engine.ellipsis;
+                    stream << text.substr(0, trunc) + kernel.ellipsis;
                     break;
                 }
                 else {
@@ -1256,7 +1263,7 @@ struct builtin_filters {
 
                 if ((length += text.length()) > limit) {
                     size_type const trunc = ellip < limit ? limit - ellip : 0;
-                    stream << text.substr(0, trunc) + engine.ellipsis;
+                    stream << text.substr(0, trunc) + kernel.ellipsis;
                 }
                 else {
                     stream << text;
@@ -1277,7 +1284,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct truncatewords_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1289,7 +1296,7 @@ struct builtin_filters {
             size_type count = 0;
             string_stream_type stream;
 
-            process_words(stream, text.begin(), text.end(), count, limit, engine.ellipsis);
+            process_words(stream, text.begin(), text.end(), count, limit, kernel.ellipsis);
             return stream.str();
         }
 
@@ -1325,7 +1332,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct truncatewords_html_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1340,7 +1347,7 @@ struct builtin_filters {
             string_stream_type stream;
             string_type const input = value.to_string();
             string_iterator_type last = input.begin(), done = input.end();
-            regex_iterator_type begin(last, done, engine.html_tag), end;
+            regex_iterator_type begin(last, done, kernel.html_tag), end;
             std::stack<string_type> open_tags;
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
@@ -1348,7 +1355,7 @@ struct builtin_filters {
                 string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
                 string_iterator_type const prev = last; last = match.second;
 
-                if (!process_words(stream, prev, match.first, count, limit, engine.ellipsis) || count >= limit) {
+                if (!process_words(stream, prev, match.first, count, limit, kernel.ellipsis) || count >= limit) {
                     break;
                 }
                 stream << tag;
@@ -1363,7 +1370,7 @@ struct builtin_filters {
                 }
             }
 
-            if (!process_words(stream, last, done, count, limit, engine.ellipsis) || count >= limit) {
+            if (!process_words(stream, last, done, count, limit, kernel.ellipsis) || count >= limit) {
                 while (!open_tags.empty()) {
                     stream << "</" << open_tags.top() << ">";
                     open_tags.pop();
@@ -1413,7 +1420,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct unordered_list_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1421,8 +1428,8 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
             string_stream_type stream;
-            value.safe() ? push_item<true>(value, engine, 0, stream)
-                         : push_item<false>(value, engine, 0, stream);
+            value.safe() ? push_item<true>(value, kernel, 0, stream)
+                         : push_item<false>(value, kernel, 0, stream);
             return value_type(stream.str()).mark_safe();
         }
 
@@ -1430,7 +1437,7 @@ struct builtin_filters {
 
         template <boolean_type Safe, class Stream>
         inline static void push_item( value_type  const& item
-                                    , engine_type const& engine
+                                    , kernel_type const& kernel
                                     , size_type   const  level
                                     , Stream&            out
                                     ) {
@@ -1448,7 +1455,7 @@ struct builtin_filters {
 
                             if (!next.is_string() && next.is_iterable()) {
                                 out << std::endl << indent << "<ul>" << std::endl;
-                                push_item<Safe>(next, engine, level + 1, out);
+                                push_item<Safe>(next, kernel, level + 1, out);
                                 out << indent << "</ul>" << std::endl << indent;
                             }
                             else {
@@ -1474,7 +1481,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct upper_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1490,7 +1497,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct urlencode_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1506,14 +1513,14 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct urlize_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
-            return urlize(value, (std::numeric_limits<size_type>::max)(), engine.ellipsis);
+            return urlize(value, (std::numeric_limits<size_type>::max)(), kernel.ellipsis);
         }
 
       private:
@@ -1553,14 +1560,14 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct urlizetrunc_filter : urlize_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
-            return urlize_filter::urlize(value, arguments.first[0].to_size(), engine.ellipsis);
+            return urlize_filter::urlize(value, arguments.first[0].to_size(), kernel.ellipsis);
         }
     };
 
@@ -1569,7 +1576,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct wordcount_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1587,7 +1594,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct wordwrap_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1596,7 +1603,7 @@ struct builtin_filters {
             detail::with_arity<1>::validate(arguments.first.size());
             size_type   const width = arguments.first[0].to_size();
             string_type const text  = value.to_string();
-            return wrap(text, width, engine.newline);
+            return wrap(text, width, kernel.newline);
         }
 
       private:
@@ -1634,7 +1641,7 @@ struct builtin_filters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct yesno_filter {
-        inline static value_type process( engine_type    const& engine
+        inline static value_type process( kernel_type    const& kernel
                                         , value_type     const& value
                                         , arguments_type const& arguments
                                         , context_type   const& context
@@ -1642,7 +1649,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
             sequence_type const args =
-                engine.template split_argument<','>(arguments.first[0], context, options);
+                kernel.template split_argument<','>(arguments.first[0], context, options);
 
             switch (args.size()) {
             case 0:

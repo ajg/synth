@@ -24,36 +24,35 @@ namespace synth {
 using boost::optional;
 using boost::throw_exception;
 
-template <class Traits, class Adapted>
+template <class Behavior, class Adapted>
 struct adapter;
 
 //
 // base_adapter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Traits>
+template <class Behavior>
 struct base_adapter {
   public:
 
-    typedef base_adapter                            base_type;
-    typedef Traits                                  traits_type;
+    typedef Behavior                                                            behavior_type;
+    typedef base_adapter                                                        base_type;
+    typedef typename behavior_type::traits_type                                 traits_type;
+    typedef typename behavior_type::value_type                                  value_type;
 
-    typedef typename traits_type::char_type         char_type;
-    typedef typename traits_type::size_type         size_type;
-    typedef typename traits_type::value_type        value_type;
-    typedef typename traits_type::boolean_type      boolean_type;
-    typedef typename traits_type::number_type       number_type;
-    typedef typename traits_type::string_type       string_type;
-    typedef typename traits_type::datetime_type     datetime_type;
-    typedef typename traits_type::duration_type     duration_type;
-    typedef typename traits_type::istream_type      istream_type;
-    typedef typename traits_type::ostream_type      ostream_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::istream_type                                  istream_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef typename traits_type::iterator          iterator;
-    typedef typename traits_type::const_iterator    const_iterator;
-
- // typedef value_iterator<value_type const>        iterator;
- // typedef value_iterator<value_type const>        const_iterator;
+    typedef typename value_type::iterator                                       iterator;
+    typedef typename value_type::const_iterator                                 const_iterator;
+    typedef typename value_type::range_type                                     range_type;
 
   public:
 
@@ -71,7 +70,7 @@ struct base_adapter {
     virtual number_type   to_number()   const { AJG_SYNTH_THROW(bad_method("to_number")); }
     virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(bad_method("to_boolean")); }
     virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(bad_method("to_datetime")); }
-    virtual string_type   to_string()   const { return traits_type::adapter_traits::to_string(*this); }
+    virtual string_type   to_string()   const { return behavior_type::to_string(*this); }
 
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
@@ -85,16 +84,16 @@ struct base_adapter {
 
   private:
 
-    template <class T, class A>                   friend struct synth::adapter;
-    template <class T, class _, class A, class D> friend struct forwarding_adapter;
-    template <class C, class V, class T>          friend struct value_facade;
+    template <class T, class A>                    friend struct synth::adapter;
+    template <class T, class _, class A, class D>  friend struct forwarding_adapter;
+    template <class T, template <class> class V>   friend struct value_facade;
 
     template <class Adapter> // TODO: Deal with forwarding_adapters.
     inline Adapter const* get() const { return dynamic_cast<Adapter const*>(this); }
 
     template <class T> // TODO: Deal with forwarding_adapters.
     inline T const& get_adapted() const {
-        typedef synth::adapter<Traits, T> concrete_adapter_type;
+        typedef synth::adapter<Behavior, T> concrete_adapter_type;
         concrete_adapter_type const* const concrete_adapter = this->template get<concrete_adapter_type>();
         BOOST_ASSERT(concrete_adapter);
         return concrete_adapter->adapted_;

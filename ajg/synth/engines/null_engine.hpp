@@ -38,7 +38,7 @@ struct kernel : base_engine<traits_type>::template kernel<Iterator> {
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
     typedef typename kernel_type::frame_type                                    frame_type;
-    typedef engine_type                                                         engine_type;
+    typedef null_engine                                                         engine_type;
 
   public:
 

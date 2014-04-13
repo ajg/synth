@@ -99,7 +99,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
   public:
 
     typedef match_type                                                          frame_type;
-    typedef engine_type                                                         engine_type;
+    typedef engine                                                              engine_type;
 
   private:
 

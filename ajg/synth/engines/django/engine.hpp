@@ -108,7 +108,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
   public:
 
     typedef match_type                                                          frame_type;
-    typedef engine_type                                                         engine_type;
+    typedef engine                                                              engine_type;
 
   private:
 

@@ -19,10 +19,9 @@ namespace {
 namespace synth = ajg::synth;
 
 typedef synth::command_line::binding<synth::detail::multi_template
-    < AJG_SYNTH_DEFAULT_CHAR_TYPE
-    , synth::default_traits
+    < synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>
     , synth::stream_template
-    , synth::django::engine
+    , synth::django::engine<>
     , synth::ssi::engine<>
     , synth::tmpl::engine<>
     >
@@ -35,10 +34,10 @@ typedef synth::command_line::command<binding_type> command_type;
 namespace boost {
 namespace property_tree {
 
-binding_type::stream_type& operator <<( binding_type::stream_type&        output
-                                      , binding_type::context_type const& context
-                                      ) {
-    return output << "[context]";
+binding_type::ostream_type& operator <<( binding_type::ostream_type&       ostream
+                                       , binding_type::context_type const& context
+                                       ) {
+    return ostream << "[context]";
 }
 
 }} // namespace boost::property_tree

@@ -35,7 +35,7 @@ struct stream_template : base_template<Engine,
 
   public:
 
-    istream_type const& stream() const { return this->istream_; }
+    istream_type const& istream() const { return this->istream_; }
 
   private:
 

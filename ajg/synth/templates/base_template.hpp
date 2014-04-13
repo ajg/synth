@@ -69,11 +69,11 @@ struct base_template : boost::noncopyable {
 // render
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void render( ostream_type&       stream
+    void render( ostream_type&       ostream
                , context_type const& context = context_type()
                , options_type const& options = options_type()
                ) const {
-        kernel_->render(stream, frame_, context, options);
+        kernel_->render(ostream, frame_, context, options);
     }
 
 //
@@ -83,9 +83,9 @@ struct base_template : boost::noncopyable {
     string_type render_to_string( context_type const& context = context_type()
                                 , options_type const& options = options_type()
                                 ) const {
-        std::basic_ostringstream<char_type> stream;
-        kernel_->render(stream, frame_, context, options);
-        return stream.str();
+        std::basic_ostringstream<char_type> ostream;
+        kernel_->render(ostream, frame_, context, options);
+        return ostream.str();
     }
 
     void render_to_file( path_type    const& path

@@ -17,49 +17,48 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
-template < class Char
-         , template <class C>          class Traits
-         , template <class T, class E> class Template
+template < class Traits
+         , template <class E> class Template
          , class Django
          , class SSI
          , class TMPL
          >
 struct multi_template {
-
   public:
 
-    typedef Traits<Char>                          traits_type;
-    typedef typename traits_type::boolean_type    boolean_type;
-    typedef typename traits_type::char_type       char_type;
-    typedef typename traits_type::string_type     string_type;
-    typedef typename traits_type::ostream_type    stream_type;
-    typedef typename traits_type::paths_type      paths_type;
+    typedef multi_template                                                      multi_template_type;
+    typedef Traits                                                              traits_type;
+    typedef Django                                                              django_engine_type;
+    typedef SSI                                                                 ssi_engine_type;
+    typedef TMPL                                                                tmpl_engine_type;
 
-    typedef Django django_engine_type;
-    typedef SSI    ssi_engine_type;
-    typedef TMPL   tmpl_engine_type;
+    typedef Template<django_engine_type>                                        django_template_type;
+    typedef Template<ssi_engine_type>                                           ssi_template_type;
+    typedef Template<tmpl_engine_type>                                          tmpl_template_type;
 
-    typedef typename Template<traits_type, django_engine_type>::type django_template_type;
-    typedef typename Template<traits_type, ssi_engine_type>::type    ssi_template_type;
-    typedef typename Template<traits_type, tmpl_engine_type>::type   tmpl_template_type;
+    typedef typename django_template_type::context_type                         django_context_type;
+    typedef typename ssi_template_type::context_type                            ssi_context_type;
+    typedef typename tmpl_template_type::context_type                           tmpl_context_type;
 
-    typedef typename django_template_type::context_type django_context_type;
-    typedef typename ssi_template_type::context_type    ssi_context_type;
-    typedef typename tmpl_template_type::context_type   tmpl_context_type;
+    typedef typename django_template_type::options_type                         django_options_type;
+    typedef typename ssi_template_type::options_type                            ssi_options_type;
+    typedef typename tmpl_template_type::options_type                           tmpl_options_type;
 
-    typedef typename django_template_type::options_type django_options_type;
-    typedef typename ssi_template_type::options_type    ssi_options_type;
-    typedef typename tmpl_template_type::options_type   tmpl_options_type;
+    typedef django_options_type                                                 options_type;
+    typedef typename django_options_type::arguments_type                        arguments_type;
+    typedef typename django_options_type::formats_type                          formats_type;
+    typedef typename django_options_type::library_type                          library_type;
+    typedef typename django_options_type::libraries_type                        libraries_type;
+    typedef typename django_options_type::loader_type                           loader_type;
+    typedef typename django_options_type::loaders_type                          loaders_type;
+    typedef typename django_options_type::resolver_type                         resolver_type;
+    typedef typename django_options_type::resolvers_type                        resolvers_type;
 
-    typedef django_options_type                          options_type;
-    typedef typename django_options_type::arguments_type arguments_type;
-    typedef typename django_options_type::formats_type   formats_type;
-    typedef typename django_options_type::library_type   library_type;
-    typedef typename django_options_type::libraries_type libraries_type;
-    typedef typename django_options_type::loader_type    loader_type;
-    typedef typename django_options_type::loaders_type   loaders_type;
-    typedef typename django_options_type::resolver_type  resolver_type;
-    typedef typename django_options_type::resolvers_type resolvers_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::paths_type                                    paths_type;
 
   public:
 
@@ -93,45 +92,27 @@ struct multi_template {
     //       e.g. Options const& options = {django_options_, ssi_options_, tmpl_options_}
 
     template <class X, class Context>
-    void render(stream_type& stream, Context const& context) const {
-        if (django_template_) {
-            return django_template_->render(stream, X::template adapt_context<django_context_type>(context), django_options_);
-        }
-        else if (ssi_template_) {
-            return ssi_template_->render(stream, X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        }
-        else if (tmpl_template_) {
-            return tmpl_template_->render(stream, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
-        }
-        AJG_SYNTH_THROW(std::logic_error("missing template"));
+    void render(ostream_type& ostream, Context const& context) const {
+             if (django_template_) return django_template_->render(ostream, X::template adapt_context<django_context_type>(context), django_options_);
+        else if (ssi_template_)    return ssi_template_->render(ostream, X::template adapt_context<ssi_context_type>(context), ssi_options_);
+        else if (tmpl_template_)   return tmpl_template_->render(ostream, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+        else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
     string_type render_to_string(Context const& context) const {
-        if (django_template_) {
-            return django_template_->render_to_string(X::template adapt_context<django_context_type>(context), django_options_);
-        }
-        else if (ssi_template_) {
-            return ssi_template_->render_to_string(X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        }
-        else if (tmpl_template_) {
-            return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
-        }
-        AJG_SYNTH_THROW(std::logic_error("missing template"));
+             if (django_template_) return django_template_->render_to_string(X::template adapt_context<django_context_type>(context), django_options_);
+        else if (ssi_template_)    return ssi_template_->render_to_string(X::template adapt_context<ssi_context_type>(context), ssi_options_);
+        else if (tmpl_template_)   return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+        else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
     void render_to_file(string_type const& filepath, Context const& context) const {
-        if (django_template_) {
-            return django_template_->render_to_file(filepath, X::template adapt_context<django_context_type>(context), django_options_);
-        }
-        else if (ssi_template_) {
-            return ssi_template_->render_to_file(filepath, X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        }
-        else if (tmpl_template_) {
-            return tmpl_template_->render_to_file(filepath, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
-        }
-        AJG_SYNTH_THROW(std::logic_error("missing template"));
+             if (django_template_) return django_template_->render_to_file(filepath, X::template adapt_context<django_context_type>(context), django_options_);
+        else if (ssi_template_)    return ssi_template_->render_to_file(filepath, X::template adapt_context<ssi_context_type>(context), ssi_options_);
+        else if (tmpl_template_)   return tmpl_template_->render_to_file(filepath, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+        else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
   private:

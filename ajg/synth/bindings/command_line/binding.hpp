@@ -20,18 +20,22 @@ namespace pt = boost::property_tree;
 
 template <class MultiTemplate>
 struct binding : MultiTemplate {
-
   public:
 
+    typedef binding                                                             binding_type;
     typedef MultiTemplate                                                       base_type;
-    typedef typename base_type::stream_type                                     stream_type;
-    typedef typename base_type::boolean_type                                    boolean_type;
-    typedef typename base_type::string_type                                     string_type;
+
+    typedef typename base_type::traits_type                                     traits_type;
     typedef typename base_type::formats_type                                    formats_type;
-    typedef typename base_type::paths_type                                      paths_type;
     typedef typename base_type::libraries_type                                  libraries_type;
     typedef typename base_type::loaders_type                                    loaders_type;
     typedef typename base_type::resolvers_type                                  resolvers_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::paths_type                                    paths_type;
+
     typedef typename pt::basic_ptree<string_type, string_type>                  context_type; // TODO: basic_ptree<string_type, value_type>
 
   public:
@@ -60,7 +64,7 @@ struct binding : MultiTemplate {
                , context_type  const& context = context_type()
             // , options_type  const& options = options_type()
                ) const {
-        return base_type::template render<binding>(stream, context);
+        return base_type::template render<binding>(ostream, context);
     }
 
     string_type render_to_string( context_type const& context = context_type()

@@ -31,16 +31,19 @@ namespace command_line {
 
 template <class Binding>
 struct command {
-
   public:
 
+    typedef command                                                             command_type;
     typedef Binding                                                             binding_type;
-    typedef typename binding_type::traits_type                                  traits_type;
-    typedef typename traits_type::char_type                                     char_type;
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::string_type                                   string_type;
+
     typedef typename binding_type::context_type                                 context_type;
-    typedef typename binding_type::directories_type                             paths_type;
+    typedef typename binding_type::traits_type                                  traits_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
+    typedef typename traits_type::paths_type                                    paths_type;
 
   public:
 

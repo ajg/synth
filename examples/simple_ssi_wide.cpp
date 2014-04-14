@@ -2,12 +2,13 @@
 #include <iostream>
 #include <ajg/synth.hpp>
 
-namespace synth = ajg::synth;
-
 #ifndef AJG_SYNTH_NO_WCHAR_T
 
-typedef synth::default_traits<wchar_t>                              traits_type;
-typedef synth::string_template<traits_type, synth::ssi::engine<> >  template_type;
+namespace synth = ajg::synth;
+
+typedef synth::default_traits<wchar_t>          traits_type;
+typedef synth::ssi::engine<traits_type>         engine_type;
+typedef synth::string_template<engine_type>     template_type;
 
 int wmain() {
     template_type const tpl(L"Howdy, <!--#echo var=\"user\" -->!");

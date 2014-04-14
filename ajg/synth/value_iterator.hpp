@@ -87,17 +87,15 @@ struct value_iterator
 
     template <class ForwardIterator>
     struct polymorphic_iterator : virtual_iterator {
-        typedef polymorphic_iterator this_type;
-        polymorphic_iterator(ForwardIterator const& iterator)
-            : iterator_(iterator) {}
+        polymorphic_iterator(ForwardIterator const& iterator) : iterator_(iterator) {}
 
         virtual void increment() { iterator_++; }
         virtual Value dereference() const { return *iterator_; }
-        virtual this_type& clone() const { return *new this_type(iterator_); }
+        virtual polymorphic_iterator& clone() const { return *new polymorphic_iterator(iterator_); }
         virtual bool equal(virtual_iterator const& that) const {
-         // BOOST_ASSERT(typeid(this_type) == typeid(that));
-            BOOST_ASSERT(dynamic_cast<this_type const*>(&that));
-            return static_cast<this_type const&>(that).iterator_ == this->iterator_;
+         // BOOST_ASSERT(typeid(polymorphic_iterator) == typeid(that));
+            BOOST_ASSERT(dynamic_cast<polymorphic_iterator const*>(&that));
+            return static_cast<polymorphic_iterator const&>(that).iterator_ == this->iterator_;
         }
 
       private:

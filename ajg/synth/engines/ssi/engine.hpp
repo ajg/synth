@@ -154,35 +154,34 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
         regex_expression
             = '/' >> (s1 = *(~as_xpr('/') | "\\\\")) >> '/'
             ;
-        string_expression // A
+        string_expression
             = quoted_string
             | raw_string
             | variable
             ;
-        expression // A
+        expression
             = xpressive::ref(and_expression)
             | xpressive::ref(or_expression)
             ;
-        primary_expression // A
+        primary_expression
             = '(' >> *_s >> expression >> *_s >> ')'
             | xpressive::ref(comparison_expression)
             | xpressive::ref(string_expression)
             | xpressive::ref(not_expression)
             ;
-        not_expression // ! A
+        not_expression
             = '!' >> *_s >> expression
             ;
         comparison_operator
             = as_xpr("=") | "==" | "!=" | "<" | ">" | "<=" | ">="
             ;
-        comparison_expression // A op C
-            = string_expression >> *_s >> comparison_operator
-                  >> *_s >> (string_expression | regex_expression)
+        comparison_expression
+            = string_expression >> *_s >> comparison_operator >> *_s >> (string_expression | regex_expression)
             ;
-        and_expression // A (&& B)*
+        and_expression
             = primary_expression >> *(*_s >> "&&" >> *_s >> expression)
             ;
-        or_expression // A (|| B)*
+        or_expression
             = primary_expression >> *(*_s >> "||" >> *_s >> expression)
             ;
         this->skipper
@@ -342,9 +341,9 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
         return tag_start >> *_s >> (s1 = name) >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
     }
 
-    boolean_type equals_regex(args_type const& args, string_match_type const& expr) const {
-        string_type       const left    = parse_string(args, get_nested<A>(expr));
-        string_type       const right   = get_nested<C>(expr)[xpressive::s1].str();
+    boolean_type equals_regex(args_type const& args, string_match_type const& str, string_match_type const& regex) const {
+        string_type       const left    = parse_string(args, str);
+        string_type       const right   = regex[xpressive::s1].str();
         string_regex_type const pattern = string_regex_type::compile(right);
 
         for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
@@ -367,15 +366,17 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
     boolean_type equals(args_type const& args, string_match_type const& expr) const {
         string_type const op = expr(this->comparison_operator).str();
 
-        if (get_nested<C>(expr) == this->regex_expression) {
+        if (string_match_type const& regex = expr(this->regex_expression)) {
+            string_match_type const& left  = expr(this->string_expression);
+
             if (op == traits_type::literal("=")
-             || op == traits_type::literal("==")) return equals_regex(args, expr);
-            if (op == traits_type::literal("!=")) return !equals_regex(args, expr);
+             || op == traits_type::literal("==")) return equals_regex(args, left, regex);
+            if (op == traits_type::literal("!=")) return !equals_regex(args, left, regex);
             throw_exception(std::logic_error("invalid regex operator"));
         }
         else {
-            string_type const left  = parse_string(args, get_nested<A>(expr));
-            string_type const right = parse_string(args, get_nested<C>(expr));
+            string_type const left  = parse_string(args, expr(this->string_expression, 0));
+            string_type const right = parse_string(args, expr(this->string_expression, 1));
             if (op == traits_type::literal("=")
              || op == traits_type::literal("==")) return left == right;
             if (op == traits_type::literal("!=")) return left != right;
@@ -397,7 +398,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
     }
 
     string_type parse_string(args_type const& args, string_match_type const& match) const {
-        string_match_type const& string = get_nested<A>(match);
+        string_match_type const& string = detail::unnest(match);
         if (string == raw_string)           return match.str();
         if (string == regex_expression)     return args.kernel.extract_attribute(match);
         if (string == args.kernel.variable) return args.kernel.interpolate(args, match.str());
@@ -408,9 +409,9 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
         if (expr == and_expression)        return fold(args, expr, true, std::logical_and<bool>());
         if (expr == or_expression)         return fold(args, expr, false, std::logical_or<bool>());
-        if (expr == not_expression)        return !evaluate_expression(args, get_nested<A>(expr));
-        if (expr == primary_expression)    return evaluate_expression(args, get_nested<A>(expr));
-        if (expr == expression)            return evaluate_expression(args, get_nested<A>(expr));
+        if (expr == not_expression)        return !evaluate_expression(args, detail::unnest(expr));
+        if (expr == primary_expression)    return evaluate_expression(args, detail::unnest(expr));
+        if (expr == expression)            return evaluate_expression(args, detail::unnest(expr));
         if (expr == string_expression)     return !parse_string(args, expr).empty();
         if (expr == comparison_expression) return equals(args, expr);
         throw_exception(std::logic_error("invalid expression"));

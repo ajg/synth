@@ -274,31 +274,13 @@ inline bool operator == ( xpressive::match_results<Iterator> const& match
 }
 
 //
-// [deprecated] get_nested
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <std::size_t Index, class Match>
-inline static Match const& get_nested(Match const& match) {
-    BOOST_STATIC_ASSERT(Index != 0);
-    std::size_t i = 0;
-
-    // TODO: Use advance or the like.
-    BOOST_FOREACH(Match const& nested, match.nested_results()) {
-        if (++i == Index) return nested;
-    }
-
-    static const Match empty;
-    return empty;
-}
-
-//
 // unnest
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Match>
-inline static Match const& unnest(Match const& match) {
+inline Match const& unnest(Match const& match) {
     BOOST_ASSERT(match);
-    BOOST_ASSERT(match.size() == 1);
+    BOOST_ASSERT(match.size() >= 1);
     return *match.nested_results().begin();
 }
 
@@ -322,25 +304,6 @@ select_nested(Match const& match, Regex const& regex) {
         , boost::make_filter_iterator(predicate, end,   end)
         );
 }
-
-//
-// [deprecated] placeholders:
-//     A symbolic way to refer to subresults within a match result object.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-namespace placeholders {
-
-    BOOST_STATIC_CONSTANT(std::size_t, A = 1);
-    BOOST_STATIC_CONSTANT(std::size_t, B = 2);
-    BOOST_STATIC_CONSTANT(std::size_t, C = 3);
-    BOOST_STATIC_CONSTANT(std::size_t, D = 4);
-    BOOST_STATIC_CONSTANT(std::size_t, E = 5);
-    BOOST_STATIC_CONSTANT(std::size_t, F = 6);
-    BOOST_STATIC_CONSTANT(std::size_t, G = 7);
-    BOOST_STATIC_CONSTANT(std::size_t, H = 8);
-    BOOST_STATIC_CONSTANT(std::size_t, I = 9);
-
-} // namespace placeholders
 
 //
 // insensitive_less:
@@ -484,7 +447,7 @@ inline optional<Value const&> find_value
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class FloatingPoint>
-inline static bool is_integer(FloatingPoint const& fp) {
+inline bool is_integer(FloatingPoint const& fp) {
     FloatingPoint integer_part;
     return std::modf(fp, &integer_part) == FloatingPoint(0.0);
 }

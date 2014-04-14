@@ -182,7 +182,7 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
 
     string_type extract_attribute(match_type const& attr) const {
         if (attr == attribute) {
-            match_type const& attr_ = detail::get_nested<1>(attr);
+            match_type const& attr_ = detail::unnest(attr);
             return extract_attribute(attr_);
         }
         else if (attr == name_attribute) {
@@ -297,7 +297,7 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
         optional<string_type> default_;
 
         BOOST_FOREACH(match_type const& nested, match.nested_results()) {
-            match_type const& attr  = get_nested<A>(nested);
+            match_type const& attr  = detail::unnest(nested);
             match_type const& value = attr(this->attribute);
 
             if (attr == name_attribute) {

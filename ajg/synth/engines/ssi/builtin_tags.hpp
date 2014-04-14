@@ -20,9 +20,7 @@ namespace ajg {
 namespace synth {
 namespace ssi {
 namespace {
-using detail::get_nested;
 using detail::operator ==;
-using namespace detail::placeholders;
 } // namespace
 
 template <class Kernel>
@@ -97,21 +95,21 @@ struct builtin_tags {
     }
 
 //
-// AJG_SYNTH_FOREACH_ATTRIBUTE_IN, AJG_SYNTH_NO_ATTRIBUTES_IN:
+// AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN, AJG_SYNTH_SSI_NO_ATTRIBUTES_IN:
 //     Macros to facilitate iterating over and validating tag attributes.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum { interpolated = true, raw = false };
 
-#define AJG_SYNTH_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
-    BOOST_FOREACH(match_type const& attr, get_nested<A>(x).nested_results()) { \
+#define AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
+    BOOST_FOREACH(match_type const& attr, detail::unnest(x).nested_results()) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
         if_statement else throw_exception(invalid_attribute(traits_type::narrow(name))); \
     } \
 } while (0)
 
-#define AJG_SYNTH_NO_ATTRIBUTES_IN(x) AJG_SYNTH_FOREACH_ATTRIBUTE_IN(x, raw, if (false) {})
+#define AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(x) AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, raw, if (false) {})
 
 //
 // validate_attribute
@@ -140,7 +138,7 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("sizefmt")) {
                     validate_attribute("sizefmt", value, "bytes", "abbrev");
                     args.options.size_format = value;
@@ -164,7 +162,7 @@ enum { interpolated = true, raw = false };
 
         static void render(args_type const& args) {
             string_type encoding = traits_type::literal("entity");
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("var")) {
                     string_type const result = args.kernel.lookup_variable(args.context, args.options, value);
                     if      (encoding == traits_type::literal("none"))   args.ostream << result;
@@ -190,7 +188,7 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("cgi")) {
                     // TODO:
                     // BOOST_ASSERT(detail::file_exists(value));
@@ -214,7 +212,7 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("fsize virtual"));
@@ -241,7 +239,7 @@ enum { interpolated = true, raw = false };
             boolean_type const abbreviate = args.options.size_format == traits_type::literal("abbrev");
             validate_attribute("size_format", args.options.size_format, "bytes", "abbrev");
 
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("fsize virtual"));
@@ -288,7 +286,7 @@ enum { interpolated = true, raw = false };
             string_type const name = tag[xpressive::s1].str();
 
             if (name == traits_type::literal("if") || name == traits_type::literal("elif")) {
-                AJG_SYNTH_FOREACH_ATTRIBUTE_IN(tag, raw,
+                AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(tag, raw,
                     if (name == traits_type::literal("expr")) {
                         if (!has_expr) has_expr = true;
                         else throw_exception(duplicate_attribute("expr"));
@@ -306,7 +304,7 @@ enum { interpolated = true, raw = false };
                 else throw_exception(missing_attribute("expr"));
             }
             else {
-                AJG_SYNTH_NO_ATTRIBUTES_IN(tag);
+                AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(tag);
                      if (name == traits_type::literal("else"))  return true;
                 else if (name == traits_type::literal("endif")) return false;
                 else throw_exception(std::logic_error("invalid tag"));
@@ -324,7 +322,7 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     throw_exception(not_implemented("include virtual"));
@@ -346,7 +344,7 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            AJG_SYNTH_NO_ATTRIBUTES_IN(args.match);
+            AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(args.match);
             BOOST_FOREACH(typename environment_type::value_type const& nv, args.kernel.environment) {
                 args.ostream << traits_type::widen(nv.first) << '=' << traits_type::widen(nv.second) << std::endl;
             }
@@ -366,7 +364,7 @@ enum { interpolated = true, raw = false };
             optional<string_type> name_;
             optional<value_type>  value_;
 
-            AJG_SYNTH_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
+            AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("var")) {
                     if (name_) throw_exception(duplicate_attribute("name"));
                     else name_ = value;
@@ -384,8 +382,8 @@ enum { interpolated = true, raw = false };
         }
     };
 
-#undef AJG_SYNTH_FOREACH_ATTRIBUTE_IN
-#undef AJG_SYNTH_NO_ATTRIBUTES_IN
+#undef AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN
+#undef AJG_SYNTH_SSI_NO_ATTRIBUTES_IN
 
 }; // builtin_tags
 

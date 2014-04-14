@@ -489,7 +489,6 @@ Future Work
    * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
-   * Replace all remaining get_nested uses with s1, s2, ... or named patterns
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop

@@ -88,10 +88,6 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-namespace {
-using detail::operator ==;
-}
-
 template < class T, bool CS, bool SS, bool LV, bool GV, tag_mode TM>
 template <class Iterator>
 struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::template kernel<Iterator> {
@@ -181,21 +177,21 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
   public:
 
     string_type extract_attribute(match_type const& attr) const {
-        if (attr == attribute) {
+        if (is(attr, this->attribute)) {
             match_type const& attr_ = detail::unnest(attr);
             return extract_attribute(attr_);
         }
-        else if (attr == name_attribute) {
+        else if (is(attr, this->name_attribute)) {
             match_type const& attr_ = attr(attribute);
             return extract_attribute(attr_);
         }
-        else if (attr == quoted_attribute) {
+        else if (is(attr, this->quoted_attribute)) {
             // TODO: Escape sequences, etc.
             // Handles "string" or 'string'.
             string_type const string = attr.str();
             return string.substr(1, string.size() - 2);
         }
-        else if (attr == plain_attribute) {
+        else if (is(attr, this->plain_attribute)) {
             return attr.str();
         }
         else if (!attr) {
@@ -284,9 +280,9 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == this->text)  render_text(ostream, match, context, options);
-        else if (match == this->block) render_block(ostream, match, context, options);
-        else if (match == this->tag)   render_tag(ostream, match, context, options);
+             if (is(match, this->text))  render_text(ostream, match, context, options);
+        else if (is(match, this->block)) render_block(ostream, match, context, options);
+        else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
@@ -300,15 +296,15 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
             match_type const& attr  = detail::unnest(nested);
             match_type const& value = attr(this->attribute);
 
-            if (attr == name_attribute) {
+            if (is(attr, this->name_attribute)) {
                 if (name) throw_exception(std::logic_error("duplicate variable name"));
                 else name = this->extract_attribute(value);
             }
-            else if (attr == default_attribute) {
+            else if (is(attr, this->default_attribute)) {
                 if (default_) throw_exception(std::logic_error("duplicate default value"));
                 else default_ = this->extract_attribute(value);
             }
-            else if (attr == escape_attribute) {
+            else if (is(attr, this->escape_attribute)) {
                 if (escape) {
                     throw_exception(std::logic_error("duplicate escape mode"));
                 }

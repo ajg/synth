@@ -34,6 +34,8 @@ namespace {
 namespace x = boost::xpressive;
 }
 
+using detail::is;
+
 template <class Traits>
 struct base_engine : detail::nonconstructible {
 

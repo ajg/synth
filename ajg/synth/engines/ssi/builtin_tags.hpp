@@ -19,9 +19,6 @@
 namespace ajg {
 namespace synth {
 namespace ssi {
-namespace {
-using detail::operator ==;
-} // namespace
 
 template <class Kernel>
 struct builtin_tags {
@@ -268,7 +265,7 @@ enum { interpolated = true, raw = false };
             boolean_type condition = false;
 
             BOOST_FOREACH(match_type const& nested, args.match.nested_results()) {
-                if (nested == args.kernel.block) {
+                if (is(nested, args.kernel.block)) {
                     if (condition) {
                         args.kernel.render_block(args.ostream, nested, args.context, args.options);
                         break;

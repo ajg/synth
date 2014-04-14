@@ -80,7 +80,6 @@ struct engine : base_engine<Traits> {
 }; // engine
 
 namespace {
-using detail::operator ==;
 using detail::find_mapped_value;
 namespace x = boost::xpressive;
 }
@@ -355,7 +354,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
     }
 
     string_type extract_string(match_type const& match) const {
-        BOOST_ASSERT(match == this->string_literal);
+        BOOST_ASSERT(is(match, this->string_literal));
         return detail::unquote(match.str());
     }
 
@@ -421,9 +420,9 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == this->text)  render_text(ostream, match, context, options);
-        else if (match == this->block) render_block(ostream, match, context, options);
-        else if (match == this->tag)   render_tag(ostream, match, context, options);
+             if (is(match, this->text))  render_text(ostream, match, context, options);
+        else if (is(match, this->block)) render_block(ostream, match, context, options);
+        else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
@@ -435,7 +434,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
         value_type result = value;
 
         BOOST_FOREACH(match_type const& filter, detail::select_nested(match, this->filter)) {
-            BOOST_ASSERT(filter == this->filter);
+            BOOST_ASSERT(is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
 
@@ -503,35 +502,35 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                                , context_type const& context
                                , options_type const& options
                                ) const {
-        BOOST_ASSERT(match == this->literal);
+        BOOST_ASSERT(is(match, this->literal));
         match_type  const& literal = detail::unnest(match);
         string_type const  string  = match.str();
         string_type const  token   = literal[0];
 
-        if (literal == none_literal) {
+        if (is(literal, this->none_literal)) {
             return value_type(none_type()).token(token);
         }
-        else if (literal == boolean_literal) {
+        else if (is(literal, this->boolean_literal)) {
             match_type const& boolean = detail::unnest(literal);
 
-            if (boolean == true_literal) {
+            if (is(boolean, this->true_literal)) {
                 return value_type(boolean_type(true)).token(token);
             }
-            else if (boolean == false_literal) {
+            else if (is(boolean, this->false_literal)) {
                 return value_type(boolean_type(false)).token(token);
             }
             else {
                 throw_exception(std::logic_error("invalid boolean literal"));
             }
         }
-        else if (literal == number_literal) {
+        else if (is(literal, this->number_literal)) {
             return value_type(boost::lexical_cast<number_type>(string)).token(token);
         }
-        else if (literal == string_literal) {
+        else if (is(literal, this->string_literal)) {
             BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:
             return value_type(extract_string(literal)).token(token.substr(1, token.length() - 2));
         }
-        else if (literal == variable_literal) {
+        else if (is(literal, this->variable_literal)) {
             if (optional<value_type const&> const variable = detail::find_value(string, context)) {
                 return variable->copy().token(token);
             }
@@ -550,13 +549,13 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                                   ) const {
         match_type const& expr = detail::unnest(match);
 
-        if (expr == unary_expression) {
+        if (is(expr, this->unary_expression)) {
             return this->evaluate_unary(expr, context, options);
         }
-        else if (expr == binary_expression) {
+        else if (is(expr, this->binary_expression)) {
             return this->evaluate_binary(expr, context, options);
         }
-        else if (expr == nested_expression) {
+        else if (is(expr, this->nested_expression)) {
             match_type const& nested = expr(this->expression);
             return this->evaluate_expression(nested, context, options);
         }
@@ -569,7 +568,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                              , context_type const& context
                              , options_type const& options
                              ) const {
-        BOOST_ASSERT(match == unary_expression);
+        BOOST_ASSERT(is(match, this->unary_expression));
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
@@ -585,16 +584,16 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                               , context_type const& context
                               , options_type const& options
                               ) const {
-        BOOST_ASSERT(match == binary_expression);
+        BOOST_ASSERT(is(match, this->binary_expression));
         match_type const& chain = match(this->chain);
         value_type value = this->evaluate_chain(chain, context, options);
         string_type op;
 
         BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
-            if (segment == binary_operator) {
+            if (is(segment, this->binary_operator)) {
                 op = segment.str();
             }
-            else if (!(segment == expression)) {
+            else if (!(is(segment, this->expression))) {
                 throw_exception(std::logic_error("invalid binary expression"));
             }
             else if (op == traits_type::literal("==")) {
@@ -644,10 +643,10 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                             ) const {
         match_type const& link = detail::unnest(match);
 
-        if (link == this->subscript_link) { // i.e. value[attribute]
+        if (is(link, this->subscript_link)) { // i.e. value[attribute]
             return this->evaluate(link(this->expression), context, options);
         }
-        else if (link == this->attribute_link) { // i.e. value.attribute
+        else if (is(link, this->attribute_link)) { // i.e. value.attribute
             return string_type(link(this->identifier).str());
         }
         else {
@@ -659,7 +658,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
                              , context_type const& context
                              , options_type const& options
                              ) const {
-        BOOST_ASSERT(match == this->chain);
+        BOOST_ASSERT(is(match, this->chain));
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(lit, context, options);
 

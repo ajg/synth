@@ -75,10 +75,6 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-namespace {
-using detail::operator ==;
-}
-
 template <class T, class E, bool TOE, std::size_t MaxRegexCaptures>
 template <class Iterator>
 struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::template kernel<Iterator> {
@@ -200,7 +196,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
                                                        ) const {
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
-        string_type const temp  = extract_attribute(attr(args.kernel.quoted_value));
+        string_type const temp  = extract_attribute(attr(this->quoted_value));
         string_type const name  = boost::algorithm::to_lower_copy(attr(this->name).str());
         string_type const value = interpolate ? this->interpolate(args, temp) : temp;
         return std::make_pair(name, value);
@@ -322,9 +318,9 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (match == this->text)  render_text(ostream, match, context, options);
-        else if (match == this->block) render_block(ostream, match, context, options);
-        else if (match == this->tag)   render_tag(ostream, match, context, options);
+             if (is(match, this->text))  render_text(ostream, match, context, options);
+        else if (is(match, this->block)) render_block(ostream, match, context, options);
+        else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else throw_exception(std::logic_error("invalid template state"));
     }
 
@@ -391,7 +387,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
     template <class Args, class Match, class Initial, class Functor>
     Initial fold(Args const& args, Match const& match, Initial initial, Functor const& functor) const {
         BOOST_FOREACH(string_match_type const& operand, match.nested_results()) {
-            initial = functor(initial, args.kernel.evaluate_expression(args, operand));
+            initial = functor(initial, this->evaluate_expression(args, operand));
         }
 
         return initial;
@@ -399,21 +395,21 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
 
     string_type parse_string(args_type const& args, string_match_type const& match) const {
         string_match_type const& string = detail::unnest(match);
-        if (string == raw_string)           return match.str();
-        if (string == regex_expression)     return args.kernel.extract_attribute(match);
-        if (string == args.kernel.variable) return args.kernel.interpolate(args, match.str());
-        if (string == quoted_string)        return args.kernel.interpolate(args, args.kernel.extract_attribute(match));
+        if (is(string, this->raw_string))           return match.str();
+        if (is(string, this->regex_expression))     return this->extract_attribute(match);
+        if (is(string, this->variable))             return this->interpolate(args, match.str());
+        if (is(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
         throw_exception(std::logic_error("invalid string"));
     }
 
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
-        if (expr == and_expression)        return fold(args, expr, true, std::logical_and<bool>());
-        if (expr == or_expression)         return fold(args, expr, false, std::logical_or<bool>());
-        if (expr == not_expression)        return !evaluate_expression(args, detail::unnest(expr));
-        if (expr == primary_expression)    return evaluate_expression(args, detail::unnest(expr));
-        if (expr == expression)            return evaluate_expression(args, detail::unnest(expr));
-        if (expr == string_expression)     return !parse_string(args, expr).empty();
-        if (expr == comparison_expression) return equals(args, expr);
+        if (is(expr, this->and_expression))        return fold(args, expr, true, std::logical_and<bool>());
+        if (is(expr, this->or_expression))         return fold(args, expr, false, std::logical_or<bool>());
+        if (is(expr, this->not_expression))        return !evaluate_expression(args, detail::unnest(expr));
+        if (is(expr, this->primary_expression))    return evaluate_expression(args, detail::unnest(expr));
+        if (is(expr, this->expression))            return evaluate_expression(args, detail::unnest(expr));
+        if (is(expr, this->string_expression))     return !parse_string(args, expr).empty();
+        if (is(expr, this->comparison_expression)) return equals(args, expr);
         throw_exception(std::logic_error("invalid expression"));
 
     }

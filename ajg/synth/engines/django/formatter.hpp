@@ -265,6 +265,7 @@ struct formatter {
             date_type     const date        = datetime.date();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
+            size_type     const week        = date.week_number();
             size_type     const month_days  = date.end_of_month().day();
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
@@ -282,12 +283,17 @@ struct formatter {
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
                                             : (succint + char_type(' ') + meridiem);
-            string_type   const iso8601     = flags.Y + char_type('-') + flags.m + char_type('-')
-                                            + flags.d + char_type('T') + flags.H + char_type(':')
-                                            + flags.M + char_type(':') + flags.S;
-            string_type   const rfc2822     = flags.a + char_type(',') + char_type(' ')
-                                            + flags.d + char_type(' ') + flags.b + char_type(' ')
-                                            + flags.Y + char_type(' ') + flags.T;
+            string_type   const iso8601     = flags.Y + char_type('-')
+                                            + flags.m + char_type('-')
+                                            + flags.d + char_type('T')
+                                            + flags.H + char_type(':')
+                                            + flags.M + char_type(':')
+                                            + flags.S;
+            string_type   const rfc2822     = flags.a + traits_type::literal(", ")
+                                            + flags.d + char_type(' ')
+                                            + flags.b + char_type(' ')
+                                            + flags.Y + char_type(' ')
+                                            + flags.T;
 
             cooked_flags cooked;
             cooked.a = meridiem;
@@ -325,7 +331,7 @@ struct formatter {
             cooked.u = trim_left_copy_if(flags.f, is_any_of("."));
             cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
-            cooked.W = traits_type::literal("");            // TODO: Like %V, without leading zeros.
+            cooked.W = behavior_type::to_string(week);
             cooked.y = flags.y;
             cooked.Y = flags.Y;
             cooked.z = trim_left_copy_if(flags.j, is_any_of("0"));

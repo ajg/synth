@@ -29,9 +29,7 @@ namespace tmpl {
 #define CLOSE_TAG(name)  TAG(kernel.tag_finish >> *_s >> NAME(name) >> *_s)
 
 namespace {
-using detail::get_nested;
 using detail::operator ==;
-using namespace detail::placeholders;
 } // namespace
 
 template <class Kernel>
@@ -133,9 +131,7 @@ struct builtin_tags {
     struct if_tag {
         static regex_type syntax(kernel_type const& kernel) {
             using namespace xpressive;
-            return OPEN_TAG("IF")   >> kernel.block  // B
-            >> !(MIDDLE_TAG("ELSE") >> kernel.block) // C
-               >> CLOSE_TAG("IF");
+            return OPEN_TAG("IF") >> kernel.block >> !(MIDDLE_TAG("ELSE") >> kernel.block) >> CLOSE_TAG("IF");
         }
 
         static void render( kernel_type  const& kernel
@@ -145,8 +141,8 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             match_type const& attr  = match(kernel.name_attribute);
-            match_type const& if_   = get_nested<B>(match);
-            match_type const& else_ = get_nested<C>(match);
+            match_type const& if_   = match(kernel.block, 0);
+            match_type const& else_ = match(kernel.block, 1);
             bool const cond_ = kernel.evaluate(attr, context, options);
 
                  if (cond_) kernel.render_block(ostream, if_,   context, options);
@@ -183,8 +179,7 @@ struct builtin_tags {
     struct loop_tag {
         static regex_type syntax(kernel_type const& kernel) {
             using namespace xpressive;
-            return OPEN_TAG("LOOP") >> kernel.block
-               >> CLOSE_TAG("LOOP");
+            return OPEN_TAG("LOOP") >> kernel.block >> CLOSE_TAG("LOOP");
         }
 
         static void render( kernel_type  const& kernel
@@ -235,9 +230,7 @@ struct builtin_tags {
     struct unless_tag {
         static regex_type syntax(kernel_type const& kernel) {
             using namespace xpressive;
-            return OPEN_TAG("UNLESS") >> kernel.block  // B
-            >> !(MIDDLE_TAG("ELSE")   >> kernel.block) // C
-               >> CLOSE_TAG("UNLESS");
+            return OPEN_TAG("UNLESS") >> kernel.block >> !(MIDDLE_TAG("ELSE") >> kernel.block) >> CLOSE_TAG("UNLESS");
         }
 
         static void render( kernel_type  const& kernel
@@ -247,8 +240,8 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             match_type const& attr  = match(kernel.name_attribute);
-            match_type const& unls_ = get_nested<B>(match);
-            match_type const& else_ = get_nested<C>(match);
+            match_type const& unls_ = match(kernel.block, 0);
+            match_type const& else_ = match(kernel.block, 1);
             bool const cond_ = !kernel.evaluate(attr, context, options);
 
                  if (cond_) kernel.render_block(ostream, unls_, context, options);
@@ -263,7 +256,7 @@ struct builtin_tags {
     struct variable_tag {
         static regex_type syntax(kernel_type const& kernel) {
             using namespace xpressive;
-            return TAG(*_s >> NAME("VAR") >> *(+_s >> kernel.extended_attribute) // A
+            return TAG(*_s >> NAME("VAR") >> *(+_s >> kernel.extended_attribute)
                     >> *_s >> !as_xpr(kernel.tag_finish));
         }
 

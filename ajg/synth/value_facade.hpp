@@ -18,6 +18,7 @@
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/value_iterator.hpp>
+#include <ajg/synth/value_behavior.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
 
@@ -40,7 +41,7 @@ struct value_facade {
     typedef value_facade                                                        facade_type;
     typedef Traits                                                              traits_type;
     typedef Value<traits_type>                                                  value_type;
-    typedef default_value_behavior<traits_type, Value>                          behavior_type;
+    typedef value_behavior<traits_type, Value>                                  behavior_type;
     typedef base_adapter<behavior_type>                                         adapter_type;
 
     typedef typename traits_type::none_type                                     none_type;

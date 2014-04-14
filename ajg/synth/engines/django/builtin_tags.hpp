@@ -93,6 +93,8 @@ struct builtin_tags {
             | add(kernel, comment_tag::syntax(kernel),           comment_tag::render)
             | add(kernel, csrf_token_tag::syntax(kernel),        csrf_token_tag::render)
             | add(kernel, cycle_tag::syntax(kernel),             cycle_tag::render)
+            | add(kernel, cycle_as_tag::syntax(kernel),          cycle_as_tag::render)
+            | add(kernel, cycle_as_silent_tag::syntax(kernel),   cycle_as_silent_tag::render)
             | add(kernel, debug_tag::syntax(kernel),             debug_tag::render)
             | add(kernel, extends_tag::syntax(kernel),           extends_tag::render)
             | add(kernel, filter_tag::syntax(kernel),            filter_tag::render)
@@ -280,7 +282,8 @@ struct builtin_tags {
 
     struct cycle_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("cycle") >> kernel.values >> !(kernel.keyword("as") >> kernel.name)) >> kernel.block;
+            return AJG_TAG(kernel.reserved("cycle") >> kernel.values >>
+                !(kernel.keyword("as") >> kernel.name >> !(s1 = kernel.keyword("silent")))) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -299,19 +302,52 @@ struct builtin_tags {
             match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
             value_type const  value = kernel.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
-            ostream << value;
 
             if (name.empty()) {
                 // E.g. cycle foo
+                ostream << value;
                 kernel.render_block(ostream, block, context, options);
             }
             else {
+                boolean_type const silent = match[s1].matched;
+                if (!silent) ostream << value;
+
                 // E.g. cycle foo as bar
                 context_type context_copy = context;
                 context_copy[name] = value;
                 kernel.render_block(ostream, block, context_copy, options);
             }
         }
+    };
+
+//
+// cycle_as_tag
+//     NOTE: This is a no-op, since the as clause is already handled by cycle_tag.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct cycle_as_tag {
+        static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
+        static void render( kernel_type  const& kernel
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {}
+    };
+
+//
+// cycle_as_silent_tag
+//     NOTE: This is a no-op, since the as ... silent clause is already handled by cycle_tag.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct cycle_as_silent_tag {
+        static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
+        static void render( kernel_type  const& kernel
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {}
     };
 
 //

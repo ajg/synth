@@ -498,20 +498,17 @@ Future Work
      + Remove needlessly configurable (especially defaulted) `template` parameters
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace <boost/cstdint.hpp> with <cstdint>
+     + Consider switching to unordered_map/unordered_set where possible
    * [v1+] Add AJG_PRAGMA macro that invokes _Pragma or __pragma (MSVC) as needed
      + Add AJG_PRAGMA(once) to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically
    * [v1+] Run entire C++ codebase through clang-format
    * Change `class` in template signatures to `typename`
-   * Rename `Array`/`array_type` to `Sequence`/`sequence_type`
-   * Introduce `Mapping`/`mapping_type` to replace hard-coded `std::map`s
-     + [v1+] Consider making `context`s top-level `value`s instead of `map`s
-     + [v1+] Consider switching to unordered_map/unordered_set where possible
    * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
    * [v1] Reformat all operator _()'s to operator_()
-   * [v2+] Factor out values & adapters into separate library for generic language interop
    * [v1+] Remove header guard closing comments
    * [v1+] Remove namespace closing comments
+   * [v2+] Factor out values & adapters into separate library for generic language interop
 
 Frequently Asked Questions (FAQs)
 ---------------------------------

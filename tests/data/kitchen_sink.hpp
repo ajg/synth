@@ -113,6 +113,12 @@ struct kitchen_sink {
         numbers.push_back(8);
         numbers.push_back(9);
         context[traits_type::literal("numbers")] = numbers;
+
+        std::map<string_type, string_type> states;
+        states[traits_type::literal("CA")] = "California";
+        states[traits_type::literal("FL")] = "Florida";
+        states[traits_type::literal("NY")] = "New York";
+        context[traits_type::literal("states")] = states;
     }
 
     context_type                        context;

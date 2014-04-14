@@ -126,6 +126,16 @@ DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
 
+DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' %}{% endfor %}",                  "ababababa")
+DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' as x %}{{x}}{% endfor %}",        "aabbaabbaabbaabbaa")
+DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' as x silent %}{{x}}{% endfor %}", "ababababa")
+DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' as x silent %}{% endfor %}",      "")
+
+DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v %};) {% endfor %}",                   "(CA;) (Florida;) (NY;) ")
+DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x %}; {{x}}) {% endfor %}",        "(CA; CA) (Florida; Florida) (NY; NY) ")
+DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x silent %}; {{x}}) {% endfor %}", "(; CA) (; Florida) (; NY) ")
+DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x silent %};) {% endfor %}",       "(;) (;) (;) ")
+
 DJANGO_TEST(debug_tag, "{% debug %}",
     "<h1>Context:</h1>\n"
     "    after_past = 2002-Mar-01 01:22:03<br />\n"
@@ -141,6 +151,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    past = 2002-Jan-10 01:02:03<br />\n"
     "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
     "    qux = C<br />\n"
+    "    states = CA: California, FL: Florida, NY: New York<br />\n"
     "    true_var = True<br />\n"
     "    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
 
@@ -731,5 +742,4 @@ DJANGO_TEST(safeseq_filter, "{{tags|safeseq}}", "")
 DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
 */
 
-// TODO: {% for k, v in numbers %}{% cycle k v as x %}({{x}}){% endfor %}
 // TODO: {% block a_block %}This is a block{% endblock a_block %}

@@ -18,12 +18,13 @@ BOOST_PYTHON_MODULE(synth)
     using namespace boost::python;
     namespace synth = ajg::synth;
 
+    typedef synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE> traits_type;
     typedef synth::python::binding<synth::detail::multi_template
-        < synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>
+        < traits_type
         , synth::string_template
-        , synth::django::engine<>
-        , synth::ssi::engine<>
-        , synth::tmpl::engine<>
+        , synth::django::engine<traits_type>
+        , synth::ssi::engine<traits_type>
+        , synth::tmpl::engine<traits_type>
         >
     > Template;
 

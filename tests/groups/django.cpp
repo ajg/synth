@@ -71,6 +71,9 @@ DJANGO_TEST_(text, "ABC", "ABC", context)
 DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", NO_CONTEXT)
 DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
 
+DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", NO_CONTEXT)
+DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", context)
+
 /// Literal tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,6 +124,7 @@ DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                           
 DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")
 DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                         "01")
 DJANGO_TEST(comment_tag-short, "0{# {{ x|y:'z' }} #}1",                              "01")
+DJANGO_TEST(comment_tag-short, "0{# {% if foo %}bar{% else %} #}1",                  "01")
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
 DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
@@ -381,6 +385,8 @@ unit_test(url_as_tag) {
 
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
+DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}",           NO_CONTEXT)
+DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}",           context)
 
 char path_buffer[PATH_MAX] = {};
 string_type const absolute_path = traits_type::widen(string_type(getcwd(path_buffer, PATH_MAX)));

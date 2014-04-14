@@ -417,7 +417,6 @@ Future Work
 
  - Testing:
    * Rewrite the majority of unit tests as a set of .in/.out files
-   * Add unit tests from Cjango
    * Add exhaustive date/time formatting tests
    * Add way to specify expected failures; re-enable commented out tests
 

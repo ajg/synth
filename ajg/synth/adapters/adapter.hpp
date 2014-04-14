@@ -16,9 +16,9 @@ using namespace boost; // FIXME: Delete.
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, thisT) \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapterT) \
   public: \
-    typedef thisT                                   this_type; \
+    typedef adapterT                                adapter_type; \
     typedef adaptedT                                adapted_type; \
     typedef Behavior                                behavior_type; \
     typedef base_adapter<behavior_type>             base_type; \

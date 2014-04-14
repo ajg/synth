@@ -114,9 +114,7 @@ struct cgi_environment {
 /*
 struct standard_environment {
     template <class Engine>
-    typename Engine::value_type get( typename Engine::this_type const& engine
-                                   , typename Engine::string_type const& name
-                                   ) const {
+    typename Engine::value_type get(typename Engine::string_type const& name) const {
         std::string const name_ = traits_type::narrow(name);
         std::string const value = std::getenv(name_.c_str());
         return value_type(traits_type::widen(value));

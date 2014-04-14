@@ -28,10 +28,6 @@ namespace tmpl {
 #define SINGLE_TAG(name) TAG(*_s >> NAME(name) >> +_s >> kernel.name_attribute >> *_s >> !as_xpr(kernel.tag_finish))
 #define CLOSE_TAG(name)  TAG(kernel.tag_finish >> *_s >> NAME(name) >> *_s)
 
-namespace {
-using detail::operator ==;
-} // namespace
-
 template <class Kernel>
 struct builtin_tags {
   private:

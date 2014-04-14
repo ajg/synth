@@ -261,15 +261,12 @@ inline String unquote(String const& string) {
 
 
 //
-// operator ==:
-//     Provides a more readable way to compare match objects via regex_ids.
-//     TODO: Rename to matches or similar to avoid confusion.
+// is:
+//     Returns whether the match and regex share regex_ids.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator>
-inline bool operator == ( xpressive::match_results<Iterator> const& match
-                        , xpressive::basic_regex<Iterator>   const& regex
-                        ) {
+inline bool is(xpressive::match_results<Iterator> const& match, xpressive::basic_regex<Iterator> const& regex) {
     return match.regex_id() == regex.regex_id();
 }
 

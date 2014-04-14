@@ -37,7 +37,6 @@ struct missing_attribute;
 
 namespace django {
 namespace {
-using detail::operator ==;
 using boost::xpressive::_s;
 using boost::xpressive::as_xpr;
 using boost::xpressive::s1;

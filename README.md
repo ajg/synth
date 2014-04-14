@@ -269,6 +269,8 @@ Django Engine
  - `django::builtin_tags::ifequal_tag`
  - `django::builtin_tags::ifnotequal_tag`
  - `django::builtin_tags::include_tag`
+ - `django::builtin_tags::include_with_tag`
+ - `django::builtin_tags::include_with_only_tag`
  - `django::builtin_tags::load_tag`
  - `django::builtin_tags::load_from_tag`
  - `django::builtin_tags::now_tag`
@@ -452,8 +454,6 @@ Future Work
  - Engines:
    * Django:
      + Add cycle_silent tag
-     + Add include_with tag
-     + Add include_with_only tag
      + Option to pre-load libraries, tags and filters
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable

@@ -41,8 +41,6 @@ using boost::xpressive::_s;
 using boost::xpressive::as_xpr;
 using boost::xpressive::s1;
 using boost::xpressive::s2;
-using boost::xpressive::s3;
-using boost::xpressive::s4;
 boost::xpressive::mark_tag const id(9);
 } // namespace
 
@@ -84,41 +82,44 @@ struct builtin_tags {
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef django::formatter<options_type>                                     formatter_type;
     typedef typename options_type::arguments_type                               arguments_type;
+    typedef typename arguments_type::second_type::value_type                    named_argument_type;
 
   public:
 
     inline void initialize(kernel_type& kernel) {
         kernel.tag
-            = add(kernel, autoescape_tag::syntax(kernel),  autoescape_tag::render)
-            | add(kernel, block_tag::syntax(kernel),       block_tag::render)
-            | add(kernel, comment_tag::syntax(kernel),     comment_tag::render)
-            | add(kernel, csrf_token_tag::syntax(kernel),  csrf_token_tag::render)
-            | add(kernel, cycle_tag::syntax(kernel),       cycle_tag::render)
-            | add(kernel, debug_tag::syntax(kernel),       debug_tag::render)
-            | add(kernel, extends_tag::syntax(kernel),     extends_tag::render)
-            | add(kernel, filter_tag::syntax(kernel),      filter_tag::render)
-            | add(kernel, firstof_tag::syntax(kernel),     firstof_tag::render)
-            | add(kernel, for_tag::syntax(kernel),         for_tag::render)
-            | add(kernel, for_empty_tag::syntax(kernel),   for_empty_tag::render)
-            | add(kernel, if_tag::syntax(kernel),          if_tag::render)
-            | add(kernel, ifchanged_tag::syntax(kernel),   ifchanged_tag::render)
-            | add(kernel, ifequal_tag::syntax(kernel),     ifequal_tag::render)
-            | add(kernel, ifnotequal_tag::syntax(kernel),  ifnotequal_tag::render)
-            | add(kernel, include_tag::syntax(kernel),     include_tag::render)
-            | add(kernel, load_tag::syntax(kernel),        load_tag::render)
-            | add(kernel, load_from_tag::syntax(kernel),   load_from_tag::render)
-            | add(kernel, now_tag::syntax(kernel),         now_tag::render)
-            | add(kernel, regroup_tag::syntax(kernel),     regroup_tag::render)
-            | add(kernel, spaceless_tag::syntax(kernel),   spaceless_tag::render)
-            | add(kernel, ssi_tag::syntax(kernel),         ssi_tag::render)
-            | add(kernel, templatetag_tag::syntax(kernel), templatetag_tag::render)
-            | add(kernel, url_tag::syntax(kernel),         url_tag::render)
-            | add(kernel, url_as_tag::syntax(kernel),      url_as_tag::render)
-            | add(kernel, variable_tag::syntax(kernel),    variable_tag::render)
-            | add(kernel, verbatim_tag::syntax(kernel),    verbatim_tag::render)
-            | add(kernel, widthratio_tag::syntax(kernel),  widthratio_tag::render)
-            | add(kernel, with_tag::syntax(kernel),        with_tag::render)
-            | add(kernel, library_tag::syntax(kernel),     library_tag::render)
+            = add(kernel, autoescape_tag::syntax(kernel),        autoescape_tag::render)
+            | add(kernel, block_tag::syntax(kernel),             block_tag::render)
+            | add(kernel, comment_tag::syntax(kernel),           comment_tag::render)
+            | add(kernel, csrf_token_tag::syntax(kernel),        csrf_token_tag::render)
+            | add(kernel, cycle_tag::syntax(kernel),             cycle_tag::render)
+            | add(kernel, debug_tag::syntax(kernel),             debug_tag::render)
+            | add(kernel, extends_tag::syntax(kernel),           extends_tag::render)
+            | add(kernel, filter_tag::syntax(kernel),            filter_tag::render)
+            | add(kernel, firstof_tag::syntax(kernel),           firstof_tag::render)
+            | add(kernel, for_tag::syntax(kernel),               for_tag::render)
+            | add(kernel, for_empty_tag::syntax(kernel),         for_empty_tag::render)
+            | add(kernel, if_tag::syntax(kernel),                if_tag::render)
+            | add(kernel, ifchanged_tag::syntax(kernel),         ifchanged_tag::render)
+            | add(kernel, ifequal_tag::syntax(kernel),           ifequal_tag::render)
+            | add(kernel, ifnotequal_tag::syntax(kernel),        ifnotequal_tag::render)
+            | add(kernel, include_tag::syntax(kernel),           include_tag::render)
+            | add(kernel, include_with_tag::syntax(kernel),      include_with_tag::render)
+            | add(kernel, include_with_only_tag::syntax(kernel), include_with_only_tag::render)
+            | add(kernel, load_tag::syntax(kernel),              load_tag::render)
+            | add(kernel, load_from_tag::syntax(kernel),         load_from_tag::render)
+            | add(kernel, now_tag::syntax(kernel),               now_tag::render)
+            | add(kernel, regroup_tag::syntax(kernel),           regroup_tag::render)
+            | add(kernel, spaceless_tag::syntax(kernel),         spaceless_tag::render)
+            | add(kernel, ssi_tag::syntax(kernel),               ssi_tag::render)
+            | add(kernel, templatetag_tag::syntax(kernel),       templatetag_tag::render)
+            | add(kernel, url_tag::syntax(kernel),               url_tag::render)
+            | add(kernel, url_as_tag::syntax(kernel),            url_as_tag::render)
+            | add(kernel, variable_tag::syntax(kernel),          variable_tag::render)
+            | add(kernel, verbatim_tag::syntax(kernel),          verbatim_tag::render)
+            | add(kernel, widthratio_tag::syntax(kernel),        widthratio_tag::render)
+            | add(kernel, with_tag::syntax(kernel),              with_tag::render)
+            | add(kernel, library_tag::syntax(kernel),           library_tag::render)
             ;
     }
 
@@ -641,9 +642,8 @@ struct builtin_tags {
             match_type   const& right = match(kernel.value, 1);
             match_type   const& if_   = match(kernel.block, 0);
             match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ =
-                kernel.evaluate(left, context, options) ==
-                kernel.evaluate(right, context, options);
+            boolean_type const  cond_ = kernel.evaluate(left, context, options) ==
+                                        kernel.evaluate(right, context, options);
 
                  if (cond_) kernel.render_block(ostream, if_,   context, options);
             else if (else_) kernel.render_block(ostream, else_, context, options);
@@ -672,9 +672,8 @@ struct builtin_tags {
             match_type   const& right = match(kernel.value, 1);
             match_type   const& if_   = match(kernel.block, 0);
             match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ =
-                kernel.evaluate(left, context, options) !=
-                kernel.evaluate(right, context, options);
+            boolean_type const  cond_ = kernel.evaluate(left, context, options) !=
+                                        kernel.evaluate(right, context, options);
 
                  if (cond_) kernel.render_block(ostream, if_,   context, options);
             else if (else_) kernel.render_block(ostream, else_, context, options);
@@ -687,7 +686,8 @@ struct builtin_tags {
 
     struct include_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("include") >> kernel.string_literal);
+            return AJG_TAG(kernel.reserved("include") >> kernel.string_literal >> *_s >>
+                !(kernel.keyword("with") >> kernel.arguments >> !(s1 = kernel.keyword("only"))));
         }
 
         static void render( kernel_type  const& kernel
@@ -697,8 +697,55 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             string_type const path = kernel.extract_string(match(kernel.string_literal));
-            kernel.render_file(ostream, path, context, options);
+
+            if (match_type const& args = match(kernel.arguments)) {
+                boolean_type const only = match[s1].matched;
+
+                arguments_type const& arguments = kernel.evaluate_arguments(args, context, options);
+                if (!arguments.first.empty()) {
+                    AJG_SYNTH_THROW(std::invalid_argument("positional argument"));
+                }
+
+                context_type context_copy = only ? context_type() : context;
+                BOOST_FOREACH(named_argument_type const& argument, arguments.second) {
+                    context_copy[argument.first] = argument.second;
+                }
+                kernel.render_file(ostream, path, context_copy, options);
+            }
+            else {
+                kernel.render_file(ostream, path, context, options);
+            }
         }
+    };
+
+//
+// include_with_tag
+//     NOTE: This is a no-op, since the with clause is already handled by include_tag.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct include_with_tag {
+        static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
+        static void render( kernel_type  const& kernel
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {}
+    };
+
+//
+// include_with_only_tag
+//     NOTE: This is a no-op, since the with ... only clause is already handled by include_tag.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct include_with_only_tag {
+        static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
+        static void render( kernel_type  const& kernel
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {}
     };
 
 //

@@ -337,7 +337,6 @@ struct formatter {
             cooked.Y = flags.Y;
             cooked.z = trim_left_copy_if(flags.j, is_any_of("0"));
             cooked.Z = traits_type::literal("");            // TODO: Implement.
-
             return cooked;
         }
 

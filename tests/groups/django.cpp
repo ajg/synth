@@ -173,6 +173,12 @@ DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'hello' %}Bad{% else %}Good{%
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/empty.tpl' %}", "")
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/variables.tpl' %}", "foo: A\nbar: B\nqux: C\n")
 
+DJANGO_TEST(include_with_tag, "{% include 'tests/templates/django/empty.tpl' with foo=42 %}", "")
+DJANGO_TEST(include_with_tag, "{% include 'tests/templates/django/variables.tpl' with foo=42 %}", "foo: 42\nbar: B\nqux: C\n")
+
+DJANGO_TEST(include_with_only_tag, "{% include 'tests/templates/django/empty.tpl' with foo=42 only %}", "")
+DJANGO_TEST(include_with_only_tag, "{% include 'tests/templates/django/variables.tpl' with foo=42 only %}", "foo: 42\nbar: \nqux: \n")
+
 DJANGO_TEST(filter_tag, "{% filter escape %}<foo />{% endfilter %}", "<foo />")
 DJANGO_TEST(filter_tag, "{% filter force_escape %}<foo />{% endfilter %}", "&lt;foo /&gt;")
 DJANGO_TEST(filter_tag, "{% filter title|lower %}aBcD{% endfilter %}", "abcd")

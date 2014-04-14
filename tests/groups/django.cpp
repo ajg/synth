@@ -222,11 +222,13 @@ DJANGO_TEST(for_empty_tag-none,
     "{% for v in '' %}Bad{% empty %} It's empty, Jim {% endfor %}",
     " It's empty, Jim ")
 
-/*
 DJANGO_TEST(for_tag-key-value,
-    "{% for k, v in friends %}[{{ k }}. {{ v }}]{% endfor %}",
-    "[0. age: 23, name: joe][1. age: 55, name: bob][2. age: 41, name: lou]")
-*/
+    "{% for k, v in states %}[{{ k }}: {{ v }}]{% endfor %}",
+    "[CA: California][FL: Florida][NY: New York]")
+
+DJANGO_TEST(for_tag-key-value,
+    "{% for k, v in states %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}",
+    "[CA: California][FL: Florida][NY: New York]")
 
 unit_test(now_tag) {
     string_template_type const t("{% now 'y' %}");

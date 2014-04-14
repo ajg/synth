@@ -258,6 +258,8 @@ Django Engine
  - `django::builtin_tags::comment_tag`
  - `django::builtin_tags::csrf_token_tag`
  - `django::builtin_tags::cycle_tag`
+ - `django::builtin_tags::cycle_as_tag`
+ - `django::builtin_tags::cycle_as_silent_tag`
  - `django::builtin_tags::debug_tag`
  - `django::builtin_tags::extends_tag`
  - `django::builtin_tags::filter_tag`
@@ -453,7 +455,6 @@ Future Work
 
  - Engines:
    * Django:
-     + Add cycle_silent tag
      + Option to pre-load libraries, tags and filters
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
@@ -489,6 +490,8 @@ Future Work
    * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
+   * Remove all no-op tags (e.g. cycle_as_silent_tag)
+   * Fold all variant tags into their main version (e.g. load_from_tag)
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop

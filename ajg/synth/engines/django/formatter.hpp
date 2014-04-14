@@ -257,6 +257,11 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
+            using algo::is_any_of;
+            using algo::to_lower_copy;
+            using algo::trim_left_copy_if;
+            using algo::trim_left_copy;
+
             date_type     const date        = datetime.date();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
@@ -272,53 +277,59 @@ struct formatter {
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
-            string_type   const succint     = algo::trim_left_copy(flags.l)
+            string_type   const succint     = trim_left_copy(flags.l)
                                             + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
                                             : (succint + char_type(' ') + meridiem);
+            string_type   const iso8601     = flags.Y + char_type('-') + flags.m + char_type('-')
+                                            + flags.d + char_type('T') + flags.H + char_type(':')
+                                            + flags.M + char_type(':') + flags.S;
+            string_type   const rfc2822     = flags.a + char_type(',') + char_type(' ')
+                                            + flags.d + char_type(' ') + flags.b + char_type(' ')
+                                            + flags.Y + char_type(' ') + flags.T;
 
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
-            cooked.b = algo::to_lower_copy(flags.b);
-            cooked.B = string_type(); // NOTE: "Not implemented" per the spec.
-            cooked.c = flags.Y + char_type('-') + flags.m + char_type('-') + flags.d + char_type('T') + flags.H + char_type(':') + flags.M + char_type(':') + flags.S;
+            cooked.b = to_lower_copy(flags.b);
+            cooked.B = string_type();                       // NOTE: "Not implemented" per the spec.
+            cooked.c = iso8601;
             cooked.d = flags.d;
             cooked.D = flags.a;
-            cooked.e = flags.z;  // TODO: Ignored with ptimes.
-            cooked.E = flags.B;  // TODO: Make locale-aware.
+            cooked.e = flags.z;                             // TODO: Ignored with ptimes.
+            cooked.E = flags.B;                             // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;
-            cooked.g = algo::trim_left_copy(flags.l);
-            cooked.G = algo::trim_left_copy(flags.k);
+            cooked.g = trim_left_copy(flags.l);
+            cooked.G = trim_left_copy(flags.k);
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
             cooked.I = is_dst ? traits_type::literal("1") : traits_type::literal("0");
-            cooked.j = algo::trim_left_copy_if(flags.d, algo::is_any_of("0"));
+            cooked.j = trim_left_copy_if(flags.d, is_any_of("0"));
             cooked.l = flags.A;
             cooked.L = behavior_type::to_string(is_leapyear);
             cooked.m = flags.m;
             cooked.M = flags.b;
-            cooked.n = algo::trim_left_copy_if(flags.m, algo::is_any_of("0"));
-            cooked.N = flags.b;  // TODO: Use A.P. style.
+            cooked.n = trim_left_copy_if(flags.m, is_any_of("0"));
+            cooked.N = flags.b;                             // TODO: Use A.P. style.
             cooked.o = flags.G;
-            cooked.O = traits_type::literal("");       // TODO: Implement.
+            cooked.O = traits_type::literal("");            // TODO: Implement.
             cooked.P = informal;
-            cooked.r = flags.a + char_type(',') + char_type(' ') + flags.d + char_type(' ') + flags.b + char_type(' ') + flags.Y + char_type(' ') + flags.T; // TODO: Include non-UTC timezones.
+            cooked.r = rfc2822;                             // TODO: Include non-UTC timezones.
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
-            cooked.T = traits_type::literal("");       // TODO: Implement.
-            cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
+            cooked.T = traits_type::literal("");            // TODO: Implement.
+            cooked.u = trim_left_copy_if(flags.f, is_any_of("."));
             cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
-            cooked.W = traits_type::literal("");       // TODO: Like %V but without leading zeros.
+            cooked.W = traits_type::literal("");            // TODO: Like %V, without leading zeros.
             cooked.y = flags.y;
             cooked.Y = flags.Y;
-            cooked.z = algo::trim_left_copy_if(flags.j, algo::is_any_of("0"));
-            cooked.Z = traits_type::literal("");       // TODO: Implement.
+            cooked.z = trim_left_copy_if(flags.j, is_any_of("0"));
+            cooked.Z = traits_type::literal("");            // TODO: Implement.
             return cooked;
         }
 

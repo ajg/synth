@@ -502,6 +502,10 @@ DJANGO_TEST(time_filter, "{{ past|time }}",                           "1:02 a.m.
 DJANGO_TEST(time_filter, "{{ before_past|time:'c' }}",                "2002-01-08T13:02:03")
 DJANGO_TEST(time_filter, "{{ after_past|time:'YEAR_MONTH_FORMAT' }}", "March 2002")
 
+DJANGO_TEST(formatting, "{{ past|time:'w;W;' }}",                "4;2;")
+DJANGO_TEST(formatting, "{{ before_past|time:'w;W;' }}",         "2;2;")
+DJANGO_TEST(formatting, "{{ after_past|time:'w;W;' }}",          "5;9;")
+
 DJANGO_TEST(timesince_filter, "{{ past|timesince:before_past }}",       "0&nbsp;minutes")
 DJANGO_TEST(timesince_filter, "{{ before_past|timesince:past }}",       "1&nbsp;day, 12&nbsp;hours")
 DJANGO_TEST(timesince_filter, "{{ before_past|timesince:after_past }}", "1&nbsp;month, 3&nbsp;weeks")

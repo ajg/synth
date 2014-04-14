@@ -137,15 +137,15 @@ struct options {
     typedef typename traits_type::datetime_type    datetime_type;
     typedef typename traits_type::duration_type    duration_type;
     typedef typename traits_type::string_type      string_type;
+    typedef typename traits_type::paths_type       paths_type;
+    typedef typename traits_type::names_type       names_type;
     typedef typename traits_type::istream_type     istream_type;
     typedef typename traits_type::ostream_type     ostream_type;
 
     typedef std::map<string_type, value_type>      context_type;     // TODO: value_type keys.
-    typedef std::vector<string_type>               names_type;       // TODO: scope_type? namespace_type?
 
     typedef std::pair<sequence_type, mapping_type> arguments_type;
-    typedef std::map<string_type, string_type>     formats_type;     // TODO: definitions_type?
-    typedef std::vector<string_type>               directories_type; // TODO: Use paths_type
+    typedef std::map<string_type, string_type>     formats_type;
 
     typedef abstract_library<options_type>         abstract_library_type;
     typedef abstract_loader<options_type>          abstract_loader_type;
@@ -188,7 +188,7 @@ struct options {
            , value_type       const& default_value = string_type()
            , formats_type     const& formats       = formats_type()
            , boolean_type     const  debug         = false
-           , directories_type const& directories   = directories_type()
+           , paths_type       const& directories   = paths_type()
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
            , resolvers_type   const& resolvers     = resolvers_type()
@@ -238,7 +238,7 @@ struct options {
     value_type        default_value;
     formats_type      formats;
     boolean_type      debug;
-    directories_type  directories;
+    paths_type        directories;
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;

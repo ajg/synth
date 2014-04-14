@@ -179,12 +179,15 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
     typedef binding                              binding_type;
     typedef MultiTemplate                        base_type;
+
     typedef typename binding_type::traits_type   traits_type;
-    typedef typename base_type::boolean_type     boolean_type;
-    typedef typename base_type::string_type      string_type;
+
+    typedef typename traits_type::boolean_type   boolean_type;
+    typedef typename traits_type::string_type    string_type;
+    typedef typename traits_type::paths_type     paths_type;
+
     typedef typename base_type::arguments_type   arguments_type;
     typedef typename base_type::formats_type     formats_type;
-    typedef typename base_type::directories_type directories_type;
     typedef typename base_type::options_type     options_type;
     typedef typename base_type::library_type     library_type;
     typedef typename base_type::libraries_type   libraries_type;
@@ -270,9 +273,9 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
 
     // TODO: Rename these to_*
 
-    inline static directories_type get_directories(py::list dirs) {
+    inline static paths_type get_directories(py::list dirs) {
         py::stl_input_iterator<string_type> begin(dirs), end;
-        return directories_type(begin, end);
+        return paths_type(begin, end);
     }
 
     inline static libraries_type get_libraries(py::dict libs) {

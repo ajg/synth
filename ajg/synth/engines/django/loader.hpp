@@ -17,20 +17,30 @@ namespace django {
 
 template <class Engine>
 struct loader {
-    static void load( typename Engine::context_type&      context
-                    , typename Engine::options_type&      options
-                    , typename Engine::string_type const& library_name
-                    , typename Engine::names_type const*  names
+  public:
+
+    typedef Engine                                                              engine_type;
+    typedef typename engine_type::context_type                                  context_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename engine_type::value_type                                    value_type;
+    typedef typename engine_type::traits_type                                   traits_type;
+
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::names_type                                    names_type;
+
+    typedef typename options_type::tag_type                                     tag_type;
+    typedef typename options_type::filter_type                                  filter_type;
+    typedef typename options_type::library_type                                 library_type;
+    typedef typename options_type::loader_type                                  loader_type;
+
+  public:
+
+    static void load( context_type&      context
+                    , options_type&      options
+                    , string_type const& library_name
+                    , names_type  const* names
                     ) {
 
-        typedef typename Engine::options_type       options_type;
-        typedef typename options_type::traits_type  traits_type;
-        typedef typename options_type::string_type  string_type;
-        typedef typename options_type::value_type   value_type;
-        typedef typename options_type::tag_type     tag_type;
-        typedef typename options_type::filter_type  filter_type;;
-        typedef typename options_type::library_type library_type;
-        typedef typename options_type::loader_type  loader_type;
 
         library_type library = options.libraries[library_name];
 

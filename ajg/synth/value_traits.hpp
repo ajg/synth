@@ -75,13 +75,14 @@ struct default_traits {
 
     typedef std::basic_string<char_type>                string_type;
 
-    typedef std::basic_istream<char_type>               istream_type;
-    typedef std::basic_ostream<char_type>               ostream_type;
-
     typedef string_type                                 path_type;
     typedef std::vector<path_type>                      paths_type;
 
-    typedef std::set<string_type>                       symbols_type;
+    typedef std::set<string_type>                       symbols_type; // TODO[c++11]: unordered?
+    typedef std::vector<string_type>                    names_type;   // TODO: scope_type? namespace_type?
+
+    typedef std::basic_istream<char_type>               istream_type;
+    typedef std::basic_ostream<char_type>               ostream_type;
 
   public:
 

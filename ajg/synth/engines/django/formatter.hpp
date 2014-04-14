@@ -6,6 +6,7 @@
 #define AJG_SYNTH_ENGINES_DJANGO_FORMATTER_HPP_INCLUDED
 
 #include <map>
+#include <ctime>
 #include <sstream>
 
 #include <boost/array.hpp>
@@ -327,7 +328,7 @@ struct formatter {
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
-            cooked.T = traits_type::literal("");            // TODO: Implement.
+            cooked.T = traits_type::widen(string_type(tzname[0]));
             cooked.u = trim_left_copy_if(flags.f, is_any_of("."));
             cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
@@ -336,6 +337,7 @@ struct formatter {
             cooked.Y = flags.Y;
             cooked.z = trim_left_copy_if(flags.j, is_any_of("0"));
             cooked.Z = traits_type::literal("");            // TODO: Implement.
+
             return cooked;
         }
 

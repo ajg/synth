@@ -184,8 +184,8 @@ struct builtin_tags {
 
     struct block_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("block") >> (s1 = kernel.name)) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endblock") >> !(s2 = kernel.name));
+            return AJG_TAG(kernel.reserved("block") >> kernel.name) >> kernel.block
+                >> AJG_TAG(kernel.reserved("endblock") >> !kernel.name);
         }
 
         static void render( kernel_type  const& kernel
@@ -195,12 +195,12 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             match_type  const& block = match(kernel.block);
-            string_type const& name  = match(s1)[id].str();
-            string_type const& close = match(s2)[id].str();
+            string_type const& name  = match(kernel.name, 0)[id].str();
+            string_type const& close = match(kernel.name, 1)[id].str();
 
             if (!close.empty() && name != close) {
                 std::string const original = traits_type::narrow(name);
-                throw_exception(std::logic_error("mismatched endblock tag for " + original));
+                throw_exception(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
             if (options.blocks_) { // We're being inherited from.
@@ -216,7 +216,7 @@ struct builtin_tags {
                     ostream << result;
                 }
             }
-            else { // We're being rendered directly.
+            else { // The block is being rendered directly.
                 kernel.render_block(ostream, block, context, options);
             }
         }
@@ -403,10 +403,9 @@ struct builtin_tags {
 
             options_copy.blocks_ = &blocks; // Set it.
 
-            // First, we render the parent template as if it were
-            // stand-alone, so that we can make block.super
-            // available to the derived template. We don't care
-            // about non-block content, so it is discarded.
+            // First, render the parent template as if it were stand-alone, so that we can make
+            // block.super available to the derived template. We don't care about non-block content,
+            // so it is discarded.
             kernel.render_file(null_stream, filepath, context, options_copy);
             string_type const suffix = traits_type::literal("_super");
 
@@ -414,25 +413,20 @@ struct builtin_tags {
                 context_copy[block.first + suffix] = block.second;
             }
 
-            // We only care about the supers; any other
-            // modifications to the options are discarded.
+            // We only care about the supers; any other modifications to the options are discarded.
             options_copy = options; // Reset it.
             options_copy.blocks_ = &supers;
 
-            // Second, we "extract" the blocks that the derived
-            // template will be overriding, while at the same time
-            // making the parent template's versions available
-            // for the derivee to use as block.super. The derivee's
-            // non-block content is irrelevant so it is discarded.
+            // Second, "extract" the blocks that the derived template will be overriding, while
+            // at the same time making the parent template's versions available for the derivee to
+            // use as block.super. The derivee's non-block content is irrelevant so it is discarded.
             kernel.render_block(null_stream, body, context_copy, options_copy);
 
-            // We only care about the blocks; any other
-            // modifications to the options are discarded.
+            // We only care about the blocks; any other modifications to the options are discarded.
             options_copy = options; // Reset it.
-            options_copy.blocks_ = &supers; //blocks;
+            options_copy.blocks_ = &supers; // blocks;
 
-            // Finally, we render the parent template with the
-            // potentially overriden blocks already rendered.
+            // Finally, render the parent template with any potentially overriden blocks already rendered.
             kernel.render_file(ostream, filepath, context, options_copy);
         }
     };
@@ -939,7 +933,6 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            // TODO: Reuse kernel.html_tag if possible.
             static typename kernel_type::string_regex_type const tag = '<' >> *~(as_xpr('>')) >> '>';
             static typename kernel_type::string_regex_type const gap = (s1 = tag) >> +_s >> (s2 = tag);
 

@@ -15,7 +15,7 @@ int main() {
 
     // Render to different targets:
     tpl.render(std::cout);
-    tpl.render_to_file("greeting.txt", ctx);
+    tpl.render_to_path("greeting.txt", ctx);
     std::cout << tpl.render_to_string(ctx);
     return 0;
 }

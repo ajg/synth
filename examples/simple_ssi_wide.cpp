@@ -17,7 +17,7 @@ int wmain() {
 
     // Render to different targets:
     tpl.render(std::wcout);
-    tpl.render_to_file(L"greeting.txt", ctx);
+    tpl.render_to_path(L"greeting.txt", ctx);
     std::wcout << tpl.render_to_string(ctx);
     return 0;
 }

@@ -243,6 +243,29 @@ struct options {
     loaders_type      loaders;
     resolvers_type    resolvers;
 
+    inline boolean_type top_level() const {
+        return this->blocks_ == 0;
+    }
+
+    inline optional<string_type const&> get_block(string_type const& name) const {
+        if (this->top_level()) {
+            throw_exception(std::invalid_argument("not in a derived template"));
+        }
+        return detail::find_value(name, *this->blocks_);
+    }
+
+    inline string_type const& get_base_block() const {
+        if (this->base_block_.empty()) {
+            throw_exception(std::invalid_argument("not in a derived block"));
+        }
+        else if (optional<string_type const&> const block = this->get_block(this->base_block_)) {
+            return *block;
+        }
+        else {
+            throw_exception(std::logic_error("invalid block"));
+        }
+    }
+
   protected:
 
     tags_type     loaded_tags;
@@ -253,6 +276,7 @@ struct options {
     blocks_type*  blocks_;
     cycles_type   cycles_;
     changes_type  changes_;
+    string_type   base_block_;
 };
 
 }}} // namespace ajg::synth::django

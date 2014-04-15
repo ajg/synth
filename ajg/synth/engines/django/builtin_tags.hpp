@@ -203,21 +203,56 @@ struct builtin_tags {
                 throw_exception(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
-            if (options.blocks_) { // The block is being inherited from.
-                if (optional<string_type const&> const overriden = detail::find_value(name, *options.blocks_)) {
-                    ostream << *overriden;
-                }
-                else {
-                    string_stream_type ss;
-                    kernel.render_block(ss, block, context, options);
-                    string_type const result = ss.str();
-                    (*options.blocks_)[name] = result;
-                    ostream << result;
-                }
-            }
-            else { // The block is being rendered directly.
+            if (options.top_level()) { // The block is being rendered directly.
                 kernel.render_block(ostream, block, context, options);
+                return;
+            } // Else, the block is being derived from instead:
+
+            if (optional<string_type const&> const derived = options.get_block(name)) {
+                ostream << *derived; // The base template is being rendered with derived blocks.
             }
+
+            string_stream_type ss;
+            { // TODO: Either make an options copy or make this strongly exception safe:
+                string_type const previous_block = options.base_block_;
+                const_cast<options_type&>(options).base_block_ = name;
+                kernel.render_block(ss, block, context, options);
+                const_cast<options_type&>(options).base_block_ = previous_block;
+            }
+            (*options.blocks_)[name] = ss.str();
+        }
+
+        static void extend( string_type  const& path
+                          , kernel_type  const& kernel
+                          , match_type   const& body
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {
+
+            std::basic_ostream<char_type> null_stream(0);
+            typename options_type::blocks_type blocks;
+
+            options_type options_copy = options;
+            options_copy.blocks_ = &blocks;
+
+            // First, render the base template as if it were stand-alone, so that block.super is
+            // available to the derived template; non-block content is discarded.
+            kernel.render_file(null_stream, path, context, options_copy);
+
+            options_copy = options; // Discard non-block modifications to options.
+            options_copy.blocks_ = &blocks;
+
+            // Second, render any blocks in the derived template, while making the base template's
+            // versions available to the derivee as block.super; non-block content is discarded.
+            kernel.render_block(null_stream, body, context, options_copy);
+
+            options_copy = options; // Discard non-block modifications to options.
+            options_copy.blocks_ = &blocks;
+
+            // Third, render the base template again with any (possibly) overridden blocks.
+            // TODO: Parse and generate the frame once and reuse it or have render_file do caching.
+            kernel.render_file(ostream, path, context, options_copy);
         }
     };
 
@@ -388,44 +423,9 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            typedef typename options_type::blocks_type blocks_type;
-            typedef typename blocks_type::value_type   block_type;
-
-            match_type  const& string   = match(kernel.string_literal);
-            match_type  const& body     = match(kernel.block);
-            string_type const  filepath = kernel.extract_string(string);
-
-            std::basic_ostream<char_type> null_stream(0);
-            blocks_type blocks, supers;
-            options_type options_copy = options;
-            context_type context_copy = context;
-
-            options_copy.blocks_ = &blocks; // Set it.
-
-            // First, render the parent template as if it were stand-alone, so that we can make
-            // block.super available to the derived template. We don't care about non-block content,
-            // so it is discarded.
-            kernel.render_file(null_stream, filepath, context, options_copy);
-
-            BOOST_FOREACH(block_type const& block, blocks) {
-                context_copy[block.first + traits_type::literal("_super")] = block.second;
-            }
-
-            // We only care about the supers; any other modifications to the options are discarded.
-            options_copy = options; // Reset it.
-            options_copy.blocks_ = &supers;
-
-            // Second, "extract" the blocks that the derived template will be overriding, while
-            // at the same time making the parent template's versions available for the derivee to
-            // use as block.super. The derivee's non-block content is irrelevant so it is discarded.
-            kernel.render_block(null_stream, body, context_copy, options_copy);
-
-            // We only care about the blocks; any other modifications to the options are discarded.
-            options_copy = options; // Reset it.
-            options_copy.blocks_ = &supers; // blocks;
-
-            // Finally, render the parent template with any potentially overriden blocks already rendered.
-            kernel.render_file(ostream, filepath, context, options_copy);
+            match_type  const& body = match(kernel.block);
+            string_type const  path = kernel.extract_string(match(kernel.string_literal));
+            block_tag::extend(path, kernel, body, context, options, ostream);
         }
     };
 

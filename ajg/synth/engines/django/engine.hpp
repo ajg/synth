@@ -179,6 +179,9 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             = '"'  >> *~as_xpr('"')  >> '"'
             | '\'' >> *~as_xpr('\'') >> '\''
             ;
+        super_literal
+            = word("block.super")
+            ;
         variable_literal
             = restricted_identifier
             ;
@@ -187,6 +190,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             | boolean_literal
             | number_literal
             | string_literal
+            | super_literal
             | variable_literal
             ;
         attribute_link
@@ -531,6 +535,9 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:
             return value_type(extract_string(literal)).token(token.substr(1, token.length() - 2));
         }
+        else if (is(literal, this->super_literal)) {
+            return options.get_base_block(); // TODO? .copy().token(token);
+        }
         else if (is(literal, this->variable_literal)) {
             if (optional<value_type const&> const variable = detail::find_value(string, context)) {
                 return variable->copy().token(token);
@@ -747,8 +754,9 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
     regex_type true_literal;
     regex_type false_literal;
     regex_type boolean_literal;
-    regex_type string_literal;
     regex_type number_literal;
+    regex_type string_literal;
+    regex_type super_literal;
     regex_type variable_literal;
     regex_type literal;
 

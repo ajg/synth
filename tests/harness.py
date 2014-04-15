@@ -63,6 +63,20 @@ def run_test(name, context, golden, source, engine, args=()):
             if string != file.read():
                 print('    x Rendering to file failed: mismatch')
 
+    with tempfile.NamedTemporaryFile() as file:
+        try:
+            template.render_to_path(file.name, context)
+            print('    - Rendering to path succeeded')
+        except Exception as e:
+            failures += 1
+            print('    x Rendering to path failed:\n' + str(e))
+            return
+        else:
+            file.flush()
+            file.seek(0)
+            if string != file.read():
+                print('    x Rendering to path failed: mismatch')
+
     if string == golden:
         print('    - Matching succeeded')
     else:

@@ -31,9 +31,8 @@ BOOST_PYTHON_MODULE(synth)
     def("version", synth::python::version);
 
     class_<Template>("Template", Template::constructor_type())
-        .def("render_to_string", &Template::render_to_string)
+        .def("render_to_file",   &Template::render_to_file)
         .def("render_to_path",   &Template::render_to_path)
-     // .def("render_to_file",   &Template::render_to_file)
-     // .def("render_to_stream", &Template::render_to_stream)
+        .def("render_to_string", &Template::render_to_string)
     ;
 }

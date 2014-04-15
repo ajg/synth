@@ -240,19 +240,28 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                    ) {}
 
     void render_to_file(py::object file, py::dict dictionary) const {
-        throw_exception(not_implemented("render_to_file"));
-        // TODO:
-        // streambuf stream(file, buffer_size=0); // (from python_streambuf.h)
-        // return base_type::template render_to_stream<binding>(stream, dictionary);
-    }
+        file.attr("write")(base_type::template render_to_string<binding>(dictionary));
+        // XXX: Automatically call flush()?
 
-    string_type render_to_string(py::dict dictionary) const {
-        return base_type::template render_to_string<binding>(dictionary);
+        /* TODO: Be more intelligent and use something like:
+
+        if (descriptor = file.attr("fileno")) {
+            return base_type::template render_to_descriptor<binding>(descriptor, dictionary);
+        }
+        else {
+            streambuf stream(file, buffer_size=0); // (e.g. from python_streambuf.h)
+            base_type::template render_to_stream<binding>(stream, dictionary);
+        }
+        */
     }
 
     void render_to_path(py::str filepath, py::dict dictionary) const {
         string_type const s = py::extract<string_type>(filepath);
         return base_type::template render_to_path<binding>(s, dictionary);
+    }
+
+    string_type render_to_string(py::dict dictionary) const {
+        return base_type::template render_to_string<binding>(dictionary);
     }
 
   private:

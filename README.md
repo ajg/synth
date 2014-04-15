@@ -35,15 +35,15 @@ cat tpl.txt | ./synth -e django -c ctx.json
 ### Python
 
 ```python
-import synth
+import synth, sys
 
 def simple_tmpl_example():
     tpl = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
     ctx = {'user': 'Dolph Lundgren'}
 
-    tpl.render_to_path("greeting.txt", ctx)
-    # or, e.g.:
-    return tpl.render_to_string(ctx)
+    tpl.render_to_path("greeting.txt", ctx) # or, e.g.:
+    tpl.render_to_file(sys.stdout, ctx) # or, e.g.:
+    print tpl.render_to_string(ctx)
 ```
 
 ### [C++](./examples/simple_ssi.cpp)

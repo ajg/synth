@@ -3,6 +3,7 @@
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 import synth
+import tempfile
 from difflib import unified_diff
 
 print('Loaded synth; version: ' + synth.version())
@@ -42,11 +43,25 @@ def run_test(name, context, golden, source, engine, args=()):
 
     try:
         string = template.render_to_string(context)
-        print('    - Rendering succeeded')
+        print('    - Rendering to string succeeded')
     except Exception as e:
         failures += 1
-        print('    x Rendering failed:\n' + str(e))
+        print('    x Rendering to string failed:\n' + str(e))
         return
+
+    with tempfile.TemporaryFile() as file:
+        try:
+            template.render_to_file(file, context)
+            print('    - Rendering to file succeeded')
+        except Exception as e:
+            failures += 1
+            print('    x Rendering to file failed:\n' + str(e))
+            return
+        else:
+            file.flush()
+            file.seek(0)
+            if string != file.read():
+                print('    x Rendering to file failed: mismatch')
 
     if string == golden:
         print('    - Matching succeeded')

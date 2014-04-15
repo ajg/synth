@@ -400,16 +400,6 @@ uniform_random_number_generator<double> const random_double;
 //     TODO: Deprecate the esoteric ones and rename the rest get_* or such.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Needle, class Haystack, class Else>
-inline typename Haystack::const_iterator find_or
-        ( Needle   const& needle
-        , Haystack const& haystack
-        , Else     const& else_
-        ) {
-    typename Haystack::const_iterator const it = std::find(haystack.begin(), haystack.end(), needle);
-    return it == haystack.end() ? else_ : it;
-}
-
 template <class Needle, class Haystack>
 inline optional<typename Haystack::value_type const&> find_value
         ( Needle   const& needle

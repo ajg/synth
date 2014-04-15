@@ -140,10 +140,12 @@ DJANGO_TEST(autoescape_tag, "{{ xml_var|safe }}",         "<foo><bar><qux /></ba
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 DJANGO_TEST(inheritance, "{% include 'tests/templates/django/base.tpl' %}",
-    "Base template\nThe header\nThe content\nThe footer\n")
+    "Base template\nBase header\nBase content\nBase footer\n")
 
 DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
-    "Base template\nThe header\nThe content: 1, 2, 3, 4, 5, 6, 7, 8, 9\nThe footer\n")
+    "Base template\nBase header\nBase content + 1, 2, 3, 4, 5, 6, 7, 8, 9\nBase footer\n")
+
+// TODO: Test multiple levels of inheritance.
 
 ///
 /// Tag tests

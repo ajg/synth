@@ -203,9 +203,8 @@ struct builtin_tags {
                 throw_exception(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
-            if (options.blocks_) { // We're being inherited from.
-                if (optional<string_type const&> const overriden =
-                    detail::find_value(name, *options.blocks_)) {
+            if (options.blocks_) { // The block is being inherited from.
+                if (optional<string_type const&> const overriden = detail::find_value(name, *options.blocks_)) {
                     ostream << *overriden;
                 }
                 else {
@@ -389,8 +388,8 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            typedef typename options_type::blocks_type    blocks_type;
-            typedef typename blocks_type::value_type block_type;
+            typedef typename options_type::blocks_type blocks_type;
+            typedef typename blocks_type::value_type   block_type;
 
             match_type  const& string   = match(kernel.string_literal);
             match_type  const& body     = match(kernel.block);
@@ -407,10 +406,9 @@ struct builtin_tags {
             // block.super available to the derived template. We don't care about non-block content,
             // so it is discarded.
             kernel.render_file(null_stream, filepath, context, options_copy);
-            string_type const suffix = traits_type::literal("_super");
 
             BOOST_FOREACH(block_type const& block, blocks) {
-                context_copy[block.first + suffix] = block.second;
+                context_copy[block.first + traits_type::literal("_super")] = block.second;
             }
 
             // We only care about the supers; any other modifications to the options are discarded.

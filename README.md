@@ -63,7 +63,7 @@ int main() {
     template_type::context_type ctx;
     ctx["user"] = "Dolph Lundgren";
 
-    // Render to different targets:
+    // Render to different destinations:
     tpl.render_to_stream(std::cout);
     tpl.render_to_path("greeting.txt", ctx);
     std::cout << tpl.render_to_string(ctx);

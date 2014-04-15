@@ -15,7 +15,7 @@ int wmain() {
     template_type::context_type ctx;
     ctx[L"user"] = L"Dolph Lundgren";
 
-    // Render to different targets:
+    // Render to different destinations:
     tpl.render_to_stream(std::wcout);
     tpl.render_to_path(L"greeting.txt", ctx);
     std::wcout << tpl.render_to_string(ctx);

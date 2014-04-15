@@ -51,11 +51,11 @@ struct bidirectional_input_stream {
 
         inline bool at(position_type const position) const {
             return this->position_ == position || (this->position_ == this->stream_->current_size()
-                && !this->stream_->expand() && position == std::numeric_limits<position_type>::max());
+                && !this->stream_->expand() && position == (std::numeric_limits<position_type>::max)());
         }
 
         inline void maybe_read() {
-            if (this->position_ == std::numeric_limits<position_type>::max()) {
+            if (this->position_ == (std::numeric_limits<position_type>::max)()) {
                 this->position_ = this->stream_->read_all();
             }
         }
@@ -73,7 +73,7 @@ struct bidirectional_input_stream {
     bidirectional_input_stream(input_stream_type& stream): stream_(stream) {}
 
     iterator         begin()  { return iterator(this, 0); }
-    iterator         end()    { return iterator(this, std::numeric_limits<position_type>::max()); }
+    iterator         end()    { return iterator(this, (std::numeric_limits<position_type>::max)()); }
     reverse_iterator rbegin() { return reverse_iterator(this->begin()); }
     reverse_iterator rend()   { return reverse_iterator(this->end()); }
 

@@ -395,37 +395,41 @@ uniform_random_number_generator<int>    const random_int;
 uniform_random_number_generator<double> const random_double;
 
 //
-// find_*:
-//     Set of convenience functions to locate specific items within collections.
-//     TODO: Deprecate the esoteric ones and rename the rest get_* or such.
+// has_mapped_type
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Needle, class Haystack>
-inline optional<typename Haystack::value_type const&> find_value
-        ( Needle   const& needle
-        , Haystack const& haystack
+struct one { char c[1]; };
+struct two { char c[2]; };
+
+template <class T> one has_mapped_type_(...);
+template <class T> two has_mapped_type_(typename T::mapped_type const volatile *);
+
+template <class T> struct has_mapped_type {
+    BOOST_STATIC_CONSTANT(bool, value = sizeof(has_mapped_type_<T>(0)) == sizeof(two));
+};
+
+//
+// find:
+//     Uniform interface for mapped and non-mapped containers.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Needle, class Container>
+inline optional<typename Container::value_type> find
+        ( Needle    const& needle
+        , Container const& container
+        , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
         ) {
-    typename Haystack::const_iterator const it = std::find(haystack.begin(), haystack.end(), needle);
-    if (it == haystack.end()) return none; else return *it;
+    typename Container::const_iterator const it = std::find(container.begin(), container.end(), needle);
+    if (it == container.end()) return none; else return *it;
 }
 
 template <class Container>
-inline optional<typename Container::mapped_type const/*&*/> find_mapped_value
+inline optional<typename Container::mapped_type> find
         ( typename Container::key_type const& needle
         , Container                    const& container
         ) {
     typename Container::const_iterator const it = container.find(needle);
     if (it == container.end()) return none; else return it->second;
-}
-
-template <class Needle, class Key, class Value, class Compare, class Allocator>
-inline optional<Value const&> find_value
-        ( Needle                                   const& needle
-        , std::map<Key, Value, Compare, Allocator> const& map
-        ) {
-    typedef std::map<Key, Value, Compare, Allocator> map_type;
-    typename map_type::const_iterator const it = map.find(needle);
-    if (it == map.end()) return none; else return it->second;
 }
 
 //

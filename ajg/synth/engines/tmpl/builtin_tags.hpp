@@ -265,7 +265,7 @@ struct builtin_tags {
             value_type result;
             typename engine_type::attributes const attrs = kernel.parse_attributes(match);
 
-            if (optional<value_type const&> const variable = detail::find_value(attrs.name, context)) {
+            if (optional<value_type> const& variable = detail::find(attrs.name, context)) {
                 result = *variable;
             }
             else if (attrs.default_) {

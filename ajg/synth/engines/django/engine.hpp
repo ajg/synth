@@ -80,7 +80,6 @@ struct engine : base_engine<Traits> {
 }; // engine
 
 namespace {
-using detail::find_mapped_value;
 namespace x = boost::xpressive;
 }
 
@@ -539,7 +538,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             return options.get_base_block(); // TODO? .copy().token(token);
         }
         else if (is(literal, this->variable_literal)) {
-            if (optional<value_type const&> const variable = detail::find_value(string, context)) {
+            if (optional<value_type> const& variable = detail::find(string, context)) {
                 return variable->copy().token(token);
             }
             else {

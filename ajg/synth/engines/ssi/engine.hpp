@@ -214,8 +214,8 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
                                , string_type  const& name
                                ) const {
         // First, check the context.
-        if (optional<value_type const&> const value = detail::find_value(name, context)) {
-            return value->to_string();
+        if (optional<value_type> const value = detail::find(name, context)) {
+            return string_type(value->to_string());
         }
         // Second, check for magic variables.
         else if (name == traits_type::literal("DOCUMENT_NAME")) {
@@ -234,8 +234,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
             throw_exception(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
-        else if(optional<typename environment_type::mapped_type const> const value =
-            detail::find_mapped_value(traits_type::narrow(name), environment)) {
+        else if (optional<string_type> const value = detail::find(traits_type::narrow(name), this->environment)) {
             return traits_type::widen(*value);
         }
         // Otherwise, use the undefined echo message.

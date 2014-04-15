@@ -947,7 +947,7 @@ struct builtin_filters {
             template <class Match>
             string_type operator()(Match const& match) const {
                 string_type const tag = match[s1].str();
-                return detail::find_value(tag, tags) ? string_type() : match.str();
+                return detail::find(tag, tags) ? string_type() : match.str();
             }
         };
     };

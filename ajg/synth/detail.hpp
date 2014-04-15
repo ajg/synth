@@ -21,8 +21,8 @@
 #include <sys/stat.h>
 
 #ifndef _WIN32
-  #include <unistd.h>
-  extern char **environ;
+    #include <unistd.h>
+    extern char **environ;
 #endif
 
 #include <boost/assert.hpp>

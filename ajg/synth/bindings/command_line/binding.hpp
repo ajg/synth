@@ -73,11 +73,11 @@ struct binding : MultiTemplate {
         return base_type::template render_to_string<binding>(context);
     }
 
-    void render_to_path( string_type  const& filepath
+    void render_to_path( string_type  const& path
                        , context_type const& context = context_type()
                     // , options_type const& options = options_type()
                        ) const {
-        return base_type::template render_to_path<binding>(filepath, context);
+        return base_type::template render_to_path<binding>(path, context);
     }
 
   public: // TODO[c++11]: Replace with `friend MultiTemplate;`

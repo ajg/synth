@@ -235,11 +235,11 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
 
     // TODO: Rename render_path
     void render_file( ostream_type&       ostream
-                    , string_type  const& filepath
+                    , string_type  const& path
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        file_template<engine_type>(filepath).render_to_stream(ostream, context, options);
+        file_template<engine_type>(path).render_to_stream(ostream, context, options);
     }
 
     void render_text( ostream_type&       ostream

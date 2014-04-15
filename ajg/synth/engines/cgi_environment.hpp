@@ -84,7 +84,7 @@ struct cgi_environment {
 
     void operator ()(context_type& context) const {
         BOOST_FOREACH(string_type const& variable, variables_) {
-            if (!detail::find_value(variable, context)) {
+            if (!detail::find(variable, context)) { // TODO: detail::contains.
                 if (optional<value_type> const value = get(variable)) {
                     context.insert(std::make_pair(variable, *value));
                 }
@@ -97,7 +97,7 @@ struct cgi_environment {
     optional<value_type> get(string_type const& name) const {
         std::string const name_ = traits_type::narrow(name);
      // char const *const value = (*Source)(name_.c_str());
-        if (char const* const value = std::getenv(name_.c_str())) {
+        if (char const* const value = (std::getenv)(name_.c_str())) {
             return value_type(traits_type::widen(std::string(value)));
         }
         else {

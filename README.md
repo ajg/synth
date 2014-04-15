@@ -63,7 +63,7 @@ int main() {
     ctx["user"] = "Dolph Lundgren";
 
     // Render to different targets:
-    tpl.render(std::cout);
+    tpl.render_to_stream(std::cout);
     tpl.render_to_path("greeting.txt", ctx);
     std::cout << tpl.render_to_string(ctx);
     return 0;

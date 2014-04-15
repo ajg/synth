@@ -254,12 +254,13 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
         render_block(ostream, frame, copy, options);
     }
 
+    // TODO: Rename render_path
     void render_file( ostream_type&       ostream
                     , string_type  const& filepath
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        file_template<engine_type>(filepath, options.directories).render(ostream, context, options);
+        file_template<engine_type>(filepath, options.directories).render_to_stream(ostream, context, options);
     }
 
     void render_text( ostream_type&       ostream

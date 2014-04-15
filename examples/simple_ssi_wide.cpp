@@ -16,7 +16,7 @@ int wmain() {
     ctx[L"user"] = L"Dolph Lundgren";
 
     // Render to different targets:
-    tpl.render(std::wcout);
+    tpl.render_to_stream(std::wcout);
     tpl.render_to_path(L"greeting.txt", ctx);
     std::wcout << tpl.render_to_string(ctx);
     return 0;

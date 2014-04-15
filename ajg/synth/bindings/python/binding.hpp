@@ -239,11 +239,11 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
                    , get_resolvers(rslvrs)
                    ) {}
 
-    void render(py::object file, py::dict dictionary) const {
-        throw_exception(not_implemented("render"));
+    void render_to_file(py::object file, py::dict dictionary) const {
+        throw_exception(not_implemented("render_to_file"));
         // TODO:
         // streambuf stream(file, buffer_size=0); // (from python_streambuf.h)
-        // return base_type::template render<binding>(stream, dictionary);
+        // return base_type::template render_to_stream<binding>(stream, dictionary);
     }
 
     string_type render_to_string(py::dict dictionary) const {

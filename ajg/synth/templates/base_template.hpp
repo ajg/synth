@@ -66,13 +66,13 @@ struct base_template : boost::noncopyable {
   public:
 
 //
-// render
+// render_to_stream
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void render( ostream_type&       ostream
-               , context_type const& context = context_type()
-               , options_type const& options = options_type()
-               ) const {
+    void render_to_stream( ostream_type&       ostream
+                         , context_type const& context = context_type()
+                         , options_type const& options = options_type()
+                         ) const {
         kernel_->render(ostream, frame_, context, options);
     }
 

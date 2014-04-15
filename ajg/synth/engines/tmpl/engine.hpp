@@ -208,8 +208,7 @@ struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::templat
                                  ) const {
         string_type const name = extract_attribute(attr);
 
-        if (optional<value_type const&> const
-                variable = detail::find_value(name, context)) {
+        if (optional<value_type> const& variable = detail::find(name, context)) {
             return *variable;
         }
         else {

@@ -208,7 +208,7 @@ struct builtin_tags {
                 return;
             } // Else, the block is being derived from instead:
 
-            if (optional<string_type const&> const derived = options.get_block(name)) {
+            if (optional<string_type> const& derived = options.get_block(name)) {
                 ostream << *derived; // The base template is being rendered with derived blocks.
             }
 
@@ -265,7 +265,7 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
 
-            if (optional<value_type const&> const token = detail::find_value(traits_type::literal("csrf_token"), context)) {
+            if (optional<value_type> const& token = detail::find(traits_type::literal("csrf_token"), context)) {
                 string_type const& s = detail::escape_entities(token->to_string());
 
                 if (s != traits_type::literal("NOTPROVIDED")) {
@@ -298,7 +298,7 @@ struct builtin_tags {
             match_type  const& block    = match(kernel.block);
             string_type const& name     = match(kernel.name)[id].str();
             size_type   const  total    = vals.nested_results().size();
-            size_type   const  current  = detail::find_mapped_value(position, options.cycles_).get_value_or(0);
+            size_type   const  current  = detail::find(position, options.cycles_).get_value_or(0);
 
             match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
             value_type const  value = kernel.evaluate(val, context, options);
@@ -598,7 +598,7 @@ struct builtin_tags {
             match_type const& else_ = match(kernel.block, 1);
 
             size_type const position = match.position();
-            optional<value_type const&> const value = detail::find_value(position, options.changes_);
+            optional<value_type> const value = detail::find(position, options.changes_);
 
             // This is the case with no variables (compare contents).
             if (vals.nested_results().empty()) {
@@ -987,7 +987,7 @@ struct builtin_tags {
                           ) {
             string_type const name = match(kernel.name)[id].str();
 
-            if (optional<string_type const> const& marker = detail::find_mapped_value(name, kernel.markers)) {
+            if (optional<string_type> const& marker = detail::find(name, kernel.markers)) {
                 ostream << *marker;
             }
             else {

@@ -42,21 +42,23 @@
 namespace ajg {
 namespace synth {
 namespace debug {
+static std::size_t count = 0; // TODO: Make global.
 
 ///
 /// AJG_CERR_LEAD, AJG_CERR_TRAIL
 //      TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_CERR_LEAD  (std::cerr << std::endl << std::boolalpha << "    in " << __FUNCTION__ << "():\t")
-#define AJG_CERR_TRAIL ("")
+#define AJG_DEBUG_CERR       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
+#define AJG_DEBUG_CERR_LEAD  (AJG_DEBUG_CERR << std::boolalpha << "  in " << __FUNCTION__ << "():\t")
+#define AJG_DEBUG_CERR_TRAIL (std::endl)
 
 ///
 /// AJG_DUMP, AJG_PRINT
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DUMP(e)  (AJG_CERR_LEAD << #e << " = `" << (e) << "`" << AJG_CERR_TRAIL)
-#define AJG_PRINT(e) (AJG_CERR_LEAD << (e)                        << AJG_CERR_TRAIL)
+#define AJG_DUMP(e)  (AJG_DEBUG_CERR_LEAD << #e << " = `" << (e) << "`" << AJG_DEBUG_CERR_TRAIL)
+#define AJG_PRINT(e) (AJG_DEBUG_CERR_LEAD << (e)                        << AJG_DEBUG_CERR_TRAIL)
 
 ///
 /// AJG_FPRINTF:

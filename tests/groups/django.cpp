@@ -44,7 +44,6 @@ struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<
 AJG_TESTING_BEGIN
 
 ///     TODO:
-///     django::force_escape_filter
 ///     django::block_tag
 ///     django::extends_tag
 ///     django::ifchanged_tag
@@ -114,11 +113,19 @@ unit_test(missing tag) {
     ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
 
-DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
-DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
-// TODO: DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var|escape }}{% endautoescape %}", "???")
-// TODO: DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var|force_escape }}{% endautoescape %}", "???")
-DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var|safe }}{% endautoescape %}", "<foo><bar><qux /></bar></foo>")
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}",               "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}",              "<foo><bar><qux /></bar></foo>")
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var|escape }}{% endautoescape %}",        "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var|escape }}{% endautoescape %}",       "<foo><bar><qux /></bar></foo>")
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var|force_escape }}{% endautoescape %}",  "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var|force_escape }}{% endautoescape %}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var|safe }}{% endautoescape %}",          "<foo><bar><qux /></bar></foo>")
+DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var|safe }}{% endautoescape %}",         "<foo><bar><qux /></bar></foo>")
+
+DJANGO_TEST(autoescape_tag, "{{ xml_var }}",              "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{{ xml_var|escape }}",       "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{{ xml_var|force_escape }}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
+DJANGO_TEST(autoescape_tag, "{{ xml_var|safe }}",         "<foo><bar><qux /></bar></foo>")
 
 DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
 DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")
@@ -748,6 +755,6 @@ DJANGO_TEST(safe_filter, "{{tags|safe}}", "")
 DJANGO_TEST(safe_filter+join_filter, "{{tags|safe|join:', '}}", "")
 DJANGO_TEST(safeseq_filter, "{{tags|safeseq}}", "")
 DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
-*/
 
-// TODO: {% block a_block %}This is a block{% endblock a_block %}
+{% block a_block %}This is a block{% endblock a_block %}
+*/

@@ -44,12 +44,17 @@ struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<
 AJG_TESTING_BEGIN
 
 ///     TODO:
-///     django::block_tag
-///     django::extends_tag
 ///     django::ifchanged_tag
 ///     django::load_tag      (Tested implicitly in Python binding tests.)
 ///     django::load_from_tag (Tested implicitly in Python binding tests.)
 ///     django::library_tag   (Tested implicitly in Python binding tests.)
+
+/* TODO:
+DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
+DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
+DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
+DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
+*/
 
 #define DJANGO_TEST_(name, in, out, context) \
     unit_test(name) { ensure_equals(string_template_type(in).render_to_string(context), out); }}}
@@ -58,6 +63,7 @@ AJG_TESTING_BEGIN
 
 #define NO_CONTEXT // Nothing.
 
+///
 /// Sanity checks
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +79,7 @@ DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /
 DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", NO_CONTEXT)
 DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", context)
 
+///
 /// Literal tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,13 +112,14 @@ DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
 DJANGO_TEST(multiple filters,   "{% firstof 0|add:1|add:2|add:3 %}", "6")
 DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 
-/// Tag tests
+///
+/// Escaping tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unit_test(missing tag) {
-    string_template_type const t("{% xyz 42 %}");
-    ensure_throws(s::missing_tag, t.render_to_string(context));
-}}}
+// TODO: DJANGO_TEST(safe_filter,                "{{tags|safe}}",               "???")
+// TODO: DJANGO_TEST(safe_filter+join_filter,    "{{tags|safe|join:', '}}",     "???")
+// TODO: DJANGO_TEST(safeseq_filter,             "{{tags|safeseq}}",            "???")
+// TODO: DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}",  "???")
 
 DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}",               "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}",              "<foo><bar><qux /></bar></foo>")
@@ -126,6 +134,33 @@ DJANGO_TEST(autoescape_tag, "{{ xml_var }}",              "&lt;foo&gt;&lt;bar&gt
 DJANGO_TEST(autoescape_tag, "{{ xml_var|escape }}",       "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{{ xml_var|force_escape }}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{{ xml_var|safe }}",         "<foo><bar><qux /></bar></foo>")
+
+///
+/// Inheritance tests
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DJANGO_TEST(inheritance, "{% include 'tests/templates/django/base.tpl' %}",
+    "Base template\nThe header\nThe content\nThe footer\n")
+
+DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
+    "Base template\nThe header\nThe content: 1, 2, 3, 4, 5, 6, 7, 8, 9\nThe footer\n")
+
+///
+/// Tag tests
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+unit_test(missing tag) {
+    string_template_type const t("{% xyz 42 %}");
+    ensure_throws(s::missing_tag, t.render_to_string(context));
+}}}
+
+DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock %}|bar",         "foo|This is a block|bar")
+DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock a_block %}|bar", "foo|This is a block|bar")
+
+unit_test(mismatched block) {
+    string_template_type const t("{% block foo %}{% endblock bar %}");
+    ensure_throws(std::invalid_argument, t.render_to_string(context));
+}}}
 
 DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
 DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")
@@ -743,18 +778,3 @@ DJANGO_TEST(slice_filter, "{{ numbers|slice:':'}}",     "1, 2, 3, 4, 5, 6, 7, 8,
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}",    "1, 2, 3, 4, 5, 6, 7, 8, 9")
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}",   "3, 4, 5, 6")
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "4, 5, 6, 7")
-
-/* TODO:
-DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
-DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
-DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
-DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
-
-DJANGO_TEST(join_filter, "{{tags|join:', '}}", "")
-DJANGO_TEST(safe_filter, "{{tags|safe}}", "")
-DJANGO_TEST(safe_filter+join_filter, "{{tags|safe|join:', '}}", "")
-DJANGO_TEST(safeseq_filter, "{{tags|safeseq}}", "")
-DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}", "")
-
-{% block a_block %}This is a block{% endblock a_block %}
-*/

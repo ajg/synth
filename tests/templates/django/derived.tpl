@@ -1,9 +1,3 @@
 {% extends "tests/templates/django/base.tpl" %}
-
-{% block content %}
-Derived content: {{ a_string_array }}.
-{{ content_super }}
-{% endblock content %}
-
-This is the derived template.
-{{a_string_array[2]}}
+Derived template
+{% block content %}{{ block.super }}: {{ numbers }}{% endblock content %}

@@ -112,7 +112,7 @@ struct command {
             else throw_exception(std::invalid_argument("unknown context format"));
         }
 
-        binding.render(std::cout, context);
+        binding.render_to_stream(std::cout, context);
     }
 };
 

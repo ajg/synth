@@ -60,11 +60,11 @@ struct binding : MultiTemplate {
 
   public:
 
-    void render( ostream_type&        ostream
-               , context_type  const& context = context_type()
-            // , options_type  const& options = options_type()
-               ) const {
-        return base_type::template render<binding>(ostream, context);
+    void render_to_stream( ostream_type&        ostream
+                         , context_type  const& context = context_type()
+                      // , options_type  const& options = options_type()
+                         ) const {
+        return base_type::template render_to_stream<binding>(ostream, context);
     }
 
     string_type render_to_string( context_type const& context = context_type()

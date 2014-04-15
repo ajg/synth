@@ -71,10 +71,29 @@ is_threaded = True
 synth_base  = join('ajg', 'synth')
 is_windows  = sys.platform == 'win32'
 
+def get_and_set_windows_msvc_version():
+    latest, path = None, None
+
+    for name, value in os.environ.items():
+        match = re.search(r'VS(\d\d?)(\d)COMNTOOLS', name)
+        if match:
+            version = (int(match.group(1)), int(match.group(2)))
+            if not latest or version > latest:
+                latest = version
+                path = value
+    
+    if not latest:
+        raise Exception('No version of MSVC found')
+
+    # These are hard-coded somewhere in the guts of setuptools/distutils:
+    os.environ['VS90COMNTOOLS']  = path
+    os.environ['VS100COMNTOOLS'] = path
+    return latest
+
 if is_windows:
     is_msvc       = True       # FIXME: Exclude non-msvc compilers.
     architecture  = 32         # TODO: Detect.
-    msvc_version  = (12, 0)    # TODO: Try to detect from '%VS{major}{minor}COMNTOOLS%' environment variable.
+    msvc_version  = get_and_set_windows_msvc_version()
     boost_version = (1, 55, 0) # TODO: Try to detect from standard install locations (c:/boost*, c:/local/boost*, etc.)
     boost_path    = 'c:/local/boost_%d_%d_%d/' % boost_version
 else:

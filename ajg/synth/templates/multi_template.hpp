@@ -108,10 +108,10 @@ struct multi_template {
     }
 
     template <class X, class Context>
-    void render_to_file(string_type const& filepath, Context const& context) const {
-             if (django_template_) return django_template_->render_to_file(filepath, X::template adapt_context<django_context_type>(context), django_options_);
-        else if (ssi_template_)    return ssi_template_->render_to_file(filepath, X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        else if (tmpl_template_)   return tmpl_template_->render_to_file(filepath, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+    void render_to_path(string_type const& path, Context const& context) const {
+             if (django_template_) return django_template_->render_to_path(path, X::template adapt_context<django_context_type>(context), django_options_);
+        else if (ssi_template_)    return ssi_template_->render_to_path(path, X::template adapt_context<ssi_context_type>(context), ssi_options_);
+        else if (tmpl_template_)   return tmpl_template_->render_to_path(path, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 

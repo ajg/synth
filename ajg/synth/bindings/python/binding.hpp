@@ -250,9 +250,9 @@ struct binding : MultiTemplate /*, boost::noncopyable*/ {
         return base_type::template render_to_string<binding>(dictionary);
     }
 
-    void render_to_file(py::str filepath, py::dict dictionary) const {
+    void render_to_path(py::str filepath, py::dict dictionary) const {
         string_type const s = py::extract<string_type>(filepath);
-        return base_type::template render_to_file<binding>(s, dictionary);
+        return base_type::template render_to_path<binding>(s, dictionary);
     }
 
   private:

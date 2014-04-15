@@ -88,7 +88,7 @@ struct base_template : boost::noncopyable {
         return ostream.str();
     }
 
-    void render_to_file( path_type    const& path
+    void render_to_path( path_type    const& path
                        , context_type const& context = context_type()
                        , options_type const& options = options_type()
                        ) const {

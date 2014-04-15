@@ -41,7 +41,7 @@ def simple_tmpl_example():
     tpl = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
     ctx = {'user': 'Dolph Lundgren'}
 
-    tpl.render_to_file("greeting.txt", ctx)
+    tpl.render_to_path("greeting.txt", ctx)
     # or, e.g.:
     return tpl.render_to_string(ctx)
 ```
@@ -64,7 +64,7 @@ int main() {
 
     // Render to different targets:
     tpl.render(std::cout);
-    tpl.render_to_file("greeting.txt", ctx);
+    tpl.render_to_path("greeting.txt", ctx);
     std::cout << tpl.render_to_string(ctx);
     return 0;
 }
@@ -474,11 +474,10 @@ Future Work
  - Templates:
    * Refactor `multi_template` into `base_binding`
    * Rename `file_template` to `path_template`
-     ~ Rename `render_to_file` to `render_to_path`
+     + Create new `file_template` (using `FILE* file`)
+     + Add `render_to_file` (using `FILE* file`)
    * Create `descriptor_template` (using `int descriptor`)
-     ~ Add `render_to_descriptor` (using `int descriptor`)
-   * Create new `file_template` (using `FILE* file`)
-     ~ Add `render_to_file` (using `FILE* file`)
+     + Add `render_to_descriptor` (using `int descriptor`)
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```

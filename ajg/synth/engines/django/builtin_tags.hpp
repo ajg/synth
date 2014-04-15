@@ -221,39 +221,6 @@ struct builtin_tags {
             }
             (*options.blocks_)[name] = ss.str();
         }
-
-        static void extend( string_type  const& path
-                          , kernel_type  const& kernel
-                          , match_type   const& body
-                          , context_type const& context
-                          , options_type const& options
-                          , ostream_type&       ostream
-                          ) {
-
-            std::basic_ostream<char_type> null_stream(0);
-            typename options_type::blocks_type blocks;
-
-            options_type options_copy = options;
-            options_copy.blocks_ = &blocks;
-
-            // First, render the base template as if it were stand-alone, so that block.super is
-            // available to the derived template; non-block content is discarded.
-            kernel.render_file(null_stream, path, context, options_copy);
-
-            options_copy = options; // Discard non-block modifications to options.
-            options_copy.blocks_ = &blocks;
-
-            // Second, render any blocks in the derived template, while making the base template's
-            // versions available to the derivee as block.super; non-block content is discarded.
-            kernel.render_block(null_stream, body, context, options_copy);
-
-            options_copy = options; // Discard non-block modifications to options.
-            options_copy.blocks_ = &blocks;
-
-            // Third, render the base template again with any (possibly) overridden blocks.
-            // TODO: Parse and generate the frame once and reuse it or have render_file do caching.
-            kernel.render_file(ostream, path, context, options_copy);
-        }
     };
 
 //
@@ -425,7 +392,30 @@ struct builtin_tags {
                           ) {
             match_type  const& body = match(kernel.block);
             string_type const  path = kernel.extract_string(match(kernel.string_literal));
-            block_tag::extend(path, kernel, body, context, options, ostream);
+
+            std::basic_ostream<char_type> null_stream(0);
+            typename options_type::blocks_type blocks;
+
+            options_type options_copy = options;
+            options_copy.blocks_ = &blocks;
+
+            // First, render the base template as if it were stand-alone, so that block.super is
+            // available to the derived template; non-block content is discarded.
+            kernel.render_file(null_stream, path, context, options_copy);
+
+            options_copy = options; // Discard non-block modifications to options.
+            options_copy.blocks_ = &blocks;
+
+            // Second, render any blocks in the derived template, while making the base template's
+            // versions available to the derivee as block.super; non-block content is discarded.
+            kernel.render_block(null_stream, body, context, options_copy);
+
+            options_copy = options; // Discard non-block modifications to options.
+            options_copy.blocks_ = &blocks;
+
+            // Third, render the base template again with any (possibly) overridden blocks.
+            // TODO: Parse and generate the frame once and reuse it or have render_file do caching.
+            kernel.render_file(ostream, path, context, options_copy);
         }
     };
 

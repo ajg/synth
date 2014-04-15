@@ -54,8 +54,9 @@ def simple_tmpl_example():
 
 namespace synth = ajg::synth;
 
-typedef synth::default_traits<char>                                 traits_type;
-typedef synth::string_template<traits_type, synth::ssi::engine<> >  template_type;
+typedef synth::default_traits<char>             traits_type;
+typedef synth::ssi::engine<traits_type>         engine_type;
+typedef synth::string_template<engine_type>     template_type;
 
 int main() {
     template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");

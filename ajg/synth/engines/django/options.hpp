@@ -266,6 +266,8 @@ struct options {
         }
     }
 
+    // TODO: Move these to either context or a `state` type:
+
   protected:
 
     tags_type     loaded_tags;

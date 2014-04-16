@@ -57,7 +57,12 @@ struct builtin_tags {
     typedef typename engine_type::context_type                                  context_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename engine_type::value_type                                    value_type;
-    typedef typename engine_type::traits_type                                   traits_type;
+
+    typedef typename value_type::behavior_type                                  behavior_type;
+    typedef typename value_type::range_type                                     range_type;
+    typedef typename value_type::sequence_type                                  sequence_type;
+    typedef typename value_type::mapping_type                                   mapping_type;
+    typedef typename value_type::traits_type                                    traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
@@ -582,7 +587,7 @@ struct builtin_tags {
 
     struct ifchanged_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("ifchanged") >> kernel.values) >> kernel.block
+            return AJG_TAG(kernel.reserved("ifchanged") >> !kernel.values) >> kernel.block
               >> !(AJG_TAG(kernel.reserved("else"))     >> kernel.block)
               >>   AJG_TAG(kernel.reserved("endifchanged"));
         }
@@ -593,40 +598,22 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            match_type const& vals  = match(kernel.values);
             match_type const& if_   = match(kernel.block, 0);
             match_type const& else_ = match(kernel.block, 1);
 
             size_type const position = match.position();
             optional<value_type> const value = detail::find(position, options.changes_);
 
-            // This is the case with no variables (compare contents).
-            if (vals.nested_results().empty()) {
-                string_stream_type ss;
-                kernel.render_block(ss, if_, context, options);
-                string_type const result = ss.str();
-
-                if (value && *value == value_type/*ref*/(result)) {
-                    if (else_) {
-                        kernel.render_block(ostream, else_, context, options);
-                    }
-                }
-                else {
-                    const_cast<options_type&>(options).changes_[position] = result;
-                    ostream << result;
-                }
-            }
-            // Here, we compare variables.
-            else {
-                // NOTE: The key is a string (rather than an int) presumably in case variables are repeated.
-                std::map<string_type, value_type> values;
+            if (match_type const& vals = match(kernel.values)) { // Compare variables.
+                // NOTE: The key is a string (rather than e.g. an int) presumably in case variables are repeated.
+                mapping_type values;
 
                 BOOST_FOREACH(match_type const& val, detail::select_nested(vals, kernel.value)) {
                     string_type const s = boost::algorithm::trim_copy(val.str());
                     values[s] = kernel.evaluate(val, context, options);
                 }
 
-                if (value && *value == value_type/*ref*/(values)) {
+                if (value && value->template as<mapping_type>() == values) {
                     if (else_) {
                         kernel.render_block(ostream, else_, context, options);
                     }
@@ -634,6 +621,21 @@ struct builtin_tags {
                 else {
                     const_cast<options_type&>(options).changes_[position] = values;
                     kernel.render_block(ostream, if_, context, options);
+                }
+            }
+            else { // No variables, compare contents.
+                string_stream_type ss;
+                kernel.render_block(ss, if_, context, options);
+                string_type const result = ss.str();
+
+                if (value && value->template as<string_type>() == result) {
+                    if (else_) {
+                        kernel.render_block(ostream, else_, context, options);
+                    }
+                }
+                else {
+                    const_cast<options_type&>(options).changes_[position] = result;
+                    ostream << result;
                 }
             }
         }

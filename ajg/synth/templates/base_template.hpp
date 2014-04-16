@@ -27,6 +27,7 @@ namespace synth {
 
 using boost::throw_exception;
 
+// TODO: Factor out an intermediate range_template (or iterator_template) for use with arbitrary iterators.
 template <class Engine, class Iterator>
 struct base_template : boost::noncopyable {
   protected:

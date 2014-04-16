@@ -35,7 +35,7 @@ inline char const* version() {
 }
 
 template <class MultiTemplate>
-struct binding : MultiTemplate /*, boost::noncopyable*/ {
+struct binding : MultiTemplate {
 
   public:
 

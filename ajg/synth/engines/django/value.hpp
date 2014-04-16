@@ -161,6 +161,18 @@ struct value : value_facade<Traits, value> {
         return groups;
     }
 
+    sequence_type to_sequence() const {
+        sequence_type sequence;
+
+        sequence.resize(this->size());
+        size_type i = 0;
+        BOOST_FOREACH(value_type const& value, *this) {
+            sequence[i++] = value;
+        }
+
+        return sequence;
+    }
+
     // NOTE: Returns a copy for now.
     value_type reverse() const {
         // TODO: Avoid copying the sequence for values with adapters that natively support rbegin/rend.

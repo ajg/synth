@@ -510,6 +510,12 @@ struct builtin_tags {
             if (reversed) {
                 value = value.reverse();
             }
+        #ifdef __GNUG__
+            else {
+                // FIXME: This extra copy shouldn't be necessary but it fixes the odd invalid reads in Travis.
+                value = value.to_sequence();
+            }
+        #endif
 
             typename value_type::const_iterator it(value.begin()), end(value.end());
             typename options_type::names_type const& variables = kernel.extract_names(vars);

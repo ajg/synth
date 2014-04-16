@@ -108,11 +108,6 @@ DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 /// Escaping tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: DJANGO_TEST(safe_filter,                "{{tags|safe}}",               "???")
-// TODO: DJANGO_TEST(safe_filter+join_filter,    "{{tags|safe|join:', '}}",     "???")
-// TODO: DJANGO_TEST(safeseq_filter,             "{{tags|safeseq}}",            "???")
-// TODO: DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:', '}}",  "???")
-
 DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var }}{% endautoescape %}",               "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{% autoescape off %}{{ xml_var }}{% endautoescape %}",              "<foo><bar><qux /></bar></foo>")
 DJANGO_TEST(autoescape_tag, "{% autoescape on %}{{ xml_var|escape }}{% endautoescape %}",        "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
@@ -126,6 +121,13 @@ DJANGO_TEST(autoescape_tag, "{{ xml_var }}",              "&lt;foo&gt;&lt;bar&gt
 DJANGO_TEST(autoescape_tag, "{{ xml_var|escape }}",       "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{{ xml_var|force_escape }}", "&lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;")
 DJANGO_TEST(autoescape_tag, "{{ xml_var|safe }}",         "<foo><bar><qux /></bar></foo>")
+
+DJANGO_TEST(no-filter,                  "{{tags}}",                   "&lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;")
+DJANGO_TEST(join_filter,                "{{tags|join:'-'}}",          "&lt;X&gt;-&lt;Y&gt;-&lt;Z&gt;")
+DJANGO_TEST(safe_filter,                "{{tags|safe}}",              "<X>, <Y>, <Z>")
+DJANGO_TEST(safe_filter+join_filter,    "{{tags|safe|join:'-'}}",     "<-X->-,- -<-Y->-,- -<-Z->")
+DJANGO_TEST(safeseq_filter,             "{{tags|safeseq}}",           "<X>, <Y>, <Z>")
+DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:'-'}}",  "<X>-<Y>-<Z>")
 
 ///
 /// Inheritance tests
@@ -194,6 +196,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
     "    qux = C<br />\n"
     "    states = CA: California, FL: Florida, NY: New York<br />\n"
+    "    tags = &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;<br />\n"
     "    true_var = True<br />\n"
     "    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
 

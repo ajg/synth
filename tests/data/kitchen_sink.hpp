@@ -126,6 +126,11 @@ struct kitchen_sink {
         heterogenous.push_back(traits_type::literal("foo"));
         heterogenous.push_back(traits_type::literal("foo"));
         context[traits_type::literal("heterogenous")] = heterogenous;
+
+        tags.push_front("<Z>");
+        tags.push_front("<Y>");
+        tags.push_front("<X>");
+        context[traits_type::literal("tags")] = tags;
     }
 
     context_type                        context;
@@ -134,6 +139,7 @@ struct kitchen_sink {
     std::map<string_type, std::string>  cities[5];
     std::map<string_type, string_type>  states;
     std::vector<int>                    numbers;
+    std::deque<char const*>             tags;
     std::list<value_type>               heterogenous;
 }; // kitchen_sink
 

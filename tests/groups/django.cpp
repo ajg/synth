@@ -49,13 +49,6 @@ AJG_TESTING_BEGIN
 ///     django::load_from_tag (Tested implicitly in Python binding tests.)
 ///     django::library_tag   (Tested implicitly in Python binding tests.)
 
-/* TODO:
-DJANGO_TEST(linenumbers_filter, "{{ lines_of_text|linenumbers}}", "")
-DJANGO_TEST(linebreaksbr_filter, "{{ lines_of_text|linebreaksbr }}", "")
-DJANGO_TEST(linebreaks_filter, "{{ lines_of_text|linebreaks }}", "")
-DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
-*/
-
 #define DJANGO_TEST_(name, in, out, context) \
     unit_test(name) { ensure_equals(string_template_type(in).render_to_string(context), out); }}}
 
@@ -195,6 +188,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    foo = A<br />\n"
     "    friends = age: 23, name: joe, age: 55, name: bob, age: 41, name: lou<br />\n"
     "    future = 2202-Feb-11 03:02:01<br />\n"
+    "    haiku = Haikus are easy,\nBut sometimes they don&apos;t make sense.\nRefrigerator.\n<br />\n"
     "    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n"
     "    past = 2002-Jan-10 01:02:03<br />\n"
     "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
@@ -502,6 +496,10 @@ DJANGO_TEST(dictsortreversed_filter, "{{ friends|dictsortreversed:'name' }}", "a
 DJANGO_TEST(divisibleby_filter, "{{ 21|divisibleby:\"3\" }}", "True")
 DJANGO_TEST(divisibleby_filter, "{{ 20|divisibleby:\"3\" }}", "False")
 
+DJANGO_TEST(escapejs_filter, "{{ haiku|escapejs }}", "Haikus are easy,\\x0ABut sometimes they don&apos;t make sense.\\x0ARefrigerator.\\x0A")
+DJANGO_TEST(escapejs_filter, "{{ haiku|escapejs|safe }}", "Haikus are easy,\\x0ABut sometimes they don't make sense.\\x0ARefrigerator.\\x0A")
+// DJANGO_TEST(escapejs_filter, "{{ binary_string|escapejs }}", "")
+
 DJANGO_TEST(filesizeformat_filter, "{{ 123456789|filesizeformat }}", "117.7 MB")
 
 DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;'|fix_ampersands }}",
@@ -524,6 +522,16 @@ DJANGO_TEST(getdigit_filter, "{{ -123456789|get_digit:'2' }}", "-123456789")
 DJANGO_TEST(getdigit_filter, "{{ 'foobar'|get_digit:'2' }}",   "foobar")
 
 DJANGO_TEST(iriencode_filter, "{{ \"?test=1&me=2\"|iriencode }}", "?test=1&amp;me=2")
+
+DJANGO_TEST(linenumbers_filter, "{{ haiku|linenumbers}}",
+    "1. Haikus are easy,\n"
+    "2. But sometimes they don&apos;t make sense.\n"
+    "3. Refrigerator.\n"
+    "4. \n")
+
+DJANGO_TEST(linebreaksbr_filter, "{{ haiku|linebreaksbr }}", "Haikus are easy,<br />But sometimes they don't make sense.<br />Refrigerator.<br />")
+
+DJANGO_TEST(linebreaks_filter, "{{ haiku|linebreaks }}", "<p>Haikus are easy,<br />But sometimes they don't make sense.<br />Refrigerator.<br /></p>\n\n")
 
 DJANGO_TEST(ljust_filter, "{{ \"Django\"|ljust:\"10\" }}", "Django    ")
 DJANGO_TEST(ljust_filter, "{{ \"Django\"|ljust:\"2\" }}",  "Django")

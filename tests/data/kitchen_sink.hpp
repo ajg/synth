@@ -102,6 +102,8 @@ struct kitchen_sink {
 
         context[traits_type::literal("xml_var")] = "<foo><bar><qux /></bar></foo>";
 
+        context[traits_type::literal("haiku")] = "Haikus are easy,\nBut sometimes they don't make sense.\nRefrigerator.\n";
+
         states[traits_type::literal("CA")] = "California";
         states[traits_type::literal("FL")] = "Florida";
         states[traits_type::literal("NY")] = "New York";

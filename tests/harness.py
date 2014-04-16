@@ -3,6 +3,7 @@
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 import synth
+import sys
 import tempfile
 from difflib import unified_diff
 
@@ -71,19 +72,21 @@ def run_test_as(type, name, context, golden, source, engine, args):
             if string != file.read():
                 print('    x Rendering to file failed: mismatch')
 
-    with tempfile.NamedTemporaryFile() as file:
-        try:
-            template.render_to_path(file.name, context)
-            print('    - Rendering to path succeeded')
-        except Exception as e:
-            failures += 1
-            print('    x Rendering to path failed:\n' + str(e))
-            return
-        else:
-            file.flush()
-            file.seek(0)
-            if string != file.read():
-                print('    x Rendering to path failed: mismatch')
+    # XXX: Windows doesn't support reading from an already open temporary file.
+    if sys.platform != 'win32':
+        with tempfile.NamedTemporaryFile() as file:
+            try:
+                template.render_to_path(file.name, context)
+                print('    - Rendering to path succeeded')
+            except Exception as e:
+                failures += 1
+                print('    x Rendering to path failed:\n' + str(e))
+                return
+            else:
+                file.flush()
+                file.seek(0)
+                if string != file.read():
+                    print('    x Rendering to path failed: mismatch')
 
     if string == golden:
         print('    - Matching succeeded')

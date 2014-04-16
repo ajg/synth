@@ -38,6 +38,7 @@
 namespace ajg {
 namespace detail {
 
+#if AJG_SYNTH_UNUSED
 //
 // AJG_COUNTER, AJG_TESTING_BEGIN, TEST_NUMBER
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,13 @@ namespace detail {
       static unsigned const counter_start = AJG_COUNTER; \
   }} // namespace ajg::detail
 #define TEST_NUMBER() (AJG_COUNTER - ajg::detail::counter_start)
+
+#else
+
+#define AJG_TESTING_BEGIN
+#define TEST_NUMBER() __LINE__
+
+#endif
 
 //
 // check_test_number

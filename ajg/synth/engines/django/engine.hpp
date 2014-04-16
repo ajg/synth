@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <ostream>
+#include <cstdlib>
 #include <numeric>
 #include <algorithm>
 
@@ -170,9 +171,7 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             | false_literal
             ;
         number_literal
-            = !(set= '-','+') >> +_d // Integral part.
-                >> !('.' >> +_d)     // Floating part.
-                >> !('e' >> +_d)     // Exponent part.
+            = !(set= '-','+') >> +_d >> !('.' >> +_d) >> !('e' >> +_d)
             ;
         string_literal
             = '"'  >> *~as_xpr('"')  >> '"'
@@ -528,7 +527,8 @@ struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
             }
         }
         else if (is(literal, this->number_literal)) {
-            return value_type(boost::lexical_cast<number_type>(string)).token(token);
+            double const d = (std::atof)(traits_type::narrow(string).c_str());
+            return value_type(static_cast<number_type>(d)).token(token);
         }
         else if (is(literal, this->string_literal)) {
             BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:

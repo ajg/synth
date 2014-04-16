@@ -443,7 +443,6 @@ Future Work
        ~ Custom inclusion tags
        ~ Custom assignment tags
        ~ Custom tags with arbitrary blocks
-     + Full support for `unicode` type (not just through UTF-8)
      + Set docstrings where appropriate
      + Support for Python 3
    * Other:
@@ -461,6 +460,8 @@ Future Work
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
      + Consider using hex character entities (vs. named) to match Django's engine
+     + Implement multi-level inheritance
+     + Support non-UTC timezones
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * Other:

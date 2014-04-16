@@ -6,6 +6,7 @@
 #define AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
 
 #include <boost/foreach.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <ajg/synth/adapters/map.hpp>
@@ -19,7 +20,7 @@ namespace command_line {
 namespace pt = boost::property_tree;
 
 template <class MultiTemplate>
-struct binding : MultiTemplate {
+struct binding : MultiTemplate, boost::noncopyable {
   public:
 
     typedef binding                                                             binding_type;

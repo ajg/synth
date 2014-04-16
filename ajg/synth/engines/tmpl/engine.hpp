@@ -22,17 +22,12 @@
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/tmpl/value.hpp>
+#include <ajg/synth/engines/tmpl/options.hpp>
 #include <ajg/synth/engines/tmpl/builtin_tags.hpp>
 
 namespace ajg {
 namespace synth {
 namespace tmpl {
-
-enum tag_mode
-    { xml
-    , html
-    , loose
-    };
 
 template <class Traits>
 struct engine : base_engine<Traits> {
@@ -41,29 +36,19 @@ struct engine : base_engine<Traits> {
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
 
-    typedef typename traits_type::void_type                                     void_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-  public:
-
-    // TODO: Move these to options.
-    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = false);
-    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = true);
-    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = true);
-    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = false);
-    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = loose); // TODO: Implement.
-
-  public:
-
-    typedef typename mpl::if_c< case_sensitive, std::less<string_type>
-                              , detail::insensitive_less<string_type> >::type   less_type;
     typedef tmpl::value<traits_type>                                            value_type;
+    typedef options<value_type>                                                 options_type;
+    typedef typename mpl::if_c< options_type::case_sensitive
+                              , std::less<string_type>
+                              , detail::insensitive_less<string_type>
+                              >::type                                           less_type;
     typedef std::map<string_type, value_type, less_type>                        context_type;
-    typedef void_type                                                           options_type;
 
   private:
 
@@ -142,7 +127,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::template kernel<Iterat
         regex_type const tag_attribute_equals
             = icase(tag_attribute) >> *_s >> '=' >> *_s
             ;
-        shortcut_syntax
+        options_type::shortcut_syntax
             ? name_attribute = !tag_attribute_equals >> attribute
             : name_attribute = tag_attribute_equals >> attribute
             ;

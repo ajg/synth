@@ -188,11 +188,11 @@ struct builtin_tags {
             match_type const& body    = match(kernel.block);
             value_type const  value   = kernel.evaluate(attr, context, options);
             size_type  const  size    = value.size();
-            context_type context_copy = engine_type::global_variables ? context : context_type();
+            context_type context_copy = options_type::global_variables ? context : context_type();
             size_type    index        = 1;
 
             BOOST_FOREACH(value_type const& item, value) {
-                if (engine_type::loop_variables) {
+                if (options_type::loop_variables) {
                     context_copy[traits_type::literal("__SIZE__")]    = size;
                     context_copy[traits_type::literal("__TOTAL__")]   = size;
                     context_copy[traits_type::literal("__FIRST__")]   = to_int(index == 1);

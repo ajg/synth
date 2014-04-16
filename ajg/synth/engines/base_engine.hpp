@@ -52,8 +52,16 @@ struct base_engine : detail::nonconstructible {
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
 
+    template <class Iterator>
+    struct kernel;
+
+}; // base_engine
+
+#define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(, template)
+
+template <class Traits>
 template <class Iterator>
-struct kernel : boost::noncopyable {
+struct base_engine<Traits>::kernel : boost::noncopyable {
   public:
 
     typedef kernel                                                              kernel_type;
@@ -124,7 +132,7 @@ struct kernel : boost::noncopyable {
         throw_exception(parsing_error(traits_type::narrow(line)));
     }
 
-  protected:
+  AJG_SYNTH_IF_MSVC(public, protected):
 
     regex_type tag;
     regex_type text;
@@ -150,8 +158,6 @@ struct kernel : boost::noncopyable {
     };
 
 }; // kernel
-
-}; // base_engine
 
 }} // namespace ajg::synth
 

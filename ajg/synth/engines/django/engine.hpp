@@ -84,9 +84,9 @@ namespace {
 namespace x = boost::xpressive;
 }
 
-template <class T>
+template <class Traits>
 template <class Iterator>
-struct engine<T>::kernel : base_engine<traits_type>::template kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;

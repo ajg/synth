@@ -72,11 +72,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\tests\groups\adapter.cpp" />
+    <ClCompile Include="..\..\tests\groups\adapters.cpp" />
     <ClCompile Include="..\..\tests\groups\django.cpp" />
     <ClCompile Include="..\..\tests\groups\ssi.cpp" />
+    <ClCompile Include="..\..\tests\groups\templates.cpp" />
     <ClCompile Include="..\..\tests\groups\tmpl.cpp" />
     <ClCompile Include="..\..\tests\harness.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\ajg\synth.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

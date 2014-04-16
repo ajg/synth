@@ -443,9 +443,9 @@ Future Work
      + Turn optional arguments to synth.Template into kwargs
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
      + Support for non-simple custom tags via token and parser objects
-       1. Custom inclusion tags
-       2. Custom assignment tags
-       3. Custom tags with arbitrary blocks
+         1. Custom inclusion tags
+         2. Custom assignment tags
+         3. Custom tags with arbitrary blocks
      + Set docstrings where appropriate
      + Support for Python 3
    * Other:
@@ -495,8 +495,8 @@ Future Work
    * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
-   * Remove all no-op tags (e.g. cycle_as_silent_tag)
-   * Fold all variant tags into their main version (e.g. load_from_tag)
+   * Remove all no-op tags (e.g. `cycle_as_silent_tag`)
+   * Fold all variant tags into their main version (e.g. `load_from_tag`)
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
@@ -504,15 +504,15 @@ Future Work
      + Replace `boost::assign` use with aggregate initializers
      + Remove needlessly configurable (especially defaulted) `template` parameters
      + Remove complex redundant `typedef`s in favor of `auto`
-     + Replace <boost/cstdint.hpp> with <cstdint>
+     + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Consider switching to unordered_map/unordered_set where possible
-   * [v1+] Add AJG_PRAGMA macro that invokes _Pragma or __pragma (MSVC) as needed
-     + Add AJG_PRAGMA(once) to all header files and see if it speeds up compilations
+   * [v1+] Add `AJG_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
+     + Add `AJG_PRAGMA(once)` to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically
    * [v1+] Run entire C++ codebase through clang-format
    * Change `class` in template signatures to `typename`
    * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
-   * [v1] Reformat all operator _()'s to operator_()
+   * [v1] Reformat all `operator _()`'s to `operator_()`
    * [v1+] Remove header guard closing comments
    * [v1+] Remove namespace closing comments
    * [v2+] Factor out values & adapters into separate library for generic language interop

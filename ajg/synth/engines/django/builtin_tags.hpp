@@ -521,13 +521,13 @@ struct builtin_tags {
 
             for (; it != end; ++it) {
                 if (n == 1) { // e.g. for x in ...
-                    context_copy[variables[0]] = boost::ref(*it);
+                    context_copy[variables[0]] = /* XXX: boost::ref */(*it);
                 }
                 else {
                     size_type i = 0;
                     BOOST_FOREACH(value_type const& var, *it) { // e.g. for x, y, z in ...
                         if (i >= n) break;
-                        context_copy[variables[i++]] = var; // TODO: boost::ref?
+                        context_copy[variables[i++]] = /* XXX: boost::ref */(var);
                     }
 
                     while (i < n) { // Overwrite the remaining vars in the context.
@@ -1186,7 +1186,7 @@ struct builtin_tags {
             context_type   context_copy = context;
             options_type   options_copy = options;
 
-            if (value_type const& value = tag(options_copy, &context_copy, arguments)) {
+            if (value_type const& value = tag(options_copy, context_copy, arguments)) {
                 ostream << value;
             }
             kernel.render_block(ostream, body, context_copy, options_copy);

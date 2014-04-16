@@ -10,6 +10,7 @@
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/templates.hpp>
+#include <ajg/synth/templates/multi_template.hpp>
 #include <ajg/synth/bindings/command_line/command.hpp>
 #include <ajg/synth/bindings/command_line/binding.hpp>
 

@@ -63,7 +63,7 @@ struct multi_template {
   public:
 
     template <class Source>
-    multi_template( Source&               source // NOTE: Not const for when it's e.g. a stream.
+    multi_template( Source         const& source
                   , string_type    const& engine_name
                   , boolean_type   const  autoescape
                   , string_type    const& default_value

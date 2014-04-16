@@ -21,8 +21,15 @@ struct options {
     typedef Value                                  value_type;
 
     typedef typename value_type::traits_type       traits_type;
+    typedef typename traits_type::boolean_type     boolean_type;
+    typedef typename traits_type::size_type        size_type;
     typedef typename traits_type::string_type      string_type;
     typedef typename traits_type::paths_type       paths_type;
+
+  public:
+
+    BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = false);
+    BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = 9);
 
   public:
 

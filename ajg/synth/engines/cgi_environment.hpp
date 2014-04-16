@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED
 
+#if AJG_SYNTH_UNUSED
+
 #include <set>
 #include <string>
 #include <cstdlib>
@@ -133,5 +135,7 @@ struct standard_environment {
 };*/
 
 }} // namespace ajg::synth
+
+#endif // AJG_SYNTH_UNUSED
 
 #endif // AJG_SYNTH_ENGINES_CGI_ENVIRONMENT_HPP_INCLUDED

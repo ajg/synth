@@ -130,9 +130,10 @@ struct binding : private boost::base_from_member<PyObject*>, MultiTemplate {
 
   private:
 
+    // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
     // inline static std::pair<char_type const*, size_type> get_source(PyObject* const o) {
-    //     if (PyString_Check(o)) {}
-    //     else if (PyUnicode_Check(o)) {}
+    //     if (PyString_Check(o)) { use char template }
+    //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
     // }
 
     inline static std::pair<char const*, size_type> get_source(PyObject* const o) {

@@ -232,7 +232,10 @@ Components
    * `boost::shared_ptr`
  - `string`
    * `std::basic_string`
-   * `char*`, `char[N]`
+   * `char*`
+   * `char[N]`
+   * `wchar_t*` (When available.)
+   * `wchar_t[N]` (When available.)
  - `utility`
    * `std::pair`
  - `variant`
@@ -440,9 +443,9 @@ Future Work
      + Turn optional arguments to synth.Template into kwargs
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
      + Support for non-simple custom tags via token and parser objects
-       ~ Custom inclusion tags
-       ~ Custom assignment tags
-       ~ Custom tags with arbitrary blocks
+       1. Custom inclusion tags
+       2. Custom assignment tags
+       3. Custom tags with arbitrary blocks
      + Set docstrings where appropriate
      + Support for Python 3
    * Other:

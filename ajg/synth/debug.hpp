@@ -42,7 +42,8 @@
 namespace ajg {
 namespace synth {
 namespace debug {
-static std::size_t count = 0; // TODO: Make global.
+static std::size_t count = 0;
+inline void dummy() { (void) count; }
 
 ///
 /// AJG_CERR_LEAD, AJG_CERR_TRAIL

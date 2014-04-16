@@ -34,14 +34,7 @@ enum tag_mode
     , loose
     };
 
-// TODO: Move these options to options or a traits-like type.
-template < class Traits
-         , bool CaseSensitive   = false
-         , bool ShortcutSyntax  = true
-         , bool LoopVariables   = true
-         , bool GlobalVariables = false
-         , tag_mode TagMode     = loose // TODO: Implement.
-         >
+template <class Traits>
 struct engine : base_engine<Traits> {
   public:
 
@@ -55,19 +48,22 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef typename mpl::if_c< CaseSensitive, std::less<string_type>
+  public:
+
+    // TODO: Move these to options.
+    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = false);
+    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = true);
+    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = true);
+    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = false);
+    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = loose); // TODO: Implement.
+
+  public:
+
+    typedef typename mpl::if_c< case_sensitive, std::less<string_type>
                               , detail::insensitive_less<string_type> >::type   less_type;
     typedef tmpl::value<traits_type>                                            value_type;
     typedef std::map<string_type, value_type, less_type>                        context_type;
     typedef void_type                                                           options_type;
-
-  public:
-
-    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = CaseSensitive);
-    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = ShortcutSyntax);
-    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = LoopVariables);
-    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = GlobalVariables);
-    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = TagMode);
 
   private:
 
@@ -88,9 +84,9 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-template < class T, bool CS, bool SS, bool LV, bool GV, tag_mode TM>
+template <class Traits>
 template <class Iterator>
-struct engine<T, CS, SS, LV, GV, TM>::kernel : base_engine<traits_type>::template kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<traits_type>::template kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;

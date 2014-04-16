@@ -32,18 +32,12 @@ namespace ajg {
 namespace synth {
 namespace ssi {
 
-// TODO: Move these options to options or a traits-like type.
-template < class       Traits
-         , class       Environment      = detail::standard_environment
-         , bool        ThrowOnErrors    = false
-         , std::size_t MaxRegexCaptures = 9
-         >
+template <class Traits>
 struct engine : base_engine<Traits> {
   public:
 
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
-    typedef Environment                                                         environment_type;
 
     typedef typename traits_type::void_type                                     void_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -56,13 +50,9 @@ struct engine : base_engine<Traits> {
     typedef ssi::value<traits_type>                                             value_type;
     typedef std::map<string_type, value_type>                                   context_type;
     typedef options<value_type>                                                 options_type;
+    typedef detail::standard_environment                                        environment_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
-
-  public:
-
-    BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = ThrowOnErrors);
-    BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = MaxRegexCaptures);
 
   private:
 
@@ -75,9 +65,9 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-template <class T, class E, bool TOE, std::size_t MaxRegexCaptures>
+template <class Traits>
 template <class Iterator>
-struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::template kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<traits_type>::template kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
@@ -234,8 +224,9 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
             throw_exception(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
-        else if (optional<string_type> const value = detail::find(traits_type::narrow(name), this->environment)) {
-            return traits_type::widen(*value);
+        else if (optional<typename environment_type::mapped_type> const variable =
+                    detail::find(traits_type::narrow(name), this->environment)) {
+            return traits_type::widen(*variable);
         }
         // Otherwise, use the undefined echo message.
         else {
@@ -304,7 +295,7 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
         }
     }
     catch (std::exception const&) {
-        if (throw_on_errors) throw;
+        if (options_type::throw_on_errors) throw;
         /* XXX: It's unclear whether this is helpful or even allowed; plus it's distracting in unit tests.
         else {
             std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
@@ -341,14 +332,15 @@ struct engine<T, E, TOE, MaxRegexCaptures>::kernel : base_engine<traits_type>::t
         string_type       const left    = parse_string(args, str);
         string_type       const right   = regex[xpressive::s1].str();
         string_regex_type const pattern = string_regex_type::compile(right);
+        size_type         const n       = options_type::max_regex_captures;
 
-        for (std::size_t i = 0; i <= MaxRegexCaptures; ++i) {
+        for (std::size_t i = 0; i <= n; ++i) {
             args.context.erase(behavior_type::to_string(i));
         }
 
         string_match_type match;
         if (xpressive::regex_search(left, match, pattern)) {
-            std::size_t const limit = (std::min)(match.size(), MaxRegexCaptures);
+            std::size_t const limit = (std::min)(match.size(), n);
 
             for (std::size_t i = 0; i <= limit; ++i) {
                 string_type const key = behavior_type::to_string(i);

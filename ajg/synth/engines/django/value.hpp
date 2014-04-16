@@ -161,7 +161,23 @@ struct value : value_facade<Traits, value> {
         return groups;
     }
 
+    // NOTE: Returns a copy for now.
+    value_type reverse() const {
+        // TODO: Avoid copying the sequence for values with adapters that natively support rbegin/rend.
+        sequence_type result;
+
+        result.resize(this->size());
+        size_type i = this->size() - 1;
+        BOOST_FOREACH(value_type const& value, *this) {
+            result[i--] = value;
+        }
+
+        return result;
+    }
+
+    // NOTE: Returns a copy for now.
     value_type sort_by(value_type const& attrs, boolean_type const reverse) const {
+        // TODO: Avoid copying the sequence for values with adapters that natively support rbegin/rend.
         sequence_type result, trail = make_trail(attrs);
 
         result.reserve(this->size());

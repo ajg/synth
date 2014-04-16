@@ -485,12 +485,12 @@ struct builtin_tags {
 
 //
 // for_tag
-//     TODO: for ... in ... _reversed_, using BOOST_FOREACH_REVERSE.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct for_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("for") >> kernel.variable_names >> kernel.keyword("in") >> kernel.value) >> kernel.block
+            return AJG_TAG(kernel.reserved("for") >> kernel.variable_names >> kernel.keyword("in")
+                              >> kernel.value >> !(s1 = kernel.keyword("reversed"))) >> kernel.block
               >> !(AJG_TAG(kernel.reserved("empty")) >> kernel.block)
                 >> AJG_TAG(kernel.reserved("endfor"));
         }
@@ -501,10 +501,15 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            match_type  const& vars  = match(kernel.variable_names);
-            match_type  const& for_  = match(kernel.block, 0);
-            match_type  const& empty = match(kernel.block, 1);
-            value_type  const& value = kernel.evaluate(match(kernel.value), context, options);
+            match_type   const& vars     = match(kernel.variable_names);
+            match_type   const& for_     = match(kernel.block, 0);
+            match_type   const& empty    = match(kernel.block, 1);
+            boolean_type const  reversed = match[s1].matched;
+            value_type          value    = kernel.evaluate(match(kernel.value), context, options);
+
+            if (reversed) {
+                value = value.reverse();
+            }
 
             typename value_type::const_iterator it(value.begin()), end(value.end());
             typename options_type::names_type const& variables = kernel.extract_names(vars);

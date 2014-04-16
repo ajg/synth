@@ -129,7 +129,7 @@ struct value_facade {
     inline iterator end()   { return const_cast<facade_type const*>(this)->end(); }
 
     inline const_iterator begin() const { return this->adapter().begin(); }
-    inline const_iterator end()   const {
+    inline const_iterator end()   const { return this->adapter().end(); } /*
         try {
             return this->adapter().end();
         }
@@ -137,7 +137,7 @@ struct value_facade {
         catch (bad_method const& method) {
             return method.name == "end" ? const_iterator() : throw;
         }
-    }
+    } */
 
     inline boolean_type is_iterable() const { // TODO: Defer to adapter.
         try {

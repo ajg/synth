@@ -17,6 +17,15 @@
 namespace ajg {
 namespace synth {
 
+///
+/// char_template:
+///     A sibling of string_template that doesn't keep a local copy of the source, only a pointer
+///     to it. This means the source MUST outlive the template or Bad Things will happen.
+///
+///     In general, prefer string_template over char_template unless you know what you're doing and
+///     you've determined the latter provides a tangible net performance advantage over the former.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template <class Engine>
 struct char_template : base_template<Engine, typename Engine::traits_type::char_type const*> {
   public:

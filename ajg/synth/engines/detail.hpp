@@ -52,6 +52,9 @@ namespace ajg {
 namespace synth {
 namespace detail {
 
+#define AJG_SYNTH_EMPTY_   // Nothing.
+#define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(AJG_SYNTH_EMPTY_, template)
+
 using boost::none;
 using boost::optional;
 

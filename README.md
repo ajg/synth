@@ -424,6 +424,7 @@ Future Work
 
  - Optimization:
    * Compare benefit/cost of `-O`, `-O2`, `-O3` and `-Ofast`
+   * Investigate using thread locals instead of statics for medium-expense objects
    * Investigate `-fvisibility-inlines-hidden`
    * Replace `ostream << string(a, b)` constructs with `std::ostream_iterator` + `std::copy`
 

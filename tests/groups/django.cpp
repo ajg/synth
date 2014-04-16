@@ -302,6 +302,26 @@ DJANGO_TEST(for_tag-key-value,
     "{% for k, v in states %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}",
     "[CA: California][FL: Florida][NY: New York]")
 
+DJANGO_TEST(for_tag-value-reversed,
+    "{% for v in friends reversed %}[{{ v }}]{% endfor %}",
+    "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
+
+DJANGO_TEST(for_empty_tag-value-reversed,
+    "{% for v in friends reversed %}[{{ v }}]{% empty %}Bad{% endfor %}",
+    "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
+
+DJANGO_TEST(for_empty_tag-none-reversed,
+    "{% for v in '' reversed %}Bad{% empty %} It's empty, Jim {% endfor %}",
+    " It's empty, Jim ")
+
+DJANGO_TEST(for_tag-key-value-reversed,
+    "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% endfor %}",
+    "[NY: New York][FL: Florida][CA: California]")
+
+DJANGO_TEST(for_tag-key-value-reversed,
+    "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}",
+    "[NY: New York][FL: Florida][CA: California]")
+
 unit_test(now_tag) {
     string_template_type const t("{% now 'y' %}");
 

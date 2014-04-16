@@ -44,7 +44,6 @@ struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<
 AJG_TESTING_BEGIN
 
 ///     TODO:
-///     django::ifchanged_tag
 ///     django::load_tag      (Tested implicitly in Python binding tests.)
 ///     django::load_from_tag (Tested implicitly in Python binding tests.)
 ///     django::library_tag   (Tested implicitly in Python binding tests.)
@@ -189,6 +188,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    friends = age: 23, name: joe, age: 55, name: bob, age: 41, name: lou<br />\n"
     "    future = 2202-Feb-11 03:02:01<br />\n"
     "    haiku = Haikus are easy,\nBut sometimes they don&apos;t make sense.\nRefrigerator.\n<br />\n"
+    "    heterogenous = 42, 42, foo, foo<br />\n"
     "    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n"
     "    past = 2002-Jan-10 01:02:03<br />\n"
     "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
@@ -212,6 +212,19 @@ DJANGO_TEST(if_tag, "{% if False %}Bad{% else %}Good{% endif %}",               
 DJANGO_TEST(if_tag, "{% if 1 %}Good{% endif %}{% if False %}Bad{% endif %}",    "Good")
 DJANGO_TEST(if_tag, "{% if 1 %}Good{% else %}Bad{% endif %}",                   "Good")
 DJANGO_TEST(if_tag, "{% if 0 %}Bad{% else %}Good{% endif %}",                   "Good")
+
+DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% endifchanged %}{% endfor %}",                  "42foo")
+DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% else %}-{% endifchanged %}{% endfor %}",       "42-foo-")
+DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}Y{% endifchanged %}{% endfor %}",                        "Y")
+DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}Y{% else %}-{% endifchanged %}{% endfor %}",             "Y---")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v %}Y{% endifchanged %}{% endfor %}",                    "YY")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v %}Y{% else %}N{% endifchanged %}{% endfor %}",         "YNYN")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v %}{{ v }}{% endifchanged %}{% endfor %}",              "42foo")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v %}{{ v }}{% else %}-{% endifchanged %}{% endfor %}",   "42-foo-")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v v %}Y{% endifchanged %}{% endfor %}",                  "YY")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v v %}Y{% else %}N{% endifchanged %}{% endfor %}",       "YNYN")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v v %}{{ v }}{% endifchanged %}{% endfor %}",            "42foo")
+DJANGO_TEST(ifchanged_tag:variables, "{% for v in heterogenous%}{% ifchanged v v %}{{ v }}{% else %}-{% endifchanged %}{% endfor %}", "42-foo-")
 
 DJANGO_TEST(ifequal_tag, "{% ifequal 6 6 %}Good{% endifequal %}",              "Good")
 DJANGO_TEST(ifequal_tag, "{% ifequal 5 6 %}Good{% endifequal %}",              "")
@@ -422,6 +435,8 @@ unit_test(url_as_tag) {
 
     ensure_equals(t.render_to_string(context, options), "_");
 }}}
+
+DJANGO_TEST(variable_tag, "{{ heterogenous }}", "42, 42, foo, foo")
 
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)

@@ -6,6 +6,7 @@
 #define TESTS_DATA_KITCHEN_SINK_HPP_INCLUDED
 
 #include <map>
+#include <list>
 #include <deque>
 #include <string>
 #include <vector>
@@ -119,6 +120,12 @@ struct kitchen_sink {
         numbers.push_back(8);
         numbers.push_back(9);
         context[traits_type::literal("numbers")] = numbers;
+
+        heterogenous.push_back(42);
+        heterogenous.push_back(42);
+        heterogenous.push_back(traits_type::literal("foo"));
+        heterogenous.push_back(traits_type::literal("foo"));
+        context[traits_type::literal("heterogenous")] = heterogenous;
     }
 
     context_type                        context;
@@ -127,6 +134,7 @@ struct kitchen_sink {
     std::map<string_type, std::string>  cities[5];
     std::map<string_type, string_type>  states;
     std::vector<int>                    numbers;
+    std::list<value_type>               heterogenous;
 }; // kitchen_sink
 
 }} // namespace tests::data

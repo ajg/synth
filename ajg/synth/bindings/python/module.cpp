@@ -22,7 +22,7 @@ BOOST_PYTHON_MODULE(synth)
     typedef synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE> traits_type;
     typedef synth::python::binding<synth::detail::multi_template
         < traits_type
-        , synth::string_template
+        , synth::char_template
         , synth::django::engine<traits_type>
         , synth::ssi::engine<traits_type>
         , synth::tmpl::engine<traits_type>

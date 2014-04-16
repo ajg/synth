@@ -10,10 +10,9 @@
 #include <utility>
 #include <stdexcept>
 
-#include <boost/optional.hpp>
-
 #include <boost/python.hpp>
-// #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/optional.hpp>
+#include <boost/utility/base_from_member.hpp>
 
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/django/options.hpp>
@@ -35,8 +34,7 @@ inline char const* version() {
 }
 
 template <class MultiTemplate>
-struct binding : MultiTemplate {
-
+struct binding : private boost::base_from_member<py::object>, MultiTemplate {
   public:
 
     typedef binding                              binding_type;
@@ -45,6 +43,7 @@ struct binding : MultiTemplate {
     typedef typename binding_type::traits_type   traits_type;
 
     typedef typename traits_type::boolean_type   boolean_type;
+    typedef typename traits_type::size_type      size_type;
     typedef typename traits_type::string_type    string_type;
     typedef typename traits_type::paths_type     paths_type;
 
@@ -58,7 +57,7 @@ struct binding : MultiTemplate {
     typedef typename base_type::resolver_type    resolver_type;
     typedef typename base_type::resolvers_type   resolvers_type;
     typedef py::dict                             context_type;
-    typedef py::init< string_type
+    typedef py::init< py::object
                     , string_type
                     , py::optional
                         < boolean_type
@@ -77,7 +76,7 @@ struct binding : MultiTemplate {
     // TODO: Support passing either a string or a file-like object.
     // TODO: Override filters like pprint with Python's own pprint.pprint,
     //       perhaps using a passed-in "overrides" library.
-    binding( string_type  const& source
+    binding( py::object   const& src
            , string_type  const& engine_name
            , boolean_type const  autoescape    = true
            , string_type  const& default_value = string_type()
@@ -89,7 +88,8 @@ struct binding : MultiTemplate {
            , py::list     const& ldrs          = py::list()
            , py::list     const& rslvrs        = py::list()
            )
-        : base_type( source
+        : boost::base_from_member<py::object>(src) // Keep the object alive.
+        , base_type( get_source(boost::base_from_member<py::object>::member) // (src)
                    , engine_name
                    , autoescape
                    , default_value
@@ -101,7 +101,7 @@ struct binding : MultiTemplate {
                    , get_resolvers(rslvrs)
                    ) {}
 
-    void render_to_file(py::object file, py::dict dictionary) const {
+    void render_to_file(py::object const& file, py::dict const& dictionary) const {
         file.attr("write")(base_type::template render_to_string<binding>(dictionary));
         // XXX: Automatically call flush()?
 
@@ -117,18 +117,36 @@ struct binding : MultiTemplate {
         */
     }
 
-    void render_to_path(py::str filepath, py::dict dictionary) const {
+    void render_to_path(py::str const& filepath, py::dict const& dictionary) const {
         string_type const s = py::extract<string_type>(filepath);
         return base_type::template render_to_path<binding>(s, dictionary);
     }
 
-    string_type render_to_string(py::dict dictionary) const {
+    string_type render_to_string(py::dict const& dictionary) const {
         return base_type::template render_to_string<binding>(dictionary);
     }
 
   private:
 
-    inline static formats_type get_formats(py::dict fmts) {
+    // inline static std::pair<char_type const*, size_type> get_source(py::object const& src) {
+    //     if (PyString_Check(src.ptr())) {}
+    //     else if (PyUnicode_Check(src.ptr())) {}
+    // }
+
+    inline static std::pair<char const*, size_type> get_source(py::object const& src) {
+        char*      data;
+        Py_ssize_t size;
+
+        if (PyString_AsStringAndSize(src.ptr(), &data, &size) == -1) {
+            AJG_SYNTH_THROW(std::invalid_argument("source"));
+        }
+
+        return std::pair<char const*, size_type>(data, size);
+    }
+
+    // TODO: Rename these to_*
+
+    inline static formats_type get_formats(py::dict const& fmts) {
         py::stl_input_iterator<py::tuple> begin(fmts.items()), end;
         formats_type formats;
 
@@ -142,14 +160,12 @@ struct binding : MultiTemplate {
         return formats;
     }
 
-    // TODO: Rename these to_*
-
-    inline static paths_type get_directories(py::list dirs) {
+    inline static paths_type get_directories(py::list const& dirs) {
         py::stl_input_iterator<string_type> begin(dirs), end;
         return paths_type(begin, end);
     }
 
-    inline static libraries_type get_libraries(py::dict libs) {
+    inline static libraries_type get_libraries(py::dict const& libs) {
         py::stl_input_iterator<py::tuple> begin(libs.items()), end;
         libraries_type libraries;
 
@@ -163,7 +179,7 @@ struct binding : MultiTemplate {
         return libraries;
     }
 
-    inline static loaders_type get_loaders(py::list ldrs) {
+    inline static loaders_type get_loaders(py::list const& ldrs) {
         py::stl_input_iterator<py::object> begin(ldrs), end;
         loaders_type loaders;
 
@@ -174,7 +190,7 @@ struct binding : MultiTemplate {
         return loaders;
     }
 
-    inline static resolvers_type get_resolvers(py::list rslvrs) {
+    inline static resolvers_type get_resolvers(py::list const& rslvrs) {
         py::stl_input_iterator<py::object> begin(rslvrs), end;
         resolvers_type resolvers;
 

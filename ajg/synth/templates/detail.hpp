@@ -92,8 +92,11 @@ struct bidirectional_input_stream {
         return this->buffer_.size();
     }
 
-    char_type     get(position_type const index) { return this->buffer_[index]; }
-    position_type current_size()    const { return this->buffer_.size(); }
+    position_type current_size() const { return this->buffer_.size(); }
+
+    char_type get(position_type const index) {
+        return this->buffer_[static_cast<std::size_t>(index)];
+    }
 
   private:
 

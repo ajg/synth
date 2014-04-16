@@ -57,8 +57,6 @@ struct base_engine : detail::nonconstructible {
 
 }; // base_engine
 
-#define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(, template)
-
 template <class Traits>
 template <class Iterator>
 struct base_engine<Traits>::kernel : boost::noncopyable {

@@ -42,8 +42,8 @@
 namespace ajg {
 namespace synth {
 namespace debug {
-static std::size_t count = 0;
-inline void dummy() { (void) count; }
+static std::size_t count = 0, level = 0;
+inline void dummy() { (void) count; (void) level; }
 
 ///
 /// AJG_CERR_LEAD, AJG_CERR_TRAIL
@@ -51,7 +51,7 @@ inline void dummy() { (void) count; }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define AJG_DEBUG_CERR       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
-#define AJG_DEBUG_CERR_LEAD  (AJG_DEBUG_CERR << std::boolalpha << "  in " << __FUNCTION__ << "():\t")
+#define AJG_DEBUG_CERR_LEAD  (AJG_DEBUG_CERR << std::boolalpha << "  in " << __FUNCTION__ << "():\t" << std::string(ajg::synth::debug::level * 4, ' '))
 #define AJG_DEBUG_CERR_TRAIL (std::endl)
 
 ///
@@ -92,13 +92,16 @@ inline std::string abbreviate(char const* s) {
         }
     }
 
-    boost::algorithm::replace_all(result, "boost::",     "b::");
-    boost::algorithm::replace_all(result, "xpressive::", "x::");
-    boost::algorithm::replace_all(result, "detail::",    "d::");
-    boost::algorithm::replace_all(result, "ajg::",       "a::");
-    boost::algorithm::replace_all(result, "synth::",     "s::");
+    boost::algorithm::replace_all(result, "boost::",     "");
+    boost::algorithm::replace_all(result, "xpressive::", "");
+    boost::algorithm::replace_all(result, "detail::",    "");
+    boost::algorithm::replace_all(result, "ajg::",       "");
+    boost::algorithm::replace_all(result, "synth::",     "");
+    boost::algorithm::replace_all(result, "tut::",       "");
     boost::algorithm::replace_all(result, "std::",       "");
     boost::algorithm::replace_all(result, "__1::",       "");
+    boost::algorithm::replace_all(result, "const&",      "");
+    boost::algorithm::replace_all(result, "const ",      "");
 
     return result;
 }

@@ -43,6 +43,11 @@ AJG_TESTING_BEGIN
 
 typedef null_engine<default_traits<char> > char_engine;
 
+unit_test(char_template::text char) {
+    char_template<char_engine> const t("foo bar qux");
+    ensure_equals(t.text(), "foo bar qux");
+}}}
+
 unit_test(file_template::text char) {
     file_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
     ensure_equals(t.text(), read_to_string<char>("tests/templates/tmpl/variables.tmpl"));
@@ -62,6 +67,11 @@ unit_test(string_template::text char) {
 #ifndef AJG_SYNTH_NO_WCHAR_T
 
 typedef null_engine<default_traits<wchar_t> > wchar_t_engine;
+
+unit_test(char_template::text wchar_t) {
+    char_template<wchar_t_engine> const t(L"foo bar qux");
+    wensure_equals(t.text(), L"foo bar qux");
+}}}
 
 unit_test(file_template::text wchar_t) {
     file_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");

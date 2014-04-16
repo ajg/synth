@@ -167,6 +167,7 @@ Components
 
 ### Templates
 
+ - `char_template`
  - `file_template`
  - `stream_template`
  - `string_template`

@@ -9,7 +9,7 @@
 
 // ---- adapter.hpp
 
-    typedef typename boost::python::stl_input_iterator<value_type> stl_iterator;
+    typedef typename py::stl_input_iterator<value_type> stl_iterator;
 
 // ---- module.cpp
 
@@ -19,14 +19,12 @@ static void* convertible(PyObject* obj) {
 }
 
 template <class T>
-static void construct(PyObject* obj, boost::python::converter::rvalue_from_python_stage1_data* data) {
-    using namespace boost::python;
-
-    void* storage = ((converter::rvalue_from_python_storage<T>*) data)->storage.bytes;
+static void construct(PyObject* obj, py::converter::rvalue_from_python_stage1_data* data) {
+    void* storage = ((py::converter::rvalue_from_python_storage<T>*) data)->storage.bytes;
 
     // Use borrowed to construct the object so that a reference count will be properly handled.
-    handle<> hndl(borrowed(obj));
-    new (storage) T(object(hndl));
+    py::handle<> hndl(py::borrowed(obj));
+    new (storage) T(py::object(hndl));
 
     data->convertible = storage;
 }

@@ -17,9 +17,9 @@ namespace detail {
 
 namespace py = boost::python;
 
-template <class Numeric>
-inline Numeric to_numeric(py::object const& obj) {
-    return py::extract<Numeric>(py::long_(obj));
+template <class Integral>
+inline Integral to_integral(py::object const& obj) {
+    return py::extract<Integral>(py::long_(obj));
 }
 
 template <class String>
@@ -31,15 +31,15 @@ template <class Traits>
 inline typename Traits::datetime_type to_datetime(py::object const& obj) {
     return typename Traits::datetime_type
         ( typename Traits::date_type
-              ( to_numeric<unsigned short>(obj.attr("year"))
-              , to_numeric<unsigned short>(obj.attr("month"))
-              , to_numeric<unsigned short>(obj.attr("day"))
+              ( to_integral<unsigned short>(obj.attr("year"))
+              , to_integral<unsigned short>(obj.attr("month"))
+              , to_integral<unsigned short>(obj.attr("day"))
               )
         , typename Traits::duration_type
-              ( to_numeric<long>(obj.attr("hour"))
-              , to_numeric<long>(obj.attr("minute"))
-              , to_numeric<long>(obj.attr("second"))
-              , to_numeric<long>(obj.attr("microsecond")) * 1000
+              ( to_integral<long>(obj.attr("hour"))
+              , to_integral<long>(obj.attr("minute"))
+              , to_integral<long>(obj.attr("second"))
+              , to_integral<long>(obj.attr("microsecond")) * 1000
            // , TODO: obj.attr("tzinfo")
               )
         );

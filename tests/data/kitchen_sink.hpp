@@ -105,9 +105,9 @@ struct kitchen_sink {
 
         context[traits_type::literal("haiku")] = "Haikus are easy,\nBut sometimes they don't make sense.\nRefrigerator.\n";
 
-        states[traits_type::literal("CA")] = "California";
-        states[traits_type::literal("FL")] = "Florida";
-        states[traits_type::literal("NY")] = "New York";
+        states[traits_type::literal("CA")] = traits_type::literal("California");
+        states[traits_type::literal("FL")] = traits_type::literal("Florida");
+        states[traits_type::literal("NY")] = traits_type::literal("New York");
         context[traits_type::literal("states")] = states;
 
         numbers.push_back(1);

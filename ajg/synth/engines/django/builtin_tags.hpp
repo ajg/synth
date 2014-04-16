@@ -200,10 +200,11 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             match_type  const& block = match(kernel.block);
-            string_type const& name  = match(kernel.name, 0)[id].str();
-            string_type const& close = match(kernel.name, 1)[id].str();
+            match_type  const& open  = match(kernel.name, 0);
+            match_type  const& close = match(kernel.name, 1);
+            string_type const  name  = open[id].str();
 
-            if (!close.empty() && name != close) {
+            if (close && name != close[id].str()) {
                 std::string const original = traits_type::narrow(name);
                 throw_exception(std::invalid_argument("mismatched endblock tag for " + original));
             }
@@ -298,10 +299,10 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            size_type   const  position = match.position();
             match_type  const& vals     = match(kernel.values);
             match_type  const& block    = match(kernel.block);
-            string_type const& name     = match(kernel.name)[id].str();
+            match_type  const& name     = match(kernel.name);
+            size_type   const  position = match.position();
             size_type   const  total    = vals.nested_results().size();
             size_type   const  current  = detail::find(position, options.cycles_).get_value_or(0);
 
@@ -309,18 +310,16 @@ struct builtin_tags {
             value_type const  value = kernel.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
 
-            if (name.empty()) {
-                // E.g. cycle foo
+            if (!name) { // e.g. cycle foo
                 ostream << value;
                 kernel.render_block(ostream, block, context, options);
             }
-            else {
+            else { // e.g. cycle foo as bar {silent}
                 boolean_type const silent = match[s1].matched;
                 if (!silent) ostream << value;
 
-                // E.g. cycle foo as bar
                 context_type context_copy = context;
-                context_copy[name] = value;
+                context_copy[name[id].str()] = value;
                 kernel.render_block(ostream, block, context_copy, options);
             }
         }
@@ -386,6 +385,8 @@ struct builtin_tags {
 
     struct extends_tag {
         static regex_type syntax(kernel_type& kernel) {
+            // TODO: Handle non-string literals bases, which should be treated not as paths but as
+            //       template objects.
             return AJG_TAG(kernel.reserved("extends") >> kernel.string_literal) >> kernel.block;
         }
 

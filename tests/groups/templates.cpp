@@ -48,6 +48,12 @@ unit_test(char_template::text char) {
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
+unit_test(char_template::text char) {
+    char const *const s = "foo bar qux";
+    char_template<char_engine> const t(s);
+    ensure_equals(t.text(), "foo bar qux");
+}}}
+
 unit_test(file_template::text char) {
     file_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
     ensure_equals(t.text(), read_to_string<char>("tests/templates/tmpl/variables.tmpl"));
@@ -70,6 +76,12 @@ typedef null_engine<default_traits<wchar_t> > wchar_t_engine;
 
 unit_test(char_template::text wchar_t) {
     char_template<wchar_t_engine> const t(L"foo bar qux");
+    wensure_equals(t.text(), L"foo bar qux");
+}}}
+
+unit_test(char_template::text wchar_t) {
+    wchar_t const *const s = L"foo bar qux";
+    char_template<wchar_t_engine> const t(s);
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 

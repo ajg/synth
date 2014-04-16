@@ -102,7 +102,11 @@ struct kitchen_sink {
 
         context[traits_type::literal("xml_var")] = "<foo><bar><qux /></bar></foo>";
 
-        std::vector<int> numbers;
+        states[traits_type::literal("CA")] = "California";
+        states[traits_type::literal("FL")] = "Florida";
+        states[traits_type::literal("NY")] = "New York";
+        context[traits_type::literal("states")] = states;
+
         numbers.push_back(1);
         numbers.push_back(2);
         numbers.push_back(3);
@@ -113,18 +117,14 @@ struct kitchen_sink {
         numbers.push_back(8);
         numbers.push_back(9);
         context[traits_type::literal("numbers")] = numbers;
-
-        std::map<string_type, string_type> states;
-        states[traits_type::literal("CA")] = "California";
-        states[traits_type::literal("FL")] = "Florida";
-        states[traits_type::literal("NY")] = "New York";
-        context[traits_type::literal("states")] = states;
     }
 
     context_type                        context;
     options_type                        options;
     std::map<string_type, std::string>  friends[3];
     std::map<string_type, std::string>  cities[5];
+    std::map<string_type, string_type>  states;
+    std::vector<int>                    numbers;
 }; // kitchen_sink
 
 }} // namespace tests::data

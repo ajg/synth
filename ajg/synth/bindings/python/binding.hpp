@@ -34,7 +34,7 @@ inline char const* version() {
 }
 
 template <class MultiTemplate>
-struct binding : private boost::base_from_member<py::object>, MultiTemplate {
+struct binding : private boost::base_from_member<PyObject*>, MultiTemplate {
   public:
 
     typedef binding                              binding_type;
@@ -88,8 +88,8 @@ struct binding : private boost::base_from_member<py::object>, MultiTemplate {
            , py::list     const& ldrs          = py::list()
            , py::list     const& rslvrs        = py::list()
            )
-        : boost::base_from_member<py::object>(src) // Keep the object alive.
-        , base_type( get_source(boost::base_from_member<py::object>::member) // (src)
+        : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
+        , base_type( get_source(boost::base_from_member<PyObject*>::member)
                    , engine_name
                    , autoescape
                    , default_value
@@ -100,6 +100,8 @@ struct binding : private boost::base_from_member<py::object>, MultiTemplate {
                    , get_loaders(ldrs)
                    , get_resolvers(rslvrs)
                    ) {}
+
+    ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
     void render_to_file(py::object const& file, py::dict const& dictionary) const {
         file.attr("write")(base_type::template render_to_string<binding>(dictionary));
@@ -117,8 +119,8 @@ struct binding : private boost::base_from_member<py::object>, MultiTemplate {
         */
     }
 
-    void render_to_path(py::str const& filepath, py::dict const& dictionary) const {
-        string_type const s = py::extract<string_type>(filepath);
+    void render_to_path(py::str const& path, py::dict const& dictionary) const {
+        string_type const s = py::extract<string_type>(path);
         return base_type::template render_to_path<binding>(s, dictionary);
     }
 
@@ -128,16 +130,16 @@ struct binding : private boost::base_from_member<py::object>, MultiTemplate {
 
   private:
 
-    // inline static std::pair<char_type const*, size_type> get_source(py::object const& src) {
-    //     if (PyString_Check(src.ptr())) {}
-    //     else if (PyUnicode_Check(src.ptr())) {}
+    // inline static std::pair<char_type const*, size_type> get_source(PyObject* const o) {
+    //     if (PyString_Check(o)) {}
+    //     else if (PyUnicode_Check(o)) {}
     // }
 
-    inline static std::pair<char const*, size_type> get_source(py::object const& src) {
+    inline static std::pair<char const*, size_type> get_source(PyObject* const o) {
         char*      data;
         Py_ssize_t size;
 
-        if (PyString_AsStringAndSize(src.ptr(), &data, &size) == -1) {
+        if (PyString_AsStringAndSize(o, &data, &size) == -1) {
             AJG_SYNTH_THROW(std::invalid_argument("source"));
         }
 

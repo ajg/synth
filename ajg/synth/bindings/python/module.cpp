@@ -16,7 +16,7 @@
 
 BOOST_PYTHON_MODULE(synth)
 {
-    using namespace boost::python;
+    namespace py    = boost::python;
     namespace synth = ajg::synth;
 
     typedef synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE> traits_type;
@@ -29,9 +29,9 @@ BOOST_PYTHON_MODULE(synth)
         >
     > Template;
 
-    def("version", synth::python::version);
+    py::def("version", synth::python::version);
 
-    class_<Template>("Template", Template::constructor_type())
+    py::class_<Template>("Template", Template::constructor_type())
         .def("render_to_file",   &Template::render_to_file)
         .def("render_to_path",   &Template::render_to_path)
         .def("render_to_string", &Template::render_to_string)

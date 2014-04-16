@@ -36,7 +36,7 @@ struct adapter<Behavior, shared_array<T> >
     size_t const length_;
 
 
-    template <class A> A forward() const { return A(cref(*reinterpret_cast<T(*)[]>(adapted_.get())), length_); }
+    template <class A> A forward() const { return A(boost::cref(*reinterpret_cast<T(*)[]>(adapted_.get())), length_); }
     // T (&get() const)[] { return *reinterpret_cast<T(*)[]>(adapted_.get()); }
     bool valid() const { return adapted_; }
 };

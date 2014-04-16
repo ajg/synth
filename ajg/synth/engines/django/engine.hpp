@@ -535,7 +535,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return value_type(extract_string(literal)).token(token.substr(1, token.length() - 2));
         }
         else if (is(literal, this->super_literal)) {
-            return options.get_base_block(); // TODO? .copy().token(token);
+            return options.get_base_block();
         }
         else if (is(literal, this->variable_literal)) {
             if (optional<value_type> const& variable = detail::find(string, context)) {

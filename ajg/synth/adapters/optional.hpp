@@ -26,7 +26,7 @@ struct adapter<Behavior, optional<T> >
 
     bool   valid() const { return adapted_; }
     // T const& get() const { return *adapted_; }
-    template <class A> A forward() const { return A(ref(*adapted_)); }
+    template <class A> A forward() const { return A(boost::ref(*adapted_)); }
 };
 
 }} // namespace ajg::synth

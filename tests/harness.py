@@ -73,7 +73,9 @@ def run_test_as(type, name, context, golden, source, engine, args):
                 print('    x Rendering to file failed: mismatch')
 
     # XXX: Windows doesn't support reading from an already open temporary file.
-    if sys.platform != 'win32':
+    if sys.platform == 'win32':
+        print('    # Rendering to path excluded on this platform')
+    else:
         with tempfile.NamedTemporaryFile() as file:
             try:
                 template.render_to_path(file.name, context)

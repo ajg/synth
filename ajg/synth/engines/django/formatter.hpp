@@ -63,10 +63,10 @@ struct formatter {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct native_flags {
-        BOOST_STATIC_CONSTANT(size_type, total   = 45);
-        BOOST_STATIC_CONSTANT(size_type, skipped = 8);
-        BOOST_STATIC_CONSTANT(size_type, size    = total - skipped);
-        // NOTE: Fields marked [*] are not used because their availability is platform-dependent.
+        BOOST_STATIC_CONSTANT(size_type, size = 31);
+        // NOTE: 
+        //   - Fields marked [#] are not used because their availability is platform-dependent.
+        //   - Fields marked [*] are not used because Windows is garbage and barfs otherwise.
 
         // Date flags:
         string_type a;
@@ -74,18 +74,18 @@ struct formatter {
         string_type b;
         string_type B;
         string_type c;
-     // string_type C; [*]
+     // string_type C; [#]
         string_type d;
-        string_type D;
-     // string_type e; [*]
-        string_type g;
+     // string_type D; [#]
+     // string_type e; [#]
+     // string_type g; [*]
         string_type G;
-     // string_type h; [*]
+     // string_type h; [#]
         string_type j;
         string_type m;
-        string_type u;
+     // string_type u; [*]
         string_type U;
-     // string_type V; [*]
+     // string_type V; [#]
         string_type w;
         string_type W;
         string_type x;
@@ -93,19 +93,17 @@ struct formatter {
         string_type Y;
 
         // Time flags:
-     // string_type -;
-     // string_type +;
         string_type f;
         string_type F;
         string_type H;
         string_type I;
-        string_type k;
-        string_type l;
+     // string_type k; [*]
+     // string_type l; [*]
         string_type M;
-        string_type O;
+     // string_type O; [*]
         string_type p;
-     // string_type P; [*]
-     // string_type r; [*]
+     // string_type P; [#]
+     // string_type r; [#]
         string_type R;
         string_type s;
         string_type S;
@@ -125,12 +123,9 @@ struct formatter {
                 , traits_type::literal("%B")
                 , traits_type::literal("%c")
                 , traits_type::literal("%d")
-                , traits_type::literal("%D")
-                , traits_type::literal("%g")
-                , traits_type::literal("%G")
+                , traits_type::literal(AJG_SYNTH_IF_WINDOWS("%y", "%G")) // TODO: Find workaround for Windows.
                 , traits_type::literal("%j")
                 , traits_type::literal("%m")
-                , traits_type::literal("%u")
                 , traits_type::literal("%U")
                 , traits_type::literal("%w")
                 , traits_type::literal("%W")
@@ -141,10 +136,7 @@ struct formatter {
                 , traits_type::literal("%F")
                 , traits_type::literal("%H")
                 , traits_type::literal("%I")
-                , traits_type::literal("%k")
-                , traits_type::literal("%l")
                 , traits_type::literal("%M")
-                , traits_type::literal("%O")
                 , traits_type::literal("%p")
                 , traits_type::literal("%R")
                 , traits_type::literal("%s")
@@ -158,12 +150,13 @@ struct formatter {
                 , traits_type::literal("%ZP")
                 }
             };
-            static string_type const delimiter     = string_type(1, char_type('&'));
+
+            static string_type const delimiter     = string_type(1, char_type('|'));
             static string_type const format_string = algo::join(format_flags, delimiter);
+            string_type const formatted_string     = detail::format_time(format_string, datetime);
 
             std::vector<string_type> specifiers;
             specifiers.reserve(native_flags::size);
-            string_type const formatted_string = detail::format_time(format_string, datetime);
             algo::split(specifiers, formatted_string, algo::is_any_of(delimiter));
             BOOST_ASSERT(specifiers.size() == native_flags::size);
 
@@ -199,12 +192,6 @@ struct formatter {
                 , specifiers[28]
                 , specifiers[29]
                 , specifiers[30]
-                , specifiers[31]
-                , specifiers[32]
-                , specifiers[33]
-                , specifiers[34]
-                , specifiers[35]
-                , specifiers[36]
                 };
             return flags;
         }
@@ -258,15 +245,10 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
-            using algo::is_any_of;
-            using algo::to_lower_copy;
-            using algo::trim_left_copy_if;
-            using algo::trim_left_copy;
-
             date_type     const date        = datetime.date();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
-            size_type     const week        = date.week_number();
+            size_type     const iso_week    = date.week_number();
             size_type     const month_days  = date.end_of_month().day();
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
@@ -279,8 +261,7 @@ struct formatter {
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
-            string_type   const succint     = trim_left_copy(flags.l)
-                                            + (has_minutes ? char_type(':') + flags.M : string_type());
+            string_type   const succint     = trim_zeros(flags.I) + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
                                             : (succint + char_type(' ') + meridiem);
@@ -295,11 +276,12 @@ struct formatter {
                                             + flags.b + char_type(' ')
                                             + flags.Y + char_type(' ')
                                             + flags.T;
+            string_type   const dst         = is_dst ? traits_type::literal("1") : traits_type::literal("0");
 
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
-            cooked.b = to_lower_copy(flags.b);
+            cooked.b = algo::to_lower_copy(flags.b);
             cooked.B = string_type();                       // NOTE: "Not implemented" per the spec.
             cooked.c = iso8601;
             cooked.d = flags.d;
@@ -308,18 +290,18 @@ struct formatter {
             cooked.E = flags.B;                             // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;
-            cooked.g = trim_left_copy(flags.l);
-            cooked.G = trim_left_copy(flags.k);
+            cooked.g = trim_zeros(flags.I);
+            cooked.G = trim_zeros(flags.H);
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
-            cooked.I = is_dst ? traits_type::literal("1") : traits_type::literal("0");
-            cooked.j = trim_left_copy_if(flags.d, is_any_of("0"));
+            cooked.I = dst;
+            cooked.j = trim_zeros(flags.d);
             cooked.l = flags.A;
             cooked.L = behavior_type::to_string(is_leapyear);
             cooked.m = flags.m;
             cooked.M = flags.b;
-            cooked.n = trim_left_copy_if(flags.m, is_any_of("0"));
+            cooked.n = trim_zeros(flags.m);
             cooked.N = flags.b;                             // TODO: Use A.P. style.
             cooked.o = flags.G;
             cooked.O = traits_type::literal("");            // TODO: Implement.
@@ -329,13 +311,13 @@ struct formatter {
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
             cooked.T = traits_type::widen(string_type(tzname[0]));
-            cooked.u = trim_left_copy_if(flags.f, is_any_of("."));
+            cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
             cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;
-            cooked.W = behavior_type::to_string(week);
+            cooked.W = behavior_type::to_string(iso_week);
             cooked.y = flags.y;
             cooked.Y = flags.Y;
-            cooked.z = trim_left_copy_if(flags.j, is_any_of("0"));
+            cooked.z = trim_zeros(flags.j);
             cooked.Z = traits_type::literal("");            // TODO: Implement.
             return cooked;
         }
@@ -348,6 +330,11 @@ struct formatter {
             case 3: case 23: return traits_type::literal("rd");
             default:         return traits_type::literal("th");
             }
+        }
+
+        inline static string_type trim_zeros(string_type const& s) {
+            string_type const trimmed = algo::trim_left_copy_if(s, algo::is_any_of("0"));
+            return trimmed.empty() ? string_type(1, char_type('0')) : trimmed;
         }
     };
 

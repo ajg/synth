@@ -115,7 +115,7 @@ inline String format_time(String format, Time const& time) {
 
     std::basic_ostringstream<char_type> stream;
     // The locale takes care of deleting this thing for us.
-    // TODO: Figure out a way to allocate the facet on the stack.
+    // TODO: Figure out a way to allocate the facet on the stack or reuse it.
     facet_type *const facet = new facet_type(format.c_str());
     stream.imbue(std::locale(stream.getloc(), facet));
     // Finally, stream out the time, properly formatted.

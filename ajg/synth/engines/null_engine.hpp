@@ -28,11 +28,18 @@ struct null_engine : base_engine<Traits> {
     typedef typename traits_type::ostream_type                                  ostream_type;
 
     typedef null_value<traits_type>                                             value_type;
-    typedef std::map<string_type, value_type> /* TODO: void_type */             context_type;
+    typedef std::map<string_type, value_type>                                   context_type;
     typedef void_type                                                           options_type;
 
+    template <class Iterator>
+    struct kernel;
+
+}; // null_engine
+
+
+template <class Traits>
 template <class Iterator>
-struct kernel : base_engine<traits_type>::template kernel<Iterator> {
+struct null_engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
@@ -52,8 +59,6 @@ struct kernel : base_engine<traits_type>::template kernel<Iterator> {
     void render(ostream_type&, frame_type const&, context_type const&, options_type const&) const {}
 
 }; // kernel
-
-}; // null_engine
 
 }} // namespace ajg::synth
 

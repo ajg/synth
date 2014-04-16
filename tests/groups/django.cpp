@@ -2,17 +2,32 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
+
 #include <ctime>
 #include <string>
-#include <unistd.h>
 
 #include <ajg/testing.hpp>
+#include <ajg/synth/detail.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/django.hpp>
 #include <ajg/synth/engines/null_resolver.hpp>
 
 #include <tests/data/kitchen_sink.hpp>
+
+#ifndef _WIN32
+#    include <unistd.h>
+#else
+#    include <direct.h>
+#endif
+
+namespace {
+inline std::string get_current_working_directory() {
+    char buffer[AJG_SYNTH_IF_MSVC(MAX_PATH, PATH_MAX)] = {};
+    return AJG_SYNTH_IF_MSVC(_getcwd, getcwd)(buffer, sizeof(buffer));
+}
+}
+
 
 namespace {
 namespace s = ajg::synth;
@@ -38,6 +53,9 @@ typedef value_type::behavior_type                                               
 
 struct data_type  : tests::data::kitchen_sink<engine_type> {};
 struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("django") {} } const group;
+
+using ajg::synth::detail::quote;
+string_type const absolute_path = traits_type::widen(get_current_working_directory());
 
 } // namespace
 
@@ -443,12 +461,8 @@ DJANGO_TEST(variable_tag, "{{ heterogenous }}", "42, 42, foo, foo")
 
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
-DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}",           NO_CONTEXT)
-DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}",           context)
-
-char path_buffer[PATH_MAX] = {};
-string_type const absolute_path = traits_type::widen(string_type(getcwd(path_buffer, PATH_MAX)));
-using ajg::synth::detail::quote;
+DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", NO_CONTEXT)
+DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", context)
 
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")
 DJANGO_TEST(ssi_tag, "{% ssi " + quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " parsed %}",     "")

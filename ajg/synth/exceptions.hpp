@@ -29,14 +29,14 @@ struct not_implemented : public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct file_error : public std::runtime_error {
-    std::string const filepath, action, reason;
+    std::string const path, action, reason;
 
-    file_error( std::string const& filepath
+    file_error( std::string const& path
               , std::string const& action
               , std::string const& reason
               )
-        : std::runtime_error("could not " + action + " file `" + filepath + "' (" + reason + ")")
-        , filepath(filepath), action(action), reason(reason) {}
+        : std::runtime_error("could not " + action + " file `" + path + "' (" + reason + ")")
+        , path(path), action(action), reason(reason) {}
 
     ~file_error() throw () {}
 };

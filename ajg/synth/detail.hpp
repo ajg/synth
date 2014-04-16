@@ -153,14 +153,14 @@ inline bool is_absolute(String path) {
 // stat_file
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline struct stat stat_file(std::string const& filepath) {
-    struct stat file;
+inline struct stat stat_file(std::string const& path) {
+    struct stat stats;
 
-    if (stat(filepath.c_str(), &file) != 0) {
-        throw_exception(file_error(filepath, "read", std::strerror(errno)));
+    if (stat(path.c_str(), &stats) != 0) {
+        throw_exception(file_error(path, "read", std::strerror(errno)));
     }
 
-    return file;
+    return stats;
 }
 
 #ifndef PIPE_BUF
@@ -192,16 +192,16 @@ void read_file(FILE *const file, Stream& stream) {
 #if AJG_SYNTH_UNUSED
 
 template <class Char>
-std::basic_string<Char> read_file(std::basic_string<Char> const& filepath) const {
-    std::string const path = traits_type::narrow(filepath);
+std::basic_string<Char> read_file(std::basic_string<Char> const& path) const {
+    std::string const narrow_path = traits_type::narrow(path);
     std::basic_ifstream<Char> file;
 
     try {
-        file.open(path.c_str(), std::ios::binary);
+        file.open(narrow_path.c_str(), std::ios::binary);
         return read_stream<std::basic_string<Char> >(file);
     }
     catch (std::exception const& e) {
-        throw_exception(file_error(path, "read", e.what()));
+        throw_exception(file_error(narrow_path, "read", e.what()));
     }
 }
 

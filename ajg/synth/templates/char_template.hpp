@@ -32,27 +32,28 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
 
   public:
 
-    char_template(buffer_type const& buffer) : buffer_(buffer) {
+    inline char_template(buffer_type const& buffer) : buffer_(buffer) {
         this->reset(this->buffer_.first, this->buffer_.first + this->buffer_.second);
     }
 
-    char_template(char_type const* data, size_type const size) : buffer_(data, size) {
+    inline char_template(char_type const* data, size_type const size) : buffer_(data, size) {
         this->reset(data, data + size);
     }
 
-    char_template(char_type const* data) : buffer_(data, get_size(data)) {
+    inline char_template(char_type const* data) : buffer_(data, get_size(data)) {
         this->reset(data, data + this->buffer_.second);
     }
 
-    // TODO: char_type[N] constructors that don't need to use get_size.
+    template <size_type N>
+    inline char_template(char_type const (&data)[N]): buffer_(data, N) {
+        this->reset(data, data + N);
+    }
 
   public:
 
     buffer_type const& buffer() const { return this->buffer_; }
 
   private:
-
-    buffer_type const buffer_;
 
     inline static size_type get_size(char const *const data) { return (std::strlen)(data); }
 
@@ -66,6 +67,10 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
         while (*data++) size++;
         return size;
     }
+
+  private:
+
+    buffer_type const buffer_;
 };
 
 }} // namespace ajg::synth

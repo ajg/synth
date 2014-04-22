@@ -11,7 +11,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/django.hpp>
-#include <ajg/synth/engines/null_resolver.hpp>
+#include <ajg/synth/engines/null/resolver.hpp>
 
 #include <tests/data/kitchen_sink.hpp>
 
@@ -33,7 +33,6 @@ namespace {
 namespace s = ajg::synth;
 
 using boost::optional;
-using s::null_resolver;
 
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::django::engine<traits_type>                                          engine_type;
@@ -50,6 +49,7 @@ typedef traits_type::char_type                                                  
 typedef traits_type::string_type                                                string_type;
 
 typedef value_type::behavior_type                                               behavior_type;
+typedef s::null::resolver<options_type>                                         null_resolver_type;
 
 struct data_type  : tests::data::kitchen_sink<engine_type> {};
 struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("django") {} } const group;
@@ -427,52 +427,52 @@ DJANGO_TEST(widthratio_tag, "{% widthratio 300 200 100 %}", "150")
 
 unit_test(url_tag) {
     string_template_type const t("{% url 'x.y.z' 1 2 3 %}");
-    null_resolver<options_type>::patterns_type patterns;
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    null_resolver_type::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_throws(std::runtime_error, t.render_to_string(context, options));
 }}}
 
 unit_test(url_tag) {
     string_template_type const t("{% url 'foo.bar.qux' 1 2 3 %}");
-    null_resolver<options_type>::patterns_type patterns;
+    null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_tag) {
     string_template_type const t("{% url 'foo.bar.qux' 1 b=2 3 %}");
-    null_resolver<options_type>::patterns_type patterns;
+    null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/3?b=2");
 }}}
 
 unit_test(url_as_tag) {
     string_template_type const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
-    null_resolver<options_type>::patterns_type patterns;
+    null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_as_tag) {
     string_template_type const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}");
-    null_resolver<options_type>::patterns_type patterns;
+    null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/2?a=1&amp;c=3");
 }}}
 
 unit_test(url_as_tag) {
     string_template_type const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
-    null_resolver<options_type>::patterns_type patterns;
-    options.resolvers.push_back(options_type::resolver_type(new null_resolver<options_type>(patterns)));
+    null_resolver_type::patterns_type patterns;
+    options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
 
     ensure_equals(t.render_to_string(context, options), "_");
 }}}

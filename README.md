@@ -506,6 +506,7 @@ Future Work
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Consider switching to unordered_map/unordered_set where possible
+   * Experiment with turning `detail` namespaces into `struct`s with `private` members and `friend`s
    * [v1+] Add `AJG_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
      + Add `AJG_PRAGMA(once)` to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically

@@ -4,8 +4,10 @@
 
 import fnmatch
 import os
+import platform
 import re
 import sys
+from distutils import sysconfig
 from distutils.core import setup, Extension
 from glob import glob
 from os.path import join
@@ -64,12 +66,26 @@ def get_extension():
     )
 
 # TODO: Allow some of these to be overridden via environment variable:
-char_type   = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ in Python < 3.
+char_type   = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
 is_debug    = False
 is_static   = True
 is_threaded = True
 synth_base  = join('ajg', 'synth')
-is_windows  = sys.platform == 'win32'
+is_windows  = platform.system() == 'Windows' # sys.platform == 'win32'
+is_osx      = platform.system() == 'Darwin'
+
+if not is_debug:
+    # Don't produce debugging symbols outside of debug mode.
+
+    if not is_windows:
+        cflags = sysconfig.get_config_var('CFLAGS')
+        opt = sysconfig.get_config_var('OPT')
+        sysconfig._config_vars['CFLAGS'] = cflags.replace(' -g ', ' ')
+        sysconfig._config_vars['OPT'] = opt.replace(' -g ', ' ')
+
+    if not is_osx:
+        ldshared = sysconfig.get_config_var('LDSHARED')
+        sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -g ', ' ')
 
 def get_and_set_windows_msvc_version():
     latest, path = None, None

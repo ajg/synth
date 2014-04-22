@@ -7,7 +7,7 @@
 #include <ajg/testing.hpp>
 
 #include <ajg/synth/templates.hpp>
-#include <ajg/synth/engines/null_engine.hpp>
+#include <ajg/synth/engines/null.hpp>
 
 
 #ifndef AJG_SYNTH_NO_WCHAR_T
@@ -41,63 +41,63 @@ group_type group_object("templates");
 
 AJG_TESTING_BEGIN
 
-typedef null_engine<default_traits<char> > char_engine;
+typedef null::engine<default_traits<char> > char_engine;
 
 unit_test(char_template::text char) {
-    char_template<char_engine> const t("foo bar qux");
+    templates::char_template<char_engine> const t("foo bar qux");
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
 unit_test(char_template::text char) {
     char const *const s = "foo bar qux";
-    char_template<char_engine> const t(s);
+    templates::char_template<char_engine> const t(s);
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
 unit_test(path_template::text char) {
-    path_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
+    templates::path_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
     ensure_equals(t.text(), read_to_string<char>("tests/templates/tmpl/variables.tmpl"));
 }}}
 
 unit_test(stream_template::text char) {
     std::istringstream stream("foo bar qux");
-    stream_template<char_engine> const t(stream);
+    templates::stream_template<char_engine> const t(stream);
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
 unit_test(string_template::text char) {
-    string_template<char_engine> const t("foo bar qux");
+    templates::string_template<char_engine> const t("foo bar qux");
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
 #ifndef AJG_SYNTH_NO_WCHAR_T
 
-typedef null_engine<default_traits<wchar_t> > wchar_t_engine;
+typedef null::engine<default_traits<wchar_t> > wchar_t_engine;
 
 unit_test(char_template::text wchar_t) {
-    char_template<wchar_t_engine> const t(L"foo bar qux");
+    templates::char_template<wchar_t_engine> const t(L"foo bar qux");
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 
 unit_test(char_template::text wchar_t) {
     wchar_t const *const s = L"foo bar qux";
-    char_template<wchar_t_engine> const t(s);
+    templates::char_template<wchar_t_engine> const t(s);
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 
 unit_test(path_template::text wchar_t) {
-    path_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");
+    templates::path_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");
     wensure_equals(t.text(), read_to_string<wchar_t>("tests/templates/tmpl/variables.tmpl"));
 }}}
 
 unit_test(stream_template::text wchar_t) {
     std::wistringstream stream(L"foo bar qux");
-    stream_template<wchar_t_engine> const t(stream);
+    templates::stream_template<wchar_t_engine> const t(stream);
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 
 unit_test(string_template::text wchar_t) {
-    string_template<wchar_t_engine> const t(L"foo bar qux");
+    templates::string_template<wchar_t_engine> const t(L"foo bar qux");
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 

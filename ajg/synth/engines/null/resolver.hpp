@@ -12,15 +12,13 @@
 
 namespace ajg {
 namespace synth {
+namespace null {
 
 using boost::optional;
 
-//
-// null_resolver
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 template <class Options>
-struct null_resolver : Options::abstract_resolver_type {
+struct resolver : Options::abstract_resolver_type {
+  public:
     typedef Options                               options_type;
     typedef typename options_type::traits_type    traits_type;
     typedef typename options_type::size_type      size_type;
@@ -60,15 +58,15 @@ struct null_resolver : Options::abstract_resolver_type {
         return it->second + path + query;
     }
 
-    explicit null_resolver(patterns_type patterns) : patterns_(patterns) {}
-    virtual ~null_resolver() {}
+    explicit resolver(patterns_type patterns) : patterns_(patterns) {}
+    virtual ~resolver() {}
 
   private:
 
     patterns_type patterns_;
-}; // null_resolver
+}; // resolver
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::null
 
 #endif // AJG_SYNTH_ENGINES_NULL_RESOLVER_HPP_INCLUDED
 

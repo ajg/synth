@@ -7,17 +7,18 @@
 
 #include <map>
 
-#include <ajg/synth/engines/null_value.hpp>
+#include <ajg/synth/engines/null/value.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 
 namespace ajg {
 namespace synth {
+namespace null {
 
 template <class Traits>
-struct null_engine : base_engine<Traits> {
+struct engine : base_engine<Traits> {
   public:
 
-    typedef null_engine                                                         engine_type;
+    typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
 
     typedef typename traits_type::void_type                                     void_type;
@@ -28,25 +29,25 @@ struct null_engine : base_engine<Traits> {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef null_value<traits_type>                                             value_type;
+    typedef null::value<traits_type>                                            value_type;
     typedef std::map<string_type, value_type>                                   context_type;
     typedef void_type                                                           options_type;
 
     template <class Iterator>
     struct kernel;
 
-}; // null_engine
+}; // engine
 
 
 template <class Traits>
 template <class Iterator>
-struct null_engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
     typedef typename kernel_type::frame_type                                    frame_type;
-    typedef null_engine                                                         engine_type;
+    typedef engine                                                              engine_type;
 
   public:
 
@@ -61,7 +62,7 @@ struct null_engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE ker
 
 }; // kernel
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::null
 
 #endif // AJG_SYNTH_ENGINES_NULL_ENGINE_HPP_INCLUDED
 

@@ -159,6 +159,7 @@ Components
  - [`django`](#django-engine): An implementation of [Django Templates](https://docs.djangoproject.com/en/dev/topics/templates/).
  - [`ssi`](#ssi-engine): An implementation of [Server Side Includes](http://httpd.apache.org/docs/current/howto/ssi.html).
  - [`tmpl`](#tmpl-engine): An implementation of [Perl's HTML::Template](http://html-template.sourceforge.net/html_template.html).
+ - `null`: A minimal implementation that does nothing (i.e. a no-op.)
 
 ### Bindings
 
@@ -490,7 +491,6 @@ Future Work
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Move `engine`s to own namespace
-   * Move `null_*` components to own folder and namespace
    * Make documentation comments uniformly `///`
    * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default

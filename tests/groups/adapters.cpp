@@ -12,7 +12,7 @@
 
 #include <ajg/testing.hpp>
 #include <ajg/synth/adapters.hpp>
-#include <ajg/synth/engines/null_engine.hpp>
+#include <ajg/synth/engines/null.hpp>
 #include <ajg/synth/templates/string_template.hpp>
 
 namespace {
@@ -20,7 +20,7 @@ namespace {
 namespace s = ajg::synth;
 
 typedef s::default_traits<char>                                                 traits_type;
-typedef s::null_engine<traits_type>                                             engine_type;
+typedef s::null::engine<traits_type>                                            engine_type;
 typedef s::templates::string_template<engine_type>                              template_type;
 typedef engine_type::context_type                                               context_type;
 typedef engine_type::value_type                                                 value_type;

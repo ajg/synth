@@ -250,6 +250,7 @@ Components
 ### Base Components
 
  - `base_adapter`
+ - `base_binding`
  - `base_engine`
  - `base_template`
 
@@ -448,6 +449,7 @@ Future Work
          3. Custom tags with arbitrary blocks
      + Set docstrings where appropriate
      + Support for Python 3
+     + Move under `bindings` namespace, like command_line
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
      + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)
@@ -479,7 +481,6 @@ Future Work
    * [v2] Create `c++14` type adapters
 
  - Templates:
-   * Refactor `multi_template` into `base_binding`
    * Rename `file_template` to `path_template`
      + Create new `file_template` (using `FILE* file`)
      + Add `render_to_file` (using `FILE* file`)

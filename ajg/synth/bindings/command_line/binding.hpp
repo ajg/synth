@@ -9,24 +9,25 @@
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <ajg/synth/adapters/map.hpp>
-#include <ajg/synth/adapters/ptree.hpp>
-#include <ajg/synth/adapters/string.hpp>
+#include <ajg/synth/bindings/base_binding.hpp>
+#include <ajg/synth/templates/stream_template.hpp>
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace command_line {
 
 namespace pt = boost::property_tree;
 
-template <class MultiTemplate>
-struct binding : MultiTemplate, boost::noncopyable {
+template <class Traits>
+struct binding : private boost::noncopyable
+               , bindings::detail::complete_base_binding<Traits, stream_template>::type {
   public:
 
     typedef binding                                                             binding_type;
-    typedef MultiTemplate                                                       base_type;
+    typedef Traits                                                              traits_type;
+    typedef typename binding::base_binding_type                                 base_type;
 
-    typedef typename base_type::traits_type                                     traits_type;
     typedef typename base_type::formats_type                                    formats_type;
     typedef typename base_type::libraries_type                                  libraries_type;
     typedef typename base_type::loaders_type                                    loaders_type;
@@ -81,7 +82,7 @@ struct binding : MultiTemplate, boost::noncopyable {
         return base_type::template render_to_path<binding>(path, context);
     }
 
-  public: // TODO[c++11]: Replace with `friend MultiTemplate;`
+  public: // TODO[c++11]: Replace with protected + `friend base_binding;`
 
     template <class Context>
     inline static Context adapt_context(context_type const& parent) {
@@ -95,6 +96,6 @@ struct binding : MultiTemplate, boost::noncopyable {
     }
 };
 
-}}} // namespace ajg::synth::command_line
+}}}} // namespace ajg::synth::bindings::command_line
 
 #endif // AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED

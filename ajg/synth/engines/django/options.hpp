@@ -120,60 +120,60 @@ template <class Value>
 struct options {
   public:
 
-    typedef options                                options_type;
-    typedef Value                                  value_type;
+    typedef options                                                             options_type;
+    typedef Value                                                               value_type;
 
-    typedef typename value_type::behavior_type     behavior_type;
-    typedef typename value_type::range_type        range_type;
-    typedef typename value_type::sequence_type     sequence_type;
-    typedef typename value_type::mapping_type      mapping_type;
-    typedef typename value_type::traits_type       traits_type;
+    typedef typename value_type::behavior_type                                  behavior_type;
+    typedef typename value_type::range_type                                     range_type;
+    typedef typename value_type::sequence_type                                  sequence_type;
+    typedef typename value_type::mapping_type                                   mapping_type;
+    typedef typename value_type::traits_type                                    traits_type;
 
-    typedef typename traits_type::boolean_type     boolean_type;
-    typedef typename traits_type::char_type        char_type;
-    typedef typename traits_type::size_type        size_type;
-    typedef typename traits_type::number_type      number_type;
-    typedef typename traits_type::date_type        date_type;
-    typedef typename traits_type::datetime_type    datetime_type;
-    typedef typename traits_type::duration_type    duration_type;
-    typedef typename traits_type::string_type      string_type;
-    typedef typename traits_type::paths_type       paths_type;
-    typedef typename traits_type::names_type       names_type;
-    typedef typename traits_type::istream_type     istream_type;
-    typedef typename traits_type::ostream_type     ostream_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::date_type                                     date_type;
+    typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::paths_type                                    paths_type;
+    typedef typename traits_type::names_type                                    names_type;
+    typedef typename traits_type::istream_type                                  istream_type;
+    typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef std::map<string_type, value_type>      context_type;     // TODO: value_type keys.
+    typedef std::map<string_type, value_type>                                   context_type;     // TODO: value_type keys.
 
-    typedef std::pair<sequence_type, mapping_type> arguments_type;
-    typedef std::map<string_type, string_type>     formats_type;
+    typedef std::pair<sequence_type, mapping_type>                              arguments_type;
+    typedef std::map<string_type, string_type>                                  formats_type;
 
-    typedef abstract_library<options_type>         abstract_library_type;
-    typedef abstract_loader<options_type>          abstract_loader_type;
-    typedef abstract_resolver<options_type>        abstract_resolver_type;
+    typedef abstract_library<options_type>                                      abstract_library_type;
+    typedef abstract_loader<options_type>                                       abstract_loader_type;
+    typedef abstract_resolver<options_type>                                     abstract_resolver_type;
 
-    typedef shared_ptr<abstract_library_type>      library_type;  // TODO[c++11]: Use unique_ptr?
-    typedef shared_ptr<abstract_loader_type>       loader_type;   // TODO[c++11]: Use unique_ptr?
-    typedef shared_ptr<abstract_resolver_type>     resolver_type; // TODO[c++11]: Use unique_ptr?
+    typedef boost::shared_ptr<abstract_library_type>                            library_type;  // TODO[c++11]: Use unique_ptr?
+    typedef boost::shared_ptr<abstract_loader_type>                             loader_type;   // TODO[c++11]: Use unique_ptr?
+    typedef boost::shared_ptr<abstract_resolver_type>                           resolver_type; // TODO[c++11]: Use unique_ptr?
 
     typedef value_type (tag_fn_type)(options_type&, context_type&, arguments_type&);
     typedef value_type (filter_fn_type)(options_type const&, context_type const&, value_type const&, arguments_type const&);
 
-    typedef boost::function<tag_fn_type>           tag_type;
-    typedef boost::function<filter_fn_type>        filter_type;
+    typedef boost::function<tag_fn_type>                                        tag_type;
+    typedef boost::function<filter_fn_type>                                     filter_type;
 
-    typedef std::map<string_type, tag_type>        tags_type;
-    typedef std::map<string_type, filter_type>     filters_type;
+    typedef std::map<string_type, tag_type>                                     tags_type;
+    typedef std::map<string_type, filter_type>                                  filters_type;
 
-    typedef std::map<string_type, library_type>    libraries_type;
-    typedef std::vector<loader_type>               loaders_type;
-    typedef std::vector<resolver_type>             resolvers_type;
+    typedef std::map<string_type, library_type>                                 libraries_type;
+    typedef std::vector<loader_type>                                            loaders_type;
+    typedef std::vector<resolver_type>                                          resolvers_type;
 
   private:
 
-    typedef size_type                          marker_type; // FIXME: pair<filename, size_type>
-    typedef std::map<string_type, string_type> blocks_type;
-    typedef std::map<marker_type, size_type>   cycles_type;
-    typedef std::map<marker_type, value_type>  changes_type;
+    typedef size_type                                                           marker_type; // FIXME: pair<filename, size_type>
+    typedef std::map<string_type, string_type>                                  blocks_type;
+    typedef std::map<marker_type, size_type>                                    cycles_type;
+    typedef std::map<marker_type, value_type>                                   changes_type;
 
   private:
 
@@ -187,7 +187,7 @@ struct options {
     options( boolean_type     const  autoescape    = true
            , value_type       const& default_value = string_type()
            , formats_type     const& formats       = formats_type()
-           , boolean_type     const  debug         = false
+           , boolean_type     const  debug         = boolean_type()
            , paths_type       const& directories   = paths_type()
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
@@ -249,20 +249,20 @@ struct options {
 
     inline optional<string_type> get_block(string_type const& name) const {
         if (this->top_level()) {
-            throw_exception(std::invalid_argument("not in a derived template"));
+            AJG_SYNTH_THROW(std::invalid_argument("not in a derived template"));
         }
         return detail::find(name, *this->blocks_);
     }
 
     inline string_type get_base_block() const {
         if (this->base_block_.empty()) {
-            throw_exception(std::invalid_argument("not in a derived block"));
+            AJG_SYNTH_THROW(std::invalid_argument("not in a derived block"));
         }
         else if (optional<string_type> const& block = this->get_block(this->base_block_)) {
             return *block;
         }
         else {
-            throw_exception(std::logic_error("invalid block"));
+            AJG_SYNTH_THROW(std::logic_error("invalid block"));
         }
     }
 

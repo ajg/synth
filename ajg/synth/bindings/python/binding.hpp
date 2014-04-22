@@ -16,11 +16,13 @@
 
 #include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/django/options.hpp>
+#include <ajg/synth/bindings/base_binding.hpp>
 #include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
 #include <ajg/synth/bindings/python/loader.hpp>
 #include <ajg/synth/bindings/python/library.hpp>
 #include <ajg/synth/bindings/python/resolver.hpp>
+#include <ajg/synth/templates/char_template.hpp>
 
 namespace ajg {
 namespace synth {
@@ -33,30 +35,30 @@ inline char const* version() {
     return AJG_SYNTH_VERSION_STRING;
 }
 
-template <class MultiTemplate>
-struct binding : private boost::base_from_member<PyObject*>, MultiTemplate {
+template <class Traits>
+struct binding : private boost::base_from_member<PyObject*>
+               , bindings::detail::complete_base_binding<Traits, char_template>::type {
   public:
 
-    typedef binding                              binding_type;
-    typedef MultiTemplate                        base_type;
+    typedef binding                                                             binding_type;
+    typedef Traits                                                              traits_type;
+    typedef typename binding::base_binding_type                                 base_type;
 
-    typedef typename binding_type::traits_type   traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::paths_type                                    paths_type;
 
-    typedef typename traits_type::boolean_type   boolean_type;
-    typedef typename traits_type::size_type      size_type;
-    typedef typename traits_type::string_type    string_type;
-    typedef typename traits_type::paths_type     paths_type;
-
-    typedef typename base_type::arguments_type   arguments_type;
-    typedef typename base_type::formats_type     formats_type;
-    typedef typename base_type::options_type     options_type;
-    typedef typename base_type::library_type     library_type;
-    typedef typename base_type::libraries_type   libraries_type;
-    typedef typename base_type::loader_type      loader_type;
-    typedef typename base_type::loaders_type     loaders_type;
-    typedef typename base_type::resolver_type    resolver_type;
-    typedef typename base_type::resolvers_type   resolvers_type;
-    typedef py::dict                             context_type;
+    typedef typename base_type::arguments_type                                  arguments_type;
+    typedef typename base_type::formats_type                                    formats_type;
+    typedef typename base_type::options_type                                    options_type;
+    typedef typename base_type::library_type                                    library_type;
+    typedef typename base_type::libraries_type                                  libraries_type;
+    typedef typename base_type::loader_type                                     loader_type;
+    typedef typename base_type::loaders_type                                    loaders_type;
+    typedef typename base_type::resolver_type                                   resolver_type;
+    typedef typename base_type::resolvers_type                                  resolvers_type;
+    typedef py::dict                                                            context_type;
     typedef py::init< py::object
                     , string_type
                     , py::optional
@@ -69,7 +71,7 @@ struct binding : private boost::base_from_member<PyObject*>, MultiTemplate {
                         , py::list
                         , py::list
                         >
-                    >                           constructor_type;
+                    >                                                           constructor_type;
 
   public:
 
@@ -204,7 +206,7 @@ struct binding : private boost::base_from_member<PyObject*>, MultiTemplate {
         return resolvers;
     }
 
-  public: // TODO[c++11]: Replace with `friend MultiTemplate;`
+  public: // TODO[c++11]: Replace with protected + `friend base_binding;`
 
     template <class Context>
     inline static Context adapt_context(context_type const& dictionary) {

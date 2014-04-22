@@ -7,31 +7,20 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <ajg/synth/engines.hpp>
-#include <ajg/synth/adapters.hpp>
-#include <ajg/synth/templates.hpp>
-#include <ajg/synth/templates/multi_template.hpp>
 #include <ajg/synth/bindings/command_line/command.hpp>
 #include <ajg/synth/bindings/command_line/binding.hpp>
 
 
 namespace {
 
-namespace synth = ajg::synth;
+namespace s = ajg::synth;
 
-typedef synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE> traits_type;
-typedef synth::command_line::binding<synth::detail::multi_template
-    < traits_type
-    , synth::stream_template
-    , synth::django::engine<traits_type>
-    , synth::ssi::engine<traits_type>
-    , synth::tmpl::engine<traits_type>
-    >
-> binding_type;
-
-typedef synth::command_line::command<binding_type> command_type;
+typedef s::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>                          traits_type;
+typedef s::bindings::command_line::binding<traits_type>                         binding_type;
+typedef s::bindings::command_line::command<binding_type>                        command_type;
 
 } // namespace
+
 
 namespace boost {
 namespace property_tree {

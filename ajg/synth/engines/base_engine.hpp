@@ -127,7 +127,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
         size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
         string_type const site(furthest, detail::advance_to(furthest, (std::min)(room, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
-        throw_exception(parsing_error(traits_type::narrow(line)));
+        AJG_SYNTH_THROW(parsing_error(traits_type::narrow(line)));
     }
 
   AJG_SYNTH_IF_MSVC(public, protected):

@@ -38,7 +38,7 @@ inline char const* version() {
 
 template <class Traits>
 struct binding : private boost::base_from_member<PyObject*>
-               , bindings::detail::complete_base_binding<Traits, char_template>::type {
+               , bindings::detail::complete_base_binding<Traits, templates::char_template>::type {
   public:
 
     typedef binding                                                             binding_type;

@@ -16,6 +16,7 @@
 
 namespace ajg {
 namespace synth {
+namespace templates {
 
 ///
 /// char_template:
@@ -82,6 +83,6 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
     buffer_type const buffer_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_CHAR_TEMPLATE_HPP_INCLUDED

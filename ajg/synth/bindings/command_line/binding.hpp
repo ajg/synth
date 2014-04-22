@@ -21,7 +21,7 @@ namespace pt = boost::property_tree;
 
 template <class Traits>
 struct binding : private boost::noncopyable
-               , bindings::detail::complete_base_binding<Traits, stream_template>::type {
+               , bindings::detail::complete_base_binding<Traits, templates::stream_template>::type {
   public:
 
     typedef binding                                                             binding_type;

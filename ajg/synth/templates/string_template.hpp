@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace templates {
 
 template <class Engine>
 struct string_template : base_template<Engine, typename Engine::traits_type::string_type::const_iterator> {
@@ -39,6 +40,6 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
     string_type const string_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_STRING_TEMPLATE_HPP_INCLUDED

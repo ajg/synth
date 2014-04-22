@@ -24,6 +24,7 @@
 
 namespace ajg {
 namespace synth {
+namespace templates {
 
 using boost::throw_exception;
 
@@ -149,6 +150,6 @@ struct base_template : boost::noncopyable {
     range_type          range_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_BASE_TEMPLATE_HPP_INCLUDED

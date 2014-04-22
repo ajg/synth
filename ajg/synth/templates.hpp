@@ -8,7 +8,7 @@
 #include <ajg/synth/config.hpp>
 
 #include <ajg/synth/templates/char_template.hpp>
-#include <ajg/synth/templates/file_template.hpp>
+#include <ajg/synth/templates/path_template.hpp>
 #include <ajg/synth/templates/stream_template.hpp>
 #include <ajg/synth/templates/string_template.hpp>
 

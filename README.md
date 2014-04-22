@@ -168,7 +168,7 @@ Components
 ### Templates
 
  - `char_template`
- - `file_template`
+ - `path_template`
  - `stream_template`
  - `string_template`
 
@@ -481,8 +481,8 @@ Future Work
    * [v2] Create `c++14` type adapters
 
  - Templates:
-   * Rename `file_template` to `path_template`
-     + Create new `file_template` (using `FILE* file`)
+   * Create new `file_template` (using `FILE* file`)
+     + Rename `render_to_file` to `render_to_path` using `path_type`
      + Add `render_to_file` (using `FILE* file`)
    * Create `descriptor_template` (using `int descriptor`)
      + Add `render_to_descriptor` (using `int descriptor`)

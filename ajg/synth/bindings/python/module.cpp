@@ -15,9 +15,9 @@ BOOST_PYTHON_MODULE(synth) {
     namespace py = boost::python;
 
     typedef s::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>                          traits_type;
-    typedef s::python::binding<traits_type>                                         binding_type;
+    typedef s::bindings::python::binding<traits_type>                               binding_type;
 
-    py::def("version", s::python::version);
+    py::def("version", s::bindings::python::version);
 
     py::class_<binding_type>("Template", binding_type::constructor_type())
         .def("render_to_file",   &binding_type::render_to_file)

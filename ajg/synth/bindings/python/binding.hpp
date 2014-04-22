@@ -26,10 +26,11 @@
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace python {
 
 namespace py = boost::python;
-namespace d = detail;
+namespace d  = ajg::synth::bindings::python::detail;
 
 inline char const* version() {
     return AJG_SYNTH_VERSION_STRING;
@@ -229,6 +230,6 @@ struct binding : private boost::base_from_member<PyObject*>
     }
 };
 
-}}} // namespace ajg::synth::python
+}}}} // namespace ajg::synth::bindings::python
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_BINDING_HPP_INCLUDED

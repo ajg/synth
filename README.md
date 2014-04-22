@@ -449,7 +449,6 @@ Future Work
          3. Custom tags with arbitrary blocks
      + Set docstrings where appropriate
      + Support for Python 3
-     + Move under `bindings` namespace, like command_line
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
      + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)

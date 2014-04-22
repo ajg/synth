@@ -14,6 +14,7 @@
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace python {
 
 //
@@ -86,6 +87,6 @@ struct library : Options::abstract_library_type {
     filters_type /*const*/ filters_;
 };
 
-}}} // namespace ajg::synth::python
+}}}} // namespace ajg::synth::bindings::python
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_LIBRARY_HPP_INCLUDED

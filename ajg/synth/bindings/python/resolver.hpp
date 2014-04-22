@@ -10,6 +10,7 @@
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace python {
 
 //
@@ -60,6 +61,6 @@ struct resolver : Options::abstract_resolver_type {
     py::object /*const*/ object_;
 };
 
-}}} // namespace ajg::synth::python
+}}}} // namespace ajg::synth::bindings::python
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_RESOLVER_HPP_INCLUDED

@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_TEMPLATES_MULTI_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTH_TEMPLATES_MULTI_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_BINDINGS_BASE_BINDING_HPP_INCLUDED
+#define AJG_SYNTH_BINDINGS_BASE_BINDING_HPP_INCLUDED
 
 #include <memory>
 #include <vector>
@@ -12,25 +12,27 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ajg/synth/detail.hpp>
+#include <ajg/synth/engines.hpp>
+#include <ajg/synth/adapters.hpp>
 
 namespace ajg {
 namespace synth {
-namespace detail {
+namespace bindings {
 
 template < class Traits
          , template <class E> class Template
-         , class Django
-         , class SSI
-         , class TMPL
+         , template <class T> class Django
+         , template <class T> class SSI
+         , template <class T> class TMPL
          >
-struct multi_template {
+struct base_binding {
   public:
 
-    typedef multi_template                                                      multi_template_type;
+    typedef base_binding                                                        base_binding_type;
     typedef Traits                                                              traits_type;
-    typedef Django                                                              django_engine_type;
-    typedef SSI                                                                 ssi_engine_type;
-    typedef TMPL                                                                tmpl_engine_type;
+    typedef Django<traits_type>                                                 django_engine_type;
+    typedef SSI<traits_type>                                                    ssi_engine_type;
+    typedef TMPL<traits_type>                                                   tmpl_engine_type;
 
     typedef Template<django_engine_type>                                        django_template_type;
     typedef Template<ssi_engine_type>                                           ssi_template_type;
@@ -63,17 +65,17 @@ struct multi_template {
   public:
 
     template <class Source>
-    multi_template( Source         const& source
-                  , string_type    const& engine_name
-                  , boolean_type   const  autoescape
-                  , string_type    const& default_value
-                  , formats_type   const& formats
-                  , boolean_type   const& debug
-                  , paths_type     const& paths
-                  , libraries_type const& libraries
-                  , loaders_type   const& loaders
-                  , resolvers_type const& resolvers
-                  )
+    base_binding( Source         const& source
+                , string_type    const& engine_name
+                , boolean_type   const  autoescape
+                , string_type    const& default_value
+                , formats_type   const& formats
+                , boolean_type   const& debug
+                , paths_type     const& paths
+                , libraries_type const& libraries
+                , loaders_type   const& loaders
+                , resolvers_type const& resolvers
+                )
         : django_template_(engine_name == traits_type::literal("django") ? new django_template_type(source) : 0)
         , ssi_template_   (engine_name == traits_type::literal("ssi")    ? new ssi_template_type   (source) : 0)
         , tmpl_template_  (engine_name == traits_type::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
@@ -82,13 +84,13 @@ struct multi_template {
         , tmpl_options_() {                  // TODO: paths, debug, ...
 
         if (!django_template_ && !ssi_template_ && !tmpl_template_) {
-            throw_exception(std::invalid_argument("engine_name"));
+            AJG_SYNTH_THROW(std::invalid_argument("engine_name"));
         }
     }
 
   protected:
 
-    // TODO: Support post-construction options (maybe using something like multi_options?)
+    // TODO: Support post-construction options (maybe using something like combined_options?)
     //       e.g. Options const& options = {django_options_, ssi_options_, tmpl_options_}
 
     template <class X, class Context>
@@ -127,6 +129,15 @@ struct multi_template {
     tmpl_options_type   tmpl_options_;
 };
 
-}}} // namespace ajg::synth::detail
+namespace detail { // TODO: Move elsewhere.
 
-#endif // AJG_SYNTH_TEMPLATES_MULTI_TEMPLATE_HPP_INCLUDED
+template <class Traits, template <class E> class Template>
+struct complete_base_binding {
+    typedef base_binding<Traits, Template, django::engine, ssi::engine, tmpl::engine> type;
+};
+
+} // namespace detail
+
+}}} // namespace ajg::synth::bindings
+
+#endif // AJG_SYNTH_BINDINGS_BASE_BINDING_HPP_INCLUDED

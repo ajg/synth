@@ -17,10 +17,12 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <ajg/synth/detail.hpp>
 #include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace command_line {
 
 #if (BOOST_VERSION > 105000) // 1.50+
@@ -80,7 +82,7 @@ struct command {
             return;
         }
         else if (!flags.count("engine")) {
-            throw_exception(std::invalid_argument("missing engine name"));
+            AJG_SYNTH_THROW(std::invalid_argument("missing engine name"));
         }
 
         binding_type const binding
@@ -101,7 +103,7 @@ struct command {
                 file.open(path.c_str(), std::ios::binary);
             }
             catch (std::exception const& e) {
-                throw_exception(file_error(path, "read", e.what()));
+                AJG_SYNTH_THROW(file_error(path, "read", e.what()));
             }
 
             using boost::algorithm::ends_with;
@@ -109,7 +111,7 @@ struct command {
                  if (ends_with(path, traits_type::literal(".ini")))  pt::read_ini(file, context);
             else if (ends_with(path, traits_type::literal(".json"))) pt::read_json(file, context);
             else if (ends_with(path, traits_type::literal(".xml")))  pt::read_xml(file, context);
-            else throw_exception(std::invalid_argument("unknown context format"));
+            else AJG_SYNTH_THROW(std::invalid_argument("unknown context format"));
         }
 
         binding.render_to_stream(std::cout, context);
@@ -118,7 +120,7 @@ struct command {
 
 #undef AJG_ARG
 
-}}} // namespace ajg::synth::command_line
+}}}} // namespace ajg::synth::bindings::command_line
 
 #endif // AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
 

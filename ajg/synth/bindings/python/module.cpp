@@ -8,32 +8,20 @@
 
 #include <boost/python.hpp>
 
-#include <ajg/synth/engines.hpp>
-#include <ajg/synth/adapters.hpp>
-#include <ajg/synth/templates.hpp>
-#include <ajg/synth/templates/multi_template.hpp>
 #include <ajg/synth/bindings/python/binding.hpp>
 
-BOOST_PYTHON_MODULE(synth)
-{
-    namespace py    = boost::python;
-    namespace synth = ajg::synth;
+BOOST_PYTHON_MODULE(synth) {
+    namespace s  = ajg::synth;
+    namespace py = boost::python;
 
-    typedef synth::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE> traits_type;
-    typedef synth::python::binding<synth::detail::multi_template
-        < traits_type
-        , synth::char_template
-        , synth::django::engine<traits_type>
-        , synth::ssi::engine<traits_type>
-        , synth::tmpl::engine<traits_type>
-        >
-    > Template;
+    typedef s::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>                          traits_type;
+    typedef s::python::binding<traits_type>                                         binding_type;
 
-    py::def("version", synth::python::version);
+    py::def("version", s::python::version);
 
-    py::class_<Template>("Template", Template::constructor_type())
-        .def("render_to_file",   &Template::render_to_file)
-        .def("render_to_path",   &Template::render_to_path)
-        .def("render_to_string", &Template::render_to_string)
+    py::class_<binding_type>("Template", binding_type::constructor_type())
+        .def("render_to_file",   &binding_type::render_to_file)
+        .def("render_to_path",   &binding_type::render_to_path)
+        .def("render_to_string", &binding_type::render_to_string)
     ;
 }

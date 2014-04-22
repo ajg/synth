@@ -33,7 +33,7 @@ struct stream_template : base_template<Engine,
         this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end());
     }
 
-    // NOTE: Provided because multi_template can't cope with a mutable source argument yet.
+    // NOTE: Provided because base_binding can't cope with a mutable source argument yet.
     // TODO: Introduce source_type or such to all templates and pass it via base_template.
     stream_template(istream_type const& istream) : istream_(const_cast<istream_type&>(istream)), bidi_istream_(istream_) {
         this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end());

@@ -32,8 +32,8 @@ static void construct(PyObject* obj, py::converter::rvalue_from_python_stage1_da
 // ---- BOOST_PYTHON_MODULE
 
     // TODO: ssi values, tmpl values
-    typedef Template::django_template_type::value_type Value;
-    converter::registry::push_back(&convertible<Value>, &construct<Value>, type_id<Value>());
+    typedef binding_type::django_template_type::value_type value_type;
+    py::converter::registry::push_back(&convertible<value_type>, &construct<value_type>, py::type_id<value_type>());
 
 #endif // AJG_SYNTH_OBSOLETE
 

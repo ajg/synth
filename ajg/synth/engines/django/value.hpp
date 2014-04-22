@@ -55,16 +55,16 @@ struct value : value_facade<Traits, value> {
 
     inline value_type copy() const { return *this; }
 
-    inline value_type&  safe(boolean_type const safe) { return (safe_ = safe), *this; }
-    inline boolean_type safe() const { return safe_; }
+    inline value_type&  safe(boolean_type const safe) { return (this->safe_ = safe), *this; }
+    inline boolean_type safe() const { return this->safe_; }
 
     inline value_type& mark_unsafe() { return this->safe(false), *this; }
     inline value_type& mark_safe() { return this->safe(true), *this; }
 
-    inline value_type&        token(string_type const& token) { return (token_ = token), *this; }
-    inline string_type const& token() const { BOOST_ASSERT(token_); return *token_; }
+    inline value_type&        token(string_type const& token) { return (this->token_ = token), *this; }
+    inline string_type const& token() const { BOOST_ASSERT(this->token_); return *this->token_; }
 
-    inline boolean_type is_literal() const { return boolean_type(token_); }
+    inline boolean_type is_literal() const { return boolean_type(this->token_); }
 
 	value_type escape() const {
         // XXX: Should this method escape binary and control characters?

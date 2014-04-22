@@ -471,6 +471,7 @@ Future Work
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * Other:
      + Create `ctpp` engine
+     + [v1+] Create `jinja2` engine
      + [v1+] Create `cheetah` engine
      + [v1+] Create `xslt` engine
 

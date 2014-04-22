@@ -14,19 +14,19 @@ from os.path import join
 
 def run():
     setup(
-        name = 'synth',
-        version = '.'.join(map(str, get_synth_version())),
-        description = 'A Python binding to the Synth C++ Template Framework',
+        name             = 'synth',
+        version          = '.'.join(map(str, get_synth_version())),
+        description      = 'A Python binding to the Synth C++ Template Framework',
         long_description = get_long_description(),
-        keywords = 'django, tmpl, ssi, template, framework',
-        author = 'Alvaro J. Genial',
-        author_email = 'genial@alva.ro',
-        license = 'Boost Software License V1',
-        url = 'https://github.com/ajg/synth',
-        ext_modules = [get_extension()],
-        data_files = get_data_files(),
-        classifiers = get_classifiers(),
-        # TODO: test_suite = 'synth.tests',
+        keywords         = 'django, tmpl, ssi, template, framework',
+        author           = 'Alvaro J. Genial',
+        author_email     = 'genial@alva.ro',
+        license          = 'Boost Software License V1',
+        url              = 'https://github.com/ajg/synth',
+        ext_modules      = [get_extension()],
+        data_files       = get_data_files(),
+        classifiers      = get_classifiers(),
+# TODO: test_suite       = 'synth.tests',
     )
 
 def get_long_description():

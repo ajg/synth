@@ -482,9 +482,11 @@ Future Work
 
  - Templates:
    * Create new `file_template` (using `FILE* file`)
-     + Add `render_to_file` (using `FILE* file`)
+     + Add `render_to_file` to base_template
+     + Add `render_file` to engines
    * Create `descriptor_template` (using `int descriptor`)
-     + Add `render_to_descriptor` (using `int descriptor`)
+     + Add `render_to_descriptor` to base_template
+     + Add `render_descriptor` to engines
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```

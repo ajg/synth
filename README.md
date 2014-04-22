@@ -459,12 +459,12 @@ Future Work
 
  - Engines:
    * Django:
+     + Implement multi-level inheritance
+     + Support non-UTC timezones
      + Option to pre-load libraries, tags and filters
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
      + Consider using hex character entities (vs. named) to match Django's engine
-     + Implement multi-level inheritance
-     + Support non-UTC timezones
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * Other:
@@ -502,7 +502,6 @@ Future Work
      + Replace `BOOST_FOREACH` with new `for` loop
      + Replace `BOOST_STATIC_CONSTANT` with `static const`
      + Replace `boost::assign` use with aggregate initializers
-     + Remove needlessly configurable (especially defaulted) `template` parameters
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Consider switching to unordered_map/unordered_set where possible

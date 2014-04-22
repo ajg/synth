@@ -16,7 +16,7 @@ namespace synth {
 namespace {
 
 namespace py = boost::python;
-namespace d = synth::python::detail;
+namespace d  = ajg::synth::bindings::python::detail;
 
 } // namespace
 

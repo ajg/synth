@@ -10,6 +10,7 @@
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace python {
 
 //
@@ -35,6 +36,6 @@ struct loader : Options::abstract_loader_type {
     py::object /*const*/ object_;
 };
 
-}}} // namespace ajg::synth::python
+}}}} // namespace ajg::synth::bindings::python
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_LOADER_HPP_INCLUDED

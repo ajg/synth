@@ -12,6 +12,7 @@
 
 namespace ajg {
 namespace synth {
+namespace bindings {
 namespace python {
 namespace detail {
 
@@ -73,6 +74,6 @@ inline std::pair<py::tuple, py::dict> from_arguments(Value const& p0, Arguments 
     return from_arguments(arguments);
 }
 
-}}}} // namespace ajg::synth::python::detail
+}}}}} // namespace ajg::synth::bindings::python::detail
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_DETAIL_HPP_INCLUDED

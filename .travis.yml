@@ -19,7 +19,7 @@ before_script:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
 script:
-  - scons tests/harness && (tests/harness; valgrind --track-origins=yes tests/harness)
+  - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
   - scons synth && tests/harness.sh
   - scons # Make sure every other target builds successfully.
   - sudo python setup.py install # FIXME: && python tests/harness.py (Segfaults only in Travis)

@@ -17,7 +17,7 @@
 # Executables
 /a.out
 /synth
-/tests/harness
+/tests/harness.out
 /examples/all
 
 # Sublime Text

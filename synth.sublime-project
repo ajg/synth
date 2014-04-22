@@ -19,8 +19,8 @@
             "working_dir": "${project_path}"
         },
         {
-            /* TODO: Build python module in debug mode, which is usually faster. */
-            "cmd": "scons debug=1 tests/harness && tests/harness && python setup.py clean --all install && python tests/harness.py && scons debug=1 synth",
+            /* TODO: Build python module in debug mode (but without debugging symbols) which is usually faster. */
+            "cmd": "scons debug=1 tests/harness.out && tests/harness.out && python setup.py clean --all install && python tests/harness.py && scons debug=1 synth",
             "shell": true,
             "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "name": "Synth: Build All & Run Tests (debug)",
@@ -36,7 +36,7 @@
                 ".sconsign.dblite",
                 "MANIFEST",
                 "synth",
-                /* TODO: "tests/harness", */
+                "tests/harness.out",
                 "examples/all",
                 "*.o",
                 "*.o-*",

@@ -74,6 +74,9 @@ synth_base  = join('ajg', 'synth')
 is_windows  = platform.system() == 'Windows' # sys.platform == 'win32'
 is_osx      = platform.system() == 'Darwin'
 
+# TODO: For reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++ ones,
+#       to which it doesn't apply, which causes GCC to print out a warning while building.
+
 if not is_debug:
     # Don't produce debugging symbols outside of debug mode.
 
@@ -97,7 +100,7 @@ def get_and_set_windows_msvc_version():
             if not latest or version > latest:
                 latest = version
                 path = value
-    
+
     if not latest:
         raise Exception('No version of MSVC found')
 

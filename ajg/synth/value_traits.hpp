@@ -115,6 +115,15 @@ struct default_traits {
 
     inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) { return s; }
     inline static std::basic_string<Char> const& widen (std::basic_string<Char> const& s) { return s; }
+
+///
+/// to_path:
+///     string -> path conversion
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static path_type to_path(string_type const& s) {
+        return transcode<typename path_type::value_type>(s);
+    }
 };
 
 }} // namespace ajg::synth

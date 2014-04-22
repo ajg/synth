@@ -24,6 +24,7 @@ struct null_engine : base_engine<Traits> {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 

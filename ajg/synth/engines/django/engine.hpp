@@ -52,6 +52,7 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
@@ -355,6 +356,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         return sequence;
     }
 
+    path_type extract_path(match_type const& match) const {
+        return traits_type::to_path(this->extract_string(match));
+    }
+
     string_type extract_string(match_type const& match) const {
         BOOST_ASSERT(is(match, this->string_literal));
         return detail::unquote(match.str());
@@ -375,9 +380,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         render_block(ostream, frame, context, options);
     }
 
-    // TODO: Rename render_path
-    void render_file( ostream_type&       ostream
-                    , string_type  const& path
+    void render_path( ostream_type&       ostream
+                    , path_type    const& path
                     , context_type const& context
                     , options_type const& options
                     ) const {

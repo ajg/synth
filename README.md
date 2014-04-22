@@ -482,7 +482,6 @@ Future Work
 
  - Templates:
    * Create new `file_template` (using `FILE* file`)
-     + Rename `render_to_file` to `render_to_path` using `path_type`
      + Add `render_to_file` (using `FILE* file`)
    * Create `descriptor_template` (using `int descriptor`)
      + Add `render_to_descriptor` (using `int descriptor`)

@@ -69,6 +69,7 @@ struct builtin_tags {
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -396,8 +397,8 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            match_type  const& body = match(kernel.block);
-            string_type const  path = kernel.extract_string(match(kernel.string_literal));
+            match_type const& body = match(kernel.block);
+            path_type  const  path = kernel.extract_path(match(kernel.string_literal));
 
             std::basic_ostream<char_type> null_stream(0);
             typename options_type::blocks_type blocks;
@@ -407,7 +408,7 @@ struct builtin_tags {
 
             // First, render the base template as if it were stand-alone, so that block.super is
             // available to the derived template; non-block content is discarded.
-            kernel.render_file(null_stream, path, context, options_copy);
+            kernel.render_path(null_stream, path, context, options_copy);
 
             options_copy = options; // Discard non-block modifications to options.
             options_copy.blocks_ = &blocks;
@@ -420,8 +421,8 @@ struct builtin_tags {
             options_copy.blocks_ = &blocks;
 
             // Third, render the base template again with any (possibly) overridden blocks.
-            // TODO: Parse and generate the frame once and reuse it or have render_file do caching.
-            kernel.render_file(ostream, path, context, options_copy);
+            // TODO: Parse and generate the frame once and reuse it or have render_path do caching.
+            kernel.render_path(ostream, path, context, options_copy);
         }
     };
 
@@ -728,7 +729,7 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            string_type const path = kernel.extract_string(match(kernel.string_literal));
+            path_type const path = kernel.extract_path(match(kernel.string_literal));
 
             if (match_type const& args = match(kernel.arguments)) {
                 boolean_type const only = match[s1].matched;
@@ -742,10 +743,10 @@ struct builtin_tags {
                 BOOST_FOREACH(named_argument_type const& argument, arguments.second) {
                     context_copy[argument.first] = argument.second;
                 }
-                kernel.render_file(ostream, path, context_copy, options);
+                kernel.render_path(ostream, path, context_copy, options);
             }
             else {
-                kernel.render_file(ostream, path, context, options);
+                kernel.render_path(ostream, path, context, options);
             }
         }
     };
@@ -965,7 +966,8 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            string_type  const path   = kernel.evaluate(match(kernel.value), context, options).to_string();
+            value_type   const value  = kernel.evaluate(match(kernel.value), context, options);
+            path_type    const path   = traits_type::to_path(value.to_string());
             boolean_type const parsed = match[s1].matched;
 
             if (!synth::detail::is_absolute(path)) {
@@ -973,7 +975,7 @@ struct builtin_tags {
             }
 
             if (parsed) {
-                kernel.render_file(ostream, path, context, options);
+                kernel.render_path(ostream, path, context, options);
             }
             else {
                 string_type line;

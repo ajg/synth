@@ -91,6 +91,7 @@ struct builtin_filters {
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
 
     typedef typename options_type::arguments_type                               arguments_type;

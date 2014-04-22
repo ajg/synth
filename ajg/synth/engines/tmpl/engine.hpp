@@ -39,6 +39,7 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -157,6 +158,10 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
 
   public:
 
+    path_type extract_path(match_type const& attr) const {
+        return traits_type::to_path(this->extract_attribute(attr));
+    }
+
     string_type extract_attribute(match_type const& attr) const {
         if (is(attr, this->attribute)) {
             match_type const& attr_ = detail::unnest(attr);
@@ -213,9 +218,8 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         render_block(ostream, frame, context, options);
     }
 
-    // TODO: Rename render_path
-    void render_file( ostream_type&       ostream
-                    , string_type  const& path
+    void render_path( ostream_type&       ostream
+                    , path_type    const& path
                     , context_type const& context
                     , options_type const& options
                     ) const {

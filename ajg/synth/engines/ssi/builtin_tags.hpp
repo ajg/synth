@@ -44,6 +44,7 @@ struct builtin_tags {
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -98,6 +99,7 @@ struct builtin_tags {
 
 enum { interpolated = true, raw = false };
 
+// TODO: Make `name` and `value` arguments.
 #define AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
     BOOST_FOREACH(match_type const& attr, detail::unnest(x).nested_results()) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
@@ -325,7 +327,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("include virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    args.kernel.render_file(args.ostream, value, args.context, args.options);
+                    args.kernel.render_path(args.ostream, traits_type::to_path(value), args.context, args.options);
                 }
             );
         }

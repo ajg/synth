@@ -49,6 +49,7 @@ struct builtin_tags {
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
   public:
@@ -163,8 +164,8 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             match_type const& attr = match(kernel.name_attribute);
-            string_type const path = kernel.extract_attribute(attr);
-            kernel.render_file(ostream, path, context, options);
+            path_type  const  path = kernel.extract_path(attr);
+            kernel.render_path(ostream, path, context, options);
         }
     };
 

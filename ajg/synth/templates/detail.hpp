@@ -14,7 +14,13 @@
 namespace ajg {
 namespace synth {
 namespace templates {
-namespace detail {
+
+struct detail {
+private:
+
+template <class E> friend struct stream_template;
+
+private:
 
 template <class InputStream>
 struct bidirectional_input_stream {
@@ -105,6 +111,8 @@ struct bidirectional_input_stream {
     std::vector<char_type> buffer_;
 };
 
-}}}} // namespace ajg::synth::templates::detail
+}; // detail
+
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_DETAIL_HPP_INCLUDED

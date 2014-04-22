@@ -944,7 +944,7 @@ struct builtin_tags {
 
             match_type const& body = match(kernel.block);
             kernel.render_block(ss, body, context, options);
-            // TODO: Use detail::bidirectional_input_stream to feed directly to regex_replace.
+            // TODO: Use bidirectional_input_stream to feed directly to regex_replace.
             string_type const string = ss.str();
             regex_replace(it, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
         }

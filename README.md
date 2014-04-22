@@ -54,9 +54,9 @@ def simple_tmpl_example():
 
 namespace synth = ajg::synth;
 
-typedef synth::default_traits<char>             traits_type;
-typedef synth::ssi::engine<traits_type>         engine_type;
-typedef synth::string_template<engine_type>     template_type;
+typedef synth::default_traits<char>                         traits_type;
+typedef synth::ssi::engine<traits_type>                     engine_type;
+typedef synth::templates::string_template<engine_type>      template_type;
 
 int main() {
     template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
@@ -489,7 +489,6 @@ Future Work
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
-   * Move `*_template`s to own namespace
    * Move `engine`s to own namespace
    * Move `null_*` components to own folder and namespace
    * Make documentation comments uniformly `///`

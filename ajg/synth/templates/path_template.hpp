@@ -28,6 +28,7 @@
 
 namespace ajg {
 namespace synth {
+namespace templates {
 
 template <class Engine>
 struct path_template : base_template< Engine
@@ -125,6 +126,6 @@ struct path_template : base_template< Engine
     info_type const info_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED

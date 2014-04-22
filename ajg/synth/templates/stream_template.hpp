@@ -10,6 +10,7 @@
 
 namespace ajg {
 namespace synth {
+namespace templates {
 
 template <class Engine>
 struct stream_template : base_template<Engine,
@@ -49,6 +50,6 @@ struct stream_template : base_template<Engine,
     bidi_istream_type bidi_istream_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::templates
 
 #endif // AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED

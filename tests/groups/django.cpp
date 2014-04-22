@@ -38,8 +38,8 @@ using s::null_resolver;
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::django::engine<traits_type>                                          engine_type;
 
-typedef s::path_template<engine_type>                                           path_template_type;
-typedef s::string_template<engine_type>                                         string_template_type;
+typedef s::templates::path_template<engine_type>                                path_template_type;
+typedef s::templates::string_template<engine_type>                              string_template_type;
 
 typedef engine_type::traits_type                                                traits_type;
 typedef engine_type::context_type                                               context_type;

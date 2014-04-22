@@ -17,7 +17,7 @@ namespace s = ajg::synth;
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::tmpl::engine<traits_type>                                            engine_type;
 
-typedef s::file_template<engine_type>                                           file_template_type;
+typedef s::path_template<engine_type>                                           path_template_type;
 typedef s::string_template<engine_type>                                         string_template_type;
 
 typedef engine_type::traits_type                                                traits_type;
@@ -194,12 +194,12 @@ unit_test(loop __counter__ variable) {
 }}}
 
 unit_test(file template) {
-    file_template_type t("tests/templates/tmpl/variables.tmpl");
+    path_template_type t("tests/templates/tmpl/variables.tmpl");
     ensure_equals(t.render_to_string(context), "foo: A\nbar: B\nqux: C\n");
 }}}
 
 unit_test(include tag) {
-    file_template_type t("tests/templates/tmpl/example.tmpl");
+    path_template_type t("tests/templates/tmpl/example.tmpl");
     ensure_equals(t.render_to_string(context),
         "============\nfoo: A\nbar: B\nqux: C\n|\nfoo: A\nbar: B\nqux: C\n\n============\n");
 }}}

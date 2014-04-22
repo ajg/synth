@@ -381,7 +381,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        file_template<engine>(path, options.directories).render_to_stream(ostream, context, options);
+        path_template<engine>(path, options.directories).render_to_stream(ostream, context, options);
     }
 
     void render_text( ostream_type&       ostream

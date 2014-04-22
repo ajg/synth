@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
-#define AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
+#ifndef AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED
+#define AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED
 
 #include <string>
 #include <vector>
@@ -28,17 +28,16 @@
 
 namespace ajg {
 namespace synth {
-namespace {
-using boost::spirit::classic::file_iterator;
-} // namespace
 
 template <class Engine>
-struct file_template : base_template<Engine, file_iterator<typename Engine::char_type> > {
+struct path_template : base_template< Engine
+                                    , boost::spirit::classic::file_iterator<typename Engine::char_type>
+                                    > {
   public:
 
-    typedef file_template                                                       template_type;
+    typedef path_template                                                       template_type;
     typedef Engine                                                              engine_type;
-    typedef typename file_template::kernel_type                                 kernel_type;
+    typedef typename path_template::kernel_type                                 kernel_type;
     typedef typename kernel_type::iterator_type                                 iterator_type;
     typedef typename kernel_type::range_type                                    range_type;
     typedef typename engine_type::traits_type                                   traits_type;
@@ -50,17 +49,17 @@ struct file_template : base_template<Engine, file_iterator<typename Engine::char
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
-    typedef std::pair<path_type, size_type>                                     file_type;
+    typedef std::pair<path_type, size_type>                                     info_type;
 
   public:
 
-    file_template(path_type const& path, paths_type const& directories = paths_type())
-            : file_(locate_file(path, directories)) {
-        if (boolean_type const empty_file = this->file_.second == 0) {
+    path_template(path_type const& path, paths_type const& directories = paths_type())
+            : info_(locate_file(path, directories)) {
+        if (boolean_type const empty_file = this->info_.second == 0) {
             this->reset();
         }
         else {
-            iterator_type begin(traits_type::narrow(this->file_.first));
+            iterator_type begin(traits_type::narrow(this->info_.first));
             iterator_type end = begin ? begin.make_end() : iterator_type();
             this->reset(begin, end);
         }
@@ -68,7 +67,7 @@ struct file_template : base_template<Engine, file_iterator<typename Engine::char
 
   private:
 
-    inline static file_type locate_file(path_type const& path, paths_type const& directories) {
+    inline static info_type locate_file(path_type const& path, paths_type const& directories) {
         struct stat stats;
         namespace algo = boost::algorithm;
 
@@ -77,7 +76,7 @@ struct file_template : base_template<Engine, file_iterator<typename Engine::char
             path_type const& base = algo::trim_right_copy_if(directory, algo::is_any_of("/"));
             path_type const& full = base + char_type('/') + path;
             if (stat(traits_type::narrow(full).c_str(), &stats) == 0) { // Found it.
-                return file_type(full, stats.st_size);
+                return info_type(full, stats.st_size);
             }
         }
 
@@ -88,7 +87,7 @@ struct file_template : base_template<Engine, file_iterator<typename Engine::char
             throw_exception(file_error(narrow_path, "read", std::strerror(errno)));
         }
 
-        return file_type(path, stats.st_size);
+        return info_type(path, stats.st_size);
     }
 
     /*
@@ -119,13 +118,13 @@ struct file_template : base_template<Engine, file_iterator<typename Engine::char
 
   public:
 
-    file_type const& file() const { return this->file_; }
+    info_type const& info() const { return this->info_; }
 
   private:
 
-    file_type const file_;
+    info_type const info_;
 };
 
 }} // namespace ajg::synth
 
-#endif // AJG_SYNTH_TEMPLATES_FILE_TEMPLATE_HPP_INCLUDED
+#endif // AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED

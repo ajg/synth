@@ -13,7 +13,7 @@ namespace s = ajg::synth;
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::ssi::engine<traits_type>                                             engine_type;
 
-typedef s::file_template<engine_type>                                           file_template_type;
+typedef s::path_template<engine_type>                                           path_template_type;
 typedef s::string_template<engine_type>                                         string_template_type;
 
 typedef engine_type::traits_type                                                traits_type;
@@ -265,7 +265,7 @@ unit_test(tag with error) {
 
 unit_test(file template) {
     std::string const m = default_options.echo_message + "\n";
-    file_template_type const t("tests/templates/ssi/variables.shtml");
+    path_template_type const t("tests/templates/ssi/variables.shtml");
     ensure_equals(t.render_to_string(), "foo: " + m + "bar: " + m + "qux: " + m);
 }}}
 

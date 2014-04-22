@@ -54,8 +54,8 @@ unit_test(char_template::text char) {
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
-unit_test(file_template::text char) {
-    file_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
+unit_test(path_template::text char) {
+    path_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
     ensure_equals(t.text(), read_to_string<char>("tests/templates/tmpl/variables.tmpl"));
 }}}
 
@@ -85,8 +85,8 @@ unit_test(char_template::text wchar_t) {
     wensure_equals(t.text(), L"foo bar qux");
 }}}
 
-unit_test(file_template::text wchar_t) {
-    file_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");
+unit_test(path_template::text wchar_t) {
+    path_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");
     wensure_equals(t.text(), read_to_string<wchar_t>("tests/templates/tmpl/variables.tmpl"));
 }}}
 

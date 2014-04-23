@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace django {
 
 //
@@ -93,6 +94,6 @@ struct loader {
     }
 };
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_LOADER_HPP_INCLUDED

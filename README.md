@@ -55,7 +55,7 @@ def simple_tmpl_example():
 namespace synth = ajg::synth;
 
 typedef synth::default_traits<char>                         traits_type;
-typedef synth::ssi::engine<traits_type>                     engine_type;
+typedef synth::engines::ssi::engine<traits_type>            engine_type;
 typedef synth::templates::string_template<engine_type>      template_type;
 
 int main() {
@@ -491,7 +491,7 @@ Future Work
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
-   * Move `engine`s to own namespace
+   * Rename value_facade to base_value
    * Make documentation comments uniformly `///`
    * Make `frame_type` and opaque wrapper for `match_type`
    * Experiment with embedding a slim, modularized version of Boost and using it by default

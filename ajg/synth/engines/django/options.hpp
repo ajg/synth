@@ -17,6 +17,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace django {
 namespace {
 using boost::optional;
@@ -281,6 +282,6 @@ struct options {
     string_type   base_block_;
 };
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_OPTIONS_HPP_INCLUDED

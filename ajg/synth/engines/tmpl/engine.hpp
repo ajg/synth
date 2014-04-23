@@ -27,6 +27,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace tmpl {
 
 template <class Traits>
@@ -347,6 +348,6 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
 
 }; // kernel
 
-}}} // namespace ajg::synth::tmpl
+}}}} // namespace ajg::synth::engines::tmpl
 
 #endif // AJG_SYNTH_ENGINES_TMPL_ENGINE_HPP_INCLUDED

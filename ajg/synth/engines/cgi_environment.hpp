@@ -18,6 +18,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 
 
 template < class Engine
@@ -134,7 +135,7 @@ struct standard_environment {
     }
 };*/
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::engines
 
 #endif // AJG_SYNTH_UNUSED
 

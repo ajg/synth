@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace null {
 
 template <class Traits>
@@ -28,23 +29,23 @@ struct value : value_facade<Traits, value> {
     template <class T, class U, class V> value(T const& t, U const& u, V const& v) : facade_type(t, u, v) {}
 };
 
-}}} // namespace ajg::synth::null
+}}}} // namespace ajg::synth::engines::null
 
 namespace std {
 
 template <class Traits>
-struct equal_to<ajg::synth::null::value<Traits> > {
-    bool operator()( ajg::synth::null::value<Traits> const& a
-                   , ajg::synth::null::value<Traits> const& b
+struct equal_to<ajg::synth::engines::null::value<Traits> > {
+    bool operator()( ajg::synth::engines::null::value<Traits> const& a
+                   , ajg::synth::engines::null::value<Traits> const& b
                    ) const {
         return true;
     }
 };
 
 template <class Traits>
-struct less<ajg::synth::null::value<Traits> > {
-    bool operator()( ajg::synth::null::value<Traits> const& a
-                   , ajg::synth::null::value<Traits> const& b
+struct less<ajg::synth::engines::null::value<Traits> > {
+    bool operator()( ajg::synth::engines::null::value<Traits> const& a
+                   , ajg::synth::engines::null::value<Traits> const& b
                    ) const {
         return false;
     }

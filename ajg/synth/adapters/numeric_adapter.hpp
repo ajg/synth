@@ -14,7 +14,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
 
 namespace ajg {
@@ -83,7 +83,7 @@ struct numeric_adapter : public base_adapter<Behavior> {
     void output_number(ostream_type& out, typename boost::enable_if<is_integral<T> >::type* = 0) const {
         out << adapted_;
     }
-};                                                                   \
+};
 
 }} // namespace ajg::synth
 

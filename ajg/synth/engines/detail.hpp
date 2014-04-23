@@ -50,6 +50,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace detail {
 
 #define AJG_SYNTH_EMPTY_   // Nothing.
@@ -435,17 +436,6 @@ inline optional<typename Container::mapped_type> find
     if (it == container.end()) return none; else return it->second;
 }
 
-//
-// is_integer:
-//     Determines whether a floating-point number is an integer.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class FloatingPoint>
-inline bool is_integer(FloatingPoint const& fp) {
-    FloatingPoint integer_part;
-    return std::modf(fp, &integer_part) == FloatingPoint(0.0);
-}
-
-}}} // namespace ajg::synth::detail
+}}}} // namespace ajg::synth::engines::detail
 
 #endif // AJG_SYNTH_ENGINES_DETAIL_HPP_INCLUDED

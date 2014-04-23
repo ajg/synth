@@ -20,7 +20,7 @@ namespace {
 namespace s = ajg::synth;
 
 typedef s::default_traits<char>                                                 traits_type;
-typedef s::null::engine<traits_type>                                            engine_type;
+typedef s::engines::null::engine<traits_type>                                   engine_type;
 typedef s::templates::string_template<engine_type>                              template_type;
 typedef engine_type::context_type                                               context_type;
 typedef engine_type::value_type                                                 value_type;

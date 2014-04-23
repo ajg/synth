@@ -18,6 +18,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace ssi {
 
 template <class Kernel>
@@ -194,7 +195,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("exec cgi"));
                 }
                 else if (name == traits_type::literal("cmd")) {
-                    detail::pipe pipe(traits_type::narrow(value));
+                    synth::detail::pipe pipe(traits_type::narrow(value));
                     pipe.read_into(args.ostream);
                 }
             );
@@ -217,7 +218,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
+                    std::time_t const stamp = synth::detail::stat_file(traits_type::narrow(value)).st_mtime;
                     args.ostream << detail::format_time(args.options.time_format,
                         posix_time::from_time_t(stamp));
                 }
@@ -244,7 +245,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
+                    size_type const size = synth::detail::stat_file(traits_type::narrow(value)).st_size;
                     abbreviate ? args.ostream << detail::format_size<string_type>(size) : args.ostream << size;
                 }
             );
@@ -386,7 +387,7 @@ enum { interpolated = true, raw = false };
 
 }; // builtin_tags
 
-}}} // namespace ajg::synth::ssi
+}}}} // namespace ajg::synth::engines::ssi
 
 #endif // AJG_SYNTH_ENGINES_SSI_BUILTIN_TAGS_HPP_INCLUDED
 

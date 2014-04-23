@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace ssi {
 
 template <class Value>
@@ -52,6 +53,6 @@ struct options {
     string_type  error_message;
 };
 
-}}} // namespace ajg::synth::ssi
+}}}} // namespace ajg::synth::engines::ssi
 
 #endif // AJG_SYNTH_ENGINES_SSI_OPTIONS_HPP_INCLUDED

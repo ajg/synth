@@ -12,6 +12,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace null {
 
 using boost::optional;
@@ -66,7 +67,7 @@ struct resolver : Options::abstract_resolver_type {
     patterns_type patterns_;
 }; // resolver
 
-}}} // namespace ajg::synth::null
+}}}} // namespace ajg::synth::engines::null
 
 #endif // AJG_SYNTH_ENGINES_NULL_RESOLVER_HPP_INCLUDED
 

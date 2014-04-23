@@ -16,6 +16,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace tmpl {
 
 #define TAG(content) \
@@ -299,7 +300,7 @@ struct builtin_tags {
 
 }; // builtin_tags
 
-}}} // namespace ajg::synth::tmpl
+}}}} // namespace ajg::synth::engines::tmpl
 
 #endif // AJG_SYNTH_ENGINES_TMPL_BUILTIN_TAGS_HPP_INCLUDED
 

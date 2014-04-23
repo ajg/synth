@@ -35,6 +35,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace django {
 
 template <class Traits>
@@ -601,7 +602,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         value_type value = this->evaluate_chain(chain, context, options);
         string_type op;
 
-        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
+        BOOST_FOREACH(match_type const& segment, synth::detail::drop(match.nested_results(), 1)) {
             if (is(segment, this->binary_operator)) {
                 op = segment.str();
             }
@@ -774,6 +775,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
 }; // kernel
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED

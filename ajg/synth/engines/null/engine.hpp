@@ -12,6 +12,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace null {
 
 template <class Traits>
@@ -62,7 +63,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
 }; // kernel
 
-}}} // namespace ajg::synth::null
+}}}} // namespace ajg::synth::engines::null
 
 #endif // AJG_SYNTH_ENGINES_NULL_ENGINE_HPP_INCLUDED
 

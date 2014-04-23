@@ -573,7 +573,7 @@ struct builtin_filters {
                     }
                 }
             }
-            catch (bad_method       const&) {} // Do nothing.
+            catch (invalid_method   const&) {} // Do nothing.
             catch (conversion_error const&) {} // Do nothing.
             // Otherwise, (e.g. if any of the above failed):
             return value;

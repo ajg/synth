@@ -101,7 +101,7 @@ struct base_template : boost::noncopyable {
             file.open(narrow_path.c_str(), std::ios::binary);
         }
         catch (std::exception const& e) {
-            throw_exception(file_error(narrow_path, "write", e.what()));
+            throw_exception(write_error(narrow_path, e.what()));
         }
 
         kernel_->render(file, this->frame_, context, options);

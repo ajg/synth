@@ -157,7 +157,7 @@ inline struct stat stat_file(std::string const& path) {
     struct stat stats;
 
     if (stat(path.c_str(), &stats) != 0) {
-        throw_exception(file_error(path, "read", std::strerror(errno)));
+        throw_exception(read_error(path, std::strerror(errno)));
     }
 
     return stats;
@@ -201,7 +201,7 @@ std::basic_string<Char> read_file(std::basic_string<Char> const& path) const {
         return read_stream<std::basic_string<Char> >(file);
     }
     catch (std::exception const& e) {
-        throw_exception(file_error(narrow_path, "read", e.what()));
+        throw_exception(read_error(narrow_path, e.what()));
     }
 }
 

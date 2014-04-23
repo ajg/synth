@@ -11,7 +11,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
-#include <boost/xpressive/xpressive.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
@@ -219,8 +218,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("file")) {
                     std::time_t const stamp = synth::detail::stat_file(traits_type::narrow(value)).st_mtime;
-                    args.ostream << detail::format_time(args.options.time_format,
-                        posix_time::from_time_t(stamp));
+                    args.ostream << detail::format_time(args.options.time_format, boost::posix_time::from_time_t(stamp));
                 }
             );
         }
@@ -283,7 +281,7 @@ enum { interpolated = true, raw = false };
         inline static boolean_type evaluate_tag(args_type const& args, match_type const& tag) {
             boolean_type has_expr = false, result = false;
             string_match_type match;
-            string_type const name = tag[xpressive::s1].str();
+            string_type const name = tag[s1].str();
 
             if (name == traits_type::literal("if") || name == traits_type::literal("elif")) {
                 AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(tag, raw,
@@ -291,7 +289,7 @@ enum { interpolated = true, raw = false };
                         if (!has_expr) has_expr = true;
                         else throw_exception(duplicate_attribute("expr"));
 
-                        if (xpressive::regex_match(value, match, args.kernel.expression)) {
+                        if (x::regex_match(value, match, args.kernel.expression)) {
                             result = args.kernel.evaluate_expression(args, match);
                         }
                         else {

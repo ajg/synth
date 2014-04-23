@@ -33,7 +33,7 @@ struct resolver : Options::abstract_resolver_type {
             return d::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only Resolver404?
-            return none;
+            return boost::none;
         }
     }
 
@@ -49,7 +49,7 @@ struct resolver : Options::abstract_resolver_type {
             return d::to_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
-            return none;
+            return boost::none;
         }
     }
 

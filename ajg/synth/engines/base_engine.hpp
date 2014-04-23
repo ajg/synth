@@ -18,22 +18,12 @@
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <boost/xpressive/basic_regex.hpp>
-#include <boost/xpressive/match_results.hpp>
-#include <boost/xpressive/regex_actions.hpp>
-#include <boost/xpressive/regex_compiler.hpp>
-#include <boost/xpressive/regex_algorithms.hpp>
-#include <boost/xpressive/regex_primitives.hpp>
-
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
 namespace synth {
 namespace engines {
-namespace {
-namespace x = boost::xpressive;
-}
 
 using detail::is;
 
@@ -70,7 +60,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
   protected:
 
     typedef x::regex_id_type                                                    id_type;
-	typedef x::basic_regex<iterator_type>                                       regex_type;
+    typedef x::basic_regex<iterator_type>                                       regex_type;
     typedef x::match_results<iterator_type>                                     match_type;
     typedef x::sub_match<iterator_type>                                         sub_match_type;
     typedef x::placeholder<iterator_type>                                       placeholder_type;
@@ -89,18 +79,17 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
   protected:
 
-    kernel()
-        : nothing(x::as_xpr('\0')) {} // Xpressive barfs when default-constructed.
+    kernel() : nothing(as_xpr('\0')) {} // Xpressive barfs when default-constructed.
 
     void initialize_grammar() {
         typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
 
-        this->text = +(~x::before(this->skipper) >> x::_);
+        this->text = +(~x::before(this->skipper) >> _);
 
         // block = skip(text[...])(*tag[...]); // Using skip is slightly slower than this:
         this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
-            ( x::ref(this->tag)  [set_furthest(iterator_, x::_)]
-            | x::ref(this->text) [set_furthest(iterator_, x::_)]
+            ( x::ref(this->tag)  [set_furthest(iterator_, _)]
+            | x::ref(this->text) [set_furthest(iterator_, _)]
             );
     }
 

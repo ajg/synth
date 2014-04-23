@@ -21,21 +21,20 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, scoped_array<T> >
+struct adapter<Behavior, boost::scoped_array<T> >
     : public adapter<Behavior, T[]> {
 
-    adapter(scoped_array<T> const& adapted, size_t const length)
+    adapter(boost::scoped_array<T> const& adapted, size_t const length)
         : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
 
 /*
 template <class Behavior, class T>
-struct adapter<Behavior, scoped_array<T> >
-    : public forwarding_adapter<Behavior, T[], scoped_array<T> > {
+struct adapter<Behavior, boost::scoped_array<T> > : public forwarding_adapter<Behavior, T[], boost::scoped_array<T> > {
 
-    adapter(scoped_array<T> const& adapted, size_t const length)
+    adapter(boost::scoped_array<T> const& adapted, size_t const length)
         : adapted_(adapted), length_(length) {}
-    scoped_array<T> const& adapted_;
+    boost::scoped_array<T> const& adapted_;
     size_t const length_;
 
     template <class A> A forward() const { return A(boost::cref(*reinterpret_cast<T(*)[]>(adapted_.get())), length_); }

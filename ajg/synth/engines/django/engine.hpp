@@ -82,10 +82,6 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-namespace {
-namespace x = boost::xpressive;
-}
-
 template <class Traits>
 template <class Iterator>
 struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
@@ -129,20 +125,20 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         , comment_open   (marker(traits_type::literal("{#"), traits_type::literal("opencomment")))
         , comment_close  (marker(traits_type::literal("#}"), traits_type::literal("closecomment")))
         , variable_open  (marker(traits_type::literal("{{"), traits_type::literal("openvariable")))
-        , variable_close (marker(traits_type::literal("}}"), traits_type::literal("closevariable"))) {
-        using namespace xpressive;
+        , variable_close (marker(traits_type::literal("}}"), traits_type::literal("closevariable")))
+        {
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((alpha | '_') >> *_w >> _b)
+            = ((x::alpha | '_') >> *_w >> _b)
             ;
         restricted_identifier
-            = identifier[ check(not_in(keywords_)) ]
+            = identifier[ x::check(not_in(keywords_)) ]
             ;
         unreserved_identifier
-            = restricted_identifier[ check(not_in(reserved_)) ]
+            = restricted_identifier[ x::check(not_in(reserved_)) ]
             ;
         name
             = (id = restricted_identifier) >> *_s
@@ -173,7 +169,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             | false_literal
             ;
         number_literal
-            = !(set= '-','+') >> +_d >> !('.' >> +_d) >> !('e' >> +_d)
+            = !(x::set = '-','+') >> +_d >> !('.' >> +_d) >> !('e' >> +_d)
             ;
         string_literal
             = '"'  >> *~as_xpr('"')  >> '"'
@@ -267,10 +263,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             | variable_close
             ;
         html_namechar
-            = ~(set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
+            = ~(x::set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
             ;
         html_whitespace
-            = (set = ' ', '\t', '\n', '\v', '\f', '\r')
+            = (x::set = ' ', '\t', '\n', '\v', '\f', '\r')
             ;
         html_tag
             = '<' >> !as_xpr('/')
@@ -299,15 +295,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
   public:
 
-    inline regex_type marker(string_type const& s, string_type const& name) {
-        return x::as_xpr((this->markers[name] = s));
-    }
-
-    inline regex_type word    (string_type const s) { return x::as_xpr(s) >> x::_b; }
-    inline regex_type word    (char const* const s) { return x::as_xpr(s) >> x::_b; }
+    inline regex_type marker  (string_type const& s, string_type const& name) { return as_xpr((this->markers[name] = s)); }
+    inline regex_type word    (string_type const s) { return as_xpr(s) >> _b; }
+    inline regex_type word    (char const* const s) { return as_xpr(s) >> _b; }
     inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
-    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *x::_s; }
-    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *x::_s; }
+    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *_s; }
+    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *_s; }
 
   public:
 
@@ -326,7 +319,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         BOOST_ASSERT(argument.is_literal());
         string_type const& source = argument.token();
         static char_type const delimiter[2] = { Delimiter, 0 };
-        tokenizer_type const tokenizer(source, separator_type(delimiter, 0, keep_empty_tokens));
+        tokenizer_type const tokenizer(source, separator_type(delimiter, 0, boost::keep_empty_tokens));
         static string_kernel_type const string_kernel;
         string_match_type match;
         sequence_type sequence;
@@ -335,7 +328,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             if (std::distance(token.begin(), token.end()) == 0) {
                 sequence.push_back(value_type(none_type()));
             }
-            else if (xpressive::regex_match(token.begin(), token.end(), match, string_kernel.chain)) {
+            else if (x::regex_match(token.begin(), token.end(), match, string_kernel.chain)) {
                 try {
                     sequence.push_back(string_kernel.evaluate_chain(match, context, options));
                 }
@@ -695,7 +688,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 return url;
             }
         }
-        return none;
+        return boost::none;
     }
 
     void load_library( context_type&      context

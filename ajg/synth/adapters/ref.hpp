@@ -19,12 +19,11 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, reference_wrapper<T> >
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Behavior> {
 
-    // AJG_SYNTH_ADAPTER(reference_wrapper<T>)
+    // AJG_SYNTH_ADAPTER(boost::reference_wrapper<T>)
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(reference_wrapper<T>, adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>, adapter);
     // /*const*/ adapted_type adapted_;
 
     adapter(adapted_type const& adapted) : adapted_(adapted) {}
@@ -37,7 +36,7 @@ struct adapter<Behavior, reference_wrapper<T> >
 
   protected:
 
-    typedef adapter<Behavior, typename remove_const<T>::type> wrapped_adapter_type;
+    typedef adapter<Behavior, typename boost::remove_const<T>::type> wrapped_adapter_type;
 
     virtual boolean_type equal_adapted(base_type const& that) const {
         return adapted_.template equal_as<wrapped_adapter_type>(that);

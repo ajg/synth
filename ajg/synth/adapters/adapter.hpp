@@ -10,8 +10,6 @@
 namespace ajg {
 namespace synth {
 
-using namespace boost; // FIXME: Delete.
-
 //
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +57,7 @@ template <class Behavior, class Adapted>
 struct adapter;
 
 template <class Behavior>
-struct adapter<Behavior, base_adapter<Behavior> >; // undefined
+struct adapter<Behavior, base_adapter<Behavior> >; // Left undefined.
 
 }} // namespace ajg::synth
 

@@ -20,11 +20,10 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, scoped_ptr<T> >
-    : public forwarding_adapter<Behavior, T, scoped_ptr<T> > {
+struct adapter<Behavior, boost::scoped_ptr<T> > : public forwarding_adapter<Behavior, T, boost::scoped_ptr<T> > {
 
-    adapter(scoped_ptr<T> const& adapted) : adapted_(adapted) {}
-    scoped_ptr<T> const& adapted_;
+    adapter(boost::scoped_ptr<T> const& adapted) : adapted_(adapted) {}
+    boost::scoped_ptr<T> const& adapted_;
 
     template <class A> A forward() const { return A(boost::cref(*adapted_)); }
     //T&   get()   const { return *adapted_; }

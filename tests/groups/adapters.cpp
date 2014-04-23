@@ -36,8 +36,8 @@ group_type group_object("adapter");
 AJG_TESTING_BEGIN
 
 unit_test(assignments) {
-    using namespace std;
-    using namespace boost;
+    using namespace std;   // TODO: Remove.
+    using namespace boost; // TODO: Remove.
 
     context_type context;
 

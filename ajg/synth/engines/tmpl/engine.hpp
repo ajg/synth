@@ -46,10 +46,10 @@ struct engine : base_engine<Traits> {
 
     typedef tmpl::value<traits_type>                                            value_type;
     typedef options<value_type>                                                 options_type;
-    typedef typename mpl::if_c< options_type::case_sensitive
-                              , std::less<string_type>
-                              , detail::insensitive_less<string_type>
-                              >::type                                           less_type;
+    typedef typename boost::mpl::if_c< options_type::case_sensitive
+                                     , std::less<string_type>
+                                     , detail::insensitive_less<string_type>
+                                     >::type                                    less_type;
     typedef std::map<string_type, value_type, less_type>                        context_type;
 
   private:
@@ -106,14 +106,13 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         , alt_open      (traits_type::literal("<!--"))
         , alt_close     (traits_type::literal("-->"))
         , default_value (traits_type::literal("")) {
-        using namespace xpressive;
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         name
             // @see http://www.w3.org/TR/2000/WD-xml-2e-20000814#NT-Name
-            = (alpha | '_' | ':') >> *(_w | (set= '_', ':', '-', '.'))
+            = (x::alpha | '_' | ':') >> *(_w | (x::set = '_', ':', '-', '.'))
             ;
         quoted_attribute
             = '"'  >> *~as_xpr('"')  >> '"'
@@ -127,17 +126,17 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             | plain_attribute
             ;
         regex_type const tag_attribute_equals
-            = icase(tag_attribute) >> *_s >> '=' >> *_s
+            = x::icase(tag_attribute) >> *_s >> '=' >> *_s
             ;
         options_type::shortcut_syntax
             ? name_attribute = !tag_attribute_equals >> attribute
             : name_attribute = tag_attribute_equals >> attribute
             ;
         escape_attribute
-            = icase("ESCAPE")  >> *_s >> '=' >> *_s >> attribute
+            = x::icase("ESCAPE")  >> *_s >> '=' >> *_s >> attribute
             ;
         default_attribute
-            = icase("DEFAULT") >> *_s >> '=' >> *_s >> attribute
+            = x::icase("DEFAULT") >> *_s >> '=' >> *_s >> attribute
             ;
         extended_attribute
             = escape_attribute
@@ -146,11 +145,11 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             ;
         regex_type const prefix
         // We want to skip essentially anything that is not a tmpl tag or comment.
-            = *_s >> !as_xpr(tag_finish) >> *_s >> icase(tag_prefix)
+            = *_s >> !as_xpr(tag_finish) >> *_s >> x::icase(tag_prefix)
             ;
         this->skipper
-            = tag_open >> prefix >> +(~before(tag_close) >> _) >> tag_close
-            | alt_open >> prefix >> +(~before(alt_close) >> _) >> alt_close
+            = tag_open >> prefix >> +(~x::before(tag_close) >> _) >> tag_close
+            | alt_open >> prefix >> +(~x::before(alt_close) >> _) >> alt_close
             ;
 
         this->initialize_grammar();

@@ -48,7 +48,7 @@ struct path_error : public exception, public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct read_error : public path_error {
-    read_error(std::string const& path, std::string const& reason) : path_error(path, "reading `" + path + "' failed (" + reason + ")") {}
+    read_error(std::string const& path, std::string const& reason) : path_error(path, "reading `" + path + "` failed (" + reason + ")") {}
     ~read_error() throw () {}
 };
 
@@ -57,7 +57,7 @@ struct read_error : public path_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct write_error : public path_error {
-    write_error(std::string const& path, std::string const& reason) : path_error(path, "writing `" + path + "' failed (" + reason + ")") {}
+    write_error(std::string const& path, std::string const& reason) : path_error(path, "writing `" + path + "` failed (" + reason + ")") {}
     ~write_error() throw () {}
 };
 
@@ -71,8 +71,8 @@ struct conversion_error : public exception, public std::runtime_error {
 
     conversion_error(std::type_info const& from, std::type_info const& to)
         : std::runtime_error("could not convert value from `" +
-              detail::get_type_name(from) + "' to `" +
-              detail::get_type_name(to) + "'")
+              detail::get_type_name(from) + "` to `" +
+              detail::get_type_name(to) + "`")
         , from(from)
         , to(to) {}
     ~conversion_error() throw () {}
@@ -83,7 +83,7 @@ struct conversion_error : public exception, public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct parsing_error : public exception, public std::runtime_error {
-    parsing_error(std::string const& line) : std::runtime_error("parsing error near `" + line + "'") {}
+    parsing_error(std::string const& line) : std::runtime_error("parsing error near `" + line + "`") {}
     ~parsing_error() throw () {}
 };
 
@@ -94,7 +94,7 @@ struct parsing_error : public exception, public std::runtime_error {
 struct missing_variable : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_variable(std::string const& name) : std::invalid_argument("missing variable `" + name + "'"), name(name) {}
+    missing_variable(std::string const& name) : std::invalid_argument("missing variable `" + name + "`"), name(name) {}
     ~missing_variable() throw () {}
 };
 
@@ -105,7 +105,7 @@ struct missing_variable : public exception, public std::invalid_argument {
 struct missing_attribute : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_attribute(std::string const& name) : std::invalid_argument("missing attribute `" + name + "'"), name(name) {}
+    missing_attribute(std::string const& name) : std::invalid_argument("missing attribute `" + name + "`"), name(name) {}
     ~missing_attribute() throw () {}
 };
 
@@ -116,7 +116,7 @@ struct missing_attribute : public exception, public std::invalid_argument {
 struct missing_library : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_library(std::string const& name) : std::invalid_argument("missing library `" + name + "'"), name(name) {}
+    missing_library(std::string const& name) : std::invalid_argument("missing library `" + name + "`"), name(name) {}
     ~missing_library() throw () {}
 };
 
@@ -127,7 +127,7 @@ struct missing_library : public exception, public std::invalid_argument {
 struct missing_key : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_key(std::string const& name) : std::invalid_argument("missing key `" + name + "'"), name(name) {}
+    missing_key(std::string const& name) : std::invalid_argument("missing key `" + name + "`"), name(name) {}
     ~missing_key() throw () {}
 };
 
@@ -138,7 +138,7 @@ struct missing_key : public exception, public std::invalid_argument {
 struct missing_tag : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_tag(std::string const& name) : std::invalid_argument("missing tag `" + name + "'"), name(name) {}
+    missing_tag(std::string const& name) : std::invalid_argument("missing tag `" + name + "`"), name(name) {}
     ~missing_tag() throw () {}
 };
 
@@ -149,7 +149,7 @@ struct missing_tag : public exception, public std::invalid_argument {
 struct missing_filter : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_filter(std::string const& name) : std::invalid_argument("missing filter `" + name + "'"), name(name) {}
+    missing_filter(std::string const& name) : std::invalid_argument("missing filter `" + name + "`"), name(name) {}
     ~missing_filter() throw () {}
 };
 
@@ -178,7 +178,7 @@ struct superfluous_argument : public exception, public std::invalid_argument {
 struct invalid_attribute : public exception, public std::invalid_argument {
     std::string const name;
 
-    invalid_attribute(std::string const& name) : std::invalid_argument("invalid attribute `" + name + "'"), name(name) {}
+    invalid_attribute(std::string const& name) : std::invalid_argument("invalid attribute `" + name + "`"), name(name) {}
     ~invalid_attribute() throw () {}
 };
 
@@ -189,7 +189,7 @@ struct invalid_attribute : public exception, public std::invalid_argument {
 struct duplicate_attribute : public exception, public std::invalid_argument {
     std::string const name;
 
-    duplicate_attribute(std::string const& name) : std::invalid_argument("duplicate attribute `" + name + "'"), name(name) {}
+    duplicate_attribute(std::string const& name) : std::invalid_argument("duplicate attribute `" + name + "`"), name(name) {}
     ~duplicate_attribute() throw () {}
 };
 
@@ -200,7 +200,7 @@ struct duplicate_attribute : public exception, public std::invalid_argument {
 struct invalid_method : public exception, public std::invalid_argument {
     std::string const name;
 
-    invalid_method(std::string const& name) : std::invalid_argument("invalid method `" + name + "'"), name(name) {}
+    invalid_method(std::string const& name) : std::invalid_argument("invalid method `" + name + "`"), name(name) {}
     ~invalid_method() throw () {}
 };
 

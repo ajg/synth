@@ -46,10 +46,10 @@ struct engine : base_engine<Traits> {
 
     typedef tmpl::value<traits_type>                                            value_type;
     typedef options<value_type>                                                 options_type;
-    typedef typename boost::mpl::if_c< options_type::case_sensitive
-                                     , std::less<string_type>
-                                     , detail::insensitive_less<string_type>
-                                     >::type                                    less_type;
+    typedef typename detail::if_c< options_type::case_sensitive
+                                 , std::less<string_type>
+                                 , detail::insensitive_less<string_type>
+                                 >::type                                        less_type;
     typedef std::map<string_type, value_type, less_type>                        context_type;
 
   private:

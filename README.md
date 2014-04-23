@@ -251,9 +251,10 @@ Components
 ### Base Components
 
  - `base_adapter`
- - `base_binding`
- - `base_engine`
- - `base_template`
+ - `bindings::base_binding`
+ - `engines::base_engine`
+ - `templates::base_template`
+ - `value_facade`
 
 Django Engine
 -------------
@@ -476,10 +477,12 @@ Future Work
      + [v1+] Create `xslt` engine
 
  - Adapters:
-   * Create `boost::tribool` adapter
-   * Create `boost::fusion` sequence adapters
-   * [v2] Create `c++11` type adapters
-   * [v2] Create `c++14` type adapters
+   * Adapter for `boost::tribool`
+   * Adapters for `boost::fusion` sequences
+   * Adapter for `intrusive_ptr`
+   * Support for `enable_shared_from_this`
+   * [v2] Adapters for `c++11` types
+   * [v2] Adapters for `c++14` types
 
  - Templates:
    * Create new `file_template` (using `FILE* file`)

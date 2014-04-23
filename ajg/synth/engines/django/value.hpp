@@ -67,7 +67,7 @@ struct value : value_facade<Traits, value> {
 
     inline boolean_type is_literal() const { return boolean_type(this->token_); }
 
-	value_type escape() const {
+    value_type escape() const {
         // XXX: Should this method escape binary and control characters?
         return detail::escape_entities(this->to_string());
     }

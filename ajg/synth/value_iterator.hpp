@@ -24,9 +24,9 @@ struct clone_ptr : boost::scoped_ptr<T> {
         return *this;
     }
 
-	inline operator bool() const {
-		return boost::scoped_ptr<T>::get() != 0;
-	}
+    inline operator bool() const {
+        return boost::scoped_ptr<T>::get() != 0;
+    }
 };
 
 } // detail

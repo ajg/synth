@@ -494,7 +494,6 @@ Future Work
 
  - Refactoring:
    * Replace all ``` `foo' ``` messages with ``` `foo` ```
-   * Convert any remaining tabs to spaces
    * Remove remaining mpl usage
    * Rename value_facade to base_value
    * Make documentation comments uniformly `///`

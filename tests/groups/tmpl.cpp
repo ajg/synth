@@ -52,7 +52,7 @@ unit_test(single tag) {
 }}}
 
 unit_test(malformed tag) {
-    ensure_throws(s::engines::parsing_error, string_template_type("<TMPL_ VAR foo>"));
+    ensure_throws(s::parsing_error, string_template_type("<TMPL_ VAR foo>"));
 }}}
 
 unit_test(alternative tag) {
@@ -135,7 +135,7 @@ unit_test(compound unless tag) {
 }}}
 
 unit_test(mismatched tags) {
-    ensure_throws(s::engines::parsing_error, string_template_type("<TMPL_IF true_var>Bad</TMPL_UNLESS>"));
+    ensure_throws(s::parsing_error, string_template_type("<TMPL_IF true_var>Bad</TMPL_UNLESS>"));
 }}}
 
 unit_test(loop tag) {

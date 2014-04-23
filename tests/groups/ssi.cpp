@@ -217,7 +217,7 @@ unit_test(multiple config_tag attributes) {
 }}}
 
 unit_test(malformed tag) {
-    ensure_throws(s::engines::parsing_error, string_template_type("<!--#e_cho -->"));
+    ensure_throws(s::parsing_error, string_template_type("<!--#e_cho -->"));
 }}}
 
 unit_test(invalid config_tag) {

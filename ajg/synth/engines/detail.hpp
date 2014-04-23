@@ -44,7 +44,7 @@
 #include <boost/preprocessor/seq/for_each_product.hpp>
 
 #include <ajg/synth/detail.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/exceptions.hpp>
 
 // TODO: Move more of this stuff to ../detail.hpp.
 

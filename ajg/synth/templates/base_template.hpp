@@ -18,9 +18,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/engines/detail.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

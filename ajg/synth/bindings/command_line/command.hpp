@@ -103,7 +103,7 @@ struct command {
                 file.open(path.c_str(), std::ios::binary);
             }
             catch (std::exception const& e) {
-                AJG_SYNTH_THROW(file_error(path, "read", e.what()));
+                AJG_SYNTH_THROW(read_error(path, e.what()));
             }
 
             using boost::algorithm::ends_with;

@@ -61,26 +61,26 @@ struct base_adapter {
 
   public:
 
-    // TODO: Instead of throwing bad_method here, defer default behavior to Traits.
+    // TODO: Instead of throwing invalid_method here, defer default behavior to Traits.
 
     virtual std::type_info const& type() const = 0;
 
     virtual boolean_type  is_numeric()  const { return false; }
 
-    virtual number_type   to_number()   const { AJG_SYNTH_THROW(bad_method("to_number")); }
-    virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(bad_method("to_boolean")); }
-    virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(bad_method("to_datetime")); }
+    virtual number_type   to_number()   const { AJG_SYNTH_THROW(invalid_method("to_number")); }
+    virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(invalid_method("to_boolean")); }
+    virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(invalid_method("to_datetime")); }
     virtual string_type   to_string()   const { return behavior_type::to_string(*this); }
 
-    virtual void input (istream_type& in)        { AJG_SYNTH_THROW(bad_method("input")); }
-    virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(bad_method("output")); }
+    virtual void input (istream_type& in)        { AJG_SYNTH_THROW(invalid_method("input")); }
+    virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(invalid_method("output")); }
 
     // TODO: Refactor these into a single to_range function.
-    virtual const_iterator begin() const { AJG_SYNTH_THROW(bad_method("begin")); }
-    virtual const_iterator end()   const { AJG_SYNTH_THROW(bad_method("end")); }
+    virtual const_iterator begin() const { AJG_SYNTH_THROW(invalid_method("begin")); }
+    virtual const_iterator end()   const { AJG_SYNTH_THROW(invalid_method("end")); }
 
-    virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(bad_method("find")); }
-    virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(bad_method("index")); }
+    virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(invalid_method("find")); }
+    virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(invalid_method("index")); }
 
   private:
 

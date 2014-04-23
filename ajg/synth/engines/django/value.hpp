@@ -49,8 +49,8 @@ struct value : value_facade<Traits, value> {
   public:
 
     value() : facade_type(), safe_(false), token_(boost::none) {}
-    template <class T> value(T const& t) : facade_type(t), safe_(false), token_(boost::none) {}
     value(value const& that) : facade_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
+    template <class T> value(T const& t) : facade_type(t), safe_(false), token_(boost::none) {}
 
   public:
 
@@ -78,7 +78,7 @@ struct value : value_facade<Traits, value> {
             // First try to find the value itself.
             return this->find(attribute);
         }
-        catch (bad_method const& method) {
+        catch (invalid_method const& method) {
             if (method.name == "find") {
                 try {
                     // If that fails, try using the value as an index.
@@ -101,7 +101,7 @@ struct value : value_facade<Traits, value> {
             // First try to locate the value as a key.
             return this->index(attribute);
         }
-        catch (bad_method const& method) {
+        catch (invalid_method const& method) {
             if (method.name == "index") {
                 try {
                     // If that fails, try using the value as an index.

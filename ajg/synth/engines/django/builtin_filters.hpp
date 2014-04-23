@@ -32,6 +32,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace detail {
 
 template <std::size_t Min, std::size_t Max = Min>
@@ -519,7 +520,7 @@ struct builtin_filters {
             number_type const number = value.to_number();
 
             // If it's an integer and n < 0, we don't want decimals.
-            boolean_type const is_integer = detail::is_integer(number);
+            boolean_type const is_integer = synth::detail::is_integer(number);
             int const precision = n < 0 && is_integer ? 0 : std::abs(n);
             stream << std::fixed << std::setprecision(precision) << number;
 
@@ -1667,6 +1668,6 @@ struct builtin_filters {
     };
 }; // builtin_filters
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_BUILTIN_FILTERS_HPP_INCLUDED

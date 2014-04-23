@@ -11,7 +11,7 @@ namespace {
 namespace s = ajg::synth;
 
 typedef s::default_traits<char>                                                 traits_type;
-typedef s::ssi::engine<traits_type>                                             engine_type;
+typedef s::engines::ssi::engine<traits_type>                                    engine_type;
 
 typedef s::templates::path_template<engine_type>                                path_template_type;
 typedef s::templates::string_template<engine_type>                              string_template_type;
@@ -217,7 +217,7 @@ unit_test(multiple config_tag attributes) {
 }}}
 
 unit_test(malformed tag) {
-    ensure_throws(s::parsing_error, string_template_type("<!--#e_cho -->"));
+    ensure_throws(s::engines::parsing_error, string_template_type("<!--#e_cho -->"));
 }}}
 
 unit_test(invalid config_tag) {
@@ -245,7 +245,7 @@ unit_test(fsize_tag abbrev) {
 unit_test(flastmod_tag) {
     string_template_type const t(
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), s::detail::format_time(default_options.time_format,
+    ensure_equals(t.render_to_string(), s::engines::detail::format_time(default_options.time_format,
         boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
@@ -254,7 +254,7 @@ unit_test(flastmod_tag custom) {
     string_template_type const t(
         "<!--#config timefmt='" + format + "' -->"
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), s::detail::format_time(format,
+    ensure_equals(t.render_to_string(), s::engines::detail::format_time(format,
         boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 

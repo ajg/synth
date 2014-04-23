@@ -371,6 +371,17 @@ inline std::string get_type_name(std::type_info const& info) {
     return info.name(); // TODO: Unmangle where needed.
 }
 
+//
+// is_integer:
+//     Determines whether a floating-point number is an integer.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class FloatingPoint>
+inline bool is_integer(FloatingPoint const& fp) {
+    FloatingPoint integer_part;
+    return std::modf(fp, &integer_part) == FloatingPoint(0.0);
+}
+
 }}} // namespace ajg::synth::detail
 
 #endif // AJG_SYNTH_DETAIL_HPP_INCLUDED

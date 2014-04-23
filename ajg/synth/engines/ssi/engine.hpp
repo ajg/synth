@@ -30,6 +30,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace ssi {
 
 template <class Traits>
@@ -51,7 +52,7 @@ struct engine : base_engine<Traits> {
     typedef ssi::value<traits_type>                                             value_type;
     typedef std::map<string_type, value_type>                                   context_type;
     typedef options<value_type>                                                 options_type;
-    typedef detail::standard_environment                                        environment_type;
+    typedef synth::detail::standard_environment                                 environment_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
 
@@ -455,6 +456,6 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
 
 }; // kernel
 
-}}} // namespace ajg::synth::ssi
+}}}} // namespace ajg::synth::engines::ssi
 
 #endif // AJG_SYNTH_ENGINES_SSI_ENGINE_HPP_INCLUDED

@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace tmpl {
 
 enum tag_mode
@@ -42,6 +43,6 @@ struct options {
     options() {}
 };
 
-}}} // namespace ajg::synth::tmpl
+}}}} // namespace ajg::synth::engines::tmpl
 
 #endif // AJG_SYNTH_ENGINES_TMPL_OPTIONS_HPP_INCLUDED

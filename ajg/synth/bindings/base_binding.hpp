@@ -21,9 +21,9 @@ namespace bindings {
 
 template < class Traits
          , template <class E> class Template
-         , template <class T> class Django
-         , template <class T> class SSI
-         , template <class T> class TMPL
+         , template <class T> class Django   = engines::django::engine
+         , template <class T> class SSI      = engines::ssi::engine
+         , template <class T> class TMPL     = engines::tmpl::engine
          >
 struct base_binding {
   public:
@@ -128,15 +128,6 @@ struct base_binding {
     ssi_options_type    ssi_options_;
     tmpl_options_type   tmpl_options_;
 };
-
-namespace detail { // TODO: Move elsewhere.
-
-template <class Traits, template <class E> class Template>
-struct complete_base_binding {
-    typedef base_binding<Traits, Template, django::engine, ssi::engine, tmpl::engine> type;
-};
-
-} // namespace detail
 
 }}} // namespace ajg::synth::bindings
 

@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace ssi {
 
 template <class Traits>
@@ -24,6 +25,6 @@ struct value : value_facade<Traits, value> {
     template <class T> value(T const& t) : facade_type(t) {}
 };
 
-}}} // namespace ajg::synth::ssi
+}}}} // namespace ajg::synth::engines::ssi
 
 #endif // AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED

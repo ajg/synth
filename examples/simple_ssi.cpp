@@ -5,7 +5,7 @@
 namespace synth = ajg::synth;
 
 typedef synth::default_traits<char>                         traits_type;
-typedef synth::ssi::engine<traits_type>                     engine_type;
+typedef synth::engines::ssi::engine<traits_type>            engine_type;
 typedef synth::templates::string_template<engine_type>      template_type;
 
 int main() {

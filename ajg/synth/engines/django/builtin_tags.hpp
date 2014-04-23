@@ -31,6 +31,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 
 struct missing_variable;
 struct missing_attribute;
@@ -86,7 +87,7 @@ struct builtin_tags {
 
     typedef std::map<id_type, tag_type>                                         tags_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
-    typedef django::formatter<options_type>                                     formatter_type;
+    typedef formatter<options_type>                                             formatter_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename arguments_type::second_type::value_type                    named_argument_type;
 
@@ -307,7 +308,7 @@ struct builtin_tags {
             size_type   const  total    = vals.nested_results().size();
             size_type   const  current  = detail::find(position, options.cycles_).get_value_or(0);
 
-            match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
+            match_type const& val   = *synth::detail::advance_to(vals.nested_results().begin(), current);
             value_type const  value = kernel.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
 
@@ -1226,6 +1227,6 @@ struct builtin_tags {
 
 }; // builtin_tags
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_BUILTIN_TAGS_HPP_INCLUDED

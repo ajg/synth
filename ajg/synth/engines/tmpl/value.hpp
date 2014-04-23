@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace tmpl {
 
 template <class Traits>
@@ -24,6 +25,6 @@ struct value : value_facade<Traits, value> {
     template <class T> value(T const& t) : facade_type(t) {}
 };
 
-}}} // namespace ajg::synth::tmpl
+}}}} // namespace ajg::synth::engines::tmpl
 
 #endif // AJG_SYNTH_ENGINES_TMPL_VALUE_HPP_INCLUDED

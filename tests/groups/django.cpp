@@ -35,7 +35,7 @@ namespace s = ajg::synth;
 using boost::optional;
 
 typedef s::default_traits<char>                                                 traits_type;
-typedef s::django::engine<traits_type>                                          engine_type;
+typedef s::engines::django::engine<traits_type>                                 engine_type;
 
 typedef s::templates::path_template<engine_type>                                path_template_type;
 typedef s::templates::string_template<engine_type>                              string_template_type;
@@ -49,12 +49,12 @@ typedef traits_type::char_type                                                  
 typedef traits_type::string_type                                                string_type;
 
 typedef value_type::behavior_type                                               behavior_type;
-typedef s::null::resolver<options_type>                                         null_resolver_type;
+typedef s::engines::null::resolver<options_type>                                null_resolver_type;
 
 struct data_type  : tests::data::kitchen_sink<engine_type> {};
 struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("django") {} } const group;
 
-using ajg::synth::detail::quote;
+using ajg::synth::engines::detail::quote;
 string_type const absolute_path = traits_type::widen(get_current_working_directory());
 
 } // namespace
@@ -165,7 +165,7 @@ DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
 
 unit_test(missing tag) {
     string_template_type const t("{% xyz 42 %}");
-    ensure_throws(s::missing_tag, t.render_to_string(context));
+    ensure_throws(s::engines::missing_tag, t.render_to_string(context));
 }}}
 
 DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock %}|bar",         "foo|This is a block|bar")
@@ -511,7 +511,7 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 
 unit_test(missing-filter) {
     string_template_type const t("{{ 42|xyz }}");
-    ensure_throws(s::missing_filter, t.render_to_string(context));
+    ensure_throws(s::engines::missing_filter, t.render_to_string(context));
 }}}
 
 DJANGO_TEST(add_filter, "{{ '5'|add:6 }}", "11")

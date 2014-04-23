@@ -22,6 +22,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace django {
 namespace {
     namespace algo = boost::algorithm;
@@ -64,7 +65,7 @@ struct formatter {
 
     struct native_flags {
         BOOST_STATIC_CONSTANT(size_type, size = 31);
-        // NOTE: 
+        // NOTE:
         //   - Fields marked [#] are not used because their availability is platform-dependent.
         //   - Fields marked [*] are not used because Windows is garbage and barfs otherwise.
 
@@ -464,6 +465,6 @@ struct formatter {
     }
 };
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_FORMATTER_HPP_INCLUDED

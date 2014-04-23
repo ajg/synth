@@ -10,6 +10,9 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
+
+// TODO: Move to synth/exceptions.hpp, directly under the synth namespace.
 
 //
 // parsing_error exception
@@ -152,6 +155,6 @@ struct duplicate_attribute : public std::invalid_argument {
     ~duplicate_attribute() throw () {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::engines
 
 #endif // AJG_SYNTH_ENGINES_EXCEPTIONS_HPP_INCLUDED

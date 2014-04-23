@@ -24,6 +24,7 @@
 
 namespace ajg {
 namespace synth {
+namespace engines {
 namespace django {
 
 template <class Traits>
@@ -232,6 +233,6 @@ struct value : value_facade<Traits, value> {
     optional<string_type> token_;
 };
 
-}}} // namespace ajg::synth::django
+}}}} // namespace ajg::synth::engines::django
 
 #endif // AJG_SYNTH_ENGINES_DJANGO_VALUE_HPP_INCLUDED

@@ -493,7 +493,6 @@ Future Work
      + Add `render_descriptor` to engines
 
  - Refactoring:
-   * Replace all ``` `foo' ``` messages with ``` `foo` ```
    * Rename value_facade to base_value
    * Make documentation comments uniformly `///`
    * Make `frame_type` and opaque wrapper for `match_type`

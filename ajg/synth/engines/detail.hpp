@@ -17,8 +17,6 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/mpl/if.hpp>
-
 #include <boost/xpressive/basic_regex.hpp>
 #include <boost/xpressive/match_results.hpp>
 #include <boost/xpressive/regex_actions.hpp>
@@ -73,9 +71,6 @@ namespace detail {
 #define AJG_SYNTH_EMPTY_   // Nothing.
 #define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(AJG_SYNTH_EMPTY_, template)
 
-namespace date_time  = boost::date_time;
-namespace mpl        = boost::mpl;
-namespace posix_time = boost::posix_time;
 using boost::optional; // TODO: Remove.
 
 //
@@ -84,16 +79,16 @@ using boost::optional; // TODO: Remove.
 //           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline posix_time::ptime local_now() {
-    return posix_time::second_clock::local_time();
+inline boost::posix_time::ptime local_now() {
+    return boost::posix_time::second_clock::local_time();
 }
 
 //
 // utc_now
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline posix_time::ptime utc_now() {
-    return posix_time::second_clock::universal_time();
+inline boost::posix_time::ptime utc_now() {
+    return boost::posix_time::second_clock::universal_time();
 }
 
 /*
@@ -106,7 +101,7 @@ inline String format_current_time(String format, bool const autoprefix = true) {
     if (autoprefix) format = prefix_format_characters(format);
     typedef typename String::value_type char_type;
     typedef typename local_time::local_date_time time_type;
-    typedef typename date_time::time_facet<time_type, char_type> facet_type;
+    typedef typename boost::date_time::time_facet<time_type, char_type> facet_type;
 
     std::basic_ostringstream<char_type> stream;
     time_type t = local_time::local_sec_clock::
@@ -126,10 +121,10 @@ inline String format_current_time(String format, bool const autoprefix = true) {
 
 template <class String, class Time>
 inline String format_time(String format, Time const& time) {
-    typedef String                                               string_type;
-    typedef Time                                                 time_type;
-    typedef typename string_type::value_type                     char_type;
-    typedef typename date_time::time_facet<time_type, char_type> facet_type;
+    typedef String                                                                  string_type;
+    typedef Time                                                                    time_type;
+    typedef typename string_type::value_type                                        char_type;
+    typedef typename boost::date_time::time_facet<time_type, char_type>             facet_type;
 
     std::basic_ostringstream<char_type> stream;
     // The locale takes care of deleting this thing for us.
@@ -346,6 +341,13 @@ struct insensitive_less : std::binary_function<T, T, bool> {
 };
 
 //
+// if_c
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <bool C, class X, class Y> struct if_c { typedef X type; };
+template <class X, class Y>         struct if_c<false, X, Y> { typedef Y type; };
+
+//
 // uniform_random_number_generator
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -356,10 +358,10 @@ struct uniform_random_number_generator {
   private:
 
     template <class T>
-    struct select_distribution : mpl::if_< boost::is_integral<T>
-                                         , boost::uniform_int<T>
-                                         , boost::uniform_real<T>
-                                         > {};
+    struct select_distribution : if_c< boost::is_integral<T>::value
+                                     , boost::uniform_int<T>
+                                     , boost::uniform_real<T>
+                                     > {};
 
   public:
 

@@ -18,8 +18,6 @@
 #include <boost/optional.hpp>
 
 #include <boost/mpl/if.hpp>
-#include <boost/mpl/or.hpp>
-#include <boost/mpl/bool.hpp>
 
 #include <boost/xpressive/basic_regex.hpp>
 #include <boost/xpressive/match_results.hpp>

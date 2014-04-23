@@ -16,7 +16,6 @@
 
 #include <boost/none_t.hpp>
 #include <boost/foreach.hpp>
-#include <boost/mpl/void.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -45,6 +44,8 @@
 namespace ajg {
 namespace synth {
 
+struct void_t { typedef void_t type; };
+
 //
 // default_traits
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +56,7 @@ struct default_traits {
   public:
 
     typedef default_traits                              traits_type;
-    typedef boost::mpl::void_                           void_type;
+    typedef void_t                                      void_type;
     typedef boost::none_t                               none_type;
     typedef bool                                        boolean_type;
 

@@ -175,10 +175,10 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
 inline void signal_handler( int        signum
 #if HAS_SIGACTION
-						  , siginfo_t* info
-						  , void*      context
+                          , siginfo_t* info
+                          , void*      context
 #endif
-						  ) {
+                          ) {
     char const* name = 0;
 
     switch (signum) {
@@ -231,20 +231,20 @@ inline void set_handlers() {
     sa.sa_sigaction = signal_handler;
     sigemptyset(&sa.sa_mask);
 
-	BOOST_VERIFY(sigaction(SIGABRT, &sa, NULL) == 0);
-	BOOST_VERIFY(sigaction(SIGSEGV, &sa, NULL) == 0);
-	BOOST_VERIFY(sigaction(SIGBUS,  &sa, NULL) == 0);
-	BOOST_VERIFY(sigaction(SIGILL,  &sa, NULL) == 0);
-	BOOST_VERIFY(sigaction(SIGFPE,  &sa, NULL) == 0);
-	BOOST_VERIFY(sigaction(SIGPIPE, &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGABRT, &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGSEGV, &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGBUS,  &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGILL,  &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGFPE,  &sa, NULL) == 0);
+    BOOST_VERIFY(sigaction(SIGPIPE, &sa, NULL) == 0);
 
 #else
 
-	BOOST_VERIFY(signal(SIGABRT, signal_handler) != SIG_ERR);
-	BOOST_VERIFY(signal(SIGSEGV, signal_handler) != SIG_ERR);
+    BOOST_VERIFY(signal(SIGABRT, signal_handler) != SIG_ERR);
+    BOOST_VERIFY(signal(SIGSEGV, signal_handler) != SIG_ERR);
  // BOOST_VERIFY(signal(SIGBUS,  signal_handler) != SIG_ERR);
-	BOOST_VERIFY(signal(SIGILL,  signal_handler) != SIG_ERR);
-	BOOST_VERIFY(signal(SIGFPE,  signal_handler) != SIG_ERR);
+    BOOST_VERIFY(signal(SIGILL,  signal_handler) != SIG_ERR);
+    BOOST_VERIFY(signal(SIGFPE,  signal_handler) != SIG_ERR);
  // BOOST_VERIFY(signal(SIGPIPE, signal_handler) != SIG_ERR);
 
 #endif // HAS_SIGACTION

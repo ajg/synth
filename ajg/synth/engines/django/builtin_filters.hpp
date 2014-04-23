@@ -265,16 +265,16 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
             string_type const string = value.to_string();
-			size_type   const width  = arguments.first[0].to_size();
-			size_type   const length = string.length();
+            size_type   const width  = arguments.first[0].to_size();
+            size_type   const length = string.length();
 
             if (width <= length) {
                 return string;
             }
 
             size_type const right = (width - length) / 2;
-			size_type const left = width - length - right;
-			return string_type(left, char_type(' ')) + string + string_type(right, char_type(' '));
+            size_type const left = width - length - right;
+            return string_type(left, char_type(' ')) + string + string_type(right, char_type(' '));
         }
     };
 
@@ -391,7 +391,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
             integer_type const dividend = static_cast<integer_type>(value.to_number());
-			integer_type const divisor  = static_cast<integer_type>(arguments.first[0].to_number());
+            integer_type const divisor  = static_cast<integer_type>(arguments.first[0].to_number());
             return dividend % divisor == 0;
         }
     };
@@ -550,10 +550,10 @@ struct builtin_filters {
                     // TODO: Use detail::is_integer.
                     if (number == integer && integer >= 1) { // Ensure the number operated on is whole.
                         string_type const text     = behavior_type::to_string(integer);
-						size_type   const distance = static_cast<size_type>(position);
+                        size_type   const distance = static_cast<size_type>(position);
 
-						if (distance <= text.length()) {
-							return *(text.end() - distance);
+                        if (distance <= text.length()) {
+                            return *(text.end() - distance);
                         }
                     }
                 }
@@ -654,7 +654,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
-			return arguments.first[0].to_size() == value.size();
+            return arguments.first[0].to_size() == value.size();
         }
     };
 
@@ -1177,7 +1177,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
-			size_type const limit = arguments.first[0].to_size();
+            size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
             size_type   const ellip = kernel.ellipsis.length();
@@ -1205,7 +1205,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
-			size_type const limit = arguments.first[0].to_size();
+            size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
             size_type   const ellip = kernel.ellipsis.length();
@@ -1327,7 +1327,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<1>::validate(arguments.first.size());
             static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
-			size_type const limit = arguments.first[0].to_size();
+            size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
             size_type count = 0;

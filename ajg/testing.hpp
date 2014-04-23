@@ -102,9 +102,8 @@ struct check_test_number {
         set_test_name(#name ":" BOOST_PP_STRINGIZE(__LINE__)); \
         AJG_DEBUG_RESET_COUNT(); \
 
-namespace {
-    struct empty {};
-} // namespace anonymous
+// NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)
+namespace { struct no_data {}; }
 
 } // namespace detail
 
@@ -112,7 +111,7 @@ namespace {
 // test_group
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class T = detail::empty>
+template <class T = detail::no_data>
 struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> {
     typedef tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> base_type;
     test_group(char const* const name) : base_type(name) {}

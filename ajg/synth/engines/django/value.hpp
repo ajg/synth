@@ -18,9 +18,9 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

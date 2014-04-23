@@ -19,6 +19,7 @@
 #include <boost/xpressive/xpressive.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/adapters/map.hpp>
 #include <ajg/synth/adapters/bool.hpp>
@@ -32,10 +33,6 @@
 namespace ajg {
 namespace synth {
 namespace engines {
-
-struct missing_variable;
-struct missing_attribute;
-
 namespace django {
 namespace {
 using boost::xpressive::_s;

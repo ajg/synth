@@ -25,8 +25,8 @@
 #include <boost/xpressive/regex_algorithms.hpp>
 #include <boost/xpressive/regex_primitives.hpp>
 
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/detail.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

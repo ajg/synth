@@ -14,7 +14,7 @@
 #include <boost/optional.hpp>
 #include <boost/utility/base_from_member.hpp>
 
-#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/django/options.hpp>
 #include <ajg/synth/bindings/base_binding.hpp>
 #include <ajg/synth/bindings/python/detail.hpp>

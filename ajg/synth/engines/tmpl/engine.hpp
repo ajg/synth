@@ -18,8 +18,8 @@
 #include <boost/noncopyable.hpp>
 
 #include <ajg/synth/templates.hpp>
+#include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/detail.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/tmpl/value.hpp>
 #include <ajg/synth/engines/tmpl/options.hpp>

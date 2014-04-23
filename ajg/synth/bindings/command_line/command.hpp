@@ -18,7 +18,7 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #include <ajg/synth/detail.hpp>
-#include <ajg/synth/engines/exceptions.hpp>
+#include <ajg/synth/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

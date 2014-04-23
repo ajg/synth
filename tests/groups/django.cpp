@@ -165,7 +165,7 @@ DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
 
 unit_test(missing tag) {
     string_template_type const t("{% xyz 42 %}");
-    ensure_throws(s::engines::missing_tag, t.render_to_string(context));
+    ensure_throws(s::missing_tag, t.render_to_string(context));
 }}}
 
 DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock %}|bar",         "foo|This is a block|bar")
@@ -511,7 +511,7 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 
 unit_test(missing-filter) {
     string_template_type const t("{{ 42|xyz }}");
-    ensure_throws(s::engines::missing_filter, t.render_to_string(context));
+    ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
 
 DJANGO_TEST(add_filter, "{{ '5'|add:6 }}", "11")

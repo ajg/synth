@@ -18,6 +18,8 @@ namespace detail {
 std::string get_type_name(std::type_info const&);
 }
 
+// TODO: Introduce common synth::exception type (deriving from std::exception).
+
 //
 // not_implemented
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,10 +52,14 @@ struct file_error : public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct conversion_error : public std::runtime_error {
-    conversion_error(std::type_info const& a, std::type_info const& b)
-        : std::runtime_error("could not convert value of type `"
-                                 + detail::get_type_name(a) + "' to `"
-                                 + detail::get_type_name(b) + "'") {}
+    std::type_info const& from;
+    std::type_info const& to;
+
+    conversion_error(std::type_info const& from, std::type_info const& to)
+        : std::runtime_error("could not convert value from `" +
+              detail::get_type_name(from) + "' to `" +
+              detail::get_type_name(to) + "'")
+        , from(from), to(to) {}
     ~conversion_error() throw () {}
 };
 

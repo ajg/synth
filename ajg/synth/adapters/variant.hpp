@@ -17,10 +17,10 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, BOOST_VARIANT_ENUM_PARAMS(class T)>
-struct adapter<Behavior, variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     : public base_adapter<Behavior> {
 
-    typedef variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
+    typedef boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
     AJG_SYNTH_ADAPTER(variant_type)
     adapted_type adapted_;
 

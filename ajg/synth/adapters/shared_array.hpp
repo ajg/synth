@@ -21,29 +21,9 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, shared_array<T> >
-    : public adapter<Behavior, T[]> {
-
-    adapter(shared_array<T> const& adapted, size_t const length)
-        : adapter<Behavior, T[]>(adapted.get(), length) {}
+struct adapter<Behavior, boost::shared_array<T> > : public adapter<Behavior, T[]> {
+    adapter(boost::shared_array<T> const& adapted, size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
-
-/*
-template <class Behavior, class T>
-struct adapter<Behavior, shared_array<T> >
-    : public forwarding_adapter<Behavior, T[], shared_array<T> > {
-
-    adapter(shared_array<T> const& adapted, size_t const length)
-        : adapted_(adapted), length_(length) {}
-    shared_array<T> adapted_;
-    size_t const length_;
-
-
-    template <class A> A forward() const { return A(boost::cref(*reinterpret_cast<T(*)[]>(adapted_.get())), length_); }
-    // T (&get() const)[] { return *reinterpret_cast<T(*)[]>(adapted_.get()); }
-    bool valid() const { return adapted_; }
-};
-*/
 
 }} // namespace ajg::synth
 

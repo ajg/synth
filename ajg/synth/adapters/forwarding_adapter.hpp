@@ -50,9 +50,9 @@ struct forwarding_adapter : public base_adapter<Behavior> {
 
   private:
 
-    typedef typename boost::remove_reference<T>::type                 T_noref;
-    typedef adapter<Behavior, reference_wrapper<T> >                  ref_type;
-    typedef adapter<Behavior, reference_wrapper<T_noref const> >      cref_type;
+    typedef typename boost::remove_reference<T>::type                           bare_type;
+    typedef adapter<Behavior, boost::reference_wrapper<T> >                     ref_type;
+    typedef adapter<Behavior, boost::reference_wrapper<bare_type const> >       cref_type;
 
   private:
 

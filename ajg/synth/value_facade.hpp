@@ -140,8 +140,8 @@ struct value_facade {
         }
     }
 
-    inline range_type slice( optional<integer_type> const lower = none
-                           , optional<integer_type> const upper = none
+    inline range_type slice( optional<integer_type> const lower = boost::none
+                           , optional<integer_type> const upper = boost::none
                            ) const { // TODO: Defer to adapter.
         return detail::slice(*this, lower, upper);
     }

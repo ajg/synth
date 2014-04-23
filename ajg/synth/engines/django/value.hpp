@@ -106,7 +106,7 @@ struct value : value_facade<Traits, value> {
                 try {
                     // If that fails, try using the value as an index.
                     const_iterator const it = this->at(attribute.to_number());
-                    return it == this->end() ? none : *it;
+                    return it == this->end() ? boost::none : *it;
                 }
                 catch (std::exception const&) {
                     // Do nothing, and pass through to the `throw' below,

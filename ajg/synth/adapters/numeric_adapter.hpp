@@ -61,8 +61,8 @@ struct numeric_adapter : public base_adapter<Behavior> {
 
     // For floating-point types
     template <class T>
-    void output_number(ostream_type& out, typename boost::disable_if<is_integral<T> >::type* = 0) const {
-        io::basic_ios_all_saver<char_type> saver(out);
+    void output_number(ostream_type& out, typename boost::disable_if<boost::is_integral<T> >::type* = 0) const {
+        boost::io::basic_ios_all_saver<char_type> saver(out);
 
         if (detail::is_integer(adapted_)) {
             out << std::fixed << std::setprecision(0);
@@ -80,7 +80,7 @@ struct numeric_adapter : public base_adapter<Behavior> {
 
     // For integral types
     template <class T>
-    void output_number(ostream_type& out, typename boost::enable_if<is_integral<T> >::type* = 0) const {
+    void output_number(ostream_type& out, typename boost::enable_if<boost::is_integral<T> >::type* = 0) const {
         out << adapted_;
     }
 };

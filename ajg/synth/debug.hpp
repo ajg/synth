@@ -97,6 +97,10 @@ inline std::string abbreviate(char const* s) {
     boost::algorithm::replace_all(result, "detail::",    "");
     boost::algorithm::replace_all(result, "ajg::",       "");
     boost::algorithm::replace_all(result, "synth::",     "");
+    boost::algorithm::replace_all(result, "adapters::",  "");
+    boost::algorithm::replace_all(result, "bindings::",  "");
+    boost::algorithm::replace_all(result, "engines::",   "");
+    boost::algorithm::replace_all(result, "templates::", "");
     boost::algorithm::replace_all(result, "tut::",       "");
     boost::algorithm::replace_all(result, "std::",       "");
     boost::algorithm::replace_all(result, "__1::",       "");

@@ -16,7 +16,6 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/xpressive/xpressive.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include <ajg/synth/exceptions.hpp>
@@ -35,12 +34,8 @@ namespace synth {
 namespace engines {
 namespace django {
 namespace {
-using boost::xpressive::_s;
-using boost::xpressive::as_xpr;
-using boost::xpressive::s1;
-using boost::xpressive::s2;
-boost::xpressive::mark_tag const id(9);
-} // namespace
+x::mark_tag const id(9);
+}
 
 template <class Kernel>
 struct builtin_tags {
@@ -235,13 +230,9 @@ struct builtin_tags {
 
     struct comment_tag {
         static regex_type syntax(kernel_type& kernel) {
-            namespace x = boost::xpressive;
-            return // Short form; assert no closing token or newlines.
-                   kernel.comment_open >> *(~x::before(kernel.comment_close | x::_n) >> x::_)
-                >> kernel.comment_close
-                   // Long form
-                |  AJG_TAG(kernel.reserved("comment")) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endcomment"));
+            // Short form (without a closing token or newlines) or long form, below.
+            return kernel.comment_open >> *(~x::before(kernel.comment_close | _n) >> _) >> kernel.comment_close
+                | AJG_TAG(kernel.reserved("comment")) >> kernel.block >> AJG_TAG(kernel.reserved("endcomment"));
         }
 
         static void render( kernel_type  const& kernel
@@ -944,7 +935,7 @@ struct builtin_tags {
             kernel.render_block(ss, body, context, options);
             // TODO: Use bidirectional_input_stream to feed directly to regex_replace.
             string_type const string = ss.str();
-            regex_replace(it, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
+            x::regex_replace(it, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
         }
     };
 

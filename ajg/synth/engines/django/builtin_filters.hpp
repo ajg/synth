@@ -27,6 +27,8 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <boost/xpressive/regex_token_iterator.hpp>
+
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
@@ -52,24 +54,7 @@ struct with_arity<0, Max> {
 
 } // namespace detail
 
-
 namespace django {
-namespace {
-
-using boost::xpressive::_d;
-using boost::xpressive::_ln;
-using boost::xpressive::_n;
-using boost::xpressive::_w;
-using boost::xpressive::alnum;
-using boost::xpressive::as_xpr;
-using boost::xpressive::before;
-using boost::xpressive::regex_replace;
-using boost::xpressive::s1;
-using boost::xpressive::set;
-
-namespace algo = boost::algorithm;
-
-} // namespace
 
 template <class Kernel>
 struct builtin_filters {
@@ -111,7 +96,7 @@ struct builtin_filters {
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename string_type::const_iterator                                string_iterator_type;
-    typedef xpressive::regex_token_iterator<string_iterator_type>               regex_iterator_type;
+    typedef x::regex_token_iterator<string_iterator_type>                       regex_iterator_type;
     typedef typename regex_iterator_type::value_type                            sub_match_type;
     typedef boost::char_separator<char_type>                                    separator_type;
     typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
@@ -497,8 +482,8 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
-            static string_regex_type const regex = as_xpr('&') >> ~before((+_w | '#' >> +_d) >> ';');
-            return value_type(regex_replace(value.to_string(), regex, traits_type::literal("&amp;"))).mark_safe();
+            static string_regex_type const regex = as_xpr('&') >> ~x::before((+_w | '#' >> +_d) >> ';');
+            return value_type(x::regex_replace(value.to_string(), regex, traits_type::literal("&amp;"))).mark_safe();
         }
     };
 
@@ -689,7 +674,7 @@ struct builtin_filters {
             static string_regex_type const newlines = _ln >> +_ln;
 
             string_stream_type stream;
-            string_type const input = regex_replace(value.to_string(), newline, kernel.newline);
+            string_type const input = x::regex_replace(value.to_string(), newline, kernel.newline);
 
             regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
             boolean_type const safe = !options.autoescape || value.safe();
@@ -938,7 +923,7 @@ struct builtin_filters {
             int (*predicate)(int) = std::isspace;
             string_type const source = arguments.first[0].to_string();
             algo::split(tags, source, predicate);
-            return regex_replace(value.to_string(), kernel.html_tag, format);
+            return x::regex_replace(value.to_string(), kernel.html_tag, format);
         }
 
       private:
@@ -1036,8 +1021,8 @@ struct builtin_filters {
             value_type const lower = args[0];
             value_type const upper = args[1];
             range_type  range = value.slice
-                ( lower ? optional<integer_type>(static_cast<integer_type>(lower.to_number())) : none
-                , upper ? optional<integer_type>(static_cast<integer_type>(upper.to_number())) : none
+                ( lower ? optional<integer_type>(static_cast<integer_type>(lower.to_number())) : boost::none
+                , upper ? optional<integer_type>(static_cast<integer_type>(upper.to_number())) : boost::none
                 );
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;
@@ -1099,7 +1084,7 @@ struct builtin_filters {
                                         ) {
             detail::with_arity<0>::validate(arguments.first.size());
             static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
-            return regex_replace(value.to_string(), tag, traits_type::literal(""));
+            return x::regex_replace(value.to_string(), tag, traits_type::literal(""));
         }
     };
 
@@ -1537,7 +1522,7 @@ struct builtin_filters {
                 string_type  const link   = match.str();
                 string_type  const full   = match.str();
                 string_type  const text   = full.substr(0, limit);
-                boolean_type const scheme = !match[xpressive::s1];
+                boolean_type const scheme = !match[s1];
                 boolean_type const more   = text.size() < full.size();
                 stream << "<a href='" << (scheme ? "http://" : "") << link;
                 stream << "'>" << text << (more ? ellipsis : string_type()) << "</a>";
@@ -1548,12 +1533,12 @@ struct builtin_filters {
       protected:
 
         inline static value_type urlize(value_type const& value, size_type const limit, string_type const& ellipsis) {
-            static string_regex_type const safe = +(alnum | (set= '/', '&', '=', ':', ';', '#', '?', '+', '-', '*', '%', '@'));
-            static string_regex_type const url  = !(s1 = +alnum >> ':') >> +safe >> +('.' >> +safe);
+            static string_regex_type const safe = +(x::alnum | (x::set = '/', '&', '=', ':', ';', '#', '?', '+', '-', '*', '%', '@'));
+            static string_regex_type const url  = !(s1 = +x::alnum >> ':') >> +safe >> +('.' >> +safe);
 
             string_type const body   = value.to_string();
             formatter   const format = {limit, ellipsis};
-            return value_type(regex_replace(body, url, format)).mark_safe();
+            return value_type(x::regex_replace(body, url, format)).mark_safe();
         }
     };
 

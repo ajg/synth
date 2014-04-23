@@ -58,8 +58,7 @@ struct adapter<Behavior, T[N]>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, T[]>
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, T[]> : public base_adapter<Behavior> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(T const*, adapter);
     // /*const*/ adapted_type adapted_;
@@ -98,26 +97,12 @@ struct adapter<Behavior, T[]>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T, std::size_t N>
-struct adapter<Behavior, array<T, N> > : public adapter<Behavior, T[N]> {
+struct adapter<Behavior, boost::array<T, N> > : public adapter<Behavior, T[N]> {
     typedef T array_type[N];
-    adapter(array<T, N> const& value) : adapter<Behavior, array_type>
+
+    adapter(boost::array<T, N> const& value) : adapter<Behavior, array_type>
         (*reinterpret_cast<const array_type*>(value.data())) {}
 };
-
-/*
-template <class Behavior, class T, std::size_t N>
-struct adapter<Behavior, array<T, N> >
-    : public base_adapter<Behavior> {
-
-    typedef array<T, N> array_type;
-    AJG_SYNTH_ADAPTER(array_type)
-
-  public:
-
-    ...
-
-    adapted_type adapted_;
-};*/
 
 }} // namespace ajg::synth
 

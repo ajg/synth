@@ -23,7 +23,7 @@ struct adapter<Behavior, T*>
     T* adapted_;
 
  // template <class Adapter> optional<Adapter> forward() const {
- //     return adapted_ ? Adapter(boost::ref(*adapted_)) : none;
+ //     return adapted_ ? Adapter(boost::ref(*adapted_)) : boost::none;
  // }
 
 

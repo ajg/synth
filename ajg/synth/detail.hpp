@@ -208,7 +208,7 @@ std::basic_string<Char> read_file(std::basic_string<Char> const& path) const {
 template <class String, class Stream>
 inline String read_stream
         ( Stream& stream
-        , optional<typename Stream::size_type> const size = none
+        , optional<typename Stream::size_type> const size = boost::none
         ) {
     BOOST_STATIC_CONSTANT(typename String::size_type, buffer_size = 4096);
 

@@ -10,8 +10,5 @@
 #include <ajg/synth/adapters/shared_ptr.hpp>
 #include <ajg/synth/adapters/shared_array.hpp>
 
-// TODO: weak_ptr
-// TODO: intrusive_ptr
-
 #endif // AJG_SYNTH_ADAPTERS_SMART_PTR_HPP_INCLUDED
 

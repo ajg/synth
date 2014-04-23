@@ -107,15 +107,15 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     kernel()
         : tag_start (traits_type::literal("<!--#"))
         , tag_end   (traits_type::literal("-->"))
-        , environment() {
-        using namespace xpressive;
+        , environment()
+        {
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         name
             // @see http://www.w3.org/TR/2000/WD-xml-2e-20000814#NT-Name
-            = (alpha | '_' | ':') >> *(_w | (set= '_', ':', '-', '.'))
+            = (x::alpha | '_' | ':') >> *(_w | (x::set = '_', ':', '-', '.'))
             ;
         quoted_value
             = '"'  >> *~as_xpr('"')  >> '"'
@@ -123,16 +123,18 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             | '\'' >> *~as_xpr('\'') >> '\''
             ;
         variable
-            = ~after('\\') >> "${" >> (s1 = +_w) >> '}'
-            | ~after('\\') >> '$' >> (s1 = +_w)
+            = ~x::after('\\') >> "${" >> (s1 = +_w) >> '}'
+            | ~x::after('\\') >> '$' >> (s1 = +_w)
             | "\\$"
             ;
         attribute
             = name >> *_s >> '=' >> *_s >> quoted_value
             ;
         raw_string
-            = /*+*/*~set[space | (set= '!', '&', '|', '$', '=',
-                  '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\', '/')]
+            = /*+*/*~x::set
+                [ x::space
+                | (x::set = '!', '&', '|', '$', '=', '(', ')', '{', '}', '<', '>', '"', '`', '\'', '\\', '/')
+                ]
             ;
         quoted_string
             = '\'' >> *(~as_xpr('\'') | "\\'")  >> '\''
@@ -148,14 +150,14 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             | variable
             ;
         expression
-            = xpressive::ref(and_expression)
-            | xpressive::ref(or_expression)
+            = x::ref(and_expression)
+            | x::ref(or_expression)
             ;
         primary_expression
             = '(' >> *_s >> expression >> *_s >> ')'
-            | xpressive::ref(comparison_expression)
-            | xpressive::ref(string_expression)
-            | xpressive::ref(not_expression)
+            | x::ref(comparison_expression)
+            | x::ref(string_expression)
+            | x::ref(not_expression)
             ;
         not_expression
             = '!' >> *_s >> expression
@@ -326,13 +328,12 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     /// \post   The name is stored in s1.
 
     regex_type make_tag(string_type const& name) const {
-        using namespace xpressive;
         return tag_start >> *_s >> (s1 = name) >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
     }
 
     boolean_type equals_regex(args_type const& args, string_match_type const& str, string_match_type const& regex) const {
         string_type       const left    = parse_string(args, str);
-        string_type       const right   = regex[xpressive::s1].str();
+        string_type       const right   = regex[s1].str();
         string_regex_type const pattern = string_regex_type::compile(right);
         size_type         const n       = options_type::max_regex_captures;
 
@@ -341,7 +342,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         }
 
         string_match_type match;
-        if (xpressive::regex_search(left, match, pattern)) {
+        if (x::regex_search(left, match, pattern)) {
             std::size_t const limit = (std::min)(match.size(), n);
 
             for (std::size_t i = 0; i <= limit; ++i) {
@@ -411,14 +412,14 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     string_type interpolate(args_type const& args, string_type const& string) const {
         boost::function<string_type(string_match_type const&)> const formatter =
             boost::bind(replace_variable, boost::cref(args), _1);
-        return xpressive::regex_replace(string, variable, formatter);
+        return x::regex_replace(string, variable, formatter);
     }
 
   private:
 
     static string_type replace_variable(args_type const& args, string_match_type const& match) {
         return match.str() == traits_type::literal("\\$") ? traits_type::literal("$") :
-            args.kernel.lookup_variable(args.context, args.options, match[xpressive::s1].str());
+            args.kernel.lookup_variable(args.context, args.options, match[s1].str());
     }
 
   public:

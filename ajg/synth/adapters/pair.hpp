@@ -24,7 +24,7 @@ struct adapter<Behavior, std::pair<First, Second> >
     : public base_adapter<Behavior> {
 
     typedef std::pair<First, Second> pair_type;
-    typedef variant<First, Second> variant_type;
+    typedef boost::variant<First, Second> variant_type;
     AJG_SYNTH_ADAPTER(pair_type)
 
   public:
@@ -45,9 +45,11 @@ struct adapter<Behavior, std::pair<First, Second> >
     enum position { first, second, past };
 
     template <class Value>
-    struct pair_iterator : iterator_facade
-        <pair_iterator<Value>, /*Value*/variant_type, forward_traversal_tag, /*Value*/variant_type> {
-
+    struct pair_iterator : boost::iterator_facade< pair_iterator<Value>
+                                                 , /* XXX: Value */variant_type
+                                                 , boost::forward_traversal_tag
+                                                 , /* XXX: Value */variant_type
+                                                 > {
      public:
         pair_iterator( pair_type const& pair
                      , position  const  position

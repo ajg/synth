@@ -12,7 +12,6 @@
 #include <boost/cstdint.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_integral.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/adapters/adapter.hpp>

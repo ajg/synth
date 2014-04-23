@@ -93,7 +93,7 @@ struct adapter<Behavior, py::object>
             }
         }
 
-        return none;
+        return boost::none;
     }
 
   private:

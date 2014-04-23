@@ -23,6 +23,10 @@
 
 #include <boost/xpressive/basic_regex.hpp>
 #include <boost/xpressive/match_results.hpp>
+#include <boost/xpressive/regex_actions.hpp>
+#include <boost/xpressive/regex_compiler.hpp>
+#include <boost/xpressive/regex_algorithms.hpp>
+#include <boost/xpressive/regex_primitives.hpp>
 
 #include <boost/type_traits/is_integral.hpp>
 
@@ -51,18 +55,30 @@
 namespace ajg {
 namespace synth {
 namespace engines {
+
+using boost::xpressive::_;
+using boost::xpressive::_b;
+using boost::xpressive::_d;
+using boost::xpressive::_ln;
+using boost::xpressive::_n;
+using boost::xpressive::_s;
+using boost::xpressive::_w;
+using boost::xpressive::as_xpr;
+using boost::xpressive::s1;
+using boost::xpressive::s2;
+
+namespace algo = boost::algorithm;
+namespace x    = boost::xpressive;
+
 namespace detail {
 
 #define AJG_SYNTH_EMPTY_   // Nothing.
 #define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(AJG_SYNTH_EMPTY_, template)
 
-using boost::none;
-using boost::optional;
-
 namespace date_time  = boost::date_time;
 namespace mpl        = boost::mpl;
 namespace posix_time = boost::posix_time;
-namespace xpressive  = boost::xpressive;
+using boost::optional; // TODO: Remove.
 
 //
 // local_now
@@ -270,7 +286,7 @@ inline String unquote(String const& string) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator>
-inline bool is(xpressive::match_results<Iterator> const& match, xpressive::basic_regex<Iterator> const& regex) {
+inline bool is(x::match_results<Iterator> const& match, x::basic_regex<Iterator> const& regex) {
     return match.regex_id() == regex.regex_id();
 }
 
@@ -291,19 +307,16 @@ inline Match const& unnest(Match const& match) {
 
 template <class Match, class Regex>
 inline std::pair
-        < boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
-        , boost::filter_iterator<boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        < boost::filter_iterator<x::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
+        , boost::filter_iterator<x::regex_id_filter_predicate<typename Regex::iterator_type>, typename Match::nested_results_type::const_iterator>
         >
 select_nested(Match const& match, Regex const& regex) {
-    typename Match::nested_results_type::const_iterator
-        begin(match.nested_results().begin()),
-        end(match.nested_results().end());
-    boost::xpressive::regex_id_filter_predicate<typename Regex::iterator_type>
-        predicate(regex.regex_id());
-    return std::make_pair
-        ( boost::make_filter_iterator(predicate, begin, end)
-        , boost::make_filter_iterator(predicate, end,   end)
-        );
+    typename Match::nested_results_type::const_iterator begin(match.nested_results().begin());
+    typename Match::nested_results_type::const_iterator end(match.nested_results().end());
+    x::regex_id_filter_predicate<typename Regex::iterator_type> predicate(regex.regex_id());
+    return std::make_pair( boost::make_filter_iterator(predicate, begin, end)
+                         , boost::make_filter_iterator(predicate, end,   end)
+                         );
 }
 
 //
@@ -345,16 +358,17 @@ struct uniform_random_number_generator {
   private:
 
     template <class T>
-    struct select_distribution : mpl::identity<typename mpl::if_< boost::is_integral<T>
-                                                                , boost::uniform_int<T>
-                                                                , boost::uniform_real<T>
-                                                                >::type> {};
+    struct select_distribution : mpl::if_< boost::is_integral<T>
+                                         , boost::uniform_int<T>
+                                         , boost::uniform_real<T>
+                                         > {};
 
   public:
 
+    typedef Output                                                              output_type;
     typedef Source                                                              source_type;
     typedef typename source_type::result_type                                   seed_type;
-    typedef typename select_distribution<Output>::type                          distribution_type;
+    typedef typename select_distribution<output_type>::type                     distribution_type;
     typedef typename distribution_type::input_type                              input_type;
     typedef typename distribution_type::result_type                             result_type;
     typedef boost::variate_generator<source_type, distribution_type>            generator_type;
@@ -369,7 +383,7 @@ struct uniform_random_number_generator {
             ( input_type const lower = (std::numeric_limits<Output>::min)()
             , input_type const upper = (std::numeric_limits<Output>::max)()
             ) const {
-        seed_type const seed(generate_seed());
+        seed_type   const seed(generate_seed());
         source_type const source(seed);
         BOOST_ASSERT(seed);
 
@@ -381,10 +395,10 @@ struct uniform_random_number_generator {
   private:
 
     inline static seed_type generate_seed() {
-        using namespace posix_time;
+        namespace pt = boost::posix_time;
 
-        ptime const epoch = from_time_t(std::time_t(0));
-        ptime const now = microsec_clock::local_time();
+        pt::ptime const epoch = pt::from_time_t(std::time_t(0));
+        pt::ptime const now = pt::microsec_clock::local_time();
         return static_cast<seed_type>((now - epoch).total_microseconds());
     }
 };
@@ -424,7 +438,7 @@ inline optional<typename Container::value_type> find
         , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
         ) {
     typename Container::const_iterator const it = std::find(container.begin(), container.end(), needle);
-    if (it == container.end()) return none; else return *it;
+    if (it == container.end()) return boost::none; else return *it;
 }
 
 template <class Container>
@@ -433,7 +447,7 @@ inline optional<typename Container::mapped_type> find
         , Container                    const& container
         ) {
     typename Container::const_iterator const it = container.find(needle);
-    if (it == container.end()) return none; else return it->second;
+    if (it == container.end()) return boost::none; else return it->second;
 }
 
 }}}} // namespace ajg::synth::engines::detail

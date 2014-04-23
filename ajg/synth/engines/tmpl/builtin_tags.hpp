@@ -9,7 +9,6 @@
 #include <string>
 
 #include <boost/foreach.hpp>
-#include <boost/xpressive/xpressive.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <ajg/synth/engines/detail.hpp>
@@ -23,7 +22,7 @@ namespace tmpl {
     ( as_xpr(kernel.tag_open) >> content >> kernel.tag_close \
     | as_xpr(kernel.alt_open) >> content >> kernel.alt_close \
     )
-#define NAME(name)       (icase(kernel.tag_prefix + traits_type::literal(name)))
+#define NAME(name)       (x::icase(kernel.tag_prefix + traits_type::literal(name)))
 #define OPEN_TAG(name)   TAG(*_s >> NAME(name) >> !(+_s >> kernel.name_attribute) >> *_s)
 #define MIDDLE_TAG(name) TAG(*_s >> NAME(name) >> *_s >> !as_xpr(kernel.tag_finish))
 #define SINGLE_TAG(name) TAG(*_s >> NAME(name) >> +_s >> kernel.name_attribute >> *_s >> !as_xpr(kernel.tag_finish))
@@ -107,9 +106,7 @@ struct builtin_tags {
 
     struct comment_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
-            return OPEN_TAG("COMMENT") >> kernel.block
-               >> CLOSE_TAG("COMMENT");
+            return OPEN_TAG("COMMENT") >> kernel.block >> CLOSE_TAG("COMMENT");
         }
 
         static void render( kernel_type  const& kernel
@@ -128,7 +125,6 @@ struct builtin_tags {
 
     struct if_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
             return OPEN_TAG("IF") >> kernel.block >> !(MIDDLE_TAG("ELSE") >> kernel.block) >> CLOSE_TAG("IF");
         }
 
@@ -154,7 +150,6 @@ struct builtin_tags {
 
     struct include_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
             return SINGLE_TAG("INCLUDE");
         }
 
@@ -176,7 +171,6 @@ struct builtin_tags {
 
     struct loop_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
             return OPEN_TAG("LOOP") >> kernel.block >> CLOSE_TAG("LOOP");
         }
 
@@ -227,7 +221,6 @@ struct builtin_tags {
 
     struct unless_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
             return OPEN_TAG("UNLESS") >> kernel.block >> !(MIDDLE_TAG("ELSE") >> kernel.block) >> CLOSE_TAG("UNLESS");
         }
 
@@ -253,9 +246,7 @@ struct builtin_tags {
 
     struct variable_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            using namespace xpressive;
-            return TAG(*_s >> NAME("VAR") >> *(+_s >> kernel.extended_attribute)
-                    >> *_s >> !as_xpr(kernel.tag_finish));
+            return TAG(*_s >> NAME("VAR") >> *(+_s >> kernel.extended_attribute) >> *_s >> !as_xpr(kernel.tag_finish));
         }
 
         static void render( kernel_type  const& kernel

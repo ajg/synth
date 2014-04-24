@@ -248,7 +248,7 @@ Components
  - `json`
  - `xml`
 
-### Base Components
+### Extensibility/customization components
 
  - `base_adapter`
  - `bindings::base_binding`

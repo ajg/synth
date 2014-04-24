@@ -49,6 +49,7 @@
             [
                 "build",
                 "dist",
+                "external",
                 "tests/tut-framework",
                 "*.egg-info"
             ],

@@ -41,7 +41,6 @@ def create_targets(env):
     command_line_tool.Program(
         target = 'synth',
         source = ['ajg/synth/bindings/command_line/tool.cpp'],
-        LIBS   = ['boost_program_options'],
     )
 
     return [test_harness, examples, command_line_tool]

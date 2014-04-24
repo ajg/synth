@@ -496,6 +496,11 @@ Future Work
    * Rename value_facade to base_value
    * Make documentation comments uniformly `///`
    * Make `frame_type` and opaque wrapper for `match_type`
+   * Replace catching `invalid_method` with dedicated attribute methods
+     + Replace all `throw_exception` with `AJG_SYNTH_THROW` but hide
+       backtraces for expected exceptions in unit tests
+   * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
+   * Move tut-framework/ to external/
    * Experiment with embedding a slim, modularized version of Boost and using it by default
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
    * Remove all no-op tags (e.g. `cycle_as_silent_tag`)

@@ -154,11 +154,81 @@ struct missing_filter : public exception, public std::invalid_argument {
 };
 
 //
+// missing_option
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct missing_option : public exception, public std::invalid_argument {
+    std::string const name;
+
+    missing_option(std::string const& name) : std::invalid_argument("missing option `" + name + "`"), name(name) {}
+    ~missing_option() throw () {}
+};
+
+//
+// unknown_option
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct unknown_option : public exception, public std::invalid_argument {
+    std::string const name;
+
+    unknown_option() : std::invalid_argument("unknown option"), name() {}
+    unknown_option(std::string const& name) : std::invalid_argument("unknown option `" + name + "`"), name(name) {}
+    ~unknown_option() throw () {}
+};
+
+//
+// empty_parameter
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct empty_parameter : public exception, public std::invalid_argument {
+    std::string const option;
+
+    empty_parameter(std::string const& option) : std::invalid_argument("empty parameter for option `" + option + "`"), option(option) {}
+    ~empty_parameter() throw () {}
+};
+
+//
+// invalid_parameter
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct invalid_parameter : public exception, public std::invalid_argument {
+    std::string const option;
+
+    invalid_parameter(std::string const& option) : std::invalid_argument("invalid parameter for option `" + option + "`"), option(option) {}
+    ~invalid_parameter() throw () {}
+};
+
+//
+// missing_parameter
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct missing_parameter : public exception, public std::invalid_argument {
+    std::string const option;
+
+    missing_parameter(std::string const& option) : std::invalid_argument("missing parameter for option `" + option + "`"), option(option) {}
+    ~missing_parameter() throw () {}
+};
+
+//
+// superfluous_parameter
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct superfluous_parameter : public exception, public std::invalid_argument {
+    std::string const option;
+
+    superfluous_parameter(std::string const& option) : std::invalid_argument("superfluous parameter for option `" + option + "`"), option(option) {}
+    ~superfluous_parameter() throw () {}
+};
+
+//
 // missing_argument
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct missing_argument : public exception, public std::invalid_argument {
-    missing_argument() : std::invalid_argument("missing argument") {}
+    std::string const name;
+
+    missing_argument() : std::invalid_argument("missing argument"), name() {}
+    missing_argument(std::string const& name) : std::invalid_argument("missing argument `" + name + "`"), name(name) {}
     ~missing_argument() throw () {}
 };
 
@@ -167,9 +237,37 @@ struct missing_argument : public exception, public std::invalid_argument {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct superfluous_argument : public exception, public std::invalid_argument {
+    std::string const name;
+
     superfluous_argument() : std::invalid_argument("superfluous argument") {}
+    superfluous_argument(std::string const& name) : std::invalid_argument("superfluous argument `" + name + "`"), name(name) {}
     ~superfluous_argument() throw () {}
 };
+
+//
+// unknown_argument
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct unknown_argument : public exception, public std::invalid_argument {
+    std::string const value;
+
+    unknown_argument(std::string const& value) : std::invalid_argument("unknown argument `" + value + "`"), value(value) {}
+    ~unknown_argument() throw () {}
+};
+
+/*
+//
+// invalid_argument
+//     TODO: Replace all uses of std::invalid_argument with this?
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct invalid_argument : public exception, public std::invalid_argument {
+    std::string const name;
+
+    invalid_argument(std::string const& name) : std::invalid_argument("invalid argument `" + name + "`"), name(name) {}
+    ~invalid_argument() throw () {}
+};
+*/
 
 //
 // invalid_attribute

@@ -10,12 +10,13 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/program_options.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+#include <external/optionparser.h>
 
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/exceptions.hpp>
@@ -25,11 +26,16 @@ namespace synth {
 namespace bindings {
 namespace command_line {
 
-#if (BOOST_VERSION > 105000) // 1.50+
-    #define AJG_ARG(name, type) po::value<type##_type>()->value_name(name)
-#else
-    #define AJG_ARG(name, type) po::value<type##_type>()
-#endif
+enum command_options
+    { unknown_option
+    , help_option
+    , version_option
+    , context_option
+    , engine_option
+    , autoescape_option
+    , directory_option
+    , replacement_option
+    };
 
 template <class Binding>
 struct command {
@@ -43,78 +49,143 @@ struct command {
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
+    typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+  private:
+
+    typedef ::option::ArgStatus                                                 status_type;
+    typedef ::option::Descriptor                                                descriptor_type;
+    typedef ::option::Option                                                    option_type;
+    typedef ::option::Parser                                                    parser_type;
+
   public:
 
-    static void run(int const argc, char_type const *const argv[]) {
-        namespace po = boost::program_options;
-        namespace pt = boost::property_tree;
+    static void run(int const argc, char_type const* argv[]) {
+        static descriptor_type const descriptors[] =
+            { {unknown_option,     0, "",  ""    ,        param_illegal,  "USAGE: synth [OPTIONS]\nOptions:"}
+            , {help_option,        0, "h", "help",        param_illegal,  "  -h,      --help              print help message"}
+            , {version_option,     0, "v", "version",     param_illegal,  "  -v,      --version           print library version"}
+            , {context_option,     0, "c", "context",     param_required, "  -c file, --context=file      contextual data             *.{ini,json,xml}"}
+            , {engine_option,      0, "e", "engine",      param_required, "  -e name, --engine=name       template engine             {django,ssi,tmpl}"}
+            , {autoescape_option,  0, "a", "autoescape",  param_allowed,  "  -a,      --autoescape[=bool] automatically escape values (default: 'true')"}
+            , {directory_option,   0, "d", "directory",   param_required, "  -d path, --directory=path    template location(s)        (default: '.')"}
+            , {replacement_option, 0, "r", "replacement", param_required, "  -r text, --replacement=text  replaces missing values     (default: '')"}
+            , {unknown_option,     0, "",  "",            param_allowed,  "\n"}
+            // ("input,i",       AJG_ARG("file", string),  "the source (default: '-')")            // TODO
+            // ("output,o",      AJG_ARG("file", string),  "the destination (default: '-')")       // TODO
+            // ("source,s",      AJG_ARG("text", string),  "inline alternative to input file")     // TODO
+            // ("format,f",      AJG_ARG("name", string),  "the context's format: {ini,json,xml}") // TODO
+            , {}
+            };
 
-        po::options_description description("Usage");
+        size_type const n = sizeof(descriptors) / sizeof(descriptors[0]);
+        option_type options[n], buffer[n];
+        parser_type parser(descriptors, argc, argv, options, buffer);
 
-        description.add_options()
-            ("help,h",                                  "print help message")
-            ("version,v",                               "print library version")
-         // ("input,i",       AJG_ARG("file", string),  "the source (default: '-')")            // TODO
-         // ("output,o",      AJG_ARG("file", string),  "the destination (default: '-')")       // TODO
-         // ("source,s",      AJG_ARG("text", string),  "inline alternative to input file")     // TODO
-         // ("format,f",      AJG_ARG("name", string),  "the context's format: {ini,json,xml}") // TODO
-            ("context,c",     AJG_ARG("file", string),  "the data: *.{ini,json,xml}")
-            ("engine,e",      AJG_ARG("name", string),  "template engine: {django,ssi,tmpl}")
-            ("autoescape,a",  AJG_ARG("bool", boolean), "automatically escape values (default: 'true')")
-            ("directories,d", AJG_ARG("path", paths),   "template lookup directories (default: '.')")
-            ("replacement,r", AJG_ARG("text", string),  "replaces missing values (default: '')")
-            ;
+        if (parser.error()) {
+            AJG_SYNTH_THROW(std::runtime_error("command option parsing"));
+        }
 
-        po::variables_map flags;
-        po::store(po::parse_command_line(argc, argv, description), flags);
-        po::notify(flags);
+        istream_type& input  = std::cin;
+        ostream_type& output = std::cout;
+        ostream_type& error  = std::cerr;
 
-        if (flags.count("help")) {
-            std::cerr << description << std::endl;
+        for (int i = 0; i < parser.nonOptionsCount(); ++i) {
+            AJG_SYNTH_THROW(synth::unknown_argument(parser.nonOption(i)));
+        }
+
+        for (option_type* option = options[unknown_option]; option; option = option->next()) {
+            AJG_SYNTH_THROW(synth::unknown_option(option->name));
+        }
+
+        if (options[help_option]/* || TODO: (argc == 0 && input is stdin and empty [non-blocking])*/) {
+            ::option::printUsage(error, descriptors);
             return;
         }
-        else if (flags.count("version")) {
-            std::cerr << "synth v" << AJG_SYNTH_VERSION_STRING << std::endl;
+        else if (options[version_option]) {
+            output << "synth v" << AJG_SYNTH_VERSION_STRING << std::endl;
             return;
         }
-        else if (!flags.count("engine")) {
-            AJG_SYNTH_THROW(std::invalid_argument("missing engine name"));
+        else if (!options[engine_option]) {
+            AJG_SYNTH_THROW(missing_option("engine"));
+        }
+
+        paths_type directories;
+        for (option_type* option = options[directory_option]; option; option = option->next()) {
+            directories.push_back(to_string(option));
         }
 
         binding_type const binding
-            ( std::cin >> std::noskipws
-            , flags["engine"].as<string_type>()
-            , flags.count("autoescape")  ? flags["autoescape"].as<boolean_type>() : boolean_type(true)
-            , flags.count("replacement") ? flags["replacement"].as<string_type>() : string_type()
-            , flags.count("directories") ? flags["directories"].as<paths_type>()  : paths_type()
+            ( input >> std::noskipws
+            , to_string(options[engine_option].last())
+            , to_boolean(options[autoescape_option].last())
+            , to_string(options[replacement_option].last())
+            , directories
             );
 
         context_type context;
-
-        if (flags.count("context")) {
-            string_type const& path = flags["context"].as<string_type>();
+        if (option_type const* const option = options[context_option].last()) {
+            std::string const narrow_path = option->arg;
             std::basic_ifstream<char_type> file;
 
             try {
-                file.open(path.c_str(), std::ios::binary);
+                file.open(narrow_path.c_str(), std::ios::binary);
             }
             catch (std::exception const& e) {
-                AJG_SYNTH_THROW(read_error(path, e.what()));
+                AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
             }
 
-            using boost::algorithm::ends_with;
-
-                 if (ends_with(path, traits_type::literal(".ini")))  pt::read_ini(file, context);
-            else if (ends_with(path, traits_type::literal(".json"))) pt::read_json(file, context);
-            else if (ends_with(path, traits_type::literal(".xml")))  pt::read_xml(file, context);
-            else AJG_SYNTH_THROW(std::invalid_argument("unknown context format"));
+                 if (boost::algorithm::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
+            else if (boost::algorithm::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
+            else if (boost::algorithm::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
+            else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
         }
 
-        binding.render_to_stream(std::cout, context);
+        binding.render_to_stream(output, context);
+    }
+
+  private:
+
+    inline static string_type to_string(option_type const* option) {
+        if (option == 0 || option->arg == 0) return string_type();
+        else return traits_type::widen(std::string(option->arg));
+    }
+
+    inline static boolean_type to_boolean(option_type const* option) {
+        if (option == 0 || option->arg == 0) return true;
+        else {
+            std::string const parameter(option->arg);
+                 if (parameter == "true"  || parameter == "yes" || parameter == "1") return true;
+            else if (parameter == "false" || parameter == "no"  || parameter == "0") return false;
+            else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
+        }
+    }
+
+    inline static std::string name_of(option_type const& option) {
+        std::string const name(option.name, option.namelen);
+        return option.name[option.namelen] == 0 ? "-" + name : "--" + name;
+    }
+
+    static status_type param_illegal(option_type const& option, bool const) {
+        if (option.arg != 0) AJG_SYNTH_THROW(superfluous_parameter(name_of(option)));
+        else return ::option::ARG_NONE;
+    }
+
+    static status_type param_allowed(option_type const& option, bool const) {
+             if (option.arg == 0)                  return ::option::ARG_NONE;
+     // else if (option.name[option.namelen] == 0) return ::option::ARG_IGNORE; // i.e. a shortopt
+        else if (option.arg[0] == 0) AJG_SYNTH_THROW(empty_parameter(name_of(option)));
+        else return ::option::ARG_OK;
+    }
+
+    static status_type param_required(option_type const& option, bool const) {
+             if (option.arg == 0)    AJG_SYNTH_THROW(missing_parameter(name_of(option)));
+        else if (option.arg[0] == 0) AJG_SYNTH_THROW(empty_parameter(name_of(option)));
+        else return ::option::ARG_OK;
     }
 };
 

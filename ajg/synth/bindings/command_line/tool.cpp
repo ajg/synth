@@ -33,9 +33,9 @@ binding_type::ostream_type& operator <<( binding_type::ostream_type&       ostre
 
 }} // namespace boost::property_tree
 
-int main(int const argc, char const *const argv[])
+int main(int const argc, char const* argv[])
 try {
-    command_type::run(argc, argv);
+    command_type::run(argc - 1, argv + 1);
     return EXIT_SUCCESS;
 }
 catch (std::exception const& e) {

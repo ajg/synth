@@ -5,9 +5,11 @@
 #ifndef AJG_SYNTH_HPP_INCLUDED
 #define AJG_SYNTH_HPP_INCLUDED
 
+#include <ajg/synth/version.hpp>
 #include <ajg/synth/config.hpp>
-#include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines.hpp>
+#include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/templates.hpp>
 
 #endif // AJG_SYNTH_HPP_INCLUDED

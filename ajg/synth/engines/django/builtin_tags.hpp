@@ -410,7 +410,7 @@ struct builtin_tags {
             options_copy.blocks_ = &blocks;
 
             // Third, render the base template again with any (possibly) overridden blocks.
-            // TODO: Parse and generate the frame once and reuse it or have render_path do caching.
+            // TODO: Parse and generate the result once and reuse it or have render_path do caching.
             kernel.render_path(ostream, path, context, options_copy);
         }
     };

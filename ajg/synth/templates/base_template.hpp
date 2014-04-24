@@ -42,7 +42,7 @@ struct base_template : boost::noncopyable {
   public:
 
     typedef typename kernel_type::range_type                                    range_type;
-    typedef typename kernel_type::frame_type                                    frame_type;
+    typedef typename kernel_type::result_type                                   result_type;
 
     typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::context_type                                  context_type;
@@ -75,7 +75,7 @@ struct base_template : boost::noncopyable {
                          , context_type const& context = context_type()
                          , options_type const& options = options_type()
                          ) const {
-        kernel_->render(ostream, frame_, context, options);
+        this->kernel_->render(ostream, this->result_, context, options);
     }
 
 //
@@ -86,7 +86,7 @@ struct base_template : boost::noncopyable {
                                 , options_type const& options = options_type()
                                 ) const {
         std::basic_ostringstream<char_type> ostream;
-        kernel_->render(ostream, frame_, context, options);
+        this->kernel_->render(ostream, this->result_, context, options);
         return ostream.str();
     }
 
@@ -104,7 +104,7 @@ struct base_template : boost::noncopyable {
             throw_exception(write_error(narrow_path, e.what()));
         }
 
-        kernel_->render(file, this->frame_, context, options);
+        this->kernel_->render(file, this->result_, context, options);
     }
 
     range_type const& range() const { return this->range_; }
@@ -130,12 +130,12 @@ struct base_template : boost::noncopyable {
 
     inline void reset() {
         this->range_ = range_type();
-        this->frame_ = frame_type();
+        this->result_ = result_type();
     }
 
     inline void reset(range_type const& range) {
         this->range_ = range;
-        kernel_->parse(this->range_.first, this->range_.second, this->frame_);
+        kernel_->parse(this->range_.first, this->range_.second, this->result_);
     }
 
     inline void reset(iterator_type const& begin, iterator_type const& end) {
@@ -146,7 +146,7 @@ struct base_template : boost::noncopyable {
 
     local_kernel_type   local_kernel_;
     kernel_type const*  kernel_;
-    frame_type          frame_;
+    result_type         result_;
     range_type          range_;
 };
 

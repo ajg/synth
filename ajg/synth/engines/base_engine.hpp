@@ -71,7 +71,13 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
     typedef x::basic_regex<string_iterator_type>                                string_regex_type;
     typedef x::match_results<string_iterator_type>                              string_match_type;
 
-    typedef match_type                                                          frame_type;
+    struct parse_result {
+      private:
+        friend struct base_engine;
+        match_type match_;
+    };
+
+    typedef parse_result                                                        result_type;
 
   public:
 
@@ -81,7 +87,11 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
     kernel() : nothing(as_xpr('\0')) {} // Xpressive barfs when default-constructed.
 
+  protected:
+
     void initialize_grammar() {
+        // TODO: Invoke set_furthest in some (maybe all) the derived engine regexes (like markers)
+        //       to present more precise error message lines.
         typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
 
         this->text = +(~x::before(this->skipper) >> _);
@@ -93,21 +103,23 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
             );
     }
 
+    inline static match_type const& get_match(result_type const& result) { return result.match_; }
+
   public:
 
     template <class I>
-    void parse(std::pair<I, I> const& range, frame_type& frame) const {
-        return this->parse(range.first, range.second, frame);
+    void parse(std::pair<I, I> const& range, result_type& result) const {
+        return this->parse(range.first, range.second, result);
     }
 
     template <class I>
-    void parse(I const& begin, I const& end, frame_type& frame) const {
+    void parse(I const& begin, I const& end, result_type& result) const {
         iterator_type const  begin_   = begin;
         iterator_type const  end_     = end;
         iterator_type        furthest = begin_;
 
-        frame.let(this->iterator_ = furthest);
-        if (x::regex_match(begin_, end_, frame, this->block)) {
+        result.match_.let(this->iterator_ = furthest);
+        if (x::regex_match(begin_, end_, result.match_, this->block)) {
             // On success, all input should have been consumed.
             BOOST_ASSERT(furthest == end_);
             return;

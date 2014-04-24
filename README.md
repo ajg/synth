@@ -495,7 +495,6 @@ Future Work
  - Refactoring:
    * Rename value_facade to base_value
    * Make documentation comments uniformly `///`
-   * Make `frame_type` and opaque wrapper for `match_type`
    * Replace catching `invalid_method` with dedicated attribute methods
      + Replace all `throw_exception` with `AJG_SYNTH_THROW` but hide
        backtraces for expected exceptions in unit tests

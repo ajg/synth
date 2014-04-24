@@ -47,8 +47,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
-    typedef typename kernel_type::frame_type                                    frame_type;
     typedef engine                                                              engine_type;
+    typedef typename kernel_type::result_type                                   result_type;
 
   public:
 
@@ -56,10 +56,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
   public:
 
-    template <class I> void parse(std::pair<I, I> const&, frame_type&) const {}
-    template <class I> void parse(I const&, I const&, frame_type&)     const {}
+    template <class I> void parse(std::pair<I, I> const&, result_type&) const {}
+    template <class I> void parse(I const&, I const&, result_type&)     const {}
 
-    void render(ostream_type&, frame_type const&, context_type const&, options_type const&) const {}
+    void render(ostream_type&, result_type const&, context_type const&, options_type const&) const {}
 
 }; // kernel
 

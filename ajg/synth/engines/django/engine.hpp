@@ -89,6 +89,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
+    typedef engine                                                              engine_type;
+    typedef typename kernel_type::result_type                                   result_type;
 
   protected:
 
@@ -101,11 +103,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     typedef typename kernel_type::match_type                                    match_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename kernel_type::string_match_type                             string_match_type;
-
-  public:
-
-    typedef match_type                                                          frame_type;
-    typedef engine                                                              engine_type;
 
   private:
 
@@ -368,10 +365,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     }
 
     void render( ostream_type&       ostream
-               , frame_type   const& frame
+               , result_type  const& result
                , context_type const& context
                , options_type const& options) const {
-        render_block(ostream, frame, context, options);
+        render_block(ostream, this->get_match(result), context, options);
     }
 
     void render_path( ostream_type&       ostream

@@ -18,6 +18,9 @@
 #    pragma clang diagnostic ignored "-Wunused-function"
 #    pragma clang diagnostic ignored "-Wunused-variable"
 #elif AJG_SYNTH_COMPILER_GCC
+#    if AJG_SYNTH_COMPILER_GCC_VERSION >= 406
+#        pragma GCC diagnostic push
+#    endif
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
 #    pragma GCC diagnostic ignored "-Wunused-function"
 #    pragma GCC diagnostic ignored "-Wunused-variable"
@@ -28,6 +31,8 @@
 
 #if AJG_SYNTH_COMPILER_CLANG
 #    pragma clang diagnostic pop
+#elif AJG_SYNTH_COMPILER_GCC && (AJG_SYNTH_COMPILER_GCC_VERSION >= 406)
+#    pragma GCC diagnostic pop
 #endif
 
 #define AJG_TESTING 1

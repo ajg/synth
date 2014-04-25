@@ -35,25 +35,6 @@
 namespace ajg {
 namespace synth {
 namespace engines {
-namespace detail {
-
-template <std::size_t Min, std::size_t Max = Min>
-struct with_arity {
-    inline static void validate(std::size_t const n) {
-        if (n > Max) throw_exception(superfluous_argument());
-        else if (n < Min) throw_exception(missing_argument());
-    }
-};
-
-template <std::size_t Max>
-struct with_arity<0, Max> {
-    inline static void validate(std::size_t const n) {
-        if (n > Max) throw_exception(superfluous_argument());
-    }
-};
-
-} // namespace detail
-
 namespace django {
 
 template <class Kernel>
@@ -110,6 +91,21 @@ struct builtin_filters {
         static separator_type const separator(word_delimiters.c_str());
         return separator;
     }
+
+    template <std::size_t Min, std::size_t Max = Min>
+    struct with_arity {
+        inline static void validate(std::size_t const n) {
+            if (n > Max) throw_exception(superfluous_argument());
+            else if (n < Min) throw_exception(missing_argument());
+        }
+    };
+
+    template <std::size_t Max>
+    struct with_arity<0, Max> {
+        inline static void validate(std::size_t const n) {
+            if (n > Max) throw_exception(superfluous_argument());
+        }
+    };
 
   public:
 
@@ -190,7 +186,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return value.to_number() + arguments.first[0].to_number();
         }
     };
@@ -206,7 +202,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return escape_slashes(value).mark_safe();
         }
 
@@ -245,7 +241,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type string = value.to_string();
             if (!string.empty()) string[0] = std::toupper(string[0]);
             return string;
@@ -263,7 +259,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             string_type const string = value.to_string();
             size_type   const width  = arguments.first[0].to_size();
             size_type   const length = string.length();
@@ -289,7 +285,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             string_type const from = value.to_string();
             string_type const what = arguments.first[0].to_string();
             return algo::erase_all_copy(from, what);
@@ -307,7 +303,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             string_type const format = arguments.first.empty() ?
                 traits_type::literal("DATE_FORMAT") : arguments.first[0].to_string();
             return formatter_type::format_datetime(options, format, value.to_datetime());
@@ -325,7 +321,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return value ? value : arguments.first[0];
         }
     };
@@ -341,7 +337,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return value.is_none() ? arguments.first[0] : value;
         }
     };
@@ -357,7 +353,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return value.sort_by(arguments.first[0], false);
         }
     };
@@ -373,7 +369,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return value.sort_by(arguments.first[0], true);
         }
     };
@@ -389,7 +385,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             integer_type const dividend = static_cast<integer_type>(value.to_number());
             integer_type const divisor  = static_cast<integer_type>(arguments.first[0].to_number());
             return dividend % divisor == 0;
@@ -407,7 +403,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return value.copy().mark_unsafe();
         }
     };
@@ -423,7 +419,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type string = value.to_string(), result;
             result.reserve(string.size()); // Assume no escapes.
 
@@ -446,7 +442,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             integer_type const integer = static_cast<integer_type>(value.to_number());
             size_type    const size    = static_cast<size_type>((std::abs)(integer));
             return detail::format_size<string_type>(size);
@@ -464,7 +460,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             if (value.empty()) throw_exception(std::invalid_argument("sequence"));
             return value.front();
         }
@@ -481,7 +477,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             static string_regex_type const regex = as_xpr('&') >> ~x::before((+_w | '#' >> +_d) >> ';');
             return value_type(x::regex_replace(value.to_string(), regex, traits_type::literal("&amp;"))).mark_safe();
         }
@@ -498,7 +494,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             // Get the number and the decimal places.
             string_stream_type stream;
             int const n = arguments.first.empty() ? -1 : static_cast<int>(arguments.first[0].to_number());
@@ -506,7 +502,7 @@ struct builtin_filters {
 
             // If it's an integer and n < 0, we don't want decimals.
             boolean_type const is_integer = synth::detail::is_integer(number);
-            int const precision = n < 0 && is_integer ? 0 : std::abs(n);
+            int const precision = n < 0 && is_integer ? 0 : (std::abs)(n);
             stream << std::fixed << std::setprecision(precision) << number;
 
             return value_type(stream.str()).mark_safe();
@@ -524,7 +520,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return value.escape().mark_safe();
         }
     };
@@ -540,7 +536,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             try {
                 number_type  const number   = value.to_number();
                 integer_type const position = static_cast<integer_type>(arguments.first[0].to_number());
@@ -576,7 +572,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return detail::iri_encode(value.to_string());
         }
     };
@@ -592,7 +588,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             string_type const delimiter = arguments.first[0].to_string();
 
             size_type i = 0;
@@ -620,7 +616,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             if (value.empty()) throw_exception(std::invalid_argument("sequence"));
             return value.back();
         }
@@ -637,7 +633,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return value.size();
         }
     };
@@ -653,7 +649,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return arguments.first[0].to_size() == value.size();
         }
     };
@@ -669,7 +665,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             static string_regex_type const newline  = _ln;
             static string_regex_type const newlines = _ln >> +_ln;
 
@@ -700,7 +696,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type const text = algo::replace_all_copy(value.to_string(),
                 kernel.newline, traits_type::literal("<br />"));
             return value_type(text).mark_safe();
@@ -718,7 +714,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             std::vector<string_type>            lines;
             string_stream_type stream;
 
@@ -752,7 +748,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type const width = arguments.first[0].to_size();
             string_stream_type stream;
             stream << std::left << std::setw(width) << value;
@@ -772,7 +768,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return algo::to_lower_copy(value.to_string());
         }
     };
@@ -789,7 +785,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_stream_type stream;
             value_type const sequence = value.is_numeric() ? value.to_string() : value;
 
@@ -815,7 +811,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type phone = algo::to_lower_copy(value.to_string());
             std::transform(phone.begin(), phone.end(), phone.begin(), translate);
             return phone;
@@ -849,7 +845,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
                 kernel.template split_argument<','>(arguments.first[0], context, options);
@@ -877,7 +873,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             // NOTE: Since this filter is for debugging, we don't normally try to do anything fancy.
             //       In the Python binding it can be overridden with a call to the real pprint.
             return value.is_string() ? detail::quote(value.to_string(), '\'') : value.to_string();
@@ -895,7 +891,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             if (size_type const size  = value.size()) {
                 size_type const index = detail::random_int(0, size - 1);
                 return value[index];
@@ -917,7 +913,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             std::vector<string_type> tags;
             formatter const format = { tags };
             int (*predicate)(int) = std::isspace;
@@ -950,7 +946,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type const width = arguments.first[0].to_size();
             string_stream_type stream;
             stream << std::right << std::setw(width) << value;
@@ -970,7 +966,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             // NOTE: The to_string is there because `safe` is expected to stringize its operand
             //       immediately, not just mark it safe.
             return options.autoescape ? value_type(value.to_string()).mark_safe() : value;
@@ -988,7 +984,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             value_type copy = value;
 
             // FIXME: These values should be mutable.
@@ -1011,7 +1007,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
                 kernel.template split_argument<':'>(arguments.first[0], context, options);
@@ -1040,7 +1036,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             struct invalid {
                 inline static boolean_type fn(char_type const c) {
                     return !std::isalnum(c) && c != '_' && c != '-';
@@ -1065,7 +1061,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             string_type const spec = arguments.first[0].to_string();
             return (format_type(char_type('%') + spec) % value).str();
         }
@@ -1082,7 +1078,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
             return x::regex_replace(value.to_string(), tag, traits_type::literal(""));
         }
@@ -1099,7 +1095,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             string_type const format = arguments.first.empty() ?
                 traits_type::literal("TIME_FORMAT") : arguments.first[0].to_string();
             return formatter_type::format_datetime(options, format, value.to_datetime());
@@ -1117,7 +1113,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
             datetime_type const from = arguments.first.empty() ? detail::local_now() : arguments.first[0].to_datetime();
             return value_type(formatter_type::format_duration(options, from - to)).mark_safe();
@@ -1135,7 +1131,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0, 1>::validate(arguments.first.size());
+            with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
             datetime_type const from = arguments.first.empty() ? detail::local_now() : arguments.first[0].to_datetime();
             return value_type(formatter_type::format_duration(options, to - from)).mark_safe();
@@ -1153,7 +1149,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type text = value.to_string();
 
             for (size_type i = 0, n = text.length(); i < n; ++i) {
@@ -1176,7 +1172,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
@@ -1204,7 +1200,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 
@@ -1277,7 +1273,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type   const limit = arguments.first[0].to_size();
             string_type const text  = value.to_string();
             size_type count = 0;
@@ -1325,7 +1321,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
             size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
@@ -1413,7 +1409,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_stream_type stream;
             value.safe() ? push_item<true>(value, kernel, 0, stream)
                          : push_item<false>(value, kernel, 0, stream);
@@ -1474,7 +1470,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return algo::to_upper_copy(value.to_string());
         }
     };
@@ -1490,7 +1486,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return detail::uri_encode(value.to_string());
         }
     };
@@ -1506,7 +1502,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             return urlize(value, (std::numeric_limits<size_type>::max)(), kernel.ellipsis);
         }
 
@@ -1553,7 +1549,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             return urlize_filter::urlize(value, arguments.first[0].to_size(), kernel.ellipsis);
         }
     };
@@ -1569,7 +1565,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<0>::validate(arguments.first.size());
+            with_arity<0>::validate(arguments.first.size());
             string_type    const string = value.to_string();
             tokenizer_type const tokenizer(string, separator());
             return std::distance(tokenizer.begin(), tokenizer.end());
@@ -1587,7 +1583,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             size_type   const width = arguments.first[0].to_size();
             string_type const text  = value.to_string();
             return wrap(text, width, kernel.newline);
@@ -1634,7 +1630,7 @@ struct builtin_filters {
                                         , context_type   const& context
                                         , options_type   const& options
                                         ) {
-            detail::with_arity<1>::validate(arguments.first.size());
+            with_arity<1>::validate(arguments.first.size());
             sequence_type const args =
                 kernel.template split_argument<','>(arguments.first[0], context, options);
 

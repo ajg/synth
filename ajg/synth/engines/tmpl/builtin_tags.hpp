@@ -261,8 +261,8 @@ struct builtin_tags {
             if (optional<value_type> const& variable = detail::find(attrs.name, context)) {
                 result = *variable;
             }
-            else if (attrs.default_) {
-                result = *attrs.default_;
+            else if (attrs.fallback) {
+                result = *attrs.fallback;
             }
             else {
                 result = kernel.default_value;

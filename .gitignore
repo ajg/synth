@@ -24,19 +24,20 @@
 *.sublime-workspace
 
 # Code Blocks
-*.depend
-*.layout
+/ide/cb*/*.depend
+/ide/cb*/*.layout
 
 # Visual Studio
-ipch/
-Debug/
-Release/
 *.idb
-*.suo
-*.sdf
-*.opensdf
+/ide/vs*/ipch/
+/ide/vs*/Debug/
+/ide/vs*/Release/
+/ide/vs*/*.suo
+/ide/vs*/*.sdf
+/ide/vs*/*.opensdf
 
 # Python
+/build/
 /dist/
 /MANIFEST
 *.pyc

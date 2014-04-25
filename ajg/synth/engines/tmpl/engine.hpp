@@ -60,7 +60,7 @@ struct engine : base_engine<Traits> {
         enum escape_mode { none, html, url, js };
 
         string_type           name;
-        optional<string_type> default_;
+        optional<string_type> fallback;
         optional<escape_mode> escape;
     };
 
@@ -271,9 +271,9 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
 
     // TODO: Throw synth exceptions when possible.
     attributes parse_attributes(match_type const& match) const {
-        optional<typename attributes::escape_mode> escape;
-        optional<string_type> name;
-        optional<string_type> default_;
+        optional<typename attributes::escape_mode> escape   = boost::none;
+        optional<string_type>                      name     = boost::none;
+        optional<string_type>                      fallback = boost::none;
 
         BOOST_FOREACH(match_type const& nested, match.nested_results()) {
             match_type const& attr  = detail::unnest(nested);
@@ -284,8 +284,8 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                 else name = this->extract_attribute(value);
             }
             else if (is(attr, this->default_attribute)) {
-                if (default_) throw_exception(std::logic_error("duplicate default value"));
-                else default_ = this->extract_attribute(value);
+                if (fallback) throw_exception(std::logic_error("duplicate default value"));
+                else fallback = this->extract_attribute(value);
             }
             else if (is(attr, this->escape_attribute)) {
                 if (escape) {
@@ -311,7 +311,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         }
 
         if (!name) throw_exception(std::logic_error("missing variable name"));
-        attributes const attrs = {*name, default_, escape};
+        attributes const attrs = {*name, fallback, escape};
         return attrs;
     }
 

@@ -9,13 +9,27 @@ import re
 import sys
 from distutils import sysconfig
 from distutils.core import setup, Extension
-from glob import glob
-from os.path import join
+
+# TODO: Allow some of these to be overridden via environment variable and/or command option.
+DEBUG = False
+CHAR  = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
+BOOST = 'auto' # TODO: Implement `local` and `system`.
+
+if BOOST not in ('auto', 'local', 'system'):
+    sys.exit('Option `boost` must be `auto`, `local` or `system`')
+
+def get_boost_path():
+    if BOOST in ('auto', 'local'):
+        return 'external/boost-1_55_0'
+    elif BOOST == 'system':
+        sys.exit('Not implemented: `system` boost')
+    else:
+        sys.exit('Unknown value for option `boost`')
 
 def run():
     setup(
         name             = 'synth',
-        version          = '.'.join(map(str, get_synth_version())),
+        version          = '.'.join(map(str, find_synth_version())),
         description      = 'A Python binding to the Synth C++ Template Framework',
         long_description = get_long_description(),
         keywords         = 'django, tmpl, ssi, template, framework',
@@ -26,7 +40,7 @@ def run():
         ext_modules      = [get_extension()],
         data_files       = get_data_files(),
         classifiers      = get_classifiers(),
-# TODO: test_suite       = 'synth.tests',
+        # TODO: test_suite
     )
 
 def get_long_description():
@@ -52,6 +66,7 @@ def get_classifiers():
     ]
 
 def get_extension():
+    compiler = initialize_compiler(platform.system().lower())
     return Extension(
         'synth',
         language             = get_language(),
@@ -60,37 +75,50 @@ def get_extension():
         include_dirs         = get_include_dirs(),
         library_dirs         = get_library_dirs(),
         runtime_library_dirs = get_runtime_library_dirs(),
-        extra_compile_args   = get_extra_compile_args(),
+        extra_compile_args   = get_extra_compile_args(compiler),
         define_macros        = get_define_macros(),
         undef_macros         = get_undef_macros(),
     )
 
-# TODO: Allow some of these to be overridden via environment variable:
-char_type   = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
-is_debug    = False
-is_static   = True
-is_threaded = True
-synth_base  = join('ajg', 'synth')
-is_windows  = platform.system() == 'Windows' # sys.platform == 'win32'
-is_osx      = platform.system() == 'Darwin'
+def find_synth_version():
+    config = open('ajg/synth/version.hpp').read()
+    major  = int(re.search(r'AJG_SYNTH_VERSION_MAJOR\s+(\S+)', config).group(1))
+    minor  = int(re.search(r'AJG_SYNTH_VERSION_MINOR\s+(\S+)', config).group(1))
+    patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
+    return (major, minor, patch)
 
 # TODO: For reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++ ones,
 #       to which it doesn't apply, which causes GCC to print out a warning while building.
+def initialize_compiler(platform):
+    if not DEBUG:
+        # Don't produce debug symbols when debug is off.
+        if platform != 'windows':
+            cflags = sysconfig.get_config_var('CFLAGS')
+            opt = sysconfig.get_config_var('OPT')
+            sysconfig._config_vars['CFLAGS'] = cflags.replace(' -g ', ' ')
+            sysconfig._config_vars['OPT'] = opt.replace(' -g ', ' ')
 
-if not is_debug:
-    # Don't produce debugging symbols outside of debug mode.
+        if platform == 'linux':
+            ldshared = sysconfig.get_config_var('LDSHARED')
+            sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -g ', ' ')
 
-    if not is_windows:
-        cflags = sysconfig.get_config_var('CFLAGS')
-        opt = sysconfig.get_config_var('OPT')
-        sysconfig._config_vars['CFLAGS'] = cflags.replace(' -g ', ' ')
-        sysconfig._config_vars['OPT'] = opt.replace(' -g ', ' ')
+    if platform == 'windows':
+        msvc_info = find_msvc_info()
+        if msvc_info is None:
+            return 'unknown'
+        version, path = msvc_info
 
-    if not is_osx:
-        ldshared = sysconfig.get_config_var('LDSHARED')
-        sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -g ', ' ')
+        # Reliance on these is hard-coded somewhere in the guts of setuptools/distutils:
+        os.environ['VS90COMNTOOLS']  = path
+        os.environ['VS100COMNTOOLS'] = path
+        os.environ['VS110COMNTOOLS'] = path
+        os.environ['VS120COMNTOOLS'] = path
 
-def get_and_set_windows_msvc_version():
+        return 'msvc'
+    else:
+        return 'default' # TODO: clang vs. gcc
+
+def find_msvc_info():
     latest, path = None, None
 
     for name, value in os.environ.items():
@@ -102,121 +130,123 @@ def get_and_set_windows_msvc_version():
                 path = value
 
     if not latest:
-        raise Exception('No version of MSVC found')
+        return None
 
-    # These are hard-coded somewhere in the guts of setuptools/distutils:
-    os.environ['VS90COMNTOOLS']  = path
-    os.environ['VS100COMNTOOLS'] = path
-    return latest
+    return (latest, path)
 
-if is_windows:
-    is_msvc       = True       # FIXME: Exclude non-msvc compilers.
-    architecture  = 32         # TODO: Detect.
-    msvc_version  = get_and_set_windows_msvc_version()
-    boost_version = (1, 55, 0) # TODO: Try to detect from standard install locations (c:/boost*, c:/local/boost*, etc.)
-    boost_path    = 'c:/local/boost_%d_%d_%d/' % boost_version
-else:
-    is_msvc = False
-
-def get_windows_boost_include_dir():
-    return boost_path
-
-def get_windows_boost_library_dir():
-    prefix = 'lib%d' % architecture
-    suffix = '%d.%d' % msvc_version
-    dir    = prefix + '-msvc-' + suffix
-    return boost_path + dir
-
-def get_windows_boost_runtime_library_dir():
-    return get_windows_boost_library_dir()
-
-def get_extra_compile_args():
-    if is_msvc:
-        # TODO: SET VS90COMNTOOLS=%VS120COMNTOOLS% (modulo version)
+def get_extra_compile_args(compiler):
+    if compiler == 'msvc':
         # TODO: Some of this is repeated in *.vcxproj.
-
-        linkage = 'STATIC' if is_static else 'DYN'
-        define  = 'BOOST_PYTHON_%s_LIB=1' % linkage
         return [
-            '/D' + define,
             '/bigobj', # Prevent reaching object limit.
             '/EHsc',   # Override structured exception handling (SEH).
             '/FD',     # Allow minimal rebuild.
             '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4180', # "qualifier applied to function type has no meaning" in list_of.hpp.
-            # TODO: Silence or fix the spurious conversion warnings.
         ]
     else:
         # TODO: Some of this is repeated in SConstruct.
         return [
-            '-Wno-unsequenced',
+            # '-Wno-unsequenced',
             '-Wno-unused-value',
-            # TODO: if clang, '-ferror-limit=1',
-            # TODO: if clang, '-ftemplate-backtrace-limit=1',
         ]
 
 def get_include_dirs():
-    if is_windows:
-        return ['.', get_windows_boost_include_dir()]
-    else:
-        return ['.']
+    return ['.', get_boost_path()]
 
 def get_library_dirs():
-    if is_windows:
-        return [get_windows_boost_library_dir()]
-    else:
-        return []
+    return []
 
 def get_libraries():
-    name = 'boost_python'
-    if is_windows:
-        prefix    = 'lib' if is_static else ''
-        threading = '-mt' if is_threaded else ''
-        compiler  = '-vc%d%d' % msvc_version
-        version   = '-%d_%d' % boost_version[:-1]
-        return [prefix + name + compiler + threading + version]
-    else:
-        return [name]
+    return []
 
 def get_runtime_library_dirs():
-    if is_windows:
-        return [] if is_static else [get_windows_boost_runtime_library_dir()]
-    else:
-        return []
-
-def get_synth_version():
-    config = open(join(synth_base, 'version.hpp')).read()
-    major  = int(re.search(r'AJG_SYNTH_VERSION_MAJOR\s+(\S+)', config).group(1))
-    minor  = int(re.search(r'AJG_SYNTH_VERSION_MINOR\s+(\S+)', config).group(1))
-    patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
-    return (major, minor, patch)
+    return []
 
 def get_define_macros():
-    defines = [('AJG_SYNTH_DEFAULT_CHAR_TYPE', char_type)]
-    return defines if is_debug else defines + [('NDEBUG', None)]
+    defines = []
+
+    # Common defines:
+    defines += [('AJG_SYNTH_DEFAULT_CHAR_TYPE', CHAR)]
+
+    # Conditional defines:
+    if BOOST != 'system':
+        defines += [
+            ('BOOST_ALL_NO_LIB',            None),
+            ('BOOST_PYTHON_NO_LIB',         None),
+            ('BOOST_PYTHON_STATIC_LIB',     None),
+            ('BOOST_PYTHON_SOURCE',         None),
+        ]
+
+    if not DEBUG:
+        defines += [('NDEBUG', None)]
+
+    return defines
 
 def get_undef_macros():
-    return ['NDEBUG'] if is_debug else []
+    undefines = []
+    
+    if DEBUG:
+        defines += ['NDEBUG']
+
+    return undefines
 
 def get_language():
     return 'c++'
 
 def get_sources():
-    return [
-        join(synth_base, 'bindings', 'python', 'module.cpp'),
-    ]
+    sources = []
+
+    if BOOST != 'system':
+        boost_path = get_boost_path() + '/'
+        sources += [boost_path + source for source in boost_python_sources]
+
+    # Add last to trigger fast compilation failures.
+    sources += ['ajg/synth/bindings/python/module.cpp']
+    return sources 
 
 def get_data_files():
     data_files = []
 
-    for base, _, files in os.walk(synth_base):
+    for base, _, files in os.walk('ajg/synth'):
         headers = []
         for file in fnmatch.filter(files, '*.hpp'):
-            header = join(base, file)
+            header = base + '/' + file
             headers.append(header)
-        target = join('include', base)
+        target = 'include/' + base
         data_files.append((target, headers))
 
     return data_files
+
+boost_python_sources = [
+    'libs/python/src/numeric.cpp',
+    'libs/python/src/list.cpp',
+    'libs/python/src/long.cpp',
+    'libs/python/src/dict.cpp',
+    'libs/python/src/tuple.cpp',
+    'libs/python/src/str.cpp',
+    'libs/python/src/slice.cpp',
+    'libs/python/src/converter/from_python.cpp',
+    'libs/python/src/converter/registry.cpp',
+    'libs/python/src/converter/type_id.cpp',
+    'libs/python/src/object/enum.cpp',
+    'libs/python/src/object/class.cpp',
+    'libs/python/src/object/function.cpp',
+    'libs/python/src/object/inheritance.cpp',
+    'libs/python/src/object/life_support.cpp',
+    'libs/python/src/object/pickle_support.cpp',
+    'libs/python/src/errors.cpp',
+    'libs/python/src/module.cpp',
+    'libs/python/src/converter/builtin_converters.cpp',
+    'libs/python/src/converter/arg_to_python_base.cpp',
+    'libs/python/src/object/iterator.cpp',
+    'libs/python/src/object/stl_iterator.cpp',
+    'libs/python/src/object_protocol.cpp',
+    'libs/python/src/object_operators.cpp',
+    'libs/python/src/wrapper.cpp',
+    'libs/python/src/import.cpp',
+    'libs/python/src/exec.cpp',
+    'libs/python/src/object/function_doc_signature.cpp',
+]
 
 run()

@@ -10,8 +10,9 @@ compiler:
   - g++
   - clang++
 
-before_install:
-  - sudo apt-get install libboost-dev libboost-program-options-dev libboost-python-dev
+### TODO: Build environment with boost available.
+### before_install:
+###   - sudo apt-get install libboost-dev libboost-python-dev
 
 before_script:
   - sudo apt-get install valgrind
@@ -22,4 +23,4 @@ script:
   - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
   - scons synth && tests/harness.sh
   - scons # Make sure every other target builds successfully.
-  - sudo python setup.py install # FIXME: && python tests/harness.py (Segfaults only in Travis)
+  - sudo python setup.py install && python tests/harness.py

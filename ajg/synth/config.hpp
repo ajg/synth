@@ -46,12 +46,15 @@
 #if defined(__clang__)
 #    undef  AJG_SYNTH_COMPILER_CLANG
 #    define AJG_SYNTH_COMPILER_CLANG 1
+#    define AJG_SYNTH_COMPILER_CLANG_VERSION // TODO
 #elif defined(__GNUC__)
 #    undef  AJG_SYNTH_COMPILER_GCC
 #    define AJG_SYNTH_COMPILER_GCC 1
+#    define AJG_SYNTH_COMPILER_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__) // e.g. 406 == 4.6
 #elif defined(_MSC_VER)
 #    undef  AJG_SYNTH_COMPILER_MSVC
 #    define AJG_SYNTH_COMPILER_MSVC 1
+#    define AJG_SYNTH_COMPILER_MSVC_VERSION // TODO
 #endif
 
 //
@@ -83,7 +86,7 @@
 #        define AJG_SYNTH_UNREACHABLE (AJG_SYNTH_ASSERT(0), (__assume(0)))
 #    elif AJG_SYNTH_COMPILER_CLANG
 #        define AJG_SYNTH_UNREACHABLE (AJG_SYNTH_ASSERT(0), (__builtin_unreachable()))
-#    elif AJG_SYNTH_COMPILER_GCC && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
+#    elif AJG_SYNTH_COMPILER_GCC && (AJG_SYNTH_COMPILER_GCC_VERSION >= 405)
 #        define AJG_SYNTH_UNREACHABLE (AJG_SYNTH_ASSERT(0), (__builtin_unreachable()))
 #    else
 #        define AJG_SYNTH_UNREACHABLE (AJG_SYNTH_ASSERT(0), (::std::terminate()))

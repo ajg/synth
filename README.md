@@ -1,7 +1,7 @@
 synth
 =====
 
-A Powerful C++ Templating Framework with [command-line](#command-line) and [Python](#python) bindings, written by [Alvaro J. Genial](http://alva.ro).
+A Powerful C++ Templating Framework with a [command-line](#command-line) tool and [Python](#python) module, written by [Alvaro J. Genial](http://alva.ro).
 
 [![Build Status](https://travis-ci.org/ajg/synth.png?branch=master)](https://travis-ci.org/ajg/synth)
 
@@ -85,71 +85,53 @@ Reference
       -d [ --directories ] path template lookup directories (default: '.')
       -r [ --replacement ] text replaces missing values (default: '')
 
-Dependencies
-------------
-
-Building `synth` from source requires:
-
- - [Boost](http://boost.org)
- - [SCons](http://scons.org)
- - A modern C++ compiler (`c++11` support is not required.)
-
-Synth is known to compile with:
-
- - `g++` versions `4.2.1` and `4.6.3`
- - `clang++` version `3.3`, including Apple's `LLVM version 5.0`
- - `boost` versions `1.46` and `1.55`
-
-### Installing Boost
-
- - On OS X, using Homebrew:
-
-        brew install boost --build-from-source
-
- - Using Apt, typically on Debian or Ubuntu:
-
-        sudo apt-get install libboost-all-dev
-
- - Using Yum, typically on Fedora or RHEL (untested):
-
-        sudo yum install boost-devel
-
- - On Windows, download a suitable version from here:
-
-        http://sourceforge.net/projects/boost/files/boost-binaries/
-
 Installation
 ------------
 
-### From source:
-
- 1. Install the [dependencies](#dependencies).
-
- 2. Get the source:
-
-        git clone --recursive https://github.com/ajg/synth.git && cd synth
-
- 3. [Optional] Build the command-line program:
-
-        scons synth # Add debug=1 to generate debugging symbols & disable optimizations.
-
- 4. [Optional] Build (and install) the Python module:
-
-        python setup.py install # Add `sudo` as needed.
-
-(Pre-built binaries are [in the works](#future-work).)
-
 ### Using Pip:
-
-Install [Boost](#installing-boost), then:
 
     pip install synth # Add `sudo` as needed.
 
 ### Using Easy Install:
 
-Install [Boost](#installing-boost), then:
-
     easy_install synth # Add `sudo` as needed.
+
+### Using Homebrew:
+
+(A formula is [planned](#future-work).)
+
+### From binaries:
+
+(Pre-built binary releases for some platforms are [in the works](#future-work).)
+
+### From source:
+
+ 1. Ensure you have the following:
+   - A tool to get the source (`git`, `curl`, etc.)
+   - A system to build it with ([SCons](http://scons.org) or Visual Studio)
+   - A C++ compiler (`clang`, `gcc`, `msvc`, etc.) In particular, Synth is known to compile with:
+     * `gcc` versions `4.2.1`, `4.6.3` and `4.7.2`
+     * `clang` version `3.0` and `3.3`
+     * `msvc` version `12.0` (VS2013)
+
+ 2. Get the source (pick your poison):
+      - With Git:
+
+            git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
+      - With Curl:
+
+            curl -L https://github.com/ajg/synth/archive/master.tar.gz | tar xz && cd synth-master
+      - Otherwise, try using https://github.com/ajg/synth/archive/master.zip
+
+ 3. *Optionally*, build the [command-line tool](#command-line):
+
+        scons synth # Add debug=1 to generate debugging symbols & disable optimizations.
+
+    (Note that if you are hell bent on it, you can use a different version of Boost; see [Infrequently Asked Questions](#infrequently-asked-questions).)
+
+ 4. *Optionally*, build (and install) the [Python module](#python):
+
+        python setup.py install # Add `sudo` as needed.
 
 Components
 ----------
@@ -415,7 +397,7 @@ Future Work
    * Create Visual Studio 2012 solution & projects
 
  - Distribution:
-   * Pre-built OS X binaries
+   * Pre-built Darwin binaries
    * Pre-built Windows binaries
    * [Homebrew](http://brew.sh/) formula
 
@@ -446,9 +428,9 @@ Future Work
      + Turn optional arguments to synth.Template into kwargs
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
      + Support for non-simple custom tags via token and parser objects
-         1. Custom inclusion tags
-         2. Custom assignment tags
-         3. Custom tags with arbitrary blocks
+         a. Custom inclusion tags
+         b. Custom assignment tags
+         c. Custom tags with arbitrary blocks
      + Set docstrings where appropriate
      + Support for Python 3
    * Other:
@@ -500,6 +482,7 @@ Future Work
        backtraces for expected exceptions in unit tests
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
    * Move tut-framework/ to external/
+   * Remove as much dead weight from local Boost copy as possible; and/or
    * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
    * Remove all no-op tags (e.g. `cycle_as_silent_tag`)
@@ -512,7 +495,7 @@ Future Work
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Consider switching to unordered_map/unordered_set where possible
-   * Experiment with turning `detail` namespaces into `struct`s with `private` members and `friend`s
+   * Turn `detail.hpp` files into detail directories to match namespace
    * [v1+] Add `AJG_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
      + Add `AJG_PRAGMA(once)` to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically
@@ -524,22 +507,23 @@ Future Work
    * [v1+] Remove namespace closing comments
    * [v2+] Factor out values & adapters into separate library for generic language interop
 
-Frequently Asked Questions (FAQs)
----------------------------------
+Infrequently Asked Questions
+----------------------------
 
- - Q: Why does installation fail with the following error?
+ - Q: Can I use a version of [Boost](http://boost.org) other than the one bundled?
+   * A: Yes, it is, though note that unless you're already using Boost in your project, there is usually no good reason to; anyway:
+     + On most systems, you can build Synth with the system's Boost by passing `boost=system` to `scons`.
+     + On Windows, you'll need to edit the project file(s) in Visual Studio and set the include and library directories to point to the existing Boost installation.
+     + The [Python module](#python) does not support this option yet.
 
-        #include <boost/python.hpp>
-                ^
-        1 error generated.
-        error: command 'cc' failed with exit status 1
-
-   A: You need to [install Boost.Python](#installing-boost) first.
+ - Q: How can I install a system-wide version of [Boost](http://boost.org)?
+   * A: Here are some suggestions:
+     + Using Homebrew: `brew install boost --build-from-source`
+     + Using Apt: `sudo apt-get install libboost-all-dev`
+     + Using Yum: `sudo yum install boost-devel`
+     + On Windows, try http://sourceforge.net/projects/boost/files/boost-binaries/
 
 License
 -------
 
 This library is distributed under the Boost [LICENSE](./LICENSE_1_0.txt).
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ajg/synth/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

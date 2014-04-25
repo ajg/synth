@@ -12,7 +12,7 @@ GROUP = str(ARGUMENTS.get('group', ''))
 BOOST = str(ARGUMENTS.get('boost', 'auto'))
 
 if BOOST not in ('auto', 'local', 'system'):
-    sys.exit('Argument `boost` must be `auto`, `local` or `system`')
+    sys.exit('Option `boost` must be `auto`, `local` or `system`')
 
 def run():
     cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
@@ -66,37 +66,46 @@ def get_cpp_path():
     cpp_path = ['.']
 
     if BOOST == 'local':
-        cpp_path += ['external/boost']
+        cpp_path += ['external/boost-1_55_0']
     elif BOOST == 'auto':
         # TODO: Use system if available, otherwise local?
-        pass
+        cpp_path += ['external/boost-1_55_0']
     elif BOOST == 'system':
         pass
 
     return cpp_path
 
 def get_cpp_flags(cxx):
+    # TODO: Handle MSVC.
+
     cpp_flags = []
 
     # Common flags:
     cpp_flags += ['-Wall']
     cpp_flags += ['-Woverloaded-virtual']
     cpp_flags += ['-Wsign-promo']
+    cpp_flags += ['-Wno-long-long']
     # TODO: cpp_flags += ['-Wsurprising']
     # TODO: cpp_flags += ['-Weffc++']
-    cpp_flags += ['-Wextra', '-Wno-unused-parameter']
-    cpp_flags += ['-pedantic', '-Wno-long-long']
+    cpp_flags += ['-Wextra']
+    cpp_flags += ['-Wno-unused-parameter']
     # XXX: Not including -Wold-style-cast due to optionparser.h.
 
     cxx_version = find_cxx_version(cxx)
     cxx_template_depth = 1024
 
     # Conditional flags:
+    if BOOST != 'system':
+        cpp_flags += ['-DBOOST_ALL_NO_LIB']
+
     if 'clang' in cxx_version:
+        cpp_flags += ['-pedantic']
         cpp_flags += ['-Wuninitialized']
         cpp_flags += ['-Wc++11-narrowing']
         cpp_flags += ['-ferror-limit=1']
         cpp_flags += ['-ftemplate-backtrace-limit=1']
+
+        # TODO: Only version 3.3+:
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
@@ -109,6 +118,8 @@ def get_cpp_flags(cxx):
         if not DEBUG:
             cpp_flags += ['-Wuninitialized'] # g++ doesn't support this without -O
 
+        # FIXME: Triggers "warning: non-standard suffix on floating constant [-pedantic]":
+        # cpp_flags += ['-pedantic']
         cpp_flags += ['-Wfatal-errors']
         cpp_flags += ['-Wstrict-null-sentinel']
 

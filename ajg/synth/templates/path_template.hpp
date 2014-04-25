@@ -56,7 +56,7 @@ struct path_template : base_template< Engine
 
     path_template(path_type const& path, paths_type const& directories = paths_type())
             : info_(locate_file(path, directories)) {
-        if (boolean_type const empty_file = this->info_.second == 0) {
+        if (this->info_.second == 0) { // Empty file.
             this->reset();
         }
         else {

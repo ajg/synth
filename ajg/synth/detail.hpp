@@ -7,6 +7,7 @@
 
 #include <ajg/synth/config.hpp>
 
+#include <cmath>
 #include <string>
 #include <limits>
 #include <cctype>
@@ -329,7 +330,7 @@ inline std::string get_type_name(std::type_info const& info) {
 template <class FloatingPoint>
 inline bool is_integer(FloatingPoint const& fp) {
     FloatingPoint integer_part;
-    return std::modf(fp, &integer_part) == FloatingPoint(0.0);
+    return (std::modf)(fp, &integer_part) == FloatingPoint(0.0);
 }
 
 }}} // namespace ajg::synth::detail

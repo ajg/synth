@@ -500,7 +500,7 @@ Future Work
        backtraces for expected exceptions in unit tests
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
    * Move tut-framework/ to external/
-   * Experiment with embedding a slim, modularized version of Boost and using it by default
+   * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
    * Remove all no-op tags (e.g. `cycle_as_silent_tag`)
    * Fold all variant tags into their main version (e.g. `load_from_tag`)

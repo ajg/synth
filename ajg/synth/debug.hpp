@@ -5,8 +5,8 @@
 #ifndef AJG_SYNTH_DEBUG_HPP_INCLUDED
 #define AJG_SYNTH_DEBUG_HPP_INCLUDED
 
-#ifdef NDEBUG
-#    error Debugging instrumentation with NDEBUG
+#if !AJG_SYNTH_DEBUG
+#    error Debugging instrumentation with debugging disabled (AJG_SYNTH_DEBUG)
 #endif
 
 #ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
@@ -25,10 +25,10 @@
 #include <sstream>
 #include <string>
 
-#if HAS_CXXABI_H
+#if AJG_SYNTH_HAS_CXXABI_H
 #include <cxxabi.h>
 #endif
-#if HAS_EXECINFO_H
+#if AJG_SYNTH_HAS_EXECINFO_H
 #include <execinfo.h>
 #endif
 
@@ -37,37 +37,32 @@
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 
+
 // TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
 
 namespace ajg {
 namespace synth {
 namespace debug {
+
 static std::size_t count = 0, level = 0;
 inline void dummy() { (void) count; (void) level; }
 
 ///
-/// AJG_CERR_LEAD, AJG_CERR_TRAIL
+/// AJG_DEBUG_CERR_, AJG_DEBUG_CERR_LEAD_, AJG_DEBUG_CERR_TRAIL_
 //      TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DEBUG_CERR       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
-#define AJG_DEBUG_CERR_LEAD  (AJG_DEBUG_CERR << std::boolalpha << "  in " << __FUNCTION__ << "():\t" << std::string(ajg::synth::debug::level * 4, ' '))
-#define AJG_DEBUG_CERR_TRAIL (std::endl)
+#define AJG_DEBUG_CERR_       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
+#define AJG_DEBUG_CERR_LEAD_  (AJG_DEBUG_CERR_ << std::boolalpha << "  in " << __FUNCTION__ << "():\t" \
+                                   << std::string(ajg::synth::debug::level * 4, ' '))
+#define AJG_DEBUG_CERR_TRAIL_ (std::endl)
 
 ///
 /// AJG_DUMP, AJG_PRINT
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DUMP(e)  (AJG_DEBUG_CERR_LEAD << #e << " = `" << (e) << "`" << AJG_DEBUG_CERR_TRAIL)
-#define AJG_PRINT(e) (AJG_DEBUG_CERR_LEAD << (e)                        << AJG_DEBUG_CERR_TRAIL)
-
-///
-/// AJG_FPRINTF:
-///     For some god-forsaken reason the compilers used by Travis CI can't find fprintf in
-///     namespace `std`; so this macro is a workaround until we find a solution.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define AJG_FPRINTF /*std::*/fprintf
+#define AJG_DUMP(e)  (AJG_DEBUG_CERR_LEAD_ << #e << " = `" << (e) << "`" << AJG_DEBUG_CERR_TRAIL_)
+#define AJG_PRINT(e) (AJG_DEBUG_CERR_LEAD_ << (e)                        << AJG_DEBUG_CERR_TRAIL_)
 
 ///
 /// abbreviate
@@ -113,7 +108,7 @@ inline std::string abbreviate(char const* s) {
 // TODO: Make this usable outside of debugging.
 inline std::string unmangle(std::string const& mangled) {
 
-#if HAS_CXXABI_H
+#if AJG_SYNTH_HAS_CXXABI_H
 
     // TODO[c++11]: unique_ptr.
     int status = 0;
@@ -124,7 +119,7 @@ inline std::string unmangle(std::string const& mangled) {
 
     return mangled;
 
-#endif // HAS_CXXABI_H
+#endif // AJG_SYNTH_HAS_CXXABI_H
 
 }
 
@@ -134,7 +129,7 @@ static boost::xpressive::sregex const signature = boost::xpressive::sregex::comp
 
 inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
-#if HAS_EXECINFO_H
+#if AJG_SYNTH_HAS_EXECINFO_H
 
     void* frames[AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT]; // TODO: Make a "thread-local static global".
     std::size_t const n = backtrace(frames, AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT);
@@ -160,21 +155,21 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
                     entry = match[2] + "(" + match[1] + ")";
                 }
 
-                AJG_FPRINTF(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
+                fprintf(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
             }
         }
     }
 
 #else
 
-    AJG_FPRINTF(file, "Backtrace unavailable\n");
+    fprintf(file, "Backtrace unavailable\n");
 
-#endif // HAS_EXECINFO_H
+#endif // AJG_SYNTH_HAS_EXECINFO_H
 
 }
 
 inline void signal_handler( int        signum
-#if HAS_SIGACTION
+#if AJG_SYNTH_HAS_SIGACTION_H
                           , siginfo_t* info
                           , void*      context
 #endif
@@ -191,7 +186,7 @@ inline void signal_handler( int        signum
     default:      name = "?";       break;
     }
 
-    AJG_FPRINTF(stderr, "Caught signal %d (%s)\n", signum, name);
+    fprintf(stderr, "Caught signal %d (%s)\n", signum, name);
     fprint_backtrace(stderr);
     std::exit(signum);
 }
@@ -200,31 +195,31 @@ inline void signal_handler( int        signum
 #undef AJG_SYNTH_THROW_EXCEPTION
 #endif
 
-#define AJG_SYNTH_THROW_EXCEPTION ajg::synth::debug::throw_exception
+#define AJG_SYNTH_THROW_EXCEPTION(e) (::ajg::synth::debug::throw_exception(e))
 
 template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
 inline void throw_exception(Exception const& e) {
     std::string const name = unmangle(typeid(Exception).name());
-    AJG_FPRINTF(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
+    fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
     fprint_backtrace(stderr, 1);
     boost::throw_exception(e);
 }
 
 inline void terminate_handler() {
-    AJG_FPRINTF(stderr, "Terminated\n");
+    fprintf(stderr, "Terminated\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }
 
 inline void unexpected_handler() {
-    AJG_FPRINTF(stderr, "Unexpected exception\n");
+    fprintf(stderr, "Unexpected exception\n");
     fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
 }
 
 inline void set_handlers() {
-#if HAS_SIGACTION
+#if AJG_SYNTH_HAS_SIGACTION_H
 
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO;
@@ -247,7 +242,7 @@ inline void set_handlers() {
     BOOST_VERIFY(signal(SIGFPE,  signal_handler) != SIG_ERR);
  // BOOST_VERIFY(signal(SIGPIPE, signal_handler) != SIG_ERR);
 
-#endif // HAS_SIGACTION
+#endif // AJG_SYNTH_HAS_SIGACTION_H
 
     std::set_terminate(terminate_handler);
     std::set_unexpected(unexpected_handler);
@@ -279,7 +274,7 @@ inline void assertion_failed( char const* const expression
                             , char const* const file
                             , long        const line
                             ) {
-    AJG_FPRINTF(stderr, "%s in %s() at %s:%ld\n", expression,
+    fprintf(stderr, "%s in %s() at %s:%ld\n", expression,
         ajg::synth::debug::abbreviate(function).c_str(), file, line);
     ajg::synth::debug::fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);
@@ -291,7 +286,7 @@ inline void assertion_failed_msg( char const* const expression
                                 , char const* const file
                                 , long        const line
                                 ) {
-    AJG_FPRINTF(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message,
+    fprintf(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message,
         ajg::synth::debug::abbreviate(function).c_str(), file, line);
     ajg::synth::debug::fprint_backtrace(stderr, 1);
     std::exit(EXIT_FAILURE);

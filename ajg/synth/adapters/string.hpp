@@ -77,7 +77,8 @@ struct adapter<Behavior, typename Behavior::char_type[N]>
             std::basic_string<typename Behavior::char_type>(value, N ? N - 1 : 0)) {}
 };
 
-#if defined(BOOST_MSVC)
+#if AJG_SYNTH_COMPILER_MSVC
+
     // MSVC seems to need these more specific specializations,
     // otherwise string literals specialize as char arrays.
     template <class Behavior, std::size_t N>
@@ -88,7 +89,8 @@ struct adapter<Behavior, typename Behavior::char_type[N]>
                 std::basic_string<char>(value, N ? N - 1 : 0)) {}
     };
 
-#    ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_NO_WCHAR_T
+
     template <class Behavior, std::size_t N>
     struct adapter<Behavior, wchar_t const[N]>
         : public adapter<Behavior, std::basic_string<wchar_t> > {
@@ -96,7 +98,8 @@ struct adapter<Behavior, typename Behavior::char_type[N]>
             adapter<Behavior, std::basic_string<wchar_t> >(
                 std::basic_string<wchar_t>(value, N ? N - 1 : 0)) {}
     };
-#    endif
+
+#endif
 #endif
 
 }} // namespace ajg::synth

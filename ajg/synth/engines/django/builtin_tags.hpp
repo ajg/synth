@@ -500,7 +500,7 @@ struct builtin_tags {
             if (reversed) {
                 value = value.reverse();
             }
-        #ifdef __GNUG__
+        #if AJG_SYNTH_COMPILER_GCC
             else {
                 // FIXME: This extra copy shouldn't be necessary but it fixes the odd invalid reads in Travis.
                 value = value.to_sequence();

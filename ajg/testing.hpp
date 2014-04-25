@@ -5,14 +5,19 @@
 #ifndef AJG_TESTING_HPP_INCLUDED
 #define AJG_TESTING_HPP_INCLUDED
 
+#include <ajg/synth/config.hpp>
+
 #include <string>
 #include <iostream>
 
 #include <boost/static_assert.hpp>
-#include <boost/preprocessor/stringize.hpp>
 
-#ifndef _MSC_VER
-#    pragma GCC diagnostic push
+#if AJG_SYNTH_COMPILER_CLANG
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wold-style-cast"
+#    pragma clang diagnostic ignored "-Wunused-function"
+#    pragma clang diagnostic ignored "-Wunused-variable"
+#elif AJG_SYNTH_COMPILER_GCC
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
 #    pragma GCC diagnostic ignored "-Wunused-function"
 #    pragma GCC diagnostic ignored "-Wunused-variable"
@@ -21,8 +26,8 @@
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-#ifndef _MSC_VER
-#    pragma GCC diagnostic pop
+#if AJG_SYNTH_COMPILER_CLANG
+#    pragma clang diagnostic pop
 #endif
 
 #define AJG_TESTING 1
@@ -38,32 +43,8 @@
 namespace ajg {
 namespace detail {
 
-#if AJG_SYNTH_UNUSED
-//
-// AJG_COUNTER, AJG_TESTING_BEGIN, TEST_NUMBER
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef __COUNTER__
-#define AJG_COUNTER __COUNTER__
-#else
-// Use line numbers in this case, which require a much higher
-// maximum template recursion depth from the compiler.
-#define AJG_COUNTER __LINE__
-#endif
-
-#define AJG_TESTING_BEGIN \
-  namespace ajg { \
-  namespace detail { \
-      static unsigned const counter_start = AJG_COUNTER; \
-  }} // namespace ajg::detail
-#define TEST_NUMBER() (AJG_COUNTER - ajg::detail::counter_start)
-
-#else
-
 #define AJG_TESTING_BEGIN
-#define TEST_NUMBER() __LINE__
-
-#endif
+#define TEST_NUMBER()
 
 //
 // check_test_number
@@ -98,8 +79,8 @@ struct check_test_number {
 
 #define unit_test(name) \
     namespace tut { template<> template<> \
-    void group_type::object::test<ajg::detail::check_test_number<TEST_NUMBER()>::value>() { \
-        set_test_name(#name ":" BOOST_PP_STRINGIZE(__LINE__)); \
+    void group_type::object::test<ajg::detail::check_test_number<__LINE__>::value>() { \
+        set_test_name(#name); \
         AJG_DEBUG_RESET_COUNT(); \
 
 // NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)

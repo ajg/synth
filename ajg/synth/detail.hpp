@@ -41,56 +41,6 @@ namespace detail {
 using boost::throw_exception;
 
 //
-// AJG_SYNTH_UNREACHABLE:
-//     Wrapper around BOOST_ASSERT that also invokes __assume on MSVC,
-//     which (a) prevents warning C4715 and (b) eliminates wasteful code.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_MSC_VER)
-#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (__assume(0)))
-#elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 405) // GCC 4.5+
-#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (__builtin_unreachable()))
-#else
-#    define AJG_SYNTH_UNREACHABLE (BOOST_ASSERT(0), (std::terminate()))
-#endif
-
-//
-// AJG_SYNTH_IF_WINDOWS:
-//     Picks the first version for Windows environments, otherwise the second.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_WIN32) || defined(_WIN64)
-#    define AJG_SYNTH_IF_WINDOWS(a, b) a
-#else
-#    define AJG_SYNTH_IF_WINDOWS(a, b) b
-#endif
-
-//
-// AJG_SYNTH_IF_MSVC:
-//     Picks the first version for Microsoft compilers, otherwise the second.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if defined(_MSC_VER)
-#    define AJG_SYNTH_IF_MSVC(a, b) a
-#else
-#    define AJG_SYNTH_IF_MSVC(a, b) b
-#endif
-
-//
-// AJG_SYNTH_THROW:
-//     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
-//     types) MSVC won't get it through its head that throw_exception doesn't return, even with
-//     __declspec(noreturn) which in turns triggers warning C4715 or error C4716.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifndef AJG_SYNTH_THROW_EXCEPTION
-#define AJG_SYNTH_THROW_EXCEPTION boost::throw_exception
-#endif
-
-#define AJG_SYNTH_THROW(e) \
-    AJG_SYNTH_IF_MSVC((AJG_SYNTH_THROW_EXCEPTION(e), AJG_SYNTH_UNREACHABLE), AJG_SYNTH_THROW_EXCEPTION(e))
-
-//
 // nonconstructible:
 //     Utility class to prevent instantiations of a class meant to be 'static.'
 ////////////////////////////////////////////////////////////////////////////////////////////////////

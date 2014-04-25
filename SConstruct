@@ -7,8 +7,13 @@ import re
 import subprocess
 import sys
 
+# TODO: Capitalize to convey constant-ness.
 debug = int(ARGUMENTS.get('debug', 0))
 group = str(ARGUMENTS.get('group', ''))
+boost = str(ARGUMENTS.get('boost', 'system')) # TODO: Make 'local' the default.
+
+if boost not in ('local', 'system'):
+    sys.exit('Argument `boost` must be `local` or `system`')
 
 def run():
     cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
@@ -16,17 +21,17 @@ def run():
     create_targets(env)
 
 def make_environment(cxx):
-    # TODO: VariantDir('build' / 'stage', '?', duplicate=0)
     return Environment(
         CXX      = cxx,
-        CPPPATH  = ['.'],
+        CPPPATH  = get_cpp_path(),
         CPPFLAGS = get_cpp_flags(cxx),
+        # TODO: VariantDir('build' / 'stage', '?', duplicate=0)
     )
 
 def create_targets(env):
-    test_harness = env.Clone()
-    test_harness.Append(CPPPATH = ['tests/tut-framework/include'])
-    test_harness.Program(
+    harness = env.Clone()
+    harness.Append(CPPPATH = ['tests/tut-framework/include'])
+    harness.Program(
         target = 'tests/harness.out',
         source = ['tests/harness.cpp'] + find_test_sources(),
     )
@@ -37,13 +42,13 @@ def create_targets(env):
         source = ['examples/simple_ssi.cpp', 'examples/simple_ssi_wide.cpp'],
     )
 
-    command_line_tool = env.Clone()
-    command_line_tool.Program(
+    tool = env.Clone()
+    tool.Program(
         target = 'synth',
         source = ['ajg/synth/bindings/command_line/tool.cpp'],
     )
 
-    return [test_harness, examples, command_line_tool]
+    return [harness, examples, tool]
 
 def find_test_sources():
     if group:
@@ -58,18 +63,24 @@ def find_cxx_version(cxx):
     except OSError as e:
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)
 
+def get_cpp_path():
+    cpp_path = ['.']
+    if boost == 'local':
+        cpp_path += ['external/boost']
+    return cpp_path
+
 def get_cpp_flags(cxx):
     cpp_flags = []
 
     # Common flags:
     cpp_flags += ['-Wall']
-    cpp_flags += ['-Wold-style-cast']
     cpp_flags += ['-Woverloaded-virtual']
     cpp_flags += ['-Wsign-promo']
     # TODO: cpp_flags += ['-Wsurprising']
     # TODO: cpp_flags += ['-Weffc++']
     cpp_flags += ['-Wextra', '-Wno-unused-parameter']
     cpp_flags += ['-pedantic', '-Wno-long-long']
+    # XXX: Not including -Wold-style-cast due to optionparser.h.
 
     cxx_version = find_cxx_version(cxx)
     cxx_template_depth = 1024
@@ -82,6 +93,11 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-ftemplate-backtrace-limit=1']
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+
+        if boost != 'system':
+            cpp_flags += ['-Wno-newline-eof']
+            cpp_flags += ['-Wno-nested-anon-types']
+            cpp_flags += ['-Wno-language-extension-token']
 
     elif 'g++' in cxx_version or 'gcc' in cxx_version:
         if not debug:
@@ -109,7 +125,6 @@ def get_cpp_flags(cxx):
                 cpp_flags += ['-Wnarrowing']
                 cpp_flags += ['-fmax-errors=1']
                 cpp_flags += ['-ftemplate-backtrace-limit=1']
-
 
     if debug:
         cpp_flags += ['-g'] # '-fstack-protector-all'

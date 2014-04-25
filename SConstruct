@@ -7,13 +7,12 @@ import re
 import subprocess
 import sys
 
-# TODO: Capitalize to convey constant-ness.
-debug = int(ARGUMENTS.get('debug', 0))
-group = str(ARGUMENTS.get('group', ''))
-boost = str(ARGUMENTS.get('boost', 'system')) # TODO: Make 'local' the default.
+DEBUG = int(ARGUMENTS.get('debug', 0))
+GROUP = str(ARGUMENTS.get('group', ''))
+BOOST = str(ARGUMENTS.get('boost', 'auto'))
 
-if boost not in ('local', 'system'):
-    sys.exit('Argument `boost` must be `local` or `system`')
+if BOOST not in ('auto', 'local', 'system'):
+    sys.exit('Argument `boost` must be `auto`, `local` or `system`')
 
 def run():
     cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
@@ -51,8 +50,8 @@ def create_targets(env):
     return [harness, examples, tool]
 
 def find_test_sources():
-    if group:
-        return ['tests/groups/%s.cpp' % group]
+    if GROUP:
+        return ['tests/groups/%s.cpp' % GROUP]
     else:
         return Glob('tests/groups/*.cpp')
 
@@ -65,8 +64,15 @@ def find_cxx_version(cxx):
 
 def get_cpp_path():
     cpp_path = ['.']
-    if boost == 'local':
+
+    if BOOST == 'local':
         cpp_path += ['external/boost']
+    elif BOOST == 'auto':
+        # TODO: Use system if available, otherwise local?
+        pass
+    elif BOOST == 'system':
+        pass
+
     return cpp_path
 
 def get_cpp_flags(cxx):
@@ -94,13 +100,13 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
         cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
 
-        if boost != 'system':
+        if BOOST != 'system':
             cpp_flags += ['-Wno-newline-eof']
             cpp_flags += ['-Wno-nested-anon-types']
             cpp_flags += ['-Wno-language-extension-token']
 
     elif 'g++' in cxx_version or 'gcc' in cxx_version:
-        if not debug:
+        if not DEBUG:
             cpp_flags += ['-Wuninitialized'] # g++ doesn't support this without -O
 
         cpp_flags += ['-Wfatal-errors']
@@ -126,7 +132,7 @@ def get_cpp_flags(cxx):
                 cpp_flags += ['-fmax-errors=1']
                 cpp_flags += ['-ftemplate-backtrace-limit=1']
 
-    if debug:
+    if DEBUG:
         cpp_flags += ['-g'] # '-fstack-protector-all'
     else:
         cpp_flags += ['-O3', '-DNDEBUG']

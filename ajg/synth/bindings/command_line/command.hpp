@@ -79,7 +79,7 @@ struct command {
             // ("output,o",      AJG_ARG("file", string),  "the destination (default: '-')")       // TODO
             // ("source,s",      AJG_ARG("text", string),  "inline alternative to input file")     // TODO
             // ("format,f",      AJG_ARG("name", string),  "the context's format: {ini,json,xml}") // TODO
-            , {}
+            , {0, 0, 0, 0, 0, 0}
             };
 
         size_type const n = sizeof(descriptors) / sizeof(descriptors[0]);

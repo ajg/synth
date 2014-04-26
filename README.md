@@ -89,21 +89,22 @@ Reference
 Installation
 ------------
 
-### Using a System Package Manager
+### Via System Package Manager
 
-#### [Homebrew](http://brew.sh/):
+#### Using [Homebrew](http://brew.sh/):
 
-    brew install https://github.com/ajg/synth/blob/master/synth.rb # Append `--with-python` to include the Python module.
+    brew install https://github.com/ajg/synth/blob/master/synth.rb
+    # Note that you must append `--with-python` to install the Python module.
 
 (Support for other system package managers like Apt or Yum is [welcome](#future-work).)
 
-### Using a Python Package Manager
+### Via Python Package Manager
 
-#### [Pip](http://www.pip-installer.org/):
+#### Using [Pip](http://www.pip-installer.org/):
 
     pip install synth # Prefix with `sudo` if needed.
 
-#### [Easy Install](https://wiki.python.org/moin/EasyInstall):
+#### Using [Easy Install](https://wiki.python.org/moin/EasyInstall):
 
     easy_install synth # Prefix with `sudo` if needed.
 

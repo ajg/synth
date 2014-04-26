@@ -121,7 +121,7 @@ Installation
    - A system to build it with ([SCons](http://scons.org) or Visual Studio)
    - A C++ compiler (`clang`, `gcc`, `msvc`, etc.) In particular, Synth is known to compile with:
      * `gcc` versions `4.2.1`, `4.6.3` and `4.7.2`
-     * `clang` version `3.0` and `3.3`
+     * `clang` versions `3.0` and `3.3`
      * `msvc` version `12.0` (VS2013)
  2. Get the source (e.g. the latest, as shown here):
 
@@ -485,8 +485,8 @@ Future Work
  - Adapters:
    * Adapter for `boost::tribool`
    * Adapters for `boost::fusion` sequences
-   * Adapter for `intrusive_ptr`
-   * Support for `enable_shared_from_this`
+   * Adapter for `boost::intrusive_ptr`
+   * Support for `boost::enable_shared_from_this`
    * [v2] Adapters for `c++11` types
    * [v2] Adapters for `c++14` types
 

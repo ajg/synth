@@ -173,16 +173,20 @@ Components
  - `complex`
    * `std::complex`
  - `container`
-   * `std::deque`
-   * `std::list`
+   * `deque`
+     + `std::deque`
+   * `list`
+     + `std::list`
    * `map`
      + `std::map`
      + `std::multimap`
    * `set`
      + `std::set`
      + `std::multiset`
-   * `std::stack`
-   * `std::vector`
+   * `stack`
+     + `std::stack`
+   * `vector`
+     + `std::vector`
  - `memory`
    * `std::auto_ptr`
  - `none`

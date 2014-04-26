@@ -89,21 +89,29 @@ Reference
 Installation
 ------------
 
-### Using [Homebrew](http://brew.sh/):
+### Using a System Package Manager
+
+#### [Homebrew](http://brew.sh/):
 
     brew install https://github.com/ajg/synth/blob/master/synth.rb # Append `--with-python` to include the Python module.
 
-### Using Pip (Python-specific):
+(Support for other system package managers like Apt or Yum is [welcome](#future-work).)
+
+### Using a Python Package Manager
+
+#### [Pip](http://www.pip-installer.org/):
 
     pip install synth # Prefix with `sudo` if needed.
 
-### Using Easy Install (Python-specific):
+#### [Easy Install](https://wiki.python.org/moin/EasyInstall):
 
     easy_install synth # Prefix with `sudo` if needed.
 
+#### Manually
+
 ### From Binaries:
 
-(Pre-built binary releases for some platforms are [in the works](#future-work).)
+(Pre-built binary releases for common platforms are [welcome](#future-work).)
 
 ### From Source:
 
@@ -408,6 +416,9 @@ Future Work
    * Create Visual Studio 2012 solution & projects
 
  - Distribution:
+   * RPM
+   * Apt package
+   * Yum package
    * Pre-built Darwin binaries
    * Pre-built Windows binaries
 

@@ -101,11 +101,11 @@ Installation
 
 (A formula is [planned](#future-work).)
 
-### From binaries:
+### From Binaries:
 
 (Pre-built binary releases for some platforms are [in the works](#future-work).)
 
-### From source:
+### From Source:
 
  1. Ensure you have the following:
    - A tool to get the source (`git`, `curl`, a browser, etc.)
@@ -114,7 +114,7 @@ Installation
      * `gcc` versions `4.2.1`, `4.6.3` and `4.7.2`
      * `clang` version `3.0` and `3.3`
      * `msvc` version `12.0` (VS2013)
- 2. Get the source:
+ 2. Get the source (e.g. the latest, as shown here):
 
         git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
 
@@ -126,7 +126,7 @@ Installation
 
  4. *Optionally*, build (and install) the [Python module](#python):
 
-        python setup.py install # Add `sudo` as needed.
+        python setup.py install # Prefix with `sudo` if needed.
 
 
 <!-- TODO: Figure out how to include submodules in tarballs & zipballs.
@@ -531,7 +531,7 @@ Infrequently Asked Questions
 
  - Q: How can I install a system-wide version of [Boost](http://boost.org)?
    * A: Here are some suggestions:
-     + Using Homebrew: `brew install boost --build-from-source`
+     + Using Homebrew: `brew install boost` (Append `--with-python` for Boost.Python support.)
      + Using Apt: `sudo apt-get install libboost-all-dev`
      + Using Yum: `sudo yum install boost-devel`
      + On Windows, try http://sourceforge.net/projects/boost/files/boost-binaries/

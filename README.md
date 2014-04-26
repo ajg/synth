@@ -449,14 +449,14 @@ Future Work
      + [v1+] Allow using arbitrary programs as tags
      + [v1+] Allow using arbitrary programs as filters
    * Python:
-     + Turn optional arguments to synth.Template into kwargs
+     + [v1] Set docstrings where appropriate
+     + [v1] Turn optional arguments to synth.Template into kwargs
+     + [v1+] Support for Python 3
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
      + Support for non-simple custom tags via token and parser objects
-         a. Custom inclusion tags
-         b. Custom assignment tags
-         c. Custom tags with arbitrary blocks
-     + Set docstrings where appropriate
-     + Support for Python 3
+         1. Custom inclusion tags
+         2. Custom assignment tags
+         3. Custom tags with arbitrary blocks
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
      + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)

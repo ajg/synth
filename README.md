@@ -93,7 +93,7 @@ Installation
 
 #### Using [Homebrew](http://brew.sh/):
 
-    brew install https://github.com/ajg/synth/blob/master/synth.rb
+    brew install https://raw.github.com/ajg/synth/master/synth.rb
     # Note that you must append `--with-python` to install the Python module.
 
 (Support for other system package managers like Apt or Yum is [welcome](#future-work).)

@@ -1,3 +1,7 @@
 [submodule "tests/tut-framework"]
     path = tests/tut-framework
     url = https://github.com/mrzechonek/tut-framework
+[submodule "external/boost"]
+	path = external/boost
+	url = https://github.com/ajg/external-boost
+	branch = 1_55_0

@@ -20,7 +20,7 @@ if BOOST not in ('auto', 'local', 'system'):
 
 def get_boost_path():
     if BOOST in ('auto', 'local'):
-        return 'external/boost-1_55_0'
+        return 'external/boost'
     elif BOOST == 'system':
         sys.exit('Not implemented: `system` boost')
     else:
@@ -185,7 +185,7 @@ def get_define_macros():
 
 def get_undef_macros():
     undefines = []
-    
+
     if DEBUG:
         defines += ['NDEBUG']
 
@@ -203,7 +203,7 @@ def get_sources():
 
     # Add last to trigger fast compilation failures.
     sources += ['ajg/synth/bindings/python/module.cpp']
-    return sources 
+    return sources
 
 def get_data_files():
     data_files = []

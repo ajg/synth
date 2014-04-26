@@ -66,10 +66,10 @@ def get_cpp_path():
     cpp_path = ['.']
 
     if BOOST == 'local':
-        cpp_path += ['external/boost-1_55_0']
+        cpp_path += ['external/boost']
     elif BOOST == 'auto':
         # TODO: Use system if available, otherwise local?
-        cpp_path += ['external/boost-1_55_0']
+        cpp_path += ['external/boost']
     elif BOOST == 'system':
         pass
 

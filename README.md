@@ -428,7 +428,7 @@ Future Work
    * Create `conf.py` (et al.) to enable ReadTheDocs
 
  - Testing:
-   * Rewrite the majority of unit tests as a set of .in/.out files
+   * Rewrite the majority of unit tests as a set of `.in`/`.out` files
    * Add exhaustive date/time formatting tests
    * Add way to specify expected failures; re-enable commented out tests
 

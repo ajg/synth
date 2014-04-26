@@ -517,7 +517,7 @@ Infrequently Asked Questions
 ----------------------------
 
  - Q: Can I use a version of [Boost](http://boost.org) other than the one bundled?
-   * A: Yes, it is, though note that unless you're already using Boost in your project, there is usually no good reason to; anyway:
+   * A: Yes, you can, though note that unless you're already using Boost in your project, there is usually no good reason to; anyway:
      + On most systems, you can build Synth with the system's Boost by passing `boost=system` to `scons`.
      + On Windows, you'll need to edit the project file(s) in Visual Studio and set the include and library directories to point to the existing Boost installation.
      + The [Python module](#python) does not support this option yet.

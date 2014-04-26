@@ -108,13 +108,13 @@ Installation
 
     easy_install synth # Prefix with `sudo` if needed.
 
-#### Manually
+### Manually
 
-### From Binaries:
+#### From Binaries:
 
 (Pre-built binary releases for common platforms are [welcome](#future-work).)
 
-### From Source:
+#### From Source:
 
  1. Ensure you have the following:
    - A tool to get the source (`git`, `curl`, a browser, etc.)

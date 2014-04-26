@@ -87,8 +87,8 @@ def find_synth_version():
     patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
     return (major, minor, patch)
 
-# TODO: For reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++ ones,
-#       to which it doesn't apply, which causes GCC to print out a warning while building.
+# TODO: For some reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++
+#       ones, to which it doesn't apply, which causes GCC to print out a warning while building.
 def initialize_compiler(platform):
     if not DEBUG:
         # Don't produce debug symbols when debug is off.
@@ -205,6 +205,10 @@ def get_sources():
     sources += ['ajg/synth/bindings/python/module.cpp']
     return sources
 
+# NOTE: distutils does not recognize the .hpp extension for headers so they have to be included as
+#       data files, otherwise they won't show up in the MANIFEST and build_ext will fail (one known
+#       "workaround", which is to deal with MANIFEST.in manually, sounds like a first-class ticket
+#       to an asylum.) Also, sadly, the `depends` argument to `Extension` is, essentially, useless.
 def get_data_files():
     data_files = []
 

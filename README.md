@@ -1,7 +1,7 @@
 synth
 =====
 
-A Powerful C++ Templating Framework with a [command-line](#command-line) tool and [Python](#python) module, written by [Alvaro J. Genial](http://alva.ro).
+A Powerful C++ Templating Framework with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
 
 [![Build Status](https://travis-ci.org/ajg/synth.png?branch=master)](https://travis-ci.org/ajg/synth)
 

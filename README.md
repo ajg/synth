@@ -89,17 +89,17 @@ Reference
 Installation
 ------------
 
-### Using Pip:
+### Using [Homebrew](http://brew.sh/):
 
-    pip install synth # Add `sudo` as needed.
+    brew install https://github.com/ajg/synth/blob/master/synth.rb # Append `--with-python` to include the Python module.
 
-### Using Easy Install:
+### Using Pip (Python-specific):
 
-    easy_install synth # Add `sudo` as needed.
+    pip install synth # Prefix with `sudo` if needed.
 
-### Using Homebrew:
+### Using Easy Install (Python-specific):
 
-(A formula is [planned](#future-work).)
+    easy_install synth # Prefix with `sudo` if needed.
 
 ### From Binaries:
 
@@ -410,7 +410,6 @@ Future Work
  - Distribution:
    * Pre-built Darwin binaries
    * Pre-built Windows binaries
-   * [Homebrew](http://brew.sh/) formula
 
  - Documentation:
    * Produce Boost-compatible documentation

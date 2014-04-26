@@ -76,15 +76,15 @@ Reference
 
 ### Command-line
 
-USAGE: synth [OPTIONS]
-Options:
-  -h,      --help              print help message
-  -v,      --version           print library version
-  -c file, --context=file      contextual data             *.{ini,json,xml}
-  -e name, --engine=name       template engine             {django,ssi,tmpl}
-  -a,      --autoescape[=bool] automatically escape values (default: 'true')
-  -d path, --directory=path    template location(s)        (default: '.')
-  -r text, --replacement=text  replaces missing values     (default: '')
+    USAGE: synth [OPTIONS]
+    Options:
+      -h,      --help              print help message
+      -v,      --version           print library version
+      -c file, --context=file      contextual data             *.{ini,json,xml}
+      -e name, --engine=name       template engine             {django,ssi,tmpl}
+      -a,      --autoescape[=bool] automatically escape values (default: 'true')
+      -d path, --directory=path    template location(s)        (default: '.')
+      -r text, --replacement=text  replaces missing values     (default: '')
 
 Installation
 ------------
@@ -459,6 +459,8 @@ Future Work
      + Consider using hex character entities (vs. named) to match Django's engine
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
+   * TMPL:
+     + Consider renaming `html`
    * Other:
      + Create `ctpp` engine
      + [v1+] Create `jinja2` engine

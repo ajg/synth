@@ -10,12 +10,14 @@ class Synth < Formula
   depends_on "python" => :optional
   depends_on "boost" if build.without? "python"
   depends_on "boost"  => "with-python" if build.with? "python"
-  # TODO: boost option {auto,local,system}
+  # TODO: debug bool option
+  # TODO: boost enum option {auto,local,system}
 
   def install
     scons "synth", "debug=0", "boost=system"
     bin.install "synth"
     # TODO: include.install "ajg/synth.hpp", Dir["ajg/**/synth.hpp"]
+    # See http://stackoverflow.com/q/23307205/1272391
 
     if build.with? "python"
       system "python", "setup.py", "install", "--prefix=#{prefix}"

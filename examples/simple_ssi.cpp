@@ -9,13 +9,13 @@ typedef synth::engines::ssi::engine<traits_type>            engine_type;
 typedef synth::templates::string_template<engine_type>      template_type;
 
 int main() {
-    template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
-    template_type::context_type ctx;
-    ctx["user"] = "Dolph Lundgren";
+    template_type const t("Howdy, <!--#echo var=\"user\" -->!");
+    template_type::context_type c;
+    c["user"] = "Dolph Lundgren";
 
     // Render to different destinations:
-    tpl.render_to_stream(std::cout);
-    tpl.render_to_path("greeting.txt", ctx);
-    std::cout << tpl.render_to_string(ctx);
+    t.render_to_stream(std::cout);
+    t.render_to_path("greeting.txt", c);
+    std::cout << t.render_to_string(c);
     return 0;
 }

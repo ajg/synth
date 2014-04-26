@@ -26,10 +26,10 @@ Examples
 ### Command-line
 
 ```shell
-echo '{"user": "Dolph Lundgren"}' > 'ctx.json'
-echo 'Howdy, {{ user }}!' > 'tpl.txt'
+echo '{"user": "Dolph Lundgren"}' > 'context.json'
+echo 'Howdy, {{ user }}!' > 'template.txt'
 
-cat tpl.txt | ./synth -e django -c ctx.json
+cat template.txt | ./synth -e django -c context.json
 ```
 
 ### Python
@@ -38,12 +38,12 @@ cat tpl.txt | ./synth -e django -c ctx.json
 import synth, sys
 
 def simple_tmpl_example():
-    tpl = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
-    ctx = {'user': 'Dolph Lundgren'}
+    t = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
+    c = {'user': 'Dolph Lundgren'}
 
-    tpl.render_to_path("greeting.txt", ctx) # or, e.g.:
-    tpl.render_to_file(sys.stdout, ctx) # or, e.g.:
-    print tpl.render_to_string(ctx)
+    t.render_to_path("greeting.txt", c) # or, e.g.:
+    t.render_to_file(sys.stdout, c) # or, e.g.:
+    print t.render_to_string(c)
 ```
 
 ### [C++](./examples/simple_ssi.cpp)
@@ -59,14 +59,14 @@ typedef synth::engines::ssi::engine<traits_type>            engine_type;
 typedef synth::templates::string_template<engine_type>      template_type;
 
 int main() {
-    template_type const tpl("Howdy, <!--#echo var=\"user\" -->!");
-    template_type::context_type ctx;
-    ctx["user"] = "Dolph Lundgren";
+    template_type const t("Howdy, <!--#echo var=\"user\" -->!");
+    template_type::context_type c;
+    c["user"] = "Dolph Lundgren";
 
     // Render to different destinations:
-    tpl.render_to_stream(std::cout);
-    tpl.render_to_path("greeting.txt", ctx);
-    std::cout << tpl.render_to_string(ctx);
+    t.render_to_stream(std::cout);
+    t.render_to_path("greeting.txt", c);
+    std::cout << t.render_to_string(c);
     return 0;
 }
 ```

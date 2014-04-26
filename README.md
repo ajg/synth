@@ -417,11 +417,13 @@ Future Work
    * Create Visual Studio 2012 solution & projects
 
  - Distribution:
-   * RPM
+   * RPM package
    * Apt package
    * Yum package
-   * Pre-built Darwin binaries
-   * Pre-built Windows binaries
+   * MacPort support
+   * Standalone pre-built Darwin binaries
+   * Standalone pre-built Windows binaries
+   * MSI installer
 
  - Documentation:
    * Produce Boost-compatible documentation

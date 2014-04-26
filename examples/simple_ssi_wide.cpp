@@ -11,14 +11,14 @@ typedef synth::engines::ssi::engine<traits_type>            engine_type;
 typedef synth::templates::string_template<engine_type>      template_type;
 
 int wmain() {
-    template_type const tpl(L"Howdy, <!--#echo var=\"user\" -->!");
-    template_type::context_type ctx;
-    ctx[L"user"] = L"Dolph Lundgren";
+    template_type const t(L"Howdy, <!--#echo var=\"user\" -->!");
+    template_type::context_type c;
+    c[L"user"] = L"Dolph Lundgren";
 
     // Render to different destinations:
-    tpl.render_to_stream(std::wcout);
-    tpl.render_to_path(L"greeting.txt", ctx);
-    std::wcout << tpl.render_to_string(ctx);
+    t.render_to_stream(std::wcout);
+    t.render_to_path(L"greeting.txt", c);
+    std::wcout << t.render_to_string(c);
     return 0;
 }
 

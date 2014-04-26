@@ -197,11 +197,11 @@ Components
    * `int unsigned`
    * `long`
    * `long unsigned`
-   * `wchar_t` (When available.)
-   * `long long` (When available.)
-   * `long long unsigned` (When available.)
-   * `__int64` (MSVC-only.)
-   * `__int64 unsigned` (MSVC-only.)
+   * `wchar_t`            (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
+   * `long long`          (When available, unless disabled by `AJG_SYNTH_NO_LONG_LONG`)
+   * `long long unsigned` (When available, unless disabled by `AJG_SYNTH_NO_LONG_LONG`)
+   * `__int64`            (`msvc`-only.)
+   * `__int64 unsigned`   (`msvc`-only.)
    * `float`
    * `double`
    * `long double`
@@ -224,8 +224,8 @@ Components
    * `std::basic_string`
    * `char*`
    * `char[N]`
-   * `wchar_t*` (When available.)
-   * `wchar_t[N]` (When available.)
+   * `wchar_t*`   (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
+   * `wchar_t[N]` (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
  - `utility`
    * `std::pair`
  - `variant`

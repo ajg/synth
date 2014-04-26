@@ -66,7 +66,7 @@ struct command {
 
     static void run(int const argc, char_type const* argv[]) {
         static descriptor_type const descriptors[] =
-            { {unknown_option,     0, "",  ""    ,        param_illegal,  "USAGE: synth [OPTIONS]\nOptions:"}
+            { {unknown_option,     0, "",  ""    ,        param_illegal,  "USAGE: synth [OPTIONS...]\nOptions:"}
             , {help_option,        0, "h", "help",        param_illegal,  "  -h,      --help              print help message"}
             , {version_option,     0, "v", "version",     param_illegal,  "  -v,      --version           print library version"}
             , {context_option,     0, "c", "context",     param_required, "  -c file, --context=file      contextual data             *.{ini,json,xml}"}

@@ -76,7 +76,7 @@ Reference
 
 ### Command-line
 
-    USAGE: synth [OPTIONS]
+    USAGE: synth [OPTIONS...]
     Options:
       -h,      --help              print help message
       -v,      --version           print library version

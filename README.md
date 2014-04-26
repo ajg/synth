@@ -107,21 +107,15 @@ Installation
 ### From source:
 
  1. Ensure you have the following:
-   - A tool to get the source (`git`, `curl`, etc.)
+   - A tool to get the source (`git`, `curl`, a browser, etc.)
    - A system to build it with ([SCons](http://scons.org) or Visual Studio)
    - A C++ compiler (`clang`, `gcc`, `msvc`, etc.) In particular, Synth is known to compile with:
      * `gcc` versions `4.2.1`, `4.6.3` and `4.7.2`
      * `clang` version `3.0` and `3.3`
      * `msvc` version `12.0` (VS2013)
+ 2. Get the source:
 
- 2. Get the source (pick your poison):
-      - With Git:
-
-            git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
-      - With Curl:
-
-            curl -L https://github.com/ajg/synth/archive/master.tar.gz | tar xz && cd synth-master
-      - Otherwise, try using https://github.com/ajg/synth/archive/master.zip
+        git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
 
  3. *Optionally*, build the [command-line tool](#command-line):
 
@@ -132,6 +126,18 @@ Installation
  4. *Optionally*, build (and install) the [Python module](#python):
 
         python setup.py install # Add `sudo` as needed.
+
+
+<!-- TODO: Figure out how to include submodules in tarballs & zipballs.
+ 2. Get the source (pick your poison):
+      - With Git:
+
+            git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
+      - With Curl:
+
+            curl -L https://github.com/ajg/synth/archive/master.tar.gz | tar xz && cd synth-master
+      - Otherwise, try using https://github.com/ajg/synth/archive/master.zip
+-->
 
 Components
 ----------

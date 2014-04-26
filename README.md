@@ -76,14 +76,15 @@ Reference
 
 ### Command-line
 
-    synth [FLAGS...]
-      -h [ --help ]             print help message
-      -v [ --version ]          print library version
-      -c [ --context ] file     the data: *.{ini,json,xml}
-      -e [ --engine ] name      template engine: {django,ssi,tmpl}
-      -a [ --autoescape ] bool  automatically escape values (default: 'true')
-      -d [ --directories ] path template lookup directories (default: '.')
-      -r [ --replacement ] text replaces missing values (default: '')
+USAGE: synth [OPTIONS]
+Options:
+  -h,      --help              print help message
+  -v,      --version           print library version
+  -c file, --context=file      contextual data             *.{ini,json,xml}
+  -e name, --engine=name       template engine             {django,ssi,tmpl}
+  -a,      --autoescape[=bool] automatically escape values (default: 'true')
+  -d path, --directory=path    template location(s)        (default: '.')
+  -r text, --replacement=text  replaces missing values     (default: '')
 
 Installation
 ------------

@@ -56,21 +56,23 @@ inline void dummy() { (void) count; (void) level; }
 #endif
 
 ///
-/// AJG_DEBUG_CERR_, AJG_DEBUG_CERR_LEAD_, AJG_DEBUG_CERR_TRAIL_
+/// AJG_SYNTH_DEBUG_LOG_LEAD, AJG_SYNTH_DEBUG_LOG_TRAIL
 ///     TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DEBUG_CERR_       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
-#define AJG_DEBUG_CERR_LEAD_  (AJG_DEBUG_CERR_ << std::boolalpha << "  in " << __FUNCTION__ << "():\t" \
-                                   << std::string(ajg::synth::debug::level * 4, ' '))
-#define AJG_DEBUG_CERR_TRAIL_ (std::endl)
+#define AJG_SYNTH_DEBUG_LOG_TRAIL (std::endl)
+#define AJG_SYNTH_DEBUG_LOG_LEAD  ( \
+    (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl) << std::boolalpha \
+    << "  in " << __FUNCTION__ << "():\t" \
+    << std::string(ajg::synth::debug::level * 4, ' ') \
+)
 
 ///
-/// AJG_DUMP, AJG_PRINT
+/// DUMP, PRINT
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_DUMP(e)  (AJG_DEBUG_CERR_LEAD_ << #e << " = `" << (e) << "`" << AJG_DEBUG_CERR_TRAIL_)
-#define AJG_PRINT(e) (AJG_DEBUG_CERR_LEAD_ << (e)                        << AJG_DEBUG_CERR_TRAIL_)
+#define DUMP(e)  (AJG_SYNTH_DEBUG_LOG_LEAD << #e << " = `" << (e) << "`" << AJG_SYNTH_DEBUG_LOG_TRAIL)
+#define PRINT(e) (AJG_SYNTH_DEBUG_LOG_LEAD << (e)                        << AJG_SYNTH_DEBUG_LOG_TRAIL)
 
 ///
 /// abbreviate

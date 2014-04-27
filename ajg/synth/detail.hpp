@@ -21,9 +21,11 @@
 #include <stdexcept>
 #include <sys/stat.h>
 
-#ifndef _WIN32
-    #include <unistd.h>
-    extern char **environ;
+#if AJG_SYNTH_IS_PLATFORM_WINDOWS
+#    include <direct.h>
+#else
+#    include <unistd.h>
+extern char **environ;
 #endif
 
 #include <boost/assert.hpp>
@@ -114,6 +116,19 @@ inline struct stat stat_file(std::string const& path) {
     return stats;
 }
 
+//
+// get_current_working_directory
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline std::string get_current_working_directory() {
+    char buffer[AJG_SYNTH_IF_MSVC(MAX_PATH, PATH_MAX)] = {};
+    return AJG_SYNTH_IF_MSVC(_getcwd, getcwd)(buffer, sizeof(buffer));
+}
+
+//
+// PIPE_BUF
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #ifndef PIPE_BUF
 #ifdef BUFSIZ
 #define PIPE_BUF BUFSIZ
@@ -125,8 +140,8 @@ inline struct stat stat_file(std::string const& path) {
 //
 // read_file:
 //     Slurps a whole file directly into a stream, using a buffer.
+//     TODO: Rename read_path?
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 template <class Stream> // TODO[c++11]: Make buffer_size a (defaulted) template parameter.
 void read_file(FILE *const file, Stream& stream) {
@@ -139,6 +154,22 @@ void read_file(FILE *const file, Stream& stream) {
         stream.write(buffer, items);
     }
 }
+
+//
+// read_path_to_string:
+//     Slurps a whole file directly into string.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Char> // TODO: Move close to detail::read_file.
+inline std::basic_string<Char> read_path_to_string(char const* const path) {
+    FILE* const file = (std::fopen)(path, "rb");
+    std::basic_ostringstream<Char> stream;
+    read_file(file, stream);
+    (std::fclose)(file); // FIXME: Not exception safe, but unlikely to be a problem.
+    return stream.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if AJG_SYNTH_UNUSED
 

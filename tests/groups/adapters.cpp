@@ -10,7 +10,7 @@
 
 #include <boost/assign/list_of.hpp>
 
-#include <ajg/testing.hpp>
+#include <ajg/synth/testing.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/null.hpp>
 #include <ajg/synth/templates/string_template.hpp>
@@ -22,18 +22,16 @@ namespace s = ajg::synth;
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::engines::null::engine<traits_type>                                   engine_type;
 typedef s::templates::string_template<engine_type>                              template_type;
+
 typedef engine_type::context_type                                               context_type;
 typedef engine_type::value_type                                                 value_type;
+
 typedef traits_type::char_type                                                  char_type;
 typedef traits_type::string_type                                                string_type;
-typedef ajg::test_group<>                                                       group_type;
 
-group_type group_object("adapter");
+AJG_SYNTH_TEST_GROUP("adapter");
 
 } // namespace
-
-
-AJG_TESTING_BEGIN
 
 unit_test(assignments) {
     using namespace std;   // TODO: Remove.

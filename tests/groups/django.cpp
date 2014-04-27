@@ -2,11 +2,10 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-
 #include <ctime>
 #include <string>
 
-#include <ajg/testing.hpp>
+#include <ajg/synth/testing.hpp>
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
@@ -15,24 +14,13 @@
 
 #include <tests/data/kitchen_sink.hpp>
 
-#ifndef _WIN32
-#    include <unistd.h>
-#else
-#    include <direct.h>
-#endif
-
 namespace {
-inline std::string get_current_working_directory() {
-    char buffer[AJG_SYNTH_IF_MSVC(MAX_PATH, PATH_MAX)] = {};
-    return AJG_SYNTH_IF_MSVC(_getcwd, getcwd)(buffer, sizeof(buffer));
-}
-}
 
-
-namespace {
 namespace s = ajg::synth;
 
 using boost::optional;
+using s::detail::get_current_working_directory;
+using s::engines::detail::quote;
 
 typedef s::default_traits<char>                                                 traits_type;
 typedef s::engines::django::engine<traits_type>                                 engine_type;
@@ -51,15 +39,13 @@ typedef traits_type::string_type                                                
 typedef value_type::behavior_type                                               behavior_type;
 typedef s::engines::null::resolver<options_type>                                null_resolver_type;
 
-struct data_type  : tests::data::kitchen_sink<engine_type> {};
-struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("django") {} } const group;
+struct data_type : tests::data::kitchen_sink<engine_type> {};
 
-using ajg::synth::engines::detail::quote;
-string_type const absolute_path = traits_type::widen(get_current_working_directory());
+AJG_SYNTH_TEST_GROUP_WITH_DATA("django", data_type);
+
+static string_type const absolute_path = traits_type::widen(get_current_working_directory());
 
 } // namespace
-
-AJG_TESTING_BEGIN
 
 ///     TODO:
 ///     django::load_tag      (Tested implicitly in Python binding tests.)
@@ -71,7 +57,7 @@ AJG_TESTING_BEGIN
 
 #define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
 
-#define NO_CONTEXT // Nothing.
+#define NO_CONTEXT AJG_SYNTH_EMPTY
 
 ///
 /// Sanity checks

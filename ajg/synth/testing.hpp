@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_TESTING_HPP_INCLUDED
-#define AJG_TESTING_HPP_INCLUDED
+#ifndef AJG_SYNTH_TESTING_HPP_INCLUDED
+#define AJG_SYNTH_TESTING_HPP_INCLUDED
 
 #define AJG_SYNTH_IS_TESTING 1
 
@@ -40,7 +40,7 @@
 #endif
 
 namespace ajg {
-// TODO: Move under synth namespace.
+namespace synth {
 namespace detail {
 
 std::size_t const max_tests_per_file = AJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH - 4;
@@ -62,7 +62,7 @@ namespace { struct no_data {}; }
 
 //
 // ensure_throws
-//     TODO: Uppercase.
+//     TODO[c++11]: Replace with function taking a lambda.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define ensure_throws(type, expr) \
@@ -71,19 +71,50 @@ namespace { struct no_data {}; }
        } while (0)
 
 //
+// wensure_equals
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
+
+inline void wensure_equals(std::wstring const& expect, std::wstring const& actual) {
+    tut::ensure_equals(actual.length(), expect.length());
+    tut::ensure(actual == expect); // XXX: tut's ensure_equals doesn't play well with wchar_t.
+}
+
+#endif
+
+//
 // unit_test
 //     TODO: Rename AJG_SYNTH_UNIT_TEST.
+//     TODO[c++11]: Replace with function taking a lambda.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define unit_test(name) \
     namespace tut { template<> template<> \
-    void group_type::object::test<ajg::detail::check_test_number<__LINE__>::value>() { \
+    void test_group_type::object::test<ajg::synth::detail::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
         AJG_SYNTH_DEBUG_RESET_COUNT(0); \
 
+//
+// AJG_SYNTH_TEST_GROUP_WITH_DATA
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
- // TODO: Refactor into AJG_SYNTH_TEST_GROUP(name)
-#define AJG_TESTING_BEGIN
+#define AJG_SYNTH_TEST_GROUP_WITH_DATA(name, data) \
+    struct test_group_type : ::ajg::synth::test_group<data> { \
+        test_group_type() : ::ajg::synth::test_group<data>(name) {} } \
+    static const group
+
+//
+// AJG_SYNTH_TEST_GROUP
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define AJG_SYNTH_TEST_GROUP(name) AJG_SYNTH_TEST_GROUP_WITH_DATA(name, AJG_SYNTH_EMPTY)
+
+//
+// AJG_SYNTH_EMPTY
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define AJG_SYNTH_EMPTY // Nothing.
 
 //
 // test_group
@@ -130,6 +161,6 @@ struct test_suite {
     tut::test_runner_singleton runner_;
 };
 
-} // namespace ajg
+}} // namespace ajg::synth
 
-#endif // AJG_TESTING_HPP_INCLUDED
+#endif // AJG_SYNTH_TESTING_HPP_INCLUDED

@@ -75,10 +75,10 @@ struct command {
             , {directory_option,   0, "d", "directory",   param_required, "  -d path, --directory=path    template location(s)        (default: '.')"}
             , {replacement_option, 0, "r", "replacement", param_required, "  -r text, --replacement=text  replaces missing values     (default: '')"}
             , {unknown_option,     0, "",  "",            param_allowed,  "\n"}
-            // ("input,i",       AJG_ARG("file", string),  "the source (default: '-')")            // TODO
-            // ("output,o",      AJG_ARG("file", string),  "the destination (default: '-')")       // TODO
-            // ("source,s",      AJG_ARG("text", string),  "inline alternative to input file")     // TODO
-            // ("format,f",      AJG_ARG("name", string),  "the context's format: {ini,json,xml}") // TODO
+            // ("input,i",       ("file", string),  "the source (default: '-')")            // TODO
+            // ("output,o",      ("file", string),  "the destination (default: '-')")       // TODO
+            // ("source,s",      ("text", string),  "inline alternative to input file")     // TODO
+            // ("format,f",      ("name", string),  "the context's format: {ini,json,xml}") // TODO
             , {0, 0, 0, 0, 0, 0}
             };
 
@@ -188,8 +188,6 @@ struct command {
         else return ::option::ARG_OK;
     }
 };
-
-#undef AJG_ARG
 
 }}}} // namespace ajg::synth::bindings::command_line
 

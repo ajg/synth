@@ -18,6 +18,7 @@ namespace synth {
 namespace engines {
 namespace tmpl {
 
+// TODO[c++11]: Replace with functions.
 #define TAG(content) \
     ( as_xpr(kernel.tag_open) >> content >> kernel.tag_close \
     | as_xpr(kernel.alt_open) >> content >> kernel.alt_close \

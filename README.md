@@ -547,12 +547,11 @@ Future Work
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Consider switching to unordered_map/unordered_set where possible
    * Turn `detail.hpp` files into detail directories to match namespace
-   * [v1+] Add `AJG_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
-     + Add `AJG_PRAGMA(once)` to all header files and see if it speeds up compilations
+   * [v1+] Add `AJG_SYNTH_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
+     + Add `AJG_SYNTH_PRAGMA(once)` to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically
    * [v1+] Run entire C++ codebase through clang-format
    * Change `class` in template signatures to `typename`
-   * [v1] Hygienicize and prefix all macros (and #undef private ones after use)
    * [v1] Reformat all `operator _()`'s to `operator_()`
    * [v1+] Remove header guard closing comments
    * [v1+] Remove namespace closing comments

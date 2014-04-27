@@ -2,12 +2,13 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#include <ajg/testing.hpp>
+#include <ajg/synth/testing.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/ssi.hpp>
 
 namespace {
+
 namespace s = ajg::synth;
 
 typedef s::default_traits<char>                                                 traits_type;
@@ -23,13 +24,12 @@ typedef engine_type::options_type                                               
 typedef traits_type::char_type                                                  char_type;
 typedef traits_type::string_type                                                string_type;
 
-struct group_type : ajg::test_group<> { group_type() : ajg::test_group<>("ssi") {} } const group;
+AJG_SYNTH_TEST_GROUP("ssi");
 
 static options_type const default_options;
 
 } // namespace
 
-AJG_TESTING_BEGIN
 
 unit_test(sanity check) {
     string_template_type const t("");

@@ -4,48 +4,29 @@
 
 #include <string>
 
-#include <ajg/testing.hpp>
-
+#include <ajg/synth/testing.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/null.hpp>
-
-
-#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
-
-inline void wensure_equals(std::wstring const& expect, std::wstring const& actual) {
-    tut::ensure_equals(actual.length(), expect.length());
-    tut::ensure(actual == expect); // XXX: tut's ensure_equals doesn't play well with wchar_t.
-}
-
-#endif
-
-template <class Char> // TODO: Move close to detail::read_file.
-std::basic_string<Char> read_to_string(char const* const path) {
-    FILE* const file = (std::fopen)(path, "rb");
-    std::basic_ostringstream<Char> stream;
-    ajg::synth::detail::read_file(file, stream);
-    (std::fclose)(file); // FIXME: Not exception safe, but unlikely to be a problem.
-    return stream.str();
-}
-
 
 namespace {
 
 namespace s = ajg::synth;
 
+using s::detail::read_path_to_string;
+
 typedef s::engines::null::engine<s::default_traits<char> > char_engine;
 
 #ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
+
+using s::wensure_equals;
+
 typedef s::engines::null::engine<s::default_traits<wchar_t> > wchar_t_engine;
+
 #endif
 
-typedef ajg::test_group<> group_type;
-
-group_type group_object("templates");
+AJG_SYNTH_TEST_GROUP("templates");
 
 } // namespace
-
-AJG_TESTING_BEGIN
 
 unit_test(char_template::text char array) {
     s::templates::char_template<char_engine> const t("foo bar qux");
@@ -60,7 +41,7 @@ unit_test(char_template::text char pointer) {
 
 unit_test(path_template::text char) {
     s::templates::path_template<char_engine> const t("tests/templates/tmpl/variables.tmpl");
-    ensure_equals(t.text(), read_to_string<char>("tests/templates/tmpl/variables.tmpl"));
+    ensure_equals(t.text(), read_path_to_string<char>("tests/templates/tmpl/variables.tmpl"));
 }}}
 
 unit_test(stream_template::text char) {
@@ -89,7 +70,7 @@ unit_test(char_template::text wchar_t pointer) {
 
 unit_test(path_template::text wchar_t) {
     s::templates::path_template<wchar_t_engine> const t(L"tests/templates/tmpl/variables.tmpl");
-    wensure_equals(t.text(), read_to_string<wchar_t>("tests/templates/tmpl/variables.tmpl"));
+    wensure_equals(t.text(), read_path_to_string<wchar_t>("tests/templates/tmpl/variables.tmpl"));
 }}}
 
 unit_test(stream_template::text wchar_t) {

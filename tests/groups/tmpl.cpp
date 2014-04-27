@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include <ajg/testing.hpp>
+#include <ajg/synth/testing.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/tmpl.hpp>
@@ -27,12 +27,11 @@ typedef engine_type::options_type                                               
 typedef traits_type::char_type                                                  char_type;
 typedef traits_type::string_type                                                string_type;
 
-struct data_type  : tests::data::kitchen_sink<engine_type> {};
-struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<data_type>("tmpl") {} } const group;
+struct data_type : tests::data::kitchen_sink<engine_type> {};
+
+AJG_SYNTH_TEST_GROUP_WITH_DATA("tmpl", data_type);
 
 } // namespace
-
-AJG_TESTING_BEGIN
 
 unit_test(sanity check) {
     string_template_type const t("");

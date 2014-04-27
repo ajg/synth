@@ -144,8 +144,8 @@ struct builtin_tags {
         return it == tags_.end() ? 0 : it->second;
     }
 
-// TODO: Replace with function.
-#define AJG_TAG(content) kernel.block_open >> *_s >> content >> *_s >> kernel.block_close
+// TODO[c++11]: Replace with function.
+#define TAG(content) kernel.block_open >> *_s >> content >> *_s >> kernel.block_close
 
 //
 // autoescape_tag
@@ -153,8 +153,8 @@ struct builtin_tags {
 
     struct autoescape_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("autoescape") >> kernel.name) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endautoescape"));
+            return TAG(kernel.reserved("autoescape") >> kernel.name) >> kernel.block
+                >> TAG(kernel.reserved("endautoescape"));
         }
 
         static void render( kernel_type  const& kernel
@@ -183,8 +183,8 @@ struct builtin_tags {
 
     struct block_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("block") >> kernel.name) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endblock") >> !kernel.name);
+            return TAG(kernel.reserved("block") >> kernel.name) >> kernel.block
+                >> TAG(kernel.reserved("endblock") >> !kernel.name);
         }
 
         static void render( kernel_type  const& kernel
@@ -232,7 +232,7 @@ struct builtin_tags {
         static regex_type syntax(kernel_type& kernel) {
             // Short form (without a closing token or newlines) or long form, below.
             return kernel.comment_open >> *(~x::before(kernel.comment_close | _n) >> _) >> kernel.comment_close
-                | AJG_TAG(kernel.reserved("comment")) >> kernel.block >> AJG_TAG(kernel.reserved("endcomment"));
+                | TAG(kernel.reserved("comment")) >> kernel.block >> TAG(kernel.reserved("endcomment"));
         }
 
         static void render( kernel_type  const& kernel
@@ -251,7 +251,7 @@ struct builtin_tags {
 
     struct csrf_token_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("csrf_token"));
+            return TAG(kernel.reserved("csrf_token"));
         }
 
         static void render( kernel_type  const& kernel
@@ -279,7 +279,7 @@ struct builtin_tags {
 
     struct cycle_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("cycle") >> kernel.values >>
+            return TAG(kernel.reserved("cycle") >> kernel.values >>
                 !(kernel.keyword("as") >> kernel.name >> !(s1 = kernel.keyword("silent")))) >> kernel.block;
         }
 
@@ -351,7 +351,7 @@ struct builtin_tags {
 
     struct debug_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("debug"));
+            return TAG(kernel.reserved("debug"));
         }
 
         static void render( kernel_type  const& kernel
@@ -377,7 +377,7 @@ struct builtin_tags {
         static regex_type syntax(kernel_type& kernel) {
             // TODO: Handle non-string literals bases, which should be treated not as paths but as
             //       template objects.
-            return AJG_TAG(kernel.reserved("extends") >> kernel.string_literal) >> kernel.block;
+            return TAG(kernel.reserved("extends") >> kernel.string_literal) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -421,7 +421,7 @@ struct builtin_tags {
 
     struct firstof_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("firstof") >> kernel.values >> !kernel.string_literal);
+            return TAG(kernel.reserved("firstof") >> kernel.values >> !kernel.string_literal);
         }
 
         static void render( kernel_type  const& kernel
@@ -457,8 +457,8 @@ struct builtin_tags {
 
     struct filter_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("filter") >> kernel.filters) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endfilter"));
+            return TAG(kernel.reserved("filter") >> kernel.filters) >> kernel.block
+                >> TAG(kernel.reserved("endfilter"));
         }
 
         static void render( kernel_type  const& kernel
@@ -479,10 +479,10 @@ struct builtin_tags {
 
     struct for_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("for") >> kernel.variable_names >> kernel.keyword("in")
+            return TAG(kernel.reserved("for") >> kernel.variable_names >> kernel.keyword("in")
                               >> kernel.value >> !(s1 = kernel.keyword("reversed"))) >> kernel.block
-              >> !(AJG_TAG(kernel.reserved("empty")) >> kernel.block)
-                >> AJG_TAG(kernel.reserved("endfor"));
+              >> !(TAG(kernel.reserved("empty")) >> kernel.block)
+                >> TAG(kernel.reserved("endfor"));
         }
 
         static void render( kernel_type  const& kernel
@@ -563,9 +563,9 @@ struct builtin_tags {
 
     struct if_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("if") >> kernel.value) >> kernel.block
-              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
-                >> AJG_TAG(kernel.reserved("endif"));
+            return TAG(kernel.reserved("if") >> kernel.value) >> kernel.block
+              >> !(TAG(kernel.reserved("else")) >> kernel.block)
+                >> TAG(kernel.reserved("endif"));
         }
 
         static void render( kernel_type  const& kernel
@@ -589,9 +589,9 @@ struct builtin_tags {
 
     struct ifchanged_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("ifchanged") >> !kernel.values) >> kernel.block
-              >> !(AJG_TAG(kernel.reserved("else"))     >> kernel.block)
-              >>   AJG_TAG(kernel.reserved("endifchanged"));
+            return TAG(kernel.reserved("ifchanged") >> !kernel.values) >> kernel.block
+              >> !(TAG(kernel.reserved("else"))     >> kernel.block)
+              >>   TAG(kernel.reserved("endifchanged"));
         }
 
         static void render( kernel_type  const& kernel
@@ -649,9 +649,9 @@ struct builtin_tags {
 
     struct ifequal_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("ifequal") >> kernel.value >> kernel.value) >> kernel.block
-              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
-              >>   AJG_TAG(kernel.reserved("endifequal"));
+            return TAG(kernel.reserved("ifequal") >> kernel.value >> kernel.value) >> kernel.block
+              >> !(TAG(kernel.reserved("else")) >> kernel.block)
+              >>   TAG(kernel.reserved("endifequal"));
         }
 
         static void render( kernel_type  const& kernel
@@ -679,9 +679,9 @@ struct builtin_tags {
 
     struct ifnotequal_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("ifnotequal") >> kernel.value >> kernel.value) >> kernel.block
-              >> !(AJG_TAG(kernel.reserved("else")) >> kernel.block)
-              >>   AJG_TAG(kernel.reserved("endifnotequal"));
+            return TAG(kernel.reserved("ifnotequal") >> kernel.value >> kernel.value) >> kernel.block
+              >> !(TAG(kernel.reserved("else")) >> kernel.block)
+              >>   TAG(kernel.reserved("endifnotequal"));
         }
 
         static void render( kernel_type  const& kernel
@@ -708,7 +708,7 @@ struct builtin_tags {
 
     struct include_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("include") >> kernel.string_literal >> *_s >>
+            return TAG(kernel.reserved("include") >> kernel.string_literal >> *_s >>
                 !(kernel.keyword("with") >> kernel.arguments >> !(s1 = kernel.keyword("only"))));
         }
 
@@ -776,7 +776,7 @@ struct builtin_tags {
 
     struct load_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("load") >> kernel.packages) >> kernel.block;
+            return TAG(kernel.reserved("load") >> kernel.packages) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -805,7 +805,7 @@ struct builtin_tags {
 
     struct load_from_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("load") >> kernel.names >> kernel.keyword("from") >> kernel.package) >> kernel.block;
+            return TAG(kernel.reserved("load") >> kernel.names >> kernel.keyword("from") >> kernel.package) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -836,7 +836,7 @@ struct builtin_tags {
 
     struct now_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("now") >> kernel.string_literal);
+            return TAG(kernel.reserved("now") >> kernel.string_literal);
         }
 
         static void render( kernel_type  const& kernel
@@ -856,7 +856,7 @@ struct builtin_tags {
 
     struct regroup_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("regroup") >> kernel.value
+            return TAG(kernel.reserved("regroup") >> kernel.value
                           >> kernel.keyword("by") >> kernel.package
                           >> kernel.keyword("as") >> kernel.name) >> kernel.block;
         }
@@ -915,8 +915,8 @@ struct builtin_tags {
 
     struct spaceless_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("spaceless")) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endspaceless"));
+            return TAG(kernel.reserved("spaceless")) >> kernel.block
+                >> TAG(kernel.reserved("endspaceless"));
         }
 
         static void render( kernel_type  const& kernel
@@ -946,7 +946,7 @@ struct builtin_tags {
 
     struct ssi_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("ssi") >> kernel.value >> !(s1 = kernel.keyword("parsed")));
+            return TAG(kernel.reserved("ssi") >> kernel.value >> !(s1 = kernel.keyword("parsed")));
         }
 
         static void render( kernel_type  const& kernel
@@ -981,7 +981,7 @@ struct builtin_tags {
 
     struct templatetag_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("templatetag") >> kernel.name);
+            return TAG(kernel.reserved("templatetag") >> kernel.name);
         }
 
         static void render( kernel_type  const& kernel
@@ -1007,7 +1007,7 @@ struct builtin_tags {
 
     struct url_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments);
+            return TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments);
         }
 
         static void render( kernel_type  const& kernel
@@ -1037,7 +1037,7 @@ struct builtin_tags {
 
     struct url_as_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments
+            return TAG(kernel.reserved("url") >> kernel.value >> kernel.arguments
                         >> kernel.keyword("as") >> kernel.name) >> kernel.block;
         }
 
@@ -1090,8 +1090,8 @@ struct builtin_tags {
 
     struct verbatim_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("verbatim")) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endverbatim"));
+            return TAG(kernel.reserved("verbatim")) >> kernel.block
+                >> TAG(kernel.reserved("endverbatim"));
         }
 
         static void render( kernel_type  const& kernel
@@ -1110,7 +1110,7 @@ struct builtin_tags {
 
     struct widthratio_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("widthratio") >> kernel.value >> kernel.value >> kernel.value);
+            return TAG(kernel.reserved("widthratio") >> kernel.value >> kernel.value >> kernel.value);
         }
 
         template <class T>
@@ -1143,8 +1143,8 @@ struct builtin_tags {
 
     struct with_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.reserved("with") >> kernel.value >> kernel.keyword("as") >> kernel.name) >> kernel.block
-                >> AJG_TAG(kernel.reserved("endwith"));
+            return TAG(kernel.reserved("with") >> kernel.value >> kernel.keyword("as") >> kernel.name) >> kernel.block
+                >> TAG(kernel.reserved("endwith"));
         }
 
         static void render( kernel_type  const& kernel
@@ -1169,7 +1169,7 @@ struct builtin_tags {
 
     struct library_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return AJG_TAG(kernel.unreserved_name >> kernel.arguments) >> kernel.block;
+            return TAG(kernel.unreserved_name >> kernel.arguments) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -1211,7 +1211,7 @@ struct builtin_tags {
         }
     };
 
-#undef AJG_TAG
+#undef TAG
 
 }; // builtin_tags
 

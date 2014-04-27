@@ -245,8 +245,8 @@ unit_test(fsize_tag abbrev) {
 unit_test(flastmod_tag) {
     string_template_type const t(
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), s::engines::detail::format_time(default_options.time_format,
-        boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
+    ensure_equals(t.render_to_string(), traits_type::format_time(default_options.time_format,
+        traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
 unit_test(flastmod_tag custom) {
@@ -254,8 +254,8 @@ unit_test(flastmod_tag custom) {
     string_template_type const t(
         "<!--#config timefmt='" + format + "' -->"
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(), s::engines::detail::format_time(format,
-        boost::posix_time::from_time_t(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
+    ensure_equals(t.render_to_string(), traits_type::format_time(format,
+        traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
 unit_test(tag with error) {

@@ -216,10 +216,11 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             throw_exception(not_implemented("DOCUMENT_URI"));
         }
         else if (name == traits_type::literal("DATE_LOCAL")) {
-            return detail::format_time(options.time_format, detail::local_now());
+            return traits_type::format_datetime(options.time_format, traits_type::local_datetime());
         }
         else if (name == traits_type::literal("DATE_GMT")) {
-            return detail::format_time(options.time_format, detail::utc_now());
+            return traits_type::format_time(options.time_format, traits_type::utc_time());
+            // OR: return traits_type::format_datetime(options.time_format, traits_type::utc_datetime());
         }
         else if (name == traits_type::literal("LAST_MODIFIED")) {
             throw_exception(not_implemented("LAST_MODIFIED"));

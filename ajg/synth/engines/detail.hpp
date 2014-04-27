@@ -28,9 +28,6 @@
 
 #include <boost/iterator/filter_iterator.hpp>
 
-#include <boost/date_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <boost/algorithm/string/classification.hpp>
 
 #include <boost/preprocessor/cat.hpp>
@@ -67,98 +64,6 @@ namespace algo = boost::algorithm;
 namespace x    = boost::xpressive;
 
 namespace detail {
-
-#define AJG_SYNTH_EMPTY_   // Nothing.
-#define AJG_SYNTH_TEMPLATE AJG_SYNTH_IF_MSVC(AJG_SYNTH_EMPTY_, template)
-
-using boost::optional; // TODO: Remove.
-
-//
-// local_now
-//     TODO: Offer a local_time::local_date_time version; e.g.
-//           local_time::local_sec_clock::local_time(local_time::time_zone_ptr())
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline boost::posix_time::ptime local_now() {
-    return boost::posix_time::second_clock::local_time();
-}
-
-//
-// utc_now
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline boost::posix_time::ptime utc_now() {
-    return boost::posix_time::second_clock::universal_time();
-}
-
-/*
-//
-// format_current_time
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class String>
-inline String format_current_time(String format, bool const autoprefix = true) {
-    if (autoprefix) format = prefix_format_characters(format);
-    typedef typename String::value_type char_type;
-    typedef typename local_time::local_date_time time_type;
-    typedef typename boost::date_time::time_facet<time_type, char_type> facet_type;
-
-    std::basic_ostringstream<char_type> stream;
-    time_type t = local_time::local_sec_clock::
-        local_time(local_time::time_zone_ptr());
-    // The locale takes care of deleting this thing for us.
-    // TODO: Figure out a way to allocate the facet on the stack.
-    facet_type *const facet = new facet_type(format.c_str());
-    stream.imbue(std::locale(stream.getloc(), facet));
-    // Finally, stream out the time, properly formatted.
-    return (stream << t), stream.str();
-}
-*/
-
-//
-// format_time
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class String, class Time>
-inline String format_time(String format, Time const& time) {
-    typedef String                                                                  string_type;
-    typedef Time                                                                    time_type;
-    typedef typename string_type::value_type                                        char_type;
-    typedef typename boost::date_time::time_facet<time_type, char_type>             facet_type;
-
-    std::basic_ostringstream<char_type> stream;
-    // The locale takes care of deleting this thing for us.
-    // TODO: Figure out a way to allocate the facet on the stack or reuse it.
-    facet_type *const facet = new facet_type(format.c_str());
-    stream.imbue(std::locale(stream.getloc(), facet));
-    // Finally, stream out the time, properly formatted.
-    return (stream << time), stream.str();
-}
-
-//
-// format_size
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class String, class Size>
-inline String format_size(Size const size) {
-    typedef typename String::value_type char_type;
-    std::basic_ostringstream<char_type> stream;
-    stream << std::fixed << std::setprecision(1);
-
-    double bucket = 1;
-    String unit;
-
-         if (size >  (bucket = (std::pow)(2, 60.0))) stream << (size / bucket) << " EB";
-    else if (size >  (bucket = (std::pow)(2, 50.0))) stream << (size / bucket) << " PB";
-    else if (size >  (bucket = (std::pow)(2, 40.0))) stream << (size / bucket) << " TB";
-    else if (size >  (bucket = (std::pow)(2, 30.0))) stream << (size / bucket) << " GB";
-    else if (size >  (bucket = (std::pow)(2, 20.0))) stream << (size / bucket) << " MB";
-    else if (size >  (bucket = (std::pow)(2, 10.0))) stream << (size / bucket) << " KB";
-    else if (size >= (bucket = (std::pow)(2, 00.0))) stream << (size / bucket) << " bytes";
-
-    BOOST_ASSERT(stream);
-    return stream.str();
-}
 
 //
 // to_hex
@@ -206,6 +111,24 @@ inline String iri_encode(String const& string) {
     BOOST_FOREACH(char_type const c, string) {
         bool const allowed = std::isalnum(c) || boost::algorithm::is_any_of("/#%[]=:;$&()+,!?")(c);
         allowed ? stream << c : stream << "%" << to_hex<2>(c);
+    }
+
+    BOOST_ASSERT(stream);
+    return stream.str();
+}
+
+//
+// escape_controls
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class String>
+inline String escape_controls(String const& string) {
+    typedef typename String::value_type char_type;
+    std::basic_ostringstream<char_type> stream;
+
+    BOOST_FOREACH(char_type const c, string) {
+        bool const allowed = c >= 32;
+        allowed ? stream << c : stream << "\\x" << to_hex<2>(c);
     }
 
     BOOST_ASSERT(stream);
@@ -272,10 +195,10 @@ inline String unquote(String const& string) {
     return string.substr(1, string.size() - 2);
 }
 
-
 //
 // is:
 //     Returns whether the match and regex share regex_ids.
+//     TODO: Move to base_engine::kernel
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Iterator>
@@ -285,6 +208,7 @@ inline bool is(x::match_results<Iterator> const& match, x::basic_regex<Iterator>
 
 //
 // unnest
+//     TODO: Move to base_engine::kernel
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Match>
@@ -296,6 +220,7 @@ inline Match const& unnest(Match const& match) {
 
 //
 // select_nested
+//     TODO: Move to base_engine::kernel
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Match, class Regex>
@@ -315,6 +240,7 @@ select_nested(Match const& match, Regex const& regex) {
 //
 // insensitive_less:
 //     Case-insensitive version of std::less<T>.
+//     TODO: Move to synth/detail.hpp or value_traits/value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class T>
@@ -341,7 +267,48 @@ struct insensitive_less : std::binary_function<T, T, bool> {
 };
 
 //
+// has_mapped_type
+//     TODO: Move to synth/detail.hpp
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct one { char c[1]; };
+struct two { char c[2]; };
+
+template <class T> one has_mapped_type_(...);
+template <class T> two has_mapped_type_(typename T::mapped_type const volatile *);
+
+template <class T> struct has_mapped_type {
+    BOOST_STATIC_CONSTANT(bool, value = sizeof(has_mapped_type_<T>(0)) == sizeof(two));
+};
+
+//
+// find:
+//     Uniform interface for mapped and non-mapped containers.
+//     TODO: Move to synth/detail.hpp
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Needle, class Container>
+inline boost::optional<typename Container::value_type> find
+        ( Needle    const& needle
+        , Container const& container
+        , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
+        ) {
+    typename Container::const_iterator const it = std::find(container.begin(), container.end(), needle);
+    if (it == container.end()) return boost::none; else return *it;
+}
+
+template <class Container>
+inline boost::optional<typename Container::mapped_type> find
+        ( typename Container::key_type const& needle
+        , Container                    const& container
+        ) {
+    typename Container::const_iterator const it = container.find(needle);
+    if (it == container.end()) return boost::none; else return it->second;
+}
+
+//
 // if_c
+//     TODO: Move to synth/detail.hpp
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <bool C, class X, class Y> struct if_c { typedef X type; };
@@ -349,6 +316,10 @@ template <class X, class Y>         struct if_c<false, X, Y> { typedef Y type; }
 
 //
 // uniform_random_number_generator
+//     FIXME: This is broken:
+//         * the seed (and source) must be generated once.
+//         * either the engine, kernel or options should hold a (mutable) instance of this.
+//     TODO: Move to value_traits/value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template < class Output = int
@@ -395,6 +366,7 @@ struct uniform_random_number_generator {
   private:
 
     inline static seed_type generate_seed() {
+        // TODO: Use traits_type clock/time types.
         namespace pt = boost::posix_time;
 
         pt::ptime const epoch = pt::from_time_t(std::time_t(0));
@@ -404,51 +376,11 @@ struct uniform_random_number_generator {
 };
 
 //
-// random_int,
-// random_double:
-//     Precreated convenience objects for random int and double generation.
+// random_int:
+//     FIXME: Remove; there can be no such const instance since the internal state must mutate.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform_random_number_generator<int>    const random_int;
-uniform_random_number_generator<double> const random_double;
-
-//
-// has_mapped_type
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct one { char c[1]; };
-struct two { char c[2]; };
-
-template <class T> one has_mapped_type_(...);
-template <class T> two has_mapped_type_(typename T::mapped_type const volatile *);
-
-template <class T> struct has_mapped_type {
-    BOOST_STATIC_CONSTANT(bool, value = sizeof(has_mapped_type_<T>(0)) == sizeof(two));
-};
-
-//
-// find:
-//     Uniform interface for mapped and non-mapped containers.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Needle, class Container>
-inline optional<typename Container::value_type> find
-        ( Needle    const& needle
-        , Container const& container
-        , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
-        ) {
-    typename Container::const_iterator const it = std::find(container.begin(), container.end(), needle);
-    if (it == container.end()) return boost::none; else return *it;
-}
-
-template <class Container>
-inline optional<typename Container::mapped_type> find
-        ( typename Container::key_type const& needle
-        , Container                    const& container
-        ) {
-    typename Container::const_iterator const it = container.find(needle);
-    if (it == container.end()) return boost::none; else return it->second;
-}
+uniform_random_number_generator<int> const random_int;
 
 }}}} // namespace ajg::synth::engines::detail
 

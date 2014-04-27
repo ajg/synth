@@ -420,14 +420,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type string = value.to_string(), result;
-            result.reserve(string.size()); // Assume no escapes.
-
-            BOOST_FOREACH(char_type const c, string) {
-                result += c < 32 ? traits_type::literal("\\x") + detail::to_hex<2>(c) : string_type(1, c);
-            }
-
-            return result;
+            return detail::escape_controls(value.to_string());
         }
     };
 
@@ -445,7 +438,7 @@ struct builtin_filters {
             with_arity<0>::validate(arguments.first.size());
             integer_type const integer = static_cast<integer_type>(value.to_number());
             size_type    const size    = static_cast<size_type>((std::abs)(integer));
-            return detail::format_size<string_type>(size);
+            return traits_type::format_size(size);
         }
     };
 
@@ -1115,7 +1108,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
-            datetime_type const from = arguments.first.empty() ? detail::local_now() : arguments.first[0].to_datetime();
+            datetime_type const from = arguments.first.empty() ? traits_type::local_datetime() : arguments.first[0].to_datetime();
             return value_type(formatter_type::format_duration(options, from - to)).mark_safe();
         }
     };
@@ -1133,7 +1126,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
-            datetime_type const from = arguments.first.empty() ? detail::local_now() : arguments.first[0].to_datetime();
+            datetime_type const from = arguments.first.empty() ? traits_type::local_datetime() : arguments.first[0].to_datetime();
             return value_type(formatter_type::format_duration(options, to - from)).mark_safe();
         }
     };
@@ -1596,6 +1589,7 @@ struct builtin_filters {
                                       , string_type const& newline
                                       ) {
             string_type word, result;
+            // TODO: Use a stream.
 
             size_type i    = 0;
             char_type last = '\0';

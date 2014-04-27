@@ -35,6 +35,7 @@ struct kitchen_sink {
 
     typedef typename traits_type::string_type                   string_type;
     typedef typename traits_type::date_type                     date_type;
+    typedef typename traits_type::time_type                     time_type;
     typedef typename traits_type::datetime_type                 datetime_type;
     typedef typename traits_type::duration_type                 duration_type;
 
@@ -61,8 +62,8 @@ struct kitchen_sink {
 
         context["friends"] = friends;
 
-        datetime_type const past(date_type(2002, 1, 10), duration_type(1, 2, 3));
-        datetime_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
+        /*date*/time_type const past(date_type(2002, 1, 10), duration_type(1, 2, 3));
+        /*date*/time_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
 
         context[traits_type::literal("past")]        = past;
         context[traits_type::literal("before_past")] = past - duration_type(36, 0, 0);

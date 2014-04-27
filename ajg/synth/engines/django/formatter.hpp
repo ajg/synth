@@ -6,7 +6,6 @@
 #define AJG_SYNTH_ENGINES_DJANGO_FORMATTER_HPP_INCLUDED
 
 #include <map>
-#include <ctime>
 #include <sstream>
 
 #include <boost/array.hpp>
@@ -47,6 +46,7 @@ struct formatter {
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::date_type                                     date_type;
+    typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
     typedef typename traits_type::string_type                                   string_type;
@@ -154,7 +154,7 @@ struct formatter {
 
             static string_type const delimiter     = string_type(1, char_type('|'));
             static string_type const format_string = algo::join(format_flags, delimiter);
-            string_type const formatted_string     = detail::format_time(format_string, datetime);
+            string_type const formatted_string     = traits_type::format_datetime(format_string, datetime);
 
             std::vector<string_type> specifiers;
             specifiers.reserve(native_flags::size);
@@ -246,9 +246,6 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
-            std::time_t time = std::time(0);
-            struct std::tm const* const now = (std::localtime)(&time);
-
             date_type     const date        = datetime.date();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
@@ -261,7 +258,6 @@ struct formatter {
             boolean_type  const is_noon     = flags.H == traits_type::literal("12") && !has_minutes;
             boolean_type  const is_dst      = false;  // TODO: Implement, e.g. using tm_isdst from struct tm.
             boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
-            datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
@@ -282,7 +278,11 @@ struct formatter {
                                             + flags.Y + char_type(' ')
                                             + flags.T;
             string_type   const dst         = is_dst ? traits_type::literal("1") : traits_type::literal("0");
-            string_type   const localtz     = traits_type::widen(string_type(now->is_dst ? tzname[1] : tzname[0]));
+         // datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
+         // duration_type const since_epoch = datetime - epoch;
+            time_type     const utc_epoch   = time_type(date_type(1970, 1, 1));
+            duration_type const since_epoch = datetime.utc_time() - utc_epoch;
+
 
             cooked_flags cooked;
             cooked.a = meridiem;
@@ -316,9 +316,9 @@ struct formatter {
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
-            cooked.T = local_tz;
+            cooked.T = traits_type::local_timezone_name();
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
-            cooked.U = behavior_type::to_string((datetime - epoch).seconds());
+            cooked.U = behavior_type::to_string(since_epoch.seconds());
             cooked.w = flags.w;
             cooked.W = behavior_type::to_string(iso_week);
             cooked.y = flags.y;

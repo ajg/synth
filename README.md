@@ -511,6 +511,7 @@ Future Work
  - Adapters:
    * Adapter for `boost::tribool`
    * Adapters for `boost::fusion` sequences
+   * Adapters for `boost::local_time` types
    * Adapter for `boost::intrusive_ptr`
    * Support for `boost::enable_shared_from_this`
    * [v2] Adapters for `c++11` types
@@ -544,6 +545,7 @@ Future Work
      + Replace `boost::assign` use with aggregate initializers
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
+     + Replace Boost.Random with `<random>`
      + Consider switching to unordered_map/unordered_set where possible
    * Turn `detail.hpp` files into detail directories to match namespace
    * [v1+] Add `AJG_SYNTH_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed

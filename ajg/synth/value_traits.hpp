@@ -7,6 +7,7 @@
 
 #include <map>
 #include <set>
+#include <ctime>
 #include <vector>
 #include <string>
 #include <istream>
@@ -18,6 +19,7 @@
 #include <boost/foreach.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/local_time/local_time.hpp>
 
 #include <ajg/synth/value_iterator.hpp>
 
@@ -68,10 +70,13 @@ struct default_traits {
     //       even an arbitrary precision type.
     typedef double                                      number_type;
 
-    // TODO: Add a time_type with optional time zome, and incorporate it into datetime_type.
     typedef boost::gregorian::date                      date_type;
-    typedef boost::posix_time::ptime                    datetime_type;
+    typedef boost::posix_time::ptime                    time_type;     // Note: No timezone.
+    typedef boost::posix_time::second_clock             clock_type;
     typedef boost::posix_time::time_duration            duration_type;
+    typedef boost::local_time::local_date_time          datetime_type;
+ // typedef boost::local_time::local_time_period        period_type;
+    typedef boost::local_time::time_zone_ptr            timezone_type;
 
     typedef std::basic_string<char_type>                string_type;
 
@@ -119,11 +124,169 @@ struct default_traits {
 
 ///
 /// to_path:
-///     string -> path conversion
+///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static path_type to_path(string_type const& s) {
         return transcode<typename path_type::value_type>(s);
+    }
+
+///
+/// to_time:
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static time_type to_time(std::time_t const t) {
+        return boost::posix_time::from_time_t(t);
+    }
+
+///
+/// to_datetime
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static datetime_type to_datetime(time_type const& time) {
+        return datetime_type(time, no_timezone());
+    }
+
+///
+/// utc_time
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static time_type utc_time() {
+        return boost::posix_time::second_clock::universal_time();
+    }
+
+///
+/// local_time
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static time_type local_time() {
+        return boost::posix_time::second_clock::local_time();
+    }
+
+///
+/// utc_datetime
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static datetime_type utc_datetime() {
+        return datetime_type(utc_time(), utc_timezone());
+    }
+
+///
+/// local_datetime
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static datetime_type local_datetime() {
+        // TODO: Try return datetime_type(local_time(), local_timezone());
+        return boost::local_time::local_sec_clock::local_time(local_timezone());
+    }
+
+///
+/// no_timezone:
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static timezone_type no_timezone() {
+        return timezone_type();
+    }
+
+///
+/// utc_timezone:
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static timezone_type utc_timezone() {
+        // TODO: make static const
+        return timezone_type(new boost::local_time::posix_time_zone("UTC"));
+    }
+
+///
+/// local_timezone:
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static /*timezone_type*/ boost::local_time::time_zone_ptr local_timezone() {
+        // TODO: make static const
+        return timezone_type(new boost::local_time::posix_time_zone(narrow(local_timezone_name())));
+    }
+
+///
+/// local_timezone_name:
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type local_timezone_name() {
+        std::time_t time = (std::time)(0);
+        std::string name((std::localtime)(&time)->tm_isdst ? tzname[1] : tzname[0]);
+        return traits_type::widen(name);
+    }
+
+///
+/// format_time
+///     TODO: Move to value_behavior.
+///     TODO: Repeated in format_datetime.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type format_time(string_type const& format, time_type const& time) {
+        typedef typename boost::date_time::time_facet<time_type, char_type> facet_type;
+
+        std::basic_ostringstream<char_type> stream;
+        // The locale takes care of deleting this thing for us.
+        // TODO: Figure out a way to allocate the facet on the stack or reuse it.
+        facet_type *const facet = new facet_type(format.c_str());
+        stream.imbue(std::locale(stream.getloc(), facet));
+
+        stream << time;
+        BOOST_ASSERT(stream);
+        return stream.str();
+    }
+
+///
+/// format_datetime
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type format_datetime(string_type const& format, datetime_type const& datetime) {
+        typedef typename boost::date_time::time_facet<datetime_type, char_type> facet_type;
+
+        std::basic_ostringstream<char_type> stream;
+        // The locale takes care of deleting this thing for us.
+        // TODO: Figure out a way to allocate the facet on the stack or reuse it.
+        facet_type *const facet = new facet_type(format.c_str());
+        stream.imbue(std::locale(stream.getloc(), facet));
+
+        stream << datetime;
+        BOOST_ASSERT(stream);
+        return stream.str();
+    }
+
+///
+/// format_size
+///     TODO: Move to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type format_size(size_type const size) {
+        std::basic_ostringstream<char_type> stream;
+        stream << std::fixed << std::setprecision(1);
+
+        double bucket = 1;
+        string_type unit;
+
+             if (size >  (bucket = (std::pow)(2, 60.0))) stream << (size / bucket) << " EB";
+        else if (size >  (bucket = (std::pow)(2, 50.0))) stream << (size / bucket) << " PB";
+        else if (size >  (bucket = (std::pow)(2, 40.0))) stream << (size / bucket) << " TB";
+        else if (size >  (bucket = (std::pow)(2, 30.0))) stream << (size / bucket) << " GB";
+        else if (size >  (bucket = (std::pow)(2, 20.0))) stream << (size / bucket) << " MB";
+        else if (size >  (bucket = (std::pow)(2, 10.0))) stream << (size / bucket) << " KB";
+        else if (size >= (bucket = (std::pow)(2, 00.0))) stream << (size / bucket) << " bytes";
+
+        BOOST_ASSERT(stream);
+        return stream.str();
     }
 };
 

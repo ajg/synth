@@ -13,7 +13,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ajg/synth/detail.hpp>
 #include <ajg/synth/value_traits.hpp>

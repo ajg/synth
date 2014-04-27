@@ -27,7 +27,7 @@ struct adapter<Behavior, boost::posix_time::ptime>
   public:
 
     boolean_type to_boolean() const { return !adapted_.is_not_a_date_time(); }
-    datetime_type to_datetime() const { return adapted_; }
+    datetime_type to_datetime() const { return traits_type::to_datetime(adapted_); }
     void output(ostream_type& out) const { out << adapted_; }
 };
 

@@ -846,7 +846,7 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             string_type const format = kernel.extract_string(match(kernel.string_literal));
-            ostream << formatter_type::format_datetime(options, format, detail::utc_now());
+            ostream << formatter_type::format_datetime(options, format, traits_type::utc_datetime());
         }
     };
 

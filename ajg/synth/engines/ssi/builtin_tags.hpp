@@ -218,7 +218,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("file")) {
                     std::time_t const stamp = synth::detail::stat_file(traits_type::narrow(value)).st_mtime;
-                    args.ostream << detail::format_time(args.options.time_format, boost::posix_time::from_time_t(stamp));
+                    args.ostream << traits_type::format_time(args.options.time_format, traits_type::to_time(stamp));
                 }
             );
         }
@@ -244,7 +244,7 @@ enum { interpolated = true, raw = false };
                 }
                 else if (name == traits_type::literal("file")) {
                     size_type const size = synth::detail::stat_file(traits_type::narrow(value)).st_size;
-                    abbreviate ? args.ostream << detail::format_size<string_type>(size) : args.ostream << size;
+                    abbreviate ? args.ostream << traits_type::format_size(size) : args.ostream << size;
                 }
             );
         }

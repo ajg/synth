@@ -5,6 +5,8 @@
 #ifndef AJG_TESTING_HPP_INCLUDED
 #define AJG_TESTING_HPP_INCLUDED
 
+#define AJG_SYNTH_IS_TESTING 1
+
 #include <ajg/synth/config.hpp>
 
 #include <string>
@@ -12,13 +14,14 @@
 
 #include <boost/static_assert.hpp>
 
-#if AJG_SYNTH_COMPILER_CLANG
+// TODO: Wrap this into AJG_SYNTH_EXTERNAL_PUSH in config.hpp
+#if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wold-style-cast"
 #    pragma clang diagnostic ignored "-Wunused-function"
 #    pragma clang diagnostic ignored "-Wunused-variable"
-#elif AJG_SYNTH_COMPILER_GCC
-#    if AJG_SYNTH_COMPILER_GCC_VERSION >= 406
+#elif AJG_SYNTH_IS_COMPILER_GCC
+#    if AJG_SYNTH_COMPILER_VERSION >= 406
 #        pragma GCC diagnostic push
 #    endif
 #    pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -29,27 +32,18 @@
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-#if AJG_SYNTH_COMPILER_CLANG
+// TODO: Wrap this into AJG_SYNTH_EXTERNAL_POP in config.hpp
+#if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic pop
-#elif AJG_SYNTH_COMPILER_GCC && (AJG_SYNTH_COMPILER_GCC_VERSION >= 406)
+#elif AJG_SYNTH_IS_COMPILER_GCC && (AJG_SYNTH_COMPILER_VERSION >= 406)
 #    pragma GCC diagnostic pop
 #endif
 
-#define AJG_TESTING 1
-
-#ifndef TEMPLATE_DEPTH
-#define TEMPLATE_DEPTH 1024
-#endif
-
-#ifndef AJG_TESTING_MAX_TESTS_PER_FILE
-#define AJG_TESTING_MAX_TESTS_PER_FILE (TEMPLATE_DEPTH - 5)
-#endif
-
 namespace ajg {
+// TODO: Move under synth namespace.
 namespace detail {
 
-#define AJG_TESTING_BEGIN
-#define TEST_NUMBER()
+std::size_t const max_tests_per_file = AJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH - 4;
 
 //
 // check_test_number
@@ -57,9 +51,14 @@ namespace detail {
 
 template <int N>
 struct check_test_number {
-    BOOST_STATIC_ASSERT(N <= AJG_TESTING_MAX_TESTS_PER_FILE);
+    BOOST_STATIC_ASSERT(N <= max_tests_per_file);
     BOOST_STATIC_CONSTANT(int, value = N);
 };
+
+// NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)
+namespace { struct no_data {}; }
+
+} // namespace detail
 
 //
 // ensure_throws
@@ -73,33 +72,26 @@ struct check_test_number {
 
 //
 // unit_test
-//     TODO: Uppercase.
+//     TODO: Rename AJG_SYNTH_UNIT_TEST.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifndef NDEBUG
-#    define AJG_DEBUG_RESET_COUNT() (ajg::synth::debug::count = 0)
-#else
-#    define AJG_DEBUG_RESET_COUNT() ((void) 0)
-#endif
 
 #define unit_test(name) \
     namespace tut { template<> template<> \
     void group_type::object::test<ajg::detail::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
-        AJG_DEBUG_RESET_COUNT(); \
+        AJG_SYNTH_DEBUG_RESET_COUNT(0); \
 
-// NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)
-namespace { struct no_data {}; }
 
-} // namespace detail
+ // TODO: Refactor into AJG_SYNTH_TEST_GROUP(name)
+#define AJG_TESTING_BEGIN
 
 //
 // test_group
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class T = detail::no_data>
-struct test_group : public tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> {
-    typedef tut::test_group<T, AJG_TESTING_MAX_TESTS_PER_FILE> base_type;
+struct test_group : public tut::test_group<T, detail::max_tests_per_file> {
+    typedef tut::test_group<T, detail::max_tests_per_file> base_type;
     test_group(char const* const name) : base_type(name) {}
 };
 

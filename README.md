@@ -210,9 +210,9 @@ Components
    * `int unsigned`
    * `long`
    * `long unsigned`
-   * `wchar_t`            (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
-   * `long long`          (When available, unless disabled by `AJG_SYNTH_NO_LONG_LONG`)
-   * `long long unsigned` (When available, unless disabled by `AJG_SYNTH_NO_LONG_LONG`)
+   * `wchar_t`            (When available, unless disabled by `AJG_SYNTH_CONFIG_NO_WCHAR_T`)
+   * `long long`          (When available, unless disabled by `AJG_SYNTH_CONFIG_NO_LONG_LONG`)
+   * `long long unsigned` (When available, unless disabled by `AJG_SYNTH_CONFIG_NO_LONG_LONG`)
    * `__int64`            (`msvc`-only.)
    * `__int64 unsigned`   (`msvc`-only.)
    * `float`
@@ -237,8 +237,8 @@ Components
    * `std::basic_string`
    * `char*`
    * `char[N]`
-   * `wchar_t*`   (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
-   * `wchar_t[N]` (When available, unless disabled by `AJG_SYNTH_NO_WCHAR_T`)
+   * `wchar_t*`   (When available, unless disabled by `AJG_SYNTH_CONFIG_NO_WCHAR_T`)
+   * `wchar_t[N]` (When available, unless disabled by `AJG_SYNTH_CONFIG_NO_WCHAR_T`)
  - `utility`
    * `std::pair`
  - `variant`
@@ -250,13 +250,37 @@ Components
  - `json`
  - `xml`
 
-### Extensibility/customization components
+### Base Components
 
  - `base_adapter`
  - `bindings::base_binding`
  - `engines::base_engine`
  - `templates::base_template`
+
+### Facades
+
  - `value_facade`
+
+### [Version](./ajg/synth/version.hpp)
+
+ - `AJG_SYNTH_VERSION`        (e.g. `1.2.3`)
+ - `AJG_SYNTH_VERSION_MAJOR`  (e.g. `1`)
+ - `AJG_SYNTH_VERSION_MINOR`  (e.g. `2`)
+ - `AJG_SYNTH_VERSION_PATCH`  (e.g. `3`)
+ - `AJG_SYNTH_VERSION_SEQ`    (e.g. `(1)(2)(3)`)
+ - `AJG_SYNTH_VERSION_TUPLE`  (e.g. `(1, 2, 3)`)
+ - `AJG_SYNTH_VERSION_ARRAY`  (e.g. `(3, (1, 2, 3))`)
+ - `AJG_SYNTH_VERSION_STRING` (e.g. `"1.2.3"`)
+
+### [Configuration](./ajg/synth/config.hpp)
+
+ - `AJG_SYNTH_CONFIG_NO_WCHAR_T`        (default: automatically determined)
+ - `AJG_SYNTH_CONFIG_NO_LONG_LONG`      (default: automatically determined)
+ - `AJG_SYNTH_CONFIG_NO_DEBUG`          (default: automatically determined)
+ - `AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE` (default: `char`)
+ - `AJG_SYNTH_CONFIG_MAX_FRAMES`        (default: `1024`)
+ - `AJG_SYNTH_CONFIG_HANDLE_ASSERT`     (default: `BOOST_ASSERT`)
+ - `AJG_SYNTH_CONFIG_HANDLE_EXCEPTION`  (default: `boost::throw_exception`)
 
 Django Engine
 -------------
@@ -517,6 +541,7 @@ Future Work
      + Translate macros to variadic templates
      + Replace `BOOST_FOREACH` with new `for` loop
      + Replace `BOOST_STATIC_CONSTANT` with `static const`
+     + Replace `BOOST_STATIC_ASSERT` with `static_assert`
      + Replace `boost::assign` use with aggregate initializers
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`

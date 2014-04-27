@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ajg/synth.hpp>
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 
 namespace synth = ajg::synth;
 

@@ -14,7 +14,7 @@ BOOST_PYTHON_MODULE(synth) {
     namespace s  = ajg::synth;
     namespace py = boost::python;
 
-    typedef s::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>                          traits_type;
+    typedef s::default_traits<AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE>                          traits_type;
     typedef s::bindings::python::binding<traits_type>                               binding_type;
 
     py::def("version", s::bindings::python::version);

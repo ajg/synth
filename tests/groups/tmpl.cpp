@@ -32,7 +32,7 @@ struct group_type : ajg::test_group<data_type> { group_type() : ajg::test_group<
 
 } // namespace
 
-AJG_TESTING_BEGIN // TODO: Refactor into AJG_TEST_GROUP(name), and rename unit_test to AJG_UNIT_TEST
+AJG_TESTING_BEGIN
 
 unit_test(sanity check) {
     string_template_type const t("");

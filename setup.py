@@ -167,7 +167,7 @@ def get_define_macros():
     defines = []
 
     # Common defines:
-    defines += [('AJG_SYNTH_DEFAULT_CHAR_TYPE', CHAR)]
+    defines += [('AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE', CHAR)]
 
     # Conditional defines:
     if BOOST != 'system':

@@ -91,8 +91,8 @@ def get_cpp_flags(cxx):
     cpp_flags += ['-Wno-unused-parameter']
     # XXX: Not including -Wold-style-cast due to optionparser.h.
 
-    cxx_version = find_cxx_version(cxx)
-    cxx_template_depth = 1024
+    cxx_version    = find_cxx_version(cxx)
+    template_depth = '1024'
 
     # Conditional flags:
     if BOOST != 'system':
@@ -106,8 +106,8 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-ftemplate-backtrace-limit=1']
 
         # TODO: Only version 3.3+:
-        cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
-        cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+        cpp_flags += ['-ftemplate-depth=' + template_depth]
+        cpp_flags += ['-DAJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH=' + template_depth]
 
         if BOOST != 'system':
             cpp_flags += ['-Wno-newline-eof']
@@ -131,11 +131,11 @@ def get_cpp_flags(cxx):
             gcc_version = (major, minor, patch)
 
             if gcc_version < (4, 5):
-                cpp_flags += ['-ftemplate-depth-' + str(cxx_template_depth)] # Note the dash
-                cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+                cpp_flags += ['-ftemplate-depth-' + template_depth] # Note the dash
+                cpp_flags += ['-DAJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH=' + template_depth]
             else:
-                cpp_flags += ['-ftemplate-depth=' + str(cxx_template_depth)]
-                cpp_flags += ['-DTEMPLATE_DEPTH=' + str(cxx_template_depth)]
+                cpp_flags += ['-ftemplate-depth=' + template_depth]
+                cpp_flags += ['-DAJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH=' + template_depth]
 
             if gcc_version >= (4, 8):
                 cpp_flags += ['-Wmaybe-uninitialized']

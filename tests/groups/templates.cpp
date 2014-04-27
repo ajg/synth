@@ -10,7 +10,7 @@
 #include <ajg/synth/engines/null.hpp>
 
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 
 inline void wensure_equals(std::wstring const& expect, std::wstring const& actual) {
     tut::ensure_equals(actual.length(), expect.length());
@@ -35,7 +35,7 @@ namespace s = ajg::synth;
 
 typedef s::engines::null::engine<s::default_traits<char> > char_engine;
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 typedef s::engines::null::engine<s::default_traits<wchar_t> > wchar_t_engine;
 #endif
 
@@ -74,7 +74,7 @@ unit_test(string_template::text char) {
     ensure_equals(t.text(), "foo bar qux");
 }}}
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 
 unit_test(char_template::text wchar_t array) {
     s::templates::char_template<wchar_t_engine> const t(L"foo bar qux");

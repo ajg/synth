@@ -15,7 +15,7 @@ namespace {
 
 namespace s = ajg::synth;
 
-typedef s::default_traits<AJG_SYNTH_DEFAULT_CHAR_TYPE>                          traits_type;
+typedef s::default_traits<AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE>                          traits_type;
 typedef s::bindings::command_line::binding<traits_type>                         binding_type;
 typedef s::bindings::command_line::command<binding_type>                        command_type;
 

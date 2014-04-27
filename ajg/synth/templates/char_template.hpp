@@ -8,7 +8,7 @@
 #include <utility>
 #include <cstring>
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 #    include <cwchar>
 #endif
 
@@ -67,7 +67,7 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
 
     inline static size_type get_size(char const *const data) { return (std::strlen)(data); }
 
-#ifndef AJG_SYNTH_NO_WCHAR_T
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
     inline static size_type get_size(wchar_t const *const data) { return (std::wcslen)(data); }
 #endif
 

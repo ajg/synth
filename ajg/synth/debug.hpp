@@ -5,13 +5,11 @@
 #ifndef AJG_SYNTH_DEBUG_HPP_INCLUDED
 #define AJG_SYNTH_DEBUG_HPP_INCLUDED
 
-#if !AJG_SYNTH_DEBUG
-#    error Debugging instrumentation with debugging disabled (AJG_SYNTH_DEBUG)
+#if !AJG_SYNTH_IS_DEBUG
+#    error Debugging instrumentation with debugging disabled
 #endif
 
-#ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
 #define BOOST_ENABLE_ASSERT_HANDLER
-#endif
 
 #include <boost/config.hpp>
 #include <boost/assert.hpp>
@@ -48,8 +46,18 @@ static std::size_t count = 0, level = 0;
 inline void dummy() { (void) count; (void) level; }
 
 ///
+/// AJG_SYNTH_DEBUG_RESET_COUNT
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if AJG_SYNTH_IS_DEBUG
+#    define AJG_SYNTH_DEBUG_RESET_COUNT(n) (::ajg::synth::debug::count = n)
+#else
+#    define AJG_SYNTH_DEBUG_RESET_COUNT(n) ((void) 0)
+#endif
+
+///
 /// AJG_DEBUG_CERR_, AJG_DEBUG_CERR_LEAD_, AJG_DEBUG_CERR_TRAIL_
-//      TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
+///     TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define AJG_DEBUG_CERR_       (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl)
@@ -119,7 +127,7 @@ inline std::string unmangle(std::string const& mangled) {
 
     return mangled;
 
-#endif // AJG_SYNTH_HAS_CXXABI_H
+#endif
 
 }
 
@@ -130,9 +138,9 @@ static boost::xpressive::sregex const signature = boost::xpressive::sregex::comp
 inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
 #if AJG_SYNTH_HAS_EXECINFO_H
-
-    void* frames[AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT]; // TODO: Make a "thread-local static global".
-    std::size_t const n = backtrace(frames, AJG_SYNTH_DEBUG_TRACE_FRAME_LIMIT);
+    std::size_t const N = AJG_SYNTH_CONFIG_MAX_FRAMES;
+    void* frames[N]; // TODO: Make a "thread-local static global".
+    std::size_t const n = backtrace(frames, N);
 
     boost::shared_ptr<char*> symbols(backtrace_symbols(frames, n), std::free);
     if (symbols) { // TODO[c++11]: auto const& symbols = make_unique_ptr().
@@ -164,7 +172,7 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
     fprintf(file, "Backtrace unavailable\n");
 
-#endif // AJG_SYNTH_HAS_EXECINFO_H
+#endif
 
 }
 
@@ -191,11 +199,11 @@ inline void signal_handler( int        signum
     std::exit(signum);
 }
 
-#ifdef AJG_SYNTH_THROW_EXCEPTION
-#undef AJG_SYNTH_THROW_EXCEPTION
+#ifdef AJG_SYNTH_CONFIG_HANDLE_EXCEPTION
+#undef AJG_SYNTH_CONFIG_HANDLE_EXCEPTION
 #endif
 
-#define AJG_SYNTH_THROW_EXCEPTION(e) (::ajg::synth::debug::throw_exception(e))
+#define AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e) (::ajg::synth::debug::throw_exception(e))
 
 template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
@@ -242,13 +250,11 @@ inline void set_handlers() {
     BOOST_VERIFY(signal(SIGFPE,  signal_handler) != SIG_ERR);
  // BOOST_VERIFY(signal(SIGPIPE, signal_handler) != SIG_ERR);
 
-#endif // AJG_SYNTH_HAS_SIGACTION_H
+#endif
 
     std::set_terminate(terminate_handler);
     std::set_unexpected(unexpected_handler);
 }
-
-#ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
 
 struct initializer {
   // private:
@@ -261,11 +267,7 @@ struct initializer {
     }
 } const initializer;
 
-#endif // AJG_SYNTH_DEBUG_NO_HANDLERS
-
 }}} // namespace ajg::synth::debug
-
-#ifndef AJG_SYNTH_DEBUG_NO_HANDLERS
 
 namespace boost {
 
@@ -274,10 +276,10 @@ inline void assertion_failed( char const* const expression
                             , char const* const file
                             , long        const line
                             ) {
-    fprintf(stderr, "%s in %s() at %s:%ld\n", expression,
-        ajg::synth::debug::abbreviate(function).c_str(), file, line);
-    ajg::synth::debug::fprint_backtrace(stderr, 1);
-    std::exit(EXIT_FAILURE);
+    std::string const f = ::ajg::synth::debug::abbreviate(function);
+    fprintf(stderr, "%s in %s() at %s:%ld\n", expression, f.c_str(), file, line);
+    ::ajg::synth::debug::fprint_backtrace(stderr, 1);
+    (::std::exit)(EXIT_FAILURE);
 }
 
 inline void assertion_failed_msg( char const* const expression
@@ -286,14 +288,12 @@ inline void assertion_failed_msg( char const* const expression
                                 , char const* const file
                                 , long        const line
                                 ) {
-    fprintf(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message,
-        ajg::synth::debug::abbreviate(function).c_str(), file, line);
-    ajg::synth::debug::fprint_backtrace(stderr, 1);
-    std::exit(EXIT_FAILURE);
+    std::string const f = ::ajg::synth::debug::abbreviate(function);
+    fprintf(stderr, "%s [%s] in %s() at %s:%ld\n", expression, message, f.c_str(), file, line);
+    ::ajg::synth::debug::fprint_backtrace(stderr, 1);
+    (::std::exit)(EXIT_FAILURE);
 }
 
 } // namespace boost
-
-#endif // AJG_SYNTH_DEBUG_NO_HANDLERS
 
 #endif // AJG_SYNTH_DEBUG_HPP_INCLUDED

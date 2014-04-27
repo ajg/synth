@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <climits>
 #include <utility>
 #include <typeinfo>
 #include <exception>
@@ -126,45 +127,43 @@ inline std::string get_current_working_directory() {
 }
 
 //
-// PIPE_BUF
+// read_buffer_size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PIPE_BUF
-#ifdef BUFSIZ
-#define PIPE_BUF BUFSIZ
+#if defined(PIPE_BUF)
+std::size_t const read_buffer_size = PIPE_BUF;
+#elif defined(BUFSIZ)
+std::size_t const read_buffer_size = BUFSIZ;
 #else
-#define PIPE_BUF 4096
-#endif
+std::size_t const read_buffer_size = 4096;
 #endif
 
 //
-// read_file:
-//     Slurps a whole file directly into a stream, using a buffer.
-//     TODO: Rename read_path?
+// read_file_to_stream:
+//     Slurps a whole FILE* into a stream, using a buffer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Stream> // TODO[c++11]: Make buffer_size a (defaulted) template parameter.
-void read_file(FILE *const file, Stream& stream) {
+void read_file_to_stream(FILE *const file, Stream& stream) {
     typedef typename Stream::char_type char_type;
-    BOOST_STATIC_CONSTANT(std::size_t, buffer_size = PIPE_BUF / sizeof(char_type));
-    char_type buffer[buffer_size];
+    char_type buffer[read_buffer_size];
     BOOST_ASSERT(file != 0);
 
-    while (std::size_t const items = std::fread(buffer, sizeof(char_type), buffer_size, file)) {
+    while (std::size_t const items = std::fread(buffer, sizeof(char_type), read_buffer_size, file)) {
         stream.write(buffer, items);
     }
 }
 
 //
 // read_path_to_string:
-//     Slurps a whole file directly into string.
+//     Slurps a whole file into a string.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Char> // TODO: Move close to detail::read_file.
+template <class Char>
 inline std::basic_string<Char> read_path_to_string(char const* const path) {
     FILE* const file = (std::fopen)(path, "rb");
     std::basic_ostringstream<Char> stream;
-    read_file(file, stream);
+    read_file_to_stream(file, stream);
     (std::fclose)(file); // FIXME: Not exception safe, but unlikely to be a problem.
     return stream.str();
 }
@@ -174,21 +173,20 @@ inline std::basic_string<Char> read_path_to_string(char const* const path) {
 #if AJG_SYNTH_UNUSED
 
 template <class Char>
-std::basic_string<Char> read_file(std::basic_string<Char> const& path) const {
-    std::string const narrow_path = traits_type::narrow(path);
+std::basic_string<Char> read_path_to_string(std::string const& path) const {
     std::basic_ifstream<Char> file;
 
     try {
-        file.open(narrow_path.c_str(), std::ios::binary);
-        return read_stream<std::basic_string<Char> >(file);
+        file.open(path.c_str(), std::ios::binary);
+        return read_stream_to_string<std::basic_string<Char> >(file);
     }
     catch (std::exception const& e) {
-        throw_exception(read_error(narrow_path, e.what()));
+        throw_exception(read_error(path, e.what()));
     }
 }
 
 template <class String, class Stream>
-inline String read_stream
+inline String read_stream_to_string
         ( Stream& stream
         , optional<typename Stream::size_type> const size = boost::none
         ) {
@@ -247,7 +245,7 @@ struct pipe : boost::noncopyable {
 
     template <class Stream>
     void read_into(Stream& stream) {
-        read_file(file_, stream);
+        read_file_to_stream(file_, stream);
     }
 
   private:

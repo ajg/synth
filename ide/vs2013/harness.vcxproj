@@ -41,7 +41,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);..\..;..\..\tests\tut-framework\include;$(BoostPath)</IncludePath>
+    <IncludePath>$(IncludePath);..\..;..\..\external\tut-framework\include;$(BoostPath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(BoostPath)\lib32-msvc-12.0</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

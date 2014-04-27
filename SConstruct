@@ -29,7 +29,7 @@ def make_environment(cxx):
 
 def create_targets(env):
     harness = env.Clone()
-    harness.Append(CPPPATH = ['tests/tut-framework/include'])
+    harness.Append(CPPPATH = ['external/tut-framework/include'])
     harness.Program(
         target = 'tests/harness.out',
         source = ['tests/harness.cpp'] + find_test_sources(),

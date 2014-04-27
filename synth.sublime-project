@@ -50,7 +50,6 @@
                 "build",
                 "dist",
                 "external",
-                "tests/tut-framework",
                 "*.egg-info"
             ],
             "follow_symlinks": true,

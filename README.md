@@ -531,7 +531,6 @@ Future Work
      + Replace all `throw_exception` with `AJG_SYNTH_THROW` but hide
        backtraces for expected exceptions in unit tests
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
-   * Move tut-framework/ to external/
    * Remove as much dead weight from local Boost copy as possible; and/or
    * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`

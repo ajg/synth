@@ -11,7 +11,6 @@
 #include <ctime>
 #include <vector>
 #include <utility>
-#include <algorithm>
 
 #include <boost/random.hpp>
 #include <boost/foreach.hpp>
@@ -236,35 +235,6 @@ select_nested(Match const& match, Regex const& regex) {
                          , boost::make_filter_iterator(predicate, end,   end)
                          );
 }
-
-//
-// insensitive_less:
-//     Case-insensitive version of std::less<T>.
-//     TODO: Move to synth/detail.hpp or value_traits/value_behavior.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class T>
-struct insensitive_less : std::binary_function<T, T, bool> {
-  public:
-
-    bool operator ()(T const& t1, T const& t2) const {
-        return std::lexicographical_compare
-            ( t1.begin(), t1.end()
-            , t2.begin(), t2.end()
-            , comparer()
-            );
-    }
-
-  private:
-
-    typedef typename T::value_type V;
-
-    struct comparer : std::binary_function<V, V, bool> {
-        bool operator ()(V const& v1, V const& v2) const {
-            return std::tolower(v1) < std::tolower(v2);
-        }
-    };
-};
 
 //
 // has_mapped_type

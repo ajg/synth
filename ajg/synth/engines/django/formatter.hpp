@@ -246,6 +246,9 @@ struct formatter {
         string_type Z;
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
+            std::time_t time = std::time(0);
+            struct std::tm const* const now = (std::localtime)(&time);
+
             date_type     const date        = datetime.date();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
@@ -262,7 +265,8 @@ struct formatter {
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
-            string_type   const succint     = trim_zeros(flags.I) + (has_minutes ? char_type(':') + flags.M : string_type());
+            string_type   const succint     = trim_zeros(flags.I)
+                                            + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
                                             : (succint + char_type(' ') + meridiem);
@@ -278,6 +282,7 @@ struct formatter {
                                             + flags.Y + char_type(' ')
                                             + flags.T;
             string_type   const dst         = is_dst ? traits_type::literal("1") : traits_type::literal("0");
+            string_type   const localtz     = traits_type::widen(string_type(now->is_dst ? tzname[1] : tzname[0]));
 
             cooked_flags cooked;
             cooked.a = meridiem;
@@ -311,7 +316,7 @@ struct formatter {
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
-            cooked.T = traits_type::widen(string_type(tzname[0]));
+            cooked.T = local_tz;
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
             cooked.U = behavior_type::to_string((datetime - epoch).seconds());
             cooked.w = flags.w;

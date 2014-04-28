@@ -19,7 +19,8 @@
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail/if_c.hpp>
+#include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/tmpl/value.hpp>
 #include <ajg/synth/engines/tmpl/options.hpp>
@@ -154,7 +155,11 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         builtin_tags_.initialize(*this);
     }
 
-  public:
+  private:
+
+    using kernel_type::base_type::is;
+
+  public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     path_type extract_path(match_type const& attr) const {
         return traits_type::to_path(this->extract_attribute(attr));
@@ -162,7 +167,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
 
     string_type extract_attribute(match_type const& attr) const {
         if (is(attr, this->attribute)) {
-            match_type const& attr_ = detail::unnest(attr);
+            match_type const& attr_ = this->unnest(attr);
             return extract_attribute(attr_);
         }
         else if (is(attr, this->name_attribute)) {
@@ -248,7 +253,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                    , context_type const& context
                    , options_type const& options
                    ) const {
-        match_type const& match_ = detail::unnest(match);
+        match_type const& match_ = this->unnest(match);
         id_type    const  id     = match_.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
@@ -277,7 +282,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         optional<string_type>                      fallback = boost::none;
 
         BOOST_FOREACH(match_type const& nested, match.nested_results()) {
-            match_type const& attr  = detail::unnest(nested);
+            match_type const& attr  = this->unnest(nested);
             match_type const& value = attr(this->attribute);
 
             if (is(attr, this->name_attribute)) {

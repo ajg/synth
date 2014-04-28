@@ -13,8 +13,6 @@
 
 #include <boost/assign/list_of.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
-
 namespace tests {
 namespace data {
 namespace {

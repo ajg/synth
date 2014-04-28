@@ -17,14 +17,12 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
-
 namespace ajg {
 namespace synth {
 namespace engines {
 namespace django {
 namespace {
-    namespace algo = boost::algorithm;
+namespace algo = boost::algorithm;
 } // namespace
 
 //
@@ -280,6 +278,7 @@ struct formatter {
             string_type   const dst         = is_dst ? traits_type::literal("1") : traits_type::literal("0");
          // datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
          // duration_type const since_epoch = datetime - epoch;
+         // time_type     const utc_epoch   = traits_type::to_time(std::time_t(0));
             time_type     const utc_epoch   = time_type(date_type(1970, 1, 1));
             duration_type const since_epoch = datetime.utc_time() - utc_epoch;
 
@@ -292,7 +291,7 @@ struct formatter {
             cooked.c = iso8601;
             cooked.d = flags.d;
             cooked.D = flags.a;
-            cooked.e = flags.z;                             // TODO: Ignored with ptimes.
+            cooked.e = flags.z;
             cooked.E = flags.B;                             // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;

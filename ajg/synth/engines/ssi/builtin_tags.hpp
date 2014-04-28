@@ -13,7 +13,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 
 namespace ajg {
 namespace synth {
@@ -47,6 +47,8 @@ struct builtin_tags {
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
+
+    typedef detail::transformer<string_type>                                    transform;
 
   public:
 
@@ -101,7 +103,7 @@ enum { interpolated = true, raw = false };
 
 // TODO: Make `name` and `value` arguments.
 #define AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
-    BOOST_FOREACH(match_type const& attr, detail::unnest(x).nested_results()) { \
+    BOOST_FOREACH(match_type const& attr, args.kernel.unnest(x).nested_results()) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
         if_statement else throw_exception(invalid_attribute(traits_type::narrow(name))); \
@@ -165,8 +167,8 @@ enum { interpolated = true, raw = false };
                 if (name == traits_type::literal("var")) {
                     string_type const result = args.kernel.lookup_variable(args.context, args.options, value);
                     if      (encoding == traits_type::literal("none"))   args.ostream << result;
-                    else if (encoding == traits_type::literal("url"))    args.ostream << detail::uri_encode(result);
-                    else if (encoding == traits_type::literal("entity")) args.ostream << detail::escape_entities(result);
+                    else if (encoding == traits_type::literal("url"))    args.ostream << transform::uri_encode(result);
+                    else if (encoding == traits_type::literal("entity")) args.ostream << transform::escape_entities(result);
                     else throw_exception(invalid_attribute("encoding"));
                 }
                 else if (name == traits_type::literal("encoding")) {
@@ -194,7 +196,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("exec cgi"));
                 }
                 else if (name == traits_type::literal("cmd")) {
-                    synth::detail::pipe pipe(traits_type::narrow(value));
+                    detail::pipe pipe(traits_type::narrow(value));
                     pipe.read_into(args.ostream);
                 }
             );
@@ -217,7 +219,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    std::time_t const stamp = synth::detail::stat_file(traits_type::narrow(value)).st_mtime;
+                    std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
                     args.ostream << traits_type::format_time(args.options.time_format, traits_type::to_time(stamp));
                 }
             );
@@ -243,7 +245,7 @@ enum { interpolated = true, raw = false };
                     throw_exception(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
-                    size_type const size = synth::detail::stat_file(traits_type::narrow(value)).st_size;
+                    size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
                     abbreviate ? args.ostream << traits_type::format_size(size) : args.ostream << size;
                 }
             );
@@ -266,7 +268,7 @@ enum { interpolated = true, raw = false };
             boolean_type condition = false;
 
             BOOST_FOREACH(match_type const& nested, args.match.nested_results()) {
-                if (is(nested, args.kernel.block)) {
+                if (kernel_type::is(nested, args.kernel.block)) {
                     if (condition) {
                         args.kernel.render_block(args.ostream, nested, args.context, args.options);
                         break;

@@ -22,11 +22,8 @@
 #include <stdexcept>
 #include <sys/stat.h>
 
-#if AJG_SYNTH_IS_PLATFORM_WINDOWS
-#    include <direct.h>
-#else
-#    include <unistd.h>
-extern char **environ;
+#if AJG_SYNTH_IS_COMPILER_MSVC
+#    include <direct.h> // For MAX_PATH
 #endif
 
 #include <boost/assert.hpp>
@@ -34,7 +31,7 @@ extern char **environ;
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/program_options/environment_iterator.hpp>
+#include <boost/utility/enable_if.hpp>
 
 #include <ajg/synth/exceptions.hpp>
 
@@ -52,43 +49,6 @@ using boost::throw_exception;
 struct nonconstructible {
   private:
     nonconstructible();
-};
-
-//
-// standard_environment:
-//     Safer and iterable interface to the program's environment.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct standard_environment {
-  public:
-
-    typedef boost::environment_iterator         iterator;
-    typedef boost::environment_iterator         const_iterator;
-    typedef iterator::value_type                value_type;
-    typedef value_type::first_type              key_type;
-    typedef value_type::second_type             mapped_type;
-
-  public:
-
-    const_iterator begin() const {
-        return const_iterator(environ);
-    }
-
-    const_iterator end() const {
-        return const_iterator();
-    }
-
-    const_iterator find(key_type const& name) const {
-        const_iterator const end = this->end();
-
-        for (const_iterator it = begin(); it != end; ++it) {
-            if (it->first == name) {
-                return it;
-            }
-        }
-
-        return end;
-    }
 };
 
 //

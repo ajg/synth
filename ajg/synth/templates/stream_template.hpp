@@ -5,8 +5,8 @@
 #ifndef AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_STREAM_TEMPLATE_HPP_INCLUDED
 
-#include <ajg/synth/templates/detail.hpp>
 #include <ajg/synth/templates/base_template.hpp>
+#include <ajg/synth/detail/bidirectional_input_stream.hpp>
 
 namespace ajg {
 namespace synth {

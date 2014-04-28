@@ -22,7 +22,8 @@
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail/find.hpp>
+#include <ajg/synth/detail/standard_environment.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/ssi/value.hpp>
 #include <ajg/synth/engines/ssi/options.hpp>
@@ -52,7 +53,7 @@ struct engine : base_engine<Traits> {
     typedef ssi::value<traits_type>                                             value_type;
     typedef std::map<string_type, value_type>                                   context_type;
     typedef options<value_type>                                                 options_type;
-    typedef synth::detail::standard_environment                                 environment_type;
+    typedef detail::standard_environment                                        environment_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
 
@@ -179,7 +180,12 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         builtin_tags_.initialize(*this);
     }
 
-  public:
+  private:
+
+    using kernel_type::base_type::is;
+    using kernel_type::base_type::is_;
+
+  public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     std::pair<string_type, string_type> parse_attribute( match_type   const& attr
                                                        , args_type    const& args
@@ -279,7 +285,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                    , options_type const& options
                    ) const
     try {
-        match_type const& match_ = detail::unnest(match);
+        match_type const& match_ = this->unnest(match);
         id_type    const  id     = match_.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
@@ -387,22 +393,22 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     }
 
     string_type parse_string(args_type const& args, string_match_type const& match) const {
-        string_match_type const& string = detail::unnest(match);
-        if (is(string, this->raw_string))           return match.str();
-        if (is(string, this->regex_expression))     return this->extract_attribute(match);
-        if (is(string, this->variable))             return this->interpolate(args, match.str());
-        if (is(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
+        string_match_type const& string = this->unnest_(match);
+        if (is_(string, this->raw_string))           return match.str();
+        if (is_(string, this->regex_expression))     return this->extract_attribute(match);
+        if (is_(string, this->variable))             return this->interpolate(args, match.str());
+        if (is_(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
         throw_exception(std::logic_error("invalid string"));
     }
 
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
-        if (is(expr, this->and_expression))        return fold(args, expr, true, std::logical_and<bool>());
-        if (is(expr, this->or_expression))         return fold(args, expr, false, std::logical_or<bool>());
-        if (is(expr, this->not_expression))        return !evaluate_expression(args, detail::unnest(expr));
-        if (is(expr, this->primary_expression))    return evaluate_expression(args, detail::unnest(expr));
-        if (is(expr, this->expression))            return evaluate_expression(args, detail::unnest(expr));
-        if (is(expr, this->string_expression))     return !parse_string(args, expr).empty();
-        if (is(expr, this->comparison_expression)) return equals(args, expr);
+        if (is_(expr, this->and_expression))        return fold(args, expr, boolean_type(true), std::logical_and<boolean_type>());
+        if (is_(expr, this->or_expression))         return fold(args, expr, boolean_type(false), std::logical_or<boolean_type>());
+        if (is_(expr, this->not_expression))        return !evaluate_expression(args, this->unnest_(expr));
+        if (is_(expr, this->primary_expression))    return evaluate_expression(args, this->unnest_(expr));
+        if (is_(expr, this->expression))            return evaluate_expression(args, this->unnest_(expr));
+        if (is_(expr, this->string_expression))     return !parse_string(args, expr).empty();
+        if (is_(expr, this->comparison_expression)) return equals(args, expr);
         throw_exception(std::logic_error("invalid expression"));
 
     }

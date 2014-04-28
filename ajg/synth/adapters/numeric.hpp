@@ -13,7 +13,6 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/utility/enable_if.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/adapters/numeric_adapter.hpp>
 

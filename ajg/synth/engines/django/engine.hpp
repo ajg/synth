@@ -25,7 +25,7 @@
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/django/value.hpp>
 #include <ajg/synth/engines/django/loader.hpp>
@@ -290,7 +290,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         }
     };
 
-  public:
+  private:
+
+    using kernel_type::base_type::is;
+
+  public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     inline regex_type marker  (string_type const& s, string_type const& name) { return as_xpr((this->markers[name] = s)); }
     inline regex_type word    (string_type const s) { return as_xpr(s) >> _b; }
@@ -298,8 +302,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
     inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *_s; }
     inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *_s; }
-
-  public:
 
     template <char_type Delimiter>
     sequence_type split_argument( value_type   const& argument
@@ -353,12 +355,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
     string_type extract_string(match_type const& match) const {
         BOOST_ASSERT(is(match, this->string_literal));
-        return detail::unquote(match.str());
+        return detail::transformer<string_type>::unquote(match.str());
     }
 
     names_type extract_names(match_type const& match) const {
         names_type names;
-        BOOST_FOREACH(match_type const& name, detail::select_nested(match, this->name)) {
+        BOOST_FOREACH(match_type const& name, this->select_nested(match, this->name)) {
             names.push_back(name[id].str());
         }
         return names;
@@ -403,7 +405,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                    , context_type const& context
                    , options_type const& options
                    ) const {
-        match_type const& match_ = detail::unnest(match);
+        match_type const& match_ = this->unnest(match);
         id_type    const  id     = match_.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
@@ -432,7 +434,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                             ) const {
         value_type result = value;
 
-        BOOST_FOREACH(match_type const& filter, detail::select_nested(match, this->filter)) {
+        BOOST_FOREACH(match_type const& filter, this->select_nested(match, this->filter)) {
             BOOST_ASSERT(is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
@@ -485,7 +487,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                                      , options_type  const& options
                                      ) const {
         arguments_type arguments;
-        BOOST_FOREACH(match_type const& arg, detail::select_nested(match, this->argument)) {
+        BOOST_FOREACH(match_type const& arg, this->select_nested(match, this->argument)) {
             value_type const& value = this->evaluate(arg(this->value), context, options);
             if (match_type const& name = arg(this->restricted_identifier)) {
                 arguments.second[name.str()] = value; // Keyword argument.
@@ -502,7 +504,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                                , options_type const& options
                                ) const {
         BOOST_ASSERT(is(match, this->literal));
-        match_type  const& literal = detail::unnest(match);
+        match_type  const& literal = this->unnest(match);
         string_type const  string  = match.str();
         string_type const  token   = literal[0];
 
@@ -510,7 +512,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return value_type(none_type()).token(token);
         }
         else if (is(literal, this->boolean_literal)) {
-            match_type const& boolean = detail::unnest(literal);
+            match_type const& boolean = this->unnest(literal);
 
             if (is(boolean, this->true_literal)) {
                 return value_type(boolean_type(true)).token(token);
@@ -550,7 +552,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                                   , context_type const& context
                                   , options_type const& options
                                   ) const {
-        match_type const& expr = detail::unnest(match);
+        match_type const& expr = this->unnest(match);
 
         if (is(expr, this->unary_expression)) {
             return this->evaluate_unary(expr, context, options);
@@ -592,7 +594,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         value_type value = this->evaluate_chain(chain, context, options);
         string_type op;
 
-        BOOST_FOREACH(match_type const& segment, synth::detail::drop(match.nested_results(), 1)) {
+        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
             if (is(segment, this->binary_operator)) {
                 op = segment.str();
             }
@@ -644,7 +646,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                             , context_type const& context
                             , options_type const& options
                             ) const {
-        match_type const& link = detail::unnest(match);
+        match_type const& link = this->unnest(match);
 
         if (is(link, this->subscript_link)) { // i.e. value[attribute]
             return this->evaluate(link(this->expression), context, options);
@@ -665,7 +667,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(lit, context, options);
 
-        BOOST_FOREACH(match_type const& link, detail::select_nested(match, this->link)) {
+        BOOST_FOREACH(match_type const& link, this->select_nested(match, this->link)) {
             value_type const attribute = this->evaluate_link(link, context, options);
             value = value.must_get_attribute(attribute);
         }

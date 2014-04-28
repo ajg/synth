@@ -20,7 +20,6 @@
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_traits.hpp>
-#include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
 namespace synth {

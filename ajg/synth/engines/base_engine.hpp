@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <utility>
 #include <ostream>
 #include <numeric>
 #include <algorithm>
@@ -18,17 +19,36 @@
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
+#include <boost/iterator/filter_iterator.hpp>
+
+#include <boost/xpressive/basic_regex.hpp>
+#include <boost/xpressive/match_results.hpp>
+#include <boost/xpressive/regex_actions.hpp>
+#include <boost/xpressive/regex_compiler.hpp>
+#include <boost/xpressive/regex_algorithms.hpp>
+#include <boost/xpressive/regex_primitives.hpp>
+
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/detail.hpp>
 
 namespace ajg {
 namespace synth {
 namespace engines {
 
-using detail::is;
+using boost::xpressive::_;
+using boost::xpressive::_b;
+using boost::xpressive::_d;
+using boost::xpressive::_ln;
+using boost::xpressive::_n;
+using boost::xpressive::_s;
+using boost::xpressive::_w;
+using boost::xpressive::as_xpr;
+using boost::xpressive::s1;
+using boost::xpressive::s2;
+
+namespace x = boost::xpressive;
 
 template <class Traits>
-struct base_engine : synth::detail::nonconstructible {
+struct base_engine : detail::nonconstructible {
 
     typedef base_engine                                                         engine_type;
     typedef Traits                                                              traits_type;
@@ -59,6 +79,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
   protected:
 
+    typedef kernel_type                                                         base_type;
     typedef x::regex_id_type                                                    id_type;
     typedef x::basic_regex<iterator_type>                                       regex_type;
     typedef x::match_results<iterator_type>                                     match_type;
@@ -105,6 +126,62 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
     inline static match_type const& get_match(result_type const& result) { return result.match_; }
 
+//
+// is
+//     Returns whether the match and regex share regex_ids.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static boolean_type is(match_type const& match, regex_type const& regex) {
+        return match.regex_id() == regex.regex_id();
+    }
+
+//
+// is_
+//     Note that this isn't an overload of `is` because string_match_type can equal match_type.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static boolean_type is_(string_match_type const& match, string_regex_type const& regex) {
+        return match.regex_id() == regex.regex_id();
+    }
+
+//
+// unnest
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static match_type const& unnest(match_type const& match) {
+        BOOST_ASSERT(match);
+        BOOST_ASSERT(match.size() >= 1);
+        return *match.nested_results().begin();
+    }
+
+//
+// unnest_
+//     Note that this isn't an overload of `unnest` because string_match_type can equal match_type.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_match_type const& unnest_(string_match_type const& match) {
+        BOOST_ASSERT(match);
+        BOOST_ASSERT(match.size() >= 1);
+        return *match.nested_results().begin();
+    }
+
+//
+// select_nested
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static std::pair
+            < boost::filter_iterator<x::regex_id_filter_predicate<typename regex_type::iterator_type>, typename match_type::nested_results_type::const_iterator>
+            , boost::filter_iterator<x::regex_id_filter_predicate<typename regex_type::iterator_type>, typename match_type::nested_results_type::const_iterator>
+            >
+    select_nested(match_type const& match, regex_type const& regex) {
+        typename match_type::nested_results_type::const_iterator begin(match.nested_results().begin());
+        typename match_type::nested_results_type::const_iterator end(match.nested_results().end());
+        x::regex_id_filter_predicate<typename regex_type::iterator_type> predicate(regex.regex_id());
+        return std::make_pair( boost::make_filter_iterator(predicate, begin, end)
+                             , boost::make_filter_iterator(predicate, end,   end)
+                             );
+    }
+
   public:
 
     template <class I>
@@ -127,7 +204,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
         // On failure, throw a semi-informative exception.
         size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
-        string_type const site(furthest, synth::detail::advance_to(furthest, (std::min)(room, limit)));
+        string_type const site(furthest, detail::advance_to(furthest, (std::min)(room, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
         // XXX: Using AJG_SYNTH_THROW here adds a superfluous stack trace to a few unit tests.
         boost::throw_exception(parsing_error(traits_type::narrow(line)));

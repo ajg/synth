@@ -10,6 +10,8 @@
 #include <boost/python.hpp>
 #include <boost/foreach.hpp>
 
+// TODO: Refactor this into a utility struct or fold into the binding or such.
+
 namespace ajg {
 namespace synth {
 namespace bindings {

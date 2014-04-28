@@ -8,12 +8,13 @@
 #include <map>
 #include <vector>
 
+#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/assign/list_of.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
+#include <ajg/synth/detail/find.hpp>
 
 namespace ajg {
 namespace synth {

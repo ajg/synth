@@ -21,6 +21,7 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 
 namespace ajg {
 namespace synth {
@@ -69,7 +70,7 @@ struct value : value_facade<Traits, value> {
 
     value_type escape() const {
         // XXX: Should this method escape binary and control characters?
-        return detail::escape_entities(this->to_string());
+        return detail::transformer<string_type>::escape_entities(this->to_string());
     }
 
     /*

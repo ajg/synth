@@ -29,7 +29,13 @@
 
 #include <boost/xpressive/regex_token_iterator.hpp>
 
-#include <ajg/synth/engines/detail.hpp>
+// TODO[c++11]: Replace with <random>.
+// XXX: Not used because it is not header-only:
+// #include <boost/random/random_device.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+
+#include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -63,6 +69,8 @@ struct builtin_filters {
 
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
+
+    typedef detail::transformer<string_type>                                    transform;
 
     typedef value_type (*filter_type)( kernel_type    const&
                                      , value_type     const&
@@ -420,7 +428,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return detail::escape_controls(value.to_string());
+            return transform::escape_controls(value.to_string());
         }
     };
 
@@ -494,7 +502,7 @@ struct builtin_filters {
             number_type const number = value.to_number();
 
             // If it's an integer and n < 0, we don't want decimals.
-            boolean_type const is_integer = synth::detail::is_integer(number);
+            boolean_type const is_integer = detail::is_integer(number);
             int const precision = n < 0 && is_integer ? 0 : (std::abs)(n);
             stream << std::fixed << std::setprecision(precision) << number;
 
@@ -566,7 +574,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return detail::iri_encode(value.to_string());
+            return transform::iri_encode(value.to_string());
         }
     };
 
@@ -869,7 +877,7 @@ struct builtin_filters {
             with_arity<0>::validate(arguments.first.size());
             // NOTE: Since this filter is for debugging, we don't normally try to do anything fancy.
             //       In the Python binding it can be overridden with a call to the real pprint.
-            return value.is_string() ? detail::quote(value.to_string(), '\'') : value.to_string();
+            return value.is_string() ? transform::quote(value.to_string(), '\'') : value.to_string();
         }
     };
 
@@ -885,12 +893,18 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            if (size_type const size  = value.size()) {
-                size_type const index = detail::random_int(0, size - 1);
+
+            if (size_type const size = value.size()) {
+                // TODO[c++11]: Replace with std::random_device.
+                // XXX: Not used because it is not header-only.
+                // boost::random::random_device device;
+                boost::random::mt19937 device(static_cast<unsigned int>((std::time)(0)));
+                boost::random::uniform_int_distribution<size_type> distribution(0, size - 1);
+                size_type const index = distribution(device);
                 return value[index];
             }
             else {
-                throw_exception(std::invalid_argument("sequence"));
+                throw_exception(std::invalid_argument("empty sequence"));
             }
         }
     };
@@ -1480,7 +1494,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return detail::uri_encode(value.to_string());
+            return transform::uri_encode(value.to_string());
         }
     };
 

@@ -7,8 +7,6 @@
 
 #include <vector>
 
-#include <ajg/synth/engines/detail.hpp>
-
 namespace ajg {
 namespace synth {
 namespace engines {

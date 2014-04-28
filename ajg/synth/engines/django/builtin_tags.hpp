@@ -19,7 +19,6 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/detail.hpp>
 #include <ajg/synth/adapters/map.hpp>
 #include <ajg/synth/adapters/bool.hpp>
 #include <ajg/synth/adapters/string.hpp>
@@ -27,6 +26,7 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/utility.hpp>
 #include <ajg/synth/adapters/variant.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -65,6 +65,8 @@ struct builtin_tags {
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
+
+    typedef detail::transformer<string_type>                                    transform;
 
   public:
 
@@ -262,7 +264,7 @@ struct builtin_tags {
                           ) {
 
             if (optional<value_type> const& token = detail::find(traits_type::literal("csrf_token"), context)) {
-                string_type const& s = detail::escape_entities(token->to_string());
+                string_type const& s = transform::escape_entities(token->to_string());
 
                 if (s != traits_type::literal("NOTPROVIDED")) {
                     ostream << "<div style='display:none'>";
@@ -296,7 +298,7 @@ struct builtin_tags {
             size_type   const  total    = vals.nested_results().size();
             size_type   const  current  = detail::find(position, options.cycles_).get_value_or(0);
 
-            match_type const& val   = *synth::detail::advance_to(vals.nested_results().begin(), current);
+            match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
             value_type const  value = kernel.evaluate(val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
 
@@ -432,7 +434,7 @@ struct builtin_tags {
                           ) {
             match_type const& vals = match(kernel.values);
 
-            BOOST_FOREACH(match_type const& val, detail::select_nested(vals, kernel.value)) {
+            BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
                 try {
                     if (value_type const value = kernel.evaluate(val, context, options)) {
                         ostream << value;
@@ -610,7 +612,7 @@ struct builtin_tags {
                 // NOTE: The key is a string (rather than e.g. an int) presumably in case variables are repeated.
                 mapping_type values;
 
-                BOOST_FOREACH(match_type const& val, detail::select_nested(vals, kernel.value)) {
+                BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
                     string_type const s = boost::algorithm::trim_copy(val.str());
                     values[s] = kernel.evaluate(val, context, options);
                 }
@@ -790,7 +792,7 @@ struct builtin_tags {
             options_type options_copy  = options;
             context_type context_copy  = context;
 
-            BOOST_FOREACH(match_type const& package, detail::select_nested(packages, kernel.package)) {
+            BOOST_FOREACH(match_type const& package, kernel.select_nested(packages, kernel.package)) {
                 string_type const& library = package[id].str();
                 kernel.load_library(context_copy, options_copy, library);
             }
@@ -819,7 +821,7 @@ struct builtin_tags {
             string_type const& library = match(kernel.package)[id].str();
             std::vector<string_type> components;
 
-            BOOST_FOREACH(match_type const& name, detail::select_nested(names, kernel.name)) {
+            BOOST_FOREACH(match_type const& name, kernel.select_nested(names, kernel.name)) {
                 components.push_back(name[id].str());
             }
 
@@ -959,7 +961,7 @@ struct builtin_tags {
             path_type    const path   = traits_type::to_path(value.to_string());
             boolean_type const parsed = match[s1].matched;
 
-            if (!synth::detail::is_absolute(path)) {
+            if (!detail::is_absolute(path)) {
                 throw_exception(std::invalid_argument("relative path"));
             }
 

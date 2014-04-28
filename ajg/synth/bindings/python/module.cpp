@@ -3,8 +3,8 @@
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 // TODO? #include <boost/python/detail/wrap_python.hpp>
-#include <Python.h>             // This prevents a strange macro issue in pyport.h.
-#include <ajg/synth/config.hpp> // Must come ahead of everything except Python.h.
+#include <Python.h>              // This prevents a strange macro issue in pyport.h.
+#include <ajg/synth/support.hpp> // Must come ahead of everything except Python.h.
 
 #include <boost/python.hpp>
 

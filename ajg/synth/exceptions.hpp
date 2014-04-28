@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_EXCEPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_EXCEPTIONS_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
 
 #include <string>
 #include <typeinfo>

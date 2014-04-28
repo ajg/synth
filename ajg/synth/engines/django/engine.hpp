@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_DJANGO_ENGINE_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
 
 #include <map>
 #include <string>

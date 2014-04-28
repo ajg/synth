@@ -7,6 +7,7 @@
 
 #include <ajg/synth/version.hpp>
 #include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/exceptions.hpp>

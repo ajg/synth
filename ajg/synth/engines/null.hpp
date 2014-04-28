@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_NULL_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_NULL_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
 #include <ajg/synth/engines/null/engine.hpp>
 
 #endif // AJG_SYNTH_ENGINES_NULL_HPP_INCLUDED

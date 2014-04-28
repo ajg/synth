@@ -2,7 +2,7 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#include <ajg/synth/config.hpp> // Must come ahead of everything else.
+#include <ajg/synth/support.hpp> // Must come ahead of everything else.
 
 #include <cstdlib>
 #include <iostream>
@@ -15,7 +15,7 @@ namespace {
 
 namespace s = ajg::synth;
 
-typedef s::default_traits<AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE>                          traits_type;
+typedef s::default_traits<AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE>                   traits_type;
 typedef s::bindings::command_line::binding<traits_type>                         binding_type;
 typedef s::bindings::command_line::command<binding_type>                        command_type;
 

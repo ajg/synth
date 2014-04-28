@@ -5,8 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
-
+#include <ajg/synth/support.hpp>
 #include <ajg/synth/engines/django.hpp>
 #include <ajg/synth/engines/null.hpp>
 #include <ajg/synth/engines/ssi.hpp>

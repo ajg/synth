@@ -5,8 +5,7 @@
 #ifndef AJG_SYNTH_ADAPTERS_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
-
+#include <ajg/synth/support.hpp>
 #include <ajg/synth/adapters/ref.hpp>
 #include <ajg/synth/adapters/bool.hpp>
 #include <ajg/synth/adapters/none.hpp>

@@ -5,16 +5,14 @@
 #ifndef AJG_SYNTH_TESTING_HPP_INCLUDED
 #define AJG_SYNTH_TESTING_HPP_INCLUDED
 
-#define AJG_SYNTH_IS_TESTING 1
-
-#include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
 
 #include <string>
 #include <iostream>
 
 #include <boost/static_assert.hpp>
 
-// TODO: Wrap this into AJG_SYNTH_EXTERNAL_PUSH in config.hpp
+// TODO: Wrap this into AJG_SYNTH_EXTERNAL_PUSH in support.hpp
 #if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wold-style-cast"
@@ -32,7 +30,7 @@
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
-// TODO: Wrap this into AJG_SYNTH_EXTERNAL_POP in config.hpp
+// TODO: Wrap this into AJG_SYNTH_EXTERNAL_POP in support.hpp
 #if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic pop
 #elif AJG_SYNTH_IS_COMPILER_GCC && (AJG_SYNTH_COMPILER_VERSION >= 406)

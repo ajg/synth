@@ -5,14 +5,14 @@
 #ifndef AJG_SYNTH_DETAIL_STANDARD_ENVIRONMENT_HPP_INCLUDED
 #define AJG_SYNTH_DETAIL_STANDARD_ENVIRONMENT_HPP_INCLUDED
 
-#include <ajg/synth/config.hpp>
+#include <ajg/synth/support.hpp>
+
+#include <boost/program_options/environment_iterator.hpp>
 
 #if !AJG_SYNTH_IS_PLATFORM_WINDOWS
 #    include <unistd.h>
 extern char **environ;
 #endif
-
-#include <boost/program_options/environment_iterator.hpp>
 
 namespace ajg {
 namespace synth {

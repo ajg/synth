@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <ostream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -43,36 +44,50 @@ namespace synth {
 namespace debug {
 
 static std::size_t count = 0, level = 0;
-inline void dummy() { (void) count; (void) level; }
 
 ///
-/// AJG_SYNTH_DEBUG_RESET_COUNT
+/// reset
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if AJG_SYNTH_IS_DEBUG
-#    define AJG_SYNTH_DEBUG_RESET_COUNT(n) (::ajg::synth::debug::count = n)
-#else
-#    define AJG_SYNTH_DEBUG_RESET_COUNT(n) ((void) 0)
-#endif
+inline void reset() {
+    count = 0;
+    level = 0;
+}
 
 ///
-/// AJG_SYNTH_DEBUG_LOG_LEAD, AJG_SYNTH_DEBUG_LOG_TRAIL
-///     TODO: Format file/line/col the same as the compiler so that IDEs pick it up.
+/// log
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_DEBUG_LOG_TRAIL (std::endl)
-#define AJG_SYNTH_DEBUG_LOG_LEAD  ( \
-    (ajg::synth::debug::count++ ? std::cerr : std::cerr << std::endl) << std::boolalpha \
-    << "  in " << __FUNCTION__ << "():\t" \
-    << std::string(ajg::synth::debug::level * 4, ' ') \
-)
+inline std::ostream& log( char const* const function
+                        , char const* const file
+                        , long        const line
+                        , long        const column = 1
+                        ) {
+    std::ostream& stream = std::cerr;
+
+    if (ajg::synth::debug::count++) {
+        stream << std::endl;
+    } else {
+        stream << std::boolalpha;
+    }
+
+    std::string const indent(level * 2, ' ');
+    stream << file << ":" << line << ":" << column << ": in " << function << "(...):\t" << indent;
+    return stream;
+}
 
 ///
-/// DUMP, PRINT
+/// AJG_SYNTH_DEBUG_LOG
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define DUMP(e)  (AJG_SYNTH_DEBUG_LOG_LEAD << #e << " = `" << (e) << "`" << AJG_SYNTH_DEBUG_LOG_TRAIL)
-#define PRINT(e) (AJG_SYNTH_DEBUG_LOG_LEAD << (e)                        << AJG_SYNTH_DEBUG_LOG_TRAIL)
+#define AJG_SYNTH_DEBUG_LOG() (::ajg::synth::debug::log(__FUNCTION__, __FILE__, __LINE__))
+
+///
+/// SHOW, LOG
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define SHOW(e) (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
+#define LOG(e)  (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
 
 ///
 /// abbreviate

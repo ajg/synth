@@ -93,7 +93,7 @@ inline void wensure_equals(std::wstring const& expect, std::wstring const& actua
     namespace tut { template<> template<> \
     void test_group_type::object::test</**/::ajg::synth::detail::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
-        AJG_SYNTH_DEBUG_RESET_COUNT(0); \
+        AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::reset();) \
 
 //
 // AJG_SYNTH_TEST_GROUP_WITH_DATA

@@ -277,6 +277,7 @@ Components
  - `AJG_SYNTH_CONFIG_NO_WCHAR_T`        (default: automatically determined)
  - `AJG_SYNTH_CONFIG_NO_LONG_LONG`      (default: automatically determined)
  - `AJG_SYNTH_CONFIG_NO_DEBUG`          (default: automatically determined)
+ - `AJG_SYNTH_CONFIG_NO_WINDOWS_H`      (default: not defined)
  - `AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE` (default: `char`)
  - `AJG_SYNTH_CONFIG_MAX_FRAMES`        (default: `1024`)
  - `AJG_SYNTH_CONFIG_HANDLE_ASSERT`     (default: `BOOST_ASSERT`)
@@ -547,7 +548,6 @@ Future Work
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Replace Boost.Random with `<random>`
      + Consider switching to unordered_map/unordered_set where possible
-   * Turn `detail.hpp` files into detail directories to match namespace
    * [v1+] Add `AJG_SYNTH_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
      + Add `AJG_SYNTH_PRAGMA(once)` to all header files and see if it speeds up compilations
    * [v1+] Sort `#include`s alphabetically

@@ -102,6 +102,16 @@
 #    define AJG_SYNTH_ONLY_DEBUG(e)
 #endif
 
+///
+/// AJG_SYNTH_CONFIG_NO_WINDOWS_H
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef AJG_SYNTH_CONFIG_NO_WINDOWS_H
+#    ifndef BOOST_SPIRIT_FILEITERATOR_STD
+#    define BOOST_SPIRIT_FILEITERATOR_STD // Prevents the inclusion of <windows.h>
+#    endif
+#endif
+
 //
 // AJG_SYNTH_HAS_CXXABI_H, AJG_SYNTH_HAS_EXECINFO_H:
 ////////////////////////////////////////////////////////////////////////////////////////////////////

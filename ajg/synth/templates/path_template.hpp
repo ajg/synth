@@ -5,17 +5,12 @@
 #ifndef AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_PATH_TEMPLATE_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <string>
 #include <vector>
 #include <cstring>
 #include <sys/stat.h>
-
-#ifdef AJG_SYNTH_NO_WINDOWS_H
-  #ifndef BOOST_SPIRIT_FILEITERATOR_STD
-  // Prevents the inclusion of <windows.h>:
-    #define BOOST_SPIRIT_FILEITERATOR_STD
-  #endif // !BOOST_SPIRIT_FILEITERATOR_STD
-#endif // AJG_SYNTH_NO_WINDOWS_H
 
 #include <boost/foreach.hpp>
 #include <boost/throw_exception.hpp>
@@ -31,9 +26,7 @@ namespace synth {
 namespace templates {
 
 template <class Engine>
-struct path_template : base_template< Engine
-                                    , boost::spirit::classic::file_iterator<typename Engine::char_type>
-                                    > {
+struct path_template : base_template<Engine, boost::spirit::classic::file_iterator<typename Engine::char_type> > {
   public:
 
     typedef path_template                                                       template_type;

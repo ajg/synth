@@ -197,12 +197,12 @@ def get_language():
 def get_sources():
     sources = []
 
+    sources += ['ajg/synth/bindings/python/module.cpp']
+
     if BOOST != 'system':
         boost_path = get_boost_path() + '/'
         sources += [boost_path + source for source in boost_python_sources]
 
-    # Add last to trigger fast compilation failures.
-    sources += ['ajg/synth/bindings/python/module.cpp']
     return sources
 
 # NOTE: distutils does not recognize the .hpp extension for headers so they have to be included as

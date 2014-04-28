@@ -60,7 +60,7 @@ inline typename Traits::duration_type get_duration(py::object const& timedelta) 
 
 template <class Traits>
 inline typename Traits::timezone_type get_timezone(py::object const& dt) {
-    if (py::object const& tzinfo = dt.attr("tzinfo")()) {
+    if (py::object const& tzinfo = dt.attr("tzinfo")) {
         (void) tzinfo;
 
         typename Traits::string_type   name;

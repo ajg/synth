@@ -20,6 +20,7 @@ namespace python {
 template <class Options>
 struct resolver : Options::abstract_resolver_type {
     typedef Options                               options_type;
+    typedef typename options_type::traits_type    traits_type;
     typedef typename options_type::string_type    string_type;
     typedef typename options_type::context_type   context_type;
     typedef typename options_type::arguments_type arguments_type;

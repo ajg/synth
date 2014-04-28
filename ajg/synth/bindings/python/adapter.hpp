@@ -15,6 +15,9 @@ namespace ajg {
 namespace synth {
 namespace {
 namespace py = ::boost::python;
+
+using bindings::python::get_string;
+using bindings::python::get_datetime;
 } // namespace
 
 //

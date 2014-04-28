@@ -60,12 +60,12 @@ struct kitchen_sink {
 
         context["friends"] = friends;
 
-        /*date*/time_type const past(date_type(2002, 1, 10), duration_type(1, 2, 3));
-        /*date*/time_type const future(date_type(2202, 2, 11), duration_type(3, 2, 1));
+        time_type const past(traits_type::to_date(2002, 1, 10), traits_type::to_duration(1, 2, 3));
+        time_type const future(traits_type::to_date(2202, 2, 11), traits_type::to_duration(3, 2, 1));
 
         context[traits_type::literal("past")]        = past;
-        context[traits_type::literal("before_past")] = past - duration_type(36, 0, 0);
-        context[traits_type::literal("after_past")]  = past + duration_type(1200, 20, 0);
+        context[traits_type::literal("before_past")] = past - traits_type::to_duration(36, 0, 0);
+        context[traits_type::literal("after_past")]  = past + traits_type::to_duration(1200, 20, 0);
         context[traits_type::literal("future")]      = future;
 
         std::map<string_type, string_type> mumbai, calcutta, nyc, chicago, tokyo;

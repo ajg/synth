@@ -30,7 +30,7 @@ struct resolver : Options::abstract_resolver_type {
                                          ) {
         try {
             py::object const& result = object_.attr("resolve")(path);
-            return d::to_string<string_type>(result);
+            return d::get_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only Resolver404?
             return boost::none;
@@ -46,7 +46,7 @@ struct resolver : Options::abstract_resolver_type {
         try {
             std::pair<py::tuple, py::dict> const args = d::from_arguments(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
-            return d::to_string<string_type>(result);
+            return d::get_string<string_type>(result);
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return boost::none;

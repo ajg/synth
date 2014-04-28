@@ -47,6 +47,7 @@ struct formatter {
     typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::timezone_type                                 timezone_type;
     typedef typename traits_type::string_type                                   string_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
@@ -245,6 +246,7 @@ struct formatter {
 
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
             date_type     const date        = datetime.date();
+            timezone_type const timezone    = datetime.zone();
             size_type     const day         = date.day();
             size_type     const year        = date.year();
             size_type     const iso_week    = date.week_number();
@@ -254,8 +256,8 @@ struct formatter {
             boolean_type  const has_minutes = flags.M != traits_type::literal("00");
             boolean_type  const is_midnight = flags.H == traits_type::literal("00") && !has_minutes;
             boolean_type  const is_noon     = flags.H == traits_type::literal("12") && !has_minutes;
-            boolean_type  const is_dst      = false;  // TODO: Implement, e.g. using tm_isdst from struct tm.
             boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
+            boolean_type  const is_dst      = datetime.is_dst();
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
@@ -274,25 +276,24 @@ struct formatter {
                                             + flags.d + char_type(' ')
                                             + flags.b + char_type(' ')
                                             + flags.Y + char_type(' ')
-                                            + flags.T;
-            string_type   const dst         = is_dst ? traits_type::literal("1") : traits_type::literal("0");
-         // datetime_type const epoch       = datetime_type(date_type(1970, 1, 1));
-         // duration_type const since_epoch = datetime - epoch;
-         // time_type     const utc_epoch   = traits_type::to_time(std::time_t(0));
-            time_type     const utc_epoch   = time_type(date_type(1970, 1, 1));
-            duration_type const since_epoch = datetime.utc_time() - utc_epoch;
+                                            + flags.T +
+                (!timezone ? string_type() : traits_type::to_string(traits_type::to_duration(timezone, is_dst)));
 
+         // time_type     const utc_epoch   = traits_type::to_time(std::time_t(0));
+            time_type     const utc_epoch   = traits_type::to_time(traits_type::to_date(1970, 1, 1));
+            duration_type const since_epoch = datetime.utc_time() - utc_epoch;
+            datetime_type const local_dt    = traits_type::local_datetime();
 
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
             cooked.b = algo::to_lower_copy(flags.b);
-            cooked.B = string_type();                       // NOTE: "Not implemented" per the spec.
+            cooked.B = string_type(); // NOTE: "Not implemented" per the spec.
             cooked.c = iso8601;
             cooked.d = flags.d;
             cooked.D = flags.a;
-            cooked.e = flags.z;
-            cooked.E = flags.B;                             // TODO: Make locale-aware.
+            cooked.e = flags.z; // XXX: Or traits_type::to_string(timezone, is_dst);
+            cooked.E = flags.B; // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;
             cooked.g = trim_zeros(flags.I);
@@ -300,22 +301,22 @@ struct formatter {
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
-            cooked.I = dst;
+            cooked.I = traits_type::literal(is_dst ? "1" : "0");
             cooked.j = trim_zeros(flags.d);
             cooked.l = flags.A;
             cooked.L = behavior_type::to_string(is_leapyear);
             cooked.m = flags.m;
             cooked.M = flags.b;
             cooked.n = trim_zeros(flags.m);
-            cooked.N = flags.b;                             // TODO: Use A.P. style.
+            cooked.N = flags.b; // TODO: Use A.P. style.
             cooked.o = flags.G;
-            cooked.O = traits_type::literal("");            // TODO: Implement.
+            cooked.O = traits_type::literal(""); // TODO: Implement.
             cooked.P = informal;
-            cooked.r = rfc2822;                             // TODO: Include non-UTC timezones.
+            cooked.r = rfc2822;
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
             cooked.t = behavior_type::to_string(month_days);
-            cooked.T = traits_type::local_timezone_name();
+            cooked.T = traits_type::to_string(local_dt.zone(), local_dt.is_dst());
             cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
             cooked.U = behavior_type::to_string(since_epoch.seconds());
             cooked.w = flags.w;

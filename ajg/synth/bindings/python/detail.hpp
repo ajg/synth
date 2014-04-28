@@ -21,31 +21,85 @@ namespace detail {
 namespace py = boost::python;
 
 template <class Integral>
-inline Integral to_integral(py::object const& obj) {
+inline Integral get_integral(py::object const& obj) {
     return py::extract<Integral>(py::long_(obj));
 }
 
 template <class String>
-inline String to_string(py::object const& obj) {
+inline String get_string(py::object const& obj) {
     return py::extract<String>(py::str(obj));
 }
 
 template <class Traits>
-inline typename Traits::datetime_type to_datetime(py::object const& obj) {
-    return typename Traits::datetime_type
-        ( typename Traits::date_type
-              ( to_integral<unsigned short>(obj.attr("year"))
-              , to_integral<unsigned short>(obj.attr("month"))
-              , to_integral<unsigned short>(obj.attr("day"))
-              )
-        , typename Traits::duration_type
-              ( to_integral<long>(obj.attr("hour"))
-              , to_integral<long>(obj.attr("minute"))
-              , to_integral<long>(obj.attr("second"))
-              , to_integral<long>(obj.attr("microsecond")) * 1000
-           // , TODO: obj.attr("tzinfo")
-              )
+inline typename Traits::date_type get_date(py::object const& dt) {
+    return Traits::to_date
+        ( get_integral<typename Traits::size_type>(dt.attr("year"))
+        , get_integral<typename Traits::size_type>(dt.attr("month"))
+        , get_integral<typename Traits::size_type>(dt.attr("day"))
         );
+}
+
+template <class Traits>
+inline typename Traits::time_type get_time(py::object const& dt) {
+    return Traits::to_time
+        ( get_integral<typename Traits::size_type>(dt.attr("hour"))
+        , get_integral<typename Traits::size_type>(dt.attr("minute"))
+        , get_integral<typename Traits::size_type>(dt.attr("second"))
+        , get_integral<typename Traits::size_type>(dt.attr("microsecond")) * 1000
+        );
+}
+
+template <class Traits>
+inline typename Traits::duration_type get_duration(py::object const& timedelta) {
+    return Traits::to_duration
+          ( get_integral<typename Traits::size_type>(timedelta.attr("days")) * 24 * 60 * 60
+          + get_integral<typename Traits::size_type>(timedelta.attr("seconds"))
+          , get_integral<typename Traits::size_type>(timedelta.attr("microseconds")) * 1000
+          );
+}
+
+template <class Traits>
+inline typename Traits::timezone_type get_timezone(py::object const& dt) {
+    if (py::object const& tzinfo = dt.attr("tzinfo")()) {
+        (void) tzinfo;
+
+        typename Traits::string_type   name;
+        typename Traits::duration_type offset;
+        typename Traits::string_type   dst_name;
+        typename Traits::duration_type dst_offset;
+
+        if (py::object const& utcoffset = dt.attr("utcoffset")()) {
+            offset = get_duration<Traits>(utcoffset);
+        }
+
+        if (py::object const& dst = dt.attr("dst")()) {
+            dst_offset = get_duration<Traits>(dst);
+        }
+
+        if (py::object const& tzname = dt.attr("tzname")()) {
+            if (!Traits::is_empty(dst_offset)) {
+                // TODO: name = tzinfo.tzname(dt without dst) or attempt to map common ones manually (e.g. EDT -> EST).
+                dst_name = get_string<typename Traits::string_type>(tzname);
+            }
+            else {
+                name = get_string<typename Traits::string_type>(tzname);
+                // TODO: dst_name = tzinfo.tzname(dt with dst) or attempt to map common ones manually (e.g. EST -> EDT).
+            }
+        }
+
+        return Traits::to_timezone(name, offset, dst_name, dst_offset);
+    }
+    else {
+        return typename Traits::timezone_type();
+    }
+}
+
+template <class Traits>
+inline typename Traits::datetime_type get_datetime(py::object const& dt) {
+    return Traits::to_datetime( get_date<Traits>(dt)
+                              , get_time<Traits>(dt)
+                              , get_timezone<Traits>(dt)
+                              );
 }
 
 template <class Value>

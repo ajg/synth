@@ -15,8 +15,8 @@ namespace ajg {
 namespace synth {
 namespace {
 
-namespace py = boost::python;
-namespace d  = ajg::synth::bindings::python::detail;
+namespace py = ::boost::python;
+namespace d  = ::ajg::synth::bindings::python::detail;
 
 } // namespace
 
@@ -25,8 +25,7 @@ namespace d  = ajg::synth::bindings::python::detail;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior>
-struct adapter<Behavior, py::object>
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
 
     typedef py::object object_type;
     AJG_SYNTH_ADAPTER(object_type)
@@ -39,11 +38,11 @@ struct adapter<Behavior, py::object>
   public:
 
     virtual boolean_type to_boolean() const { return boolean_type(adapted_); }
-    virtual datetime_type to_datetime() const { return d::to_datetime<traits_type>(adapted_); }
+    virtual datetime_type to_datetime() const { return d::get_datetime<traits_type>(adapted_); }
 
  // virtual void input (istream_type& in)        { in >> adapted_; }
  // virtual void output(ostream_type& out) const { out << adapted_; }
-    virtual void output(ostream_type& out) const { out << d::to_string<string_type>(adapted_); }
+    virtual void output(ostream_type& out) const { out << d::get_string<string_type>(adapted_); }
 
     virtual iterator begin() { return begin<iterator>(adapted_); }
     virtual iterator end()   { return end<iterator>(adapted_); }
@@ -119,7 +118,7 @@ struct adapter<Behavior, py::object>
     }
 
     inline static string_type class_name(py::object const& obj) {
-        return d::to_string<string_type>(obj.attr("__class__").attr("__name__"));
+        return d::get_string<string_type>(obj.attr("__class__").attr("__name__"));
     }
 };
 

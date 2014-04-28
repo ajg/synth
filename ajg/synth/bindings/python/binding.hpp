@@ -29,8 +29,8 @@ namespace synth {
 namespace bindings {
 namespace python {
 
-namespace py = boost::python;
-namespace d  = ajg::synth::bindings::python::detail;
+namespace py = ::boost::python;
+namespace d  = ::ajg::synth::bindings::python::detail;
 
 inline char const* version() {
     return AJG_SYNTH_VERSION_STRING;

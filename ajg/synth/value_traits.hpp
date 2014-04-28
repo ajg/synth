@@ -122,9 +122,11 @@ struct default_traits {
     inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) { return s; }
     inline static std::basic_string<Char> const& widen (std::basic_string<Char> const& s) { return s; }
 
+// TODO: Move everything below to value_behavior.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ///
 /// to_path:
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static path_type to_path(string_type const& s) {
@@ -132,26 +134,7 @@ struct default_traits {
     }
 
 ///
-/// to_time:
-///     TODO: Move to value_behavior.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    inline static time_type to_time(std::time_t const t) {
-        return boost::posix_time::from_time_t(t);
-    }
-
-///
-/// to_datetime
-///     TODO: Move to value_behavior.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    inline static datetime_type to_datetime(time_type const& time) {
-        return datetime_type(time, no_timezone());
-    }
-
-///
 /// utc_time
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static time_type utc_time() {
@@ -160,7 +143,6 @@ struct default_traits {
 
 ///
 /// local_time
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static time_type local_time() {
@@ -169,7 +151,6 @@ struct default_traits {
 
 ///
 /// utc_datetime
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static datetime_type utc_datetime() {
@@ -178,7 +159,6 @@ struct default_traits {
 
 ///
 /// local_datetime
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static datetime_type local_datetime() {
@@ -187,48 +167,152 @@ struct default_traits {
     }
 
 ///
-/// no_timezone:
-///     TODO: Move to value_behavior.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    inline static timezone_type no_timezone() {
-        return timezone_type();
-    }
-
-///
 /// utc_timezone:
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static timezone_type utc_timezone() {
-        // TODO: make static const
-        return timezone_type(new boost::local_time::posix_time_zone("UTC"));
+        return to_timezone(literal("UTC"), duration_type());
     }
 
 ///
 /// local_timezone:
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static /*timezone_type*/ boost::local_time::time_zone_ptr local_timezone() {
-        // TODO: make static const
-        return timezone_type(new boost::local_time::posix_time_zone(narrow(local_timezone_name())));
+    inline static timezone_type local_timezone() {
+        // Based on the following, in <time.h>/<ctime>:
+        //
+        // void tzset (void);
+        // extern char *tzname[2]; // [name, dst_name]
+        // extern long timezone;   // UTC offset in seconds
+        // extern int daylight;    // Whether the time zone suffers from DST
+        //
+
+        duration_type const one_hour = to_duration(1, 0, 0);
+        return to_timezone( widen(std::string(tzname[0]))
+                          , to_duration(0, 0, timezone)
+                          , widen(std::string(tzname[1]))
+                          , one_hour // FIXME: This is just a guess.
+                          );
     }
 
 ///
-/// local_timezone_name:
-///     TODO: Move to value_behavior.
+/// to_timezone:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static string_type local_timezone_name() {
-        std::time_t time = (std::time)(0);
-        std::string name((std::localtime)(&time)->tm_isdst ? tzname[1] : tzname[0]);
-        return traits_type::widen(name);
+    inline static timezone_type to_timezone( string_type   const& name
+                                           , duration_type const& offset
+                                           , string_type   const& dst_name   = string_type()
+                                           , duration_type const& dst_offset = duration_type()
+                                           ) {
+        // e.g. PST-5, PST-5PDT, or PST-5PDT01:00:00
+        string_type s = name.substr(0, 3) + to_string(offset);
+        string_type const period = literal(",M3.2.0/2,M11.1.0/2"); // FIXME: Roughly U.S.-only
+
+        if (!dst_name.empty() && !is_empty(dst_offset)) {
+            s += dst_name.substr(0, 3) + to_string(dst_offset) + period;
+        }
+        else if (!is_empty(dst_offset)) {
+            s += name.substr(0, 3) + to_string(dst_offset) + period;
+        }
+        else if (!dst_name.empty()) {
+            s += dst_name.substr(0, 3) + period;
+        }
+
+
+        return timezone_type(new boost::local_time::posix_time_zone(narrow(s)));
+    }
+
+///
+/// to_string:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type to_string(timezone_type const& tz, boolean_type const is_dst) {
+        return tz ? (is_dst ? tz->dst_zone_name() : tz->std_zone_name()) : string_type();
+    }
+
+    inline static string_type to_string(duration_type const& duration) {
+        string_type const s = widen(boost::posix_time::to_simple_string(duration));
+        return duration.is_negative() ? /* char_type('-') + */ s : char_type('+') + s;
+    }
+
+///
+/// to_duration:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static duration_type to_duration( size_type const hours       = 0
+                                           , size_type const minutes     = 0
+                                           , size_type const seconds     = 0
+                                           , size_type const nanoseconds = 0
+                                           ) {
+        return duration_type(hours, minutes, seconds, nanoseconds);
+    }
+
+    inline static duration_type to_duration(timezone_type const& tz, boolean_type const is_dst) {
+        return tz ? (is_dst ? tz->dst_offset() : tz->base_utc_offset()) : duration_type();
+    }
+
+    inline static duration_type to_duration(time_type const& time) {
+        return time.time_of_day();
+    }
+
+///
+/// is_empty:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static boolean_type is_empty(duration_type const& duration) {
+        return duration == duration_type();
+    }
+
+///
+/// to_time:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static time_type to_time(std::time_t const t) {
+        return boost::posix_time::from_time_t(t);
+    }
+
+    inline static time_type to_time( size_type const hour        = 0
+                                   , size_type const minute      = 0
+                                   , size_type const second      = 0
+                                   , size_type const nanoseconds = 0
+                                   ) {
+        return time_type(date_type(), to_duration(hour, minute, second, nanoseconds));
+    }
+
+    inline static time_type to_time( date_type     const& date
+                                   , duration_type const& duration = duration_type()
+                                   ) {
+        return time_type(date, duration);
+    }
+
+///
+/// to_date:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static date_type to_date( size_type const year  = 0
+                                   , size_type const month = 0
+                                   , size_type const day   = 0
+                                   ) {
+        return date_type(year, month, day);
+    }
+
+///
+/// to_datetime
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static datetime_type to_datetime(time_type const& time) {
+        return datetime_type(time, timezone_type());
+    }
+
+    inline static datetime_type to_datetime( date_type     const& date     = date_type()
+                                           , time_type     const& time     = time_type()
+                                           , timezone_type const& timezone = timezone_type()
+                                           ) {
+        return datetime_type(to_time(date, to_duration(time)), timezone);
     }
 
 ///
 /// format_time
-///     TODO: Move to value_behavior.
 ///     TODO: Repeated in format_datetime.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -248,7 +332,6 @@ struct default_traits {
 
 ///
 /// format_datetime
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static string_type format_datetime(string_type const& format, datetime_type const& datetime) {
@@ -267,7 +350,6 @@ struct default_traits {
 
 ///
 /// format_size
-///     TODO: Move to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static string_type format_size(size_type const size) {

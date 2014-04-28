@@ -26,6 +26,7 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/utility.hpp>
 #include <ajg/synth/adapters/variant.hpp>
+#include <ajg/synth/detail/filesystem.hpp>
 #include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 

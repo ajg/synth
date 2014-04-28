@@ -10,7 +10,7 @@
 #include <utility>
 #include <stdexcept>
 
-#include <ajg/synth/bindings/python/detail.hpp>
+#include <ajg/synth/bindings/python/conversions.hpp>
 
 namespace ajg {
 namespace synth {
@@ -64,7 +64,7 @@ struct library : Options::abstract_library_type {
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
     static value_type call_tag(py::object tag, options_type&, context_type&, arguments_type& arguments) {
-        std::pair<py::tuple, py::dict> const args = d::from_arguments(arguments);
+        std::pair<py::tuple, py::dict> const args = from_arguments(arguments);
         return tag(*args.first, **args.second);
     }
 
@@ -74,7 +74,7 @@ struct library : Options::abstract_library_type {
                                  , value_type     const& value
                                  , arguments_type const& arguments
                                  ) {
-        std::pair<py::tuple, py::dict> const args = d::from_arguments(value, arguments);
+        std::pair<py::tuple, py::dict> const args = from_arguments(value, arguments);
         return filter(*args.first, **args.second);
     }
 

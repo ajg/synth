@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <string>
 #include <istream>
 #include <ostream>
@@ -14,9 +16,8 @@
 
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
-#include <boost/throw_exception.hpp>
 
-#include <ajg/synth/detail.hpp>
+#include <ajg/synth/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

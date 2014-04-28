@@ -18,7 +18,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {

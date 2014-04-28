@@ -35,6 +35,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
+#include <ajg/synth/detail/is_integer.hpp>
 #include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
@@ -61,6 +62,7 @@ struct builtin_filters {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;

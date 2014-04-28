@@ -5,15 +5,17 @@
 #ifndef AJG_SYNTH_BINDINGS_BASE_BINDING_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_BASE_BINDING_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <memory>
 #include <vector>
 #include <stdexcept>
 
 #include <boost/shared_ptr.hpp>
 
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/adapters.hpp>
+#include <ajg/synth/exceptions.hpp>
 
 namespace ajg {
 namespace synth {

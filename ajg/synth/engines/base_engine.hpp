@@ -29,6 +29,7 @@
 #include <boost/xpressive/regex_primitives.hpp>
 
 #include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/detail/container.hpp>
 
 namespace ajg {
 namespace synth {
@@ -48,7 +49,7 @@ using boost::xpressive::s2;
 namespace x = boost::xpressive;
 
 template <class Traits>
-struct base_engine : detail::nonconstructible {
+struct base_engine {
 
     typedef base_engine                                                         engine_type;
     typedef Traits                                                              traits_type;
@@ -65,6 +66,10 @@ struct base_engine : detail::nonconstructible {
 
     template <class Iterator>
     struct kernel;
+
+  private:
+
+    base_engine(); // TODO[c++11]: = delete;
 
 }; // base_engine
 

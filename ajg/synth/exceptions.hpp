@@ -14,9 +14,6 @@
 
 namespace ajg {
 namespace synth {
-namespace detail {
-std::string get_type_name(std::type_info const&);
-}
 
 struct exception {
     exception() {}
@@ -71,8 +68,8 @@ struct conversion_error : public exception, public std::runtime_error {
 
     conversion_error(std::type_info const& from, std::type_info const& to)
         : std::runtime_error("could not convert value from `" +
-              detail::get_type_name(from) + "` to `" +
-              detail::get_type_name(to) + "`")
+              std::string(from.name()) + "` to `" + // TODO: Unmangle.
+              std::string(to.name()) + "`")         // TODO: Unmangle.
         , from(from)
         , to(to) {}
     ~conversion_error() throw () {}

@@ -7,6 +7,7 @@
 #include <ajg/synth/testing.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/engines/null.hpp>
+#include <ajg/synth/detail/filesystem.hpp>
 
 namespace {
 

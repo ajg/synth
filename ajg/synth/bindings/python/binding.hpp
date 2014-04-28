@@ -17,11 +17,11 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/engines/django/options.hpp>
 #include <ajg/synth/bindings/base_binding.hpp>
-#include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
 #include <ajg/synth/bindings/python/loader.hpp>
 #include <ajg/synth/bindings/python/library.hpp>
 #include <ajg/synth/bindings/python/resolver.hpp>
+#include <ajg/synth/bindings/python/conversions.hpp>
 #include <ajg/synth/templates/char_template.hpp>
 
 namespace ajg {
@@ -30,7 +30,6 @@ namespace bindings {
 namespace python {
 
 namespace py = ::boost::python;
-namespace d  = ::ajg::synth::bindings::python::detail;
 
 inline char const* version() {
     return AJG_SYNTH_VERSION_STRING;

@@ -49,8 +49,8 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Beh
   public:
 
     boolean_type equal(base_type const& that) const { return adapted_.equal(that); }
-    number_type  to_number()  const { return adapted_.to_number(); }
     boolean_type to_boolean() const { return adapted_.to_boolean(); }
+    number_type  to_number()  const { return adapted_.to_number(); }
     // integer_type to_integer() const { return adapted_.to_integer(); }
     // string_type  to_string()  const { return adapted_.to_string(); }
     void input (istream_type& in)        { adapted_.input(in); }

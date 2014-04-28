@@ -39,7 +39,6 @@
 
 namespace ajg {
 namespace synth {
-namespace detail {
 
 std::size_t const max_tests_per_file = AJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH - 4;
 
@@ -52,11 +51,6 @@ struct check_test_number {
     BOOST_STATIC_ASSERT(N <= max_tests_per_file);
     BOOST_STATIC_CONSTANT(int, value = N);
 };
-
-// NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)
-namespace { struct no_data {}; }
-
-} // namespace detail
 
 //
 // ensure_throws
@@ -82,6 +76,13 @@ inline void wensure_equals(std::wstring const& expect, std::wstring const& actua
 #endif
 
 //
+// no_data
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// NOTE: Must be in an anonymous namespace to avoid linker errors (duplicate symbols.)
+namespace { struct no_data {}; }
+
+//
 // unit_test
 //     TODO: Rename AJG_SYNTH_UNIT_TEST.
 //     TODO[c++11]: Replace with function taking a lambda.
@@ -89,7 +90,7 @@ inline void wensure_equals(std::wstring const& expect, std::wstring const& actua
 
 #define unit_test(name) \
     namespace tut { template<> template<> \
-    void test_group_type::object::test</**/::ajg::synth::detail::check_test_number<__LINE__>::value>() { \
+    void test_group_type::object::test</**/::ajg::synth::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
         AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::reset();) \
 
@@ -112,9 +113,9 @@ inline void wensure_equals(std::wstring const& expect, std::wstring const& actua
 // test_group
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class T = detail::no_data>
-struct test_group : public tut::test_group<T, detail::max_tests_per_file> {
-    typedef tut::test_group<T, detail::max_tests_per_file> base_type;
+template <class T = no_data>
+struct test_group : public tut::test_group<T, max_tests_per_file> {
+    typedef tut::test_group<T, max_tests_per_file> base_type;
     test_group(char const* const name) : base_type(name) {}
 };
 

@@ -5,31 +5,12 @@
 #ifndef AJG_SYNTH_VALUE_ITERATOR_HPP_INCLUDED
 #define AJG_SYNTH_VALUE_ITERATOR_HPP_INCLUDED
 
-#include <boost/smart_ptr/scoped_ptr.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+
+#include <ajg/synth/detail/clone_ptr.hpp>
 
 namespace ajg {
 namespace synth {
-namespace detail {
-
-template <class T>
-struct clone_ptr : boost::scoped_ptr<T> {
-  public:
-
-    clone_ptr(T *const t = 0) : boost::scoped_ptr<T>(t) {}
-    clone_ptr(clone_ptr const& c) : boost::scoped_ptr<T>(c ? &c->clone() : 0) {}
-
-    inline clone_ptr& operator =(clone_ptr const& c) {
-        this->reset(c ? &c->clone() : 0);
-        return *this;
-    }
-
-    inline operator bool() const {
-        return boost::scoped_ptr<T>::get() != 0;
-    }
-};
-
-} // detail
 
 //
 // value_iterator

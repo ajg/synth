@@ -6,6 +6,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/ssi.hpp>
+#include <ajg/synth/detail/filesystem.hpp>
 
 namespace {
 

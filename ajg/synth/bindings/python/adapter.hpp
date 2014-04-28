@@ -9,15 +9,12 @@
 #include <boost/python/stl_iterator.hpp>
 
 #include <ajg/synth/adapters/adapter.hpp>
-#include <ajg/synth/bindings/python/detail.hpp>
+#include <ajg/synth/bindings/python/conversions.hpp>
 
 namespace ajg {
 namespace synth {
 namespace {
-
 namespace py = ::boost::python;
-namespace d  = ::ajg::synth::bindings::python::detail;
-
 } // namespace
 
 //
@@ -38,11 +35,11 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
   public:
 
     virtual boolean_type to_boolean() const { return boolean_type(adapted_); }
-    virtual datetime_type to_datetime() const { return d::get_datetime<traits_type>(adapted_); }
+    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(adapted_); }
 
  // virtual void input (istream_type& in)        { in >> adapted_; }
  // virtual void output(ostream_type& out) const { out << adapted_; }
-    virtual void output(ostream_type& out) const { out << d::get_string<string_type>(adapted_); }
+    virtual void output(ostream_type& out) const { out << get_string<traits_type>(adapted_); }
 
     virtual iterator begin() { return begin<iterator>(adapted_); }
     virtual iterator end()   { return end<iterator>(adapted_); }
@@ -118,7 +115,7 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
     }
 
     inline static string_type class_name(py::object const& obj) {
-        return d::get_string<string_type>(obj.attr("__class__").attr("__name__"));
+        return get_string<traits_type>(obj.attr("__class__").attr("__name__"));
     }
 };
 

@@ -5,8 +5,8 @@
 #ifndef AJG_SYNTH_BINDINGS_PYTHON_LOADER_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_PYTHON_LOADER_HPP_INCLUDED
 
-#include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/library.hpp>
+#include <ajg/synth/bindings/python/conversions.hpp>
 
 namespace ajg {
 namespace synth {

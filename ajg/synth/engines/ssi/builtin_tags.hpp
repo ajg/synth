@@ -13,6 +13,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
+#include <ajg/synth/detail/pipe.hpp>
 #include <ajg/synth/detail/transformer.hpp>
 
 namespace ajg {

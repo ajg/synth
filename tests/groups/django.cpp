@@ -6,9 +6,9 @@
 #include <string>
 
 #include <ajg/synth/testing.hpp>
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
+#include <ajg/synth/detail/filesystem.hpp>
 #include <ajg/synth/detail/transformer.hpp>
 #include <ajg/synth/engines/django.hpp>
 #include <ajg/synth/engines/null/resolver.hpp>

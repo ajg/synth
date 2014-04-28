@@ -5,8 +5,8 @@
 #ifndef AJG_SYNTH_BINDINGS_PYTHON_RESOLVER_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_PYTHON_RESOLVER_HPP_INCLUDED
 
-#include <ajg/synth/bindings/python/detail.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
+#include <ajg/synth/bindings/python/conversions.hpp>
 
 namespace ajg {
 namespace synth {
@@ -30,7 +30,7 @@ struct resolver : Options::abstract_resolver_type {
                                          ) {
         try {
             py::object const& result = object_.attr("resolve")(path);
-            return d::get_string<string_type>(result);
+            return get_string<traits_type>(result);
         }
         catch (...) { // TODO: Catch only Resolver404?
             return boost::none;
@@ -44,9 +44,9 @@ struct resolver : Options::abstract_resolver_type {
                                          , options_type   const& options
                                          ) {
         try {
-            std::pair<py::tuple, py::dict> const args = d::from_arguments(arguments);
+            std::pair<py::tuple, py::dict> const args = from_arguments(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
-            return d::get_string<string_type>(result);
+            return get_string<traits_type>(result);
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return boost::none;

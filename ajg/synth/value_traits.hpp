@@ -17,6 +17,7 @@
 
 #include <boost/none_t.hpp>
 #include <boost/foreach.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -64,11 +65,11 @@ struct default_traits {
 
     typedef Char                                        char_type;
 
+    // TODO: Consider using arbitrary-precision types.
     typedef std::size_t                                 size_type;
-    // TODO: The type number is too ambiguous; break down into integral (integer, natural), floating (long double), complex, etc.
-    //       Either that or make number general enough to hold the majority of numbers, e.g. std::complex<long double> or
-    //       even an arbitrary precision type.
-    typedef double                                      number_type;
+ // typedef boost::uintmax_t                            natural_type;
+    typedef boost::intmax_t                             integer_type;
+    typedef /* TODO: long */ double                     number_type; // TODO: Rename to floating_type.
 
     typedef boost::gregorian::date                      date_type;
     typedef boost::posix_time::ptime                    time_type;     // Note: No timezone.

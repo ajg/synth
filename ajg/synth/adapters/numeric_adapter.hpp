@@ -14,8 +14,8 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/detail/is_integer.hpp>
 
 namespace ajg {
 namespace synth {
@@ -71,7 +71,7 @@ struct numeric_adapter : public base_adapter<Behavior> {
         if (out.flags() & out.hex) {
         // If they hex is desired, we convert to an
         // integral first, and then output as hex.
-            out << static_cast<detail::integer_type>(adapted_);
+            out << static_cast<integer_type>(adapted_);
         }
         else {
             out << adapted_;

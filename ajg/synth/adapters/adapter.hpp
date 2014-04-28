@@ -23,9 +23,10 @@ namespace synth {
     typedef typename behavior_type::value_type      value_type; \
     typedef typename behavior_type::traits_type     traits_type; \
     \
+    typedef typename traits_type::boolean_type      boolean_type; \
     typedef typename traits_type::char_type         char_type; \
     typedef typename traits_type::size_type         size_type; \
-    typedef typename traits_type::boolean_type      boolean_type; \
+    typedef typename traits_type::integer_type      integer_type; \
     typedef typename traits_type::number_type       number_type; \
     typedef typename traits_type::string_type       string_type; \
     typedef typename traits_type::datetime_type     datetime_type; \

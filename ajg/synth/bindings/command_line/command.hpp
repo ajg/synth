@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_COMMAND_LINE_COMMAND_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -18,7 +20,6 @@
 
 #include <external/optionparser.h>
 
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/exceptions.hpp>
 
 namespace ajg {

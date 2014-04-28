@@ -14,20 +14,18 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-#include <ajg/synth/detail.hpp>
 #include <ajg/synth/value_traits.hpp>
 #include <ajg/synth/value_iterator.hpp>
 #include <ajg/synth/value_behavior.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
+#include <ajg/synth/detail/container.hpp>
 
 namespace ajg {
 namespace synth {
 
 template <class Char, class Adapted>
 struct adapter;
-
-using detail::integer_type;
 
 //
 // value_facade
@@ -45,10 +43,11 @@ struct value_facade {
 
     typedef typename traits_type::none_type                                     none_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::char_type                                     char_type;
-    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
     typedef typename traits_type::istream_type                                  istream_type;

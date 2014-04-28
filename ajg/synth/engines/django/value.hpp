@@ -124,7 +124,7 @@ struct value : value_facade<Traits, value> {
             return *attr;
         }
         else {
-            throw_exception(missing_attribute(traits_type::narrow(attribute.to_string())));
+            AJG_SYNTH_THROW(missing_attribute(traits_type::narrow(attribute.to_string())));
         }
     }
 

@@ -36,7 +36,7 @@ struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     //       which obviously isn't the general case. So it might be better
     //       to switch to using one of our own individual adapters for
     //       this purpose (probably through a static_visitor.)
-    void input (istream_type& in)        { throw_exception(not_implemented("input")); } // in >> adapted_; }
+    void input (istream_type& in)        { AJG_SYNTH_THROW(not_implemented("input")); } // in >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }
 };
 

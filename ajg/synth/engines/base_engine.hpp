@@ -212,6 +212,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
         string_type const site(furthest, detail::advance_to(furthest, (std::min)(room, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
         // XXX: Using AJG_SYNTH_THROW here adds a superfluous stack trace to a few unit tests.
+        // TODO: Wrap those unit tests with debug::quiet().
         boost::throw_exception(parsing_error(traits_type::narrow(line)));
     }
 

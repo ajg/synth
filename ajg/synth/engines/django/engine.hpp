@@ -335,7 +335,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                     string_type const string(token.begin(), token.end());
 
                     if (traits_type::narrow(string) != e.name) {
-                        throw_exception(e);
+                        AJG_SYNTH_THROW(e);
                     }
 
                     // A missing variable means an embedded argument was meant as a string literal.
@@ -412,7 +412,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             tag(*this, match_, context, options, ostream);
         }
         else {
-            throw_exception(std::logic_error("missing built-in tag"));
+            AJG_SYNTH_THROW(std::logic_error("missing built-in tag"));
         }
     }
 
@@ -424,7 +424,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
              if (is(match, this->text))  render_text(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
-        else throw_exception(std::logic_error("invalid template state"));
+        else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
     value_type apply_filters( value_type   const& value
@@ -465,7 +465,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return filter(*this, value, arguments, context, options);
         }
         else {
-            throw_exception(missing_filter(traits_type::narrow(name)));
+            AJG_SYNTH_THROW(missing_filter(traits_type::narrow(name)));
         }
     }
 
@@ -521,7 +521,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 return value_type(boolean_type(false)).token(token);
             }
             else {
-                throw_exception(std::logic_error("invalid boolean literal"));
+                AJG_SYNTH_THROW(std::logic_error("invalid boolean literal"));
             }
         }
         else if (is(literal, this->number_literal)) {
@@ -540,11 +540,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 return variable->copy().token(token);
             }
             else {
-                throw_exception(missing_variable(traits_type::narrow(string)));
+                AJG_SYNTH_THROW(missing_variable(traits_type::narrow(string)));
             }
         }
         else {
-            throw_exception(std::logic_error("invalid literal"));
+            AJG_SYNTH_THROW(std::logic_error("invalid literal"));
         }
     }
 
@@ -565,7 +565,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return this->evaluate_expression(nested, context, options);
         }
         else {
-            throw_exception(std::logic_error("invalid expression"));
+            AJG_SYNTH_THROW(std::logic_error("invalid expression"));
         }
     }
 
@@ -581,7 +581,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return !evaluate_expression(operand, context, options);
         }
         else {
-            throw_exception(std::logic_error("invalid unary operator"));
+            AJG_SYNTH_THROW(std::logic_error("invalid unary operator"));
         }
     }
 
@@ -599,7 +599,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 op = segment.str();
             }
             else if (!(is(segment, this->expression))) {
-                throw_exception(std::logic_error("invalid binary expression"));
+                AJG_SYNTH_THROW(std::logic_error("invalid binary expression"));
             }
             else if (op == traits_type::literal("==")) {
                 value = value == this->evaluate_expression(segment, context, options);
@@ -635,7 +635,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 value = !elements.contains(value);
             }
             else {
-                throw_exception(std::logic_error("invalid binary operator"));
+                AJG_SYNTH_THROW(std::logic_error("invalid binary operator"));
             }
         }
 
@@ -655,7 +655,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return string_type(link(this->identifier).str());
         }
         else {
-            throw_exception(std::logic_error("invalid link"));
+            AJG_SYNTH_THROW(std::logic_error("invalid link"));
         }
     }
 

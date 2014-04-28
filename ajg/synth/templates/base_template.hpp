@@ -16,7 +16,6 @@
 #include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_traits.hpp>
@@ -24,8 +23,6 @@
 namespace ajg {
 namespace synth {
 namespace templates {
-
-using boost::throw_exception;
 
 // TODO: Factor out an intermediate range_template (or iterator_template) for use with arbitrary iterators.
 template <class Engine, class Iterator>
@@ -100,7 +97,7 @@ struct base_template : boost::noncopyable {
             file.open(narrow_path.c_str(), std::ios::binary);
         }
         catch (std::exception const& e) {
-            throw_exception(write_error(narrow_path, e.what()));
+            AJG_SYNTH_THROW(write_error(narrow_path, e.what()));
         }
 
         this->kernel_->render(file, this->result_, context, options);

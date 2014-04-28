@@ -172,7 +172,7 @@ struct builtin_tags {
 
                  if (setting == traits_type::literal("on"))  autoescape = true;
             else if (setting == traits_type::literal("off")) autoescape = false;
-            else throw_exception(std::invalid_argument("setting"));
+            else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
             options_type options_copy = options; // NOTE: Don't make the copy const.
             options_copy.autoescape = autoescape;
@@ -203,7 +203,7 @@ struct builtin_tags {
 
             if (close && name != close[id].str()) {
                 std::string const original = traits_type::narrow(name);
-                throw_exception(std::invalid_argument("mismatched endblock tag for " + original));
+                AJG_SYNTH_THROW(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
             if (options.top_level()) { // The block is being rendered directly.
@@ -963,7 +963,7 @@ struct builtin_tags {
             boolean_type const parsed = match[s1].matched;
 
             if (!detail::is_absolute(path)) {
-                throw_exception(std::invalid_argument("relative path"));
+                AJG_SYNTH_THROW(std::invalid_argument("relative path"));
             }
 
             if (parsed) {
@@ -1029,7 +1029,7 @@ struct builtin_tags {
                 ostream << *url;
             }
             else {
-                throw_exception(std::runtime_error("view not found"));
+                AJG_SYNTH_THROW(std::runtime_error("view not found"));
             }
         }
     };
@@ -1210,7 +1210,7 @@ struct builtin_tags {
             if (it != options.loaded_tags.end()) {
                 return it->second;
             }
-            throw_exception(missing_tag(traits_type::narrow(name)));
+            AJG_SYNTH_THROW(missing_tag(traits_type::narrow(name)));
         }
     };
 

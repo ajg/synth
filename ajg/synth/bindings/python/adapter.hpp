@@ -105,7 +105,7 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
         }
         else {
             std::string const& type = traits_type::narrow(class_name(obj));
-            throw_exception(std::runtime_error(type + " object is not iterable"));
+            AJG_SYNTH_THROW(std::runtime_error(type + " object is not iterable"));
         }
     }
 

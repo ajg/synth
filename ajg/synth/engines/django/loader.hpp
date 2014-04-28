@@ -55,7 +55,7 @@ struct loader {
         }
 
         if (!library) {
-            throw_exception(missing_library(traits_type::narrow(library_name)));
+            AJG_SYNTH_THROW(missing_library(traits_type::narrow(library_name)));
         }
         else if (names) {
             BOOST_FOREACH(string_type const& name, *names) {
@@ -63,7 +63,7 @@ struct loader {
                 filter_type const& filter = library->get_filter(name);
 
                 if (!tag && !filter) {
-                    throw_exception(missing_key(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_key(traits_type::narrow(name)));
                 }
                 if (tag) {
                     options.loaded_tags[name] = tag;
@@ -79,7 +79,7 @@ struct loader {
                     options.loaded_tags[name] = tag;
                 }
                 else {
-                    throw_exception(missing_tag(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_tag(traits_type::narrow(name)));
                 }
             }
             BOOST_FOREACH(string_type const& name, library->list_filters()) {
@@ -87,7 +87,7 @@ struct loader {
                     options.loaded_filters[name] = filter;
                 }
                 else {
-                    throw_exception(missing_filter(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_filter(traits_type::narrow(name)));
                 }
             }
         }

@@ -2,6 +2,7 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
+#include <ajg/synth/support.hpp>
 #include <ajg/synth/testing.hpp>
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
@@ -260,8 +261,10 @@ unit_test(flastmod_tag custom) {
 }}}
 
 unit_test(tag with error) {
+    AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::quiet(true));
     string_template_type const t("<!--#fsize file='non-extant' -->");
     ensure_equals(t.render_to_string(), default_options.error_message);
+    AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::quiet(false));
 }}}
 
 unit_test(file template) {

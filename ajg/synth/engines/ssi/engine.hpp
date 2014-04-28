@@ -216,10 +216,10 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         }
         // Second, check for magic variables.
         else if (name == traits_type::literal("DOCUMENT_NAME")) {
-            throw_exception(not_implemented("DOCUMENT_NAME"));
+            AJG_SYNTH_THROW(not_implemented("DOCUMENT_NAME"));
         }
         else if (name == traits_type::literal("DOCUMENT_URI")) {
-            throw_exception(not_implemented("DOCUMENT_URI"));
+            AJG_SYNTH_THROW(not_implemented("DOCUMENT_URI"));
         }
         else if (name == traits_type::literal("DATE_LOCAL")) {
             return traits_type::format_datetime(options.time_format, traits_type::local_datetime());
@@ -229,7 +229,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             // OR: return traits_type::format_datetime(options.time_format, traits_type::utc_datetime());
         }
         else if (name == traits_type::literal("LAST_MODIFIED")) {
-            throw_exception(not_implemented("LAST_MODIFIED"));
+            AJG_SYNTH_THROW(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
         else if (optional<typename environment_type::mapped_type> const variable =
@@ -299,7 +299,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             tag(args);
         }
         else {
-            throw_exception(std::logic_error("missing built-in tag"));
+            AJG_SYNTH_THROW(std::logic_error("missing built-in tag"));
         }
     }
     catch (std::exception const&) {
@@ -320,7 +320,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
              if (is(match, this->text))  render_text(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
-        else throw_exception(std::logic_error("invalid template state"));
+        else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
     /// Creates a regex instance to parse a full SSI tag ("directive").
@@ -367,7 +367,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             if (op == traits_type::literal("=")
              || op == traits_type::literal("==")) return equals_regex(args, left, regex);
             if (op == traits_type::literal("!=")) return !equals_regex(args, left, regex);
-            throw_exception(std::logic_error("invalid regex operator"));
+            AJG_SYNTH_THROW(std::logic_error("invalid regex operator"));
         }
         else {
             string_type const left  = parse_string(args, expr(this->string_expression, 0));
@@ -379,7 +379,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             if (op == traits_type::literal(">"))  return left >  right;
             if (op == traits_type::literal("<=")) return left <= right;
             if (op == traits_type::literal(">=")) return left >= right;
-            throw_exception(std::logic_error("invalid string operator"));
+            AJG_SYNTH_THROW(std::logic_error("invalid string operator"));
         }
     }
 
@@ -398,7 +398,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         if (is_(string, this->regex_expression))     return this->extract_attribute(match);
         if (is_(string, this->variable))             return this->interpolate(args, match.str());
         if (is_(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
-        throw_exception(std::logic_error("invalid string"));
+        AJG_SYNTH_THROW(std::logic_error("invalid string"));
     }
 
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
@@ -409,7 +409,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         if (is_(expr, this->expression))            return evaluate_expression(args, this->unnest_(expr));
         if (is_(expr, this->string_expression))     return !parse_string(args, expr).empty();
         if (is_(expr, this->comparison_expression)) return equals(args, expr);
-        throw_exception(std::logic_error("invalid expression"));
+        AJG_SYNTH_THROW(std::logic_error("invalid expression"));
 
     }
 

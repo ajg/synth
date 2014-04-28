@@ -17,7 +17,6 @@
 #include <boost/cstdint.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/assign/list_of.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -105,15 +104,15 @@ struct builtin_filters {
     template <std::size_t Min, std::size_t Max = Min>
     struct with_arity {
         inline static void validate(std::size_t const n) {
-            if (n > Max) throw_exception(superfluous_argument());
-            else if (n < Min) throw_exception(missing_argument());
+            if (n > Max) AJG_SYNTH_THROW(superfluous_argument());
+            else if (n < Min) AJG_SYNTH_THROW(missing_argument());
         }
     };
 
     template <std::size_t Max>
     struct with_arity<0, Max> {
         inline static void validate(std::size_t const n) {
-            if (n > Max) throw_exception(superfluous_argument());
+            if (n > Max) AJG_SYNTH_THROW(superfluous_argument());
         }
     };
 
@@ -464,7 +463,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            if (value.empty()) throw_exception(std::invalid_argument("sequence"));
+            if (value.empty()) AJG_SYNTH_THROW(std::invalid_argument("sequence"));
             return value.front();
         }
     };
@@ -620,7 +619,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            if (value.empty()) throw_exception(std::invalid_argument("sequence"));
+            if (value.empty()) AJG_SYNTH_THROW(std::invalid_argument("sequence"));
             return value.back();
         }
     };
@@ -906,7 +905,7 @@ struct builtin_filters {
                 return value[index];
             }
             else {
-                throw_exception(std::invalid_argument("empty sequence"));
+                AJG_SYNTH_THROW(std::invalid_argument("empty sequence"));
             }
         }
     };
@@ -1020,7 +1019,7 @@ struct builtin_filters {
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
                 kernel.template split_argument<':'>(arguments.first[0], context, options);
-            if (args.size() < 2) throw_exception(missing_argument());
+            if (args.size() < 2) AJG_SYNTH_THROW(missing_argument());
 
             sequence_type result;
             value_type const lower = args[0];
@@ -1647,13 +1646,13 @@ struct builtin_filters {
             switch (args.size()) {
             case 0:
             case 1:
-                throw_exception(missing_argument());
+                AJG_SYNTH_THROW(missing_argument());
             case 3:
                 if (value.is_none()) return args[2]; // Else, fall through:
             case 2:
                 return value ? args[0] : args[1];
             default:
-                throw_exception(superfluous_argument());
+                AJG_SYNTH_THROW(superfluous_argument());
             }
         }
     };

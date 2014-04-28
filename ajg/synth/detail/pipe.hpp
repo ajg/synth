@@ -25,13 +25,13 @@ struct pipe : boost::noncopyable {
 
     explicit pipe(std::string const& command, bool const reading = true) {
         if ((file_ = AJG_SYNTH_IF_MSVC(_popen, popen)(command.c_str(), reading ? "r" : "w")) == 0) {
-            throw_exception(error("open"));
+            AJG_SYNTH_THROW(error("open"));
         }
     }
 
     ~pipe() {
         if (AJG_SYNTH_IF_MSVC(_pclose, pclose)(file_) == -1) {
-            throw_exception(error("close"));
+            AJG_SYNTH_THROW(error("close"));
         }
     }
 

@@ -184,10 +184,10 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             return attr.str();
         }
         else if (!attr) {
-            throw_exception(std::logic_error("missing attribute"));
+            AJG_SYNTH_THROW(std::logic_error("missing attribute"));
         }
         else {
-            throw_exception(std::logic_error("invalid attribute"));
+            AJG_SYNTH_THROW(std::logic_error("invalid attribute"));
         }
     }
 
@@ -260,7 +260,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             tag(*this, match_, context, options, ostream);
         }
         else {
-            throw_exception(std::logic_error("missing built-in tag"));
+            AJG_SYNTH_THROW(std::logic_error("missing built-in tag"));
         }
     }
 
@@ -272,7 +272,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
              if (is(match, this->text))  render_text(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
-        else throw_exception(std::logic_error("invalid template state"));
+        else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
     // TODO: Throw synth exceptions when possible.
@@ -286,16 +286,16 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             match_type const& value = attr(this->attribute);
 
             if (is(attr, this->name_attribute)) {
-                if (name) throw_exception(std::logic_error("duplicate variable name"));
+                if (name) AJG_SYNTH_THROW(std::logic_error("duplicate variable name"));
                 else name = this->extract_attribute(value);
             }
             else if (is(attr, this->default_attribute)) {
-                if (fallback) throw_exception(std::logic_error("duplicate default value"));
+                if (fallback) AJG_SYNTH_THROW(std::logic_error("duplicate default value"));
                 else fallback = this->extract_attribute(value);
             }
             else if (is(attr, this->escape_attribute)) {
                 if (escape) {
-                    throw_exception(std::logic_error("duplicate escape mode"));
+                    AJG_SYNTH_THROW(std::logic_error("duplicate escape mode"));
                 }
                 else {
                     string_type const mode = boost::algorithm::to_lower_copy(value.str());
@@ -307,16 +307,16 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                     else if (mode == traits_type::literal("url")) escape = attributes::url;
                     else if (mode == traits_type::literal("js"))  escape = attributes::js;
                     else {
-                        throw_exception(std::invalid_argument("invalid escape mode"));
+                        AJG_SYNTH_THROW(std::invalid_argument("invalid escape mode"));
                     }
                 }
             }
             else {
-                throw_exception(std::invalid_argument("invalid attribute"));
+                AJG_SYNTH_THROW(std::invalid_argument("invalid attribute"));
             }
         }
 
-        if (!name) throw_exception(std::logic_error("missing variable name"));
+        if (!name) AJG_SYNTH_THROW(std::logic_error("missing variable name"));
         attributes const attrs = {*name, fallback, escape};
         return attrs;
     }

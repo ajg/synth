@@ -32,6 +32,7 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
+#include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
@@ -44,6 +45,7 @@ namespace synth {
 namespace debug {
 
 static std::size_t count = 0, level = 0;
+static bool silent = false;
 
 ///
 /// reset
@@ -52,6 +54,14 @@ static std::size_t count = 0, level = 0;
 inline void reset() {
     count = 0;
     level = 0;
+}
+
+///
+/// quiet
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void quiet(bool const q) {
+    silent = q;
 }
 
 ///
@@ -225,9 +235,11 @@ inline void signal_handler( int        signum
 template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
 inline void throw_exception(Exception const& e) {
-    std::string const name = unmangle(typeid(Exception).name());
-    fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
-    fprint_backtrace(stderr, 1);
+    if (!silent) {
+        std::string const name = unmangle(typeid(Exception).name());
+        fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
+        fprint_backtrace(stderr, 1);
+    }
     boost::throw_exception(e);
 }
 

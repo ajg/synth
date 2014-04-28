@@ -107,7 +107,7 @@ enum { interpolated = true, raw = false };
     BOOST_FOREACH(match_type const& attr, args.kernel.unnest(x).nested_results()) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
-        if_statement else throw_exception(invalid_attribute(traits_type::narrow(name))); \
+        if_statement else AJG_SYNTH_THROW(invalid_attribute(traits_type::narrow(name))); \
     } \
 } while (0)
 
@@ -126,7 +126,7 @@ enum { interpolated = true, raw = false };
         if ((a == 0 || value != traits_type::literal(a)) &&
             (b == 0 || value != traits_type::literal(b)) &&
             (c == 0 || value != traits_type::literal(c))) {
-            throw_exception(invalid_attribute(name));
+            AJG_SYNTH_THROW(invalid_attribute(name));
         }
     }
 
@@ -170,7 +170,7 @@ enum { interpolated = true, raw = false };
                     if      (encoding == traits_type::literal("none"))   args.ostream << result;
                     else if (encoding == traits_type::literal("url"))    args.ostream << transform::uri_encode(result);
                     else if (encoding == traits_type::literal("entity")) args.ostream << transform::escape_entities(result);
-                    else throw_exception(invalid_attribute("encoding"));
+                    else AJG_SYNTH_THROW(invalid_attribute("encoding"));
                 }
                 else if (name == traits_type::literal("encoding")) {
                     validate_attribute("encoding", value, "none", "url", "entity");
@@ -194,7 +194,7 @@ enum { interpolated = true, raw = false };
                 if (name == traits_type::literal("cgi")) {
                     // TODO:
                     // BOOST_ASSERT(detail::file_exists(value));
-                    throw_exception(not_implemented("exec cgi"));
+                    AJG_SYNTH_THROW(not_implemented("exec cgi"));
                 }
                 else if (name == traits_type::literal("cmd")) {
                     detail::pipe pipe(traits_type::narrow(value));
@@ -217,7 +217,7 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
-                    throw_exception(not_implemented("fsize virtual"));
+                    AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
                     std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
@@ -243,7 +243,7 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
-                    throw_exception(not_implemented("fsize virtual"));
+                    AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
                     size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
@@ -290,25 +290,25 @@ enum { interpolated = true, raw = false };
                 AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(tag, raw,
                     if (name == traits_type::literal("expr")) {
                         if (!has_expr) has_expr = true;
-                        else throw_exception(duplicate_attribute("expr"));
+                        else AJG_SYNTH_THROW(duplicate_attribute("expr"));
 
                         if (x::regex_match(value, match, args.kernel.expression)) {
                             result = args.kernel.evaluate_expression(args, match);
                         }
                         else {
-                            throw_exception(invalid_attribute("expr"));
+                            AJG_SYNTH_THROW(invalid_attribute("expr"));
                         }
                     }
                 );
 
                 if (has_expr) return result;
-                else throw_exception(missing_attribute("expr"));
+                else AJG_SYNTH_THROW(missing_attribute("expr"));
             }
             else {
                 AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(tag);
                      if (name == traits_type::literal("else"))  return true;
                 else if (name == traits_type::literal("endif")) return false;
-                else throw_exception(std::logic_error("invalid tag"));
+                else AJG_SYNTH_THROW(std::logic_error("invalid tag"));
             }
         }
     };
@@ -326,7 +326,7 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
-                    throw_exception(not_implemented("include virtual"));
+                    AJG_SYNTH_THROW(not_implemented("include virtual"));
                 }
                 else if (name == traits_type::literal("file")) {
                     args.kernel.render_path(args.ostream, traits_type::to_path(value), args.context, args.options);
@@ -367,17 +367,17 @@ enum { interpolated = true, raw = false };
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == traits_type::literal("var")) {
-                    if (name_) throw_exception(duplicate_attribute("name"));
+                    if (name_) AJG_SYNTH_THROW(duplicate_attribute("name"));
                     else name_ = value;
                 }
                 else if (name == traits_type::literal("value")) {
-                    if (value_) throw_exception(duplicate_attribute("value"));
+                    if (value_) AJG_SYNTH_THROW(duplicate_attribute("value"));
                     else value_ = value;
                 }
             );
 
-            if (!name_)  throw_exception(missing_attribute("name"));
-            if (!value_) throw_exception(missing_attribute("value"));
+            if (!name_)  AJG_SYNTH_THROW(missing_attribute("name"));
+            if (!value_) AJG_SYNTH_THROW(missing_attribute("value"));
 
             args.context[*name_] = *value_;
         }

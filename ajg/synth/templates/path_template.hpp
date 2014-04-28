@@ -13,7 +13,6 @@
 #include <sys/stat.h>
 
 #include <boost/foreach.hpp>
-#include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
@@ -77,7 +76,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
         // Then try the current directory.
         if (stat(narrow_path.c_str(), &stats) != 0) { // TODO: Use wstat where applicable.
-            throw_exception(read_error(narrow_path, std::strerror(errno)));
+            AJG_SYNTH_THROW(read_error(narrow_path, std::strerror(errno)));
         }
 
         return info_type(path, stats.st_size);
@@ -92,7 +91,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     // Using access:
     // if (access(path.c_str(), R_OK | F_OK) != 0) {
-    //    throw_exception(read_error(path, std::strerror(errno)));
+    //    AJG_SYNTH_THROW(read_error(path, std::strerror(errno)));
     // }
     //
 

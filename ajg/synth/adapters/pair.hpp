@@ -69,13 +69,13 @@ struct adapter<Behavior, std::pair<First, Second> >
         void increment() {
                  if (position_ == first)  position_ = second;
             else if (position_ == second) position_ = past;
-            else throw_exception(std::logic_error("invalid operation"));
+            else AJG_SYNTH_THROW(std::logic_error("invalid operation"));
         }
 
         variant_type dereference() const {
                  if (position_ == first)  return pair_.first;
             else if (position_ == second) return pair_.second;
-            else throw_exception(std::logic_error("invalid iterator"));
+            else AJG_SYNTH_THROW(std::logic_error("invalid iterator"));
         }
 
      private:

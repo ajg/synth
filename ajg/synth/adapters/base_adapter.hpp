@@ -23,7 +23,6 @@ namespace ajg {
 namespace synth {
 
 using boost::optional;
-using boost::throw_exception;
 
 template <class Behavior, class Adapted>
 struct adapter;

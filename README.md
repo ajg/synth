@@ -545,6 +545,7 @@ Future Work
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`
      + Replace Boost.Random with `<random>`
+     + Replace Boost.Atomic with `<atomic>`
      + Consider switching to unordered_map/unordered_set where possible
    * [v1+] Add `AJG_SYNTH_PRAGMA` macro that invokes `_Pragma` or `__pragma` (MSVC) as needed
      + Add `AJG_SYNTH_PRAGMA(once)` to all header files and see if it speeds up compilations

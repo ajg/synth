@@ -31,15 +31,15 @@
 #include <execinfo.h>
 #endif
 
-#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 
+#include <ajg/synth/detail/mutable_atomic_singleton.hpp>
 
-// TODO: In all these functions, eliminate dynamic allocations & minimize potential runtime failures.
+// TODO: In all these functions, minimize dynamic allocations & minimize potential runtime failures.
 
 namespace ajg {
 namespace synth {
@@ -62,32 +62,18 @@ namespace debug {
 /// count, level, quiet
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern inline int count(boost::optional<int> const c = boost::none) {
-    static int count = 0;
-    if (c) count = *c;
-    return count;
-}
-
-extern inline int level(boost::optional<int> const l = boost::none) {
-    static int level = 0;
-    if (l) level = *l;
-    return level;
-}
-
-extern inline int quiet(boost::optional<bool> const q = boost::none) {
-    static int quiet = 0;
-    if (q) quiet = *q;
-    return quiet;
-}
+struct count : detail::mutable_atomic_singleton<int> {};
+struct level : detail::mutable_atomic_singleton<int> {};
+struct quiet : detail::mutable_atomic_singleton<bool> {};
 
 ///
 /// reset
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline void reset() {
-    count(0);
-    level(0);
-    quiet(false);
+    count::set(0);
+    level::set(0);
+    quiet::set(false);
 }
 
 ///
@@ -101,15 +87,15 @@ inline std::ostream& log( char const* const function
                         ) {
     std::ostream& stream = std::cerr;
 
-    if (int const c = count()) {
-        count(c + 1);
+    if (int const c = count::get()) {
+        count::set(c + 1);
         stream << std::endl;
     } else {
-        count(c + 1);
+        count::set(c + 1);
         stream << std::boolalpha;
     }
 
-    std::string const indent(level() * 2, ' ');
+    std::string const indent(level::get() * 2, ' ');
     stream << file << ":" << line << ":" << column << ": in " << function << "(...):\t" << indent;
     return stream;
 }
@@ -252,7 +238,7 @@ inline void signal_handler( int        signum
 template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
 inline void throw_exception(Exception const& e) {
-    if (!quiet()) {
+    if (!quiet::get()) {
         std::string const name = unmangle(typeid(Exception).name());
         fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
         fprint_backtrace(stderr, 1);

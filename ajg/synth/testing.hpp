@@ -93,7 +93,7 @@ namespace { struct no_data {}; }
     void test_group_type::object::test</**/::ajg::synth::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
         AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::reset()); \
-        AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::quiet(true)); \
+        AJG_SYNTH_ONLY_DEBUG(::ajg::synth::debug::quiet::set(true)); \
 
 //
 // AJG_SYNTH_TEST_GROUP_WITH_DATA

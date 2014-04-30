@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_DETAIL_MUTABLE_ATOMIC_SINGLETON_HPP_INCLUDED
 #define AJG_SYNTH_DETAIL_MUTABLE_ATOMIC_SINGLETON_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <boost/atomic.hpp>
 #include <boost/optional.hpp>
 

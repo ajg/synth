@@ -31,6 +31,7 @@
 #include <execinfo.h>
 #endif
 
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -43,48 +44,6 @@
 namespace ajg {
 namespace synth {
 namespace debug {
-
-static std::size_t count = 0, level = 0;
-static bool silent = false;
-
-///
-/// reset
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void reset() {
-    count = 0;
-    level = 0;
-}
-
-///
-/// quiet
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void quiet(bool const q) {
-    silent = q;
-}
-
-///
-/// log
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline std::ostream& log( char const* const function
-                        , char const* const file
-                        , long        const line
-                        , long        const column = 1
-                        ) {
-    std::ostream& stream = std::cerr;
-
-    if (ajg::synth::debug::count++) {
-        stream << std::endl;
-    } else {
-        stream << std::boolalpha;
-    }
-
-    std::string const indent(level * 2, ' ');
-    stream << file << ":" << line << ":" << column << ": in " << function << "(...):\t" << indent;
-    return stream;
-}
 
 ///
 /// AJG_SYNTH_DEBUG_LOG
@@ -100,6 +59,62 @@ inline std::ostream& log( char const* const function
 #define LOG(e)  (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
 
 ///
+/// count, level, quiet
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+extern inline int count(boost::optional<int> const c = boost::none) {
+    static int count = 0;
+    if (c) count = *c;
+    return count;
+}
+
+extern inline int level(boost::optional<int> const l = boost::none) {
+    static int level = 0;
+    if (l) level = *l;
+    return level;
+}
+
+extern inline int quiet(boost::optional<bool> const q = boost::none) {
+    static int quiet = 0;
+    if (q) quiet = *q;
+    return quiet;
+}
+
+///
+/// reset
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void reset() {
+    count(0);
+    level(0);
+    quiet(false);
+}
+
+///
+/// log
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline std::ostream& log( char const* const function
+                        , char const* const file
+                        , long        const line
+                        , long        const column = 1
+                        ) {
+    std::ostream& stream = std::cerr;
+
+    if (int const c = count()) {
+        count(c + 1);
+        stream << std::endl;
+    } else {
+        count(c + 1);
+        stream << std::boolalpha;
+    }
+
+    std::string const indent(level() * 2, ' ');
+    stream << file << ":" << line << ":" << column << ": in " << function << "(...):\t" << indent;
+    return stream;
+}
+
+///
 /// abbreviate
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,33 +124,35 @@ inline std::string abbreviate(char const* s) {
 
     bool empty = true;
     int n = 0;
+
+
     while (char const c = *s++) {
-        if ((c == '<' && n++ == 0)
-         || (c == '>' && --n == 0)
+        if ((c == '<' && n++ == 0) || (c == '>' && --n == 0)
+         || (c == '(' && n++ == 0) || (c == ')' && --n == 0)
          || (n == 0)) {
             result += c;
             empty = true;
         }
         else if (empty) {
-            result += '_';
+            result += "...";
             empty = false;
         }
     }
 
-    boost::algorithm::replace_all(result, "boost::",     "");
-    boost::algorithm::replace_all(result, "xpressive::", "");
-    boost::algorithm::replace_all(result, "detail::",    "");
-    boost::algorithm::replace_all(result, "ajg::",       "");
-    boost::algorithm::replace_all(result, "synth::",     "");
-    boost::algorithm::replace_all(result, "adapters::",  "");
-    boost::algorithm::replace_all(result, "bindings::",  "");
-    boost::algorithm::replace_all(result, "engines::",   "");
-    boost::algorithm::replace_all(result, "templates::", "");
-    boost::algorithm::replace_all(result, "tut::",       "");
-    boost::algorithm::replace_all(result, "std::",       "");
-    boost::algorithm::replace_all(result, "__1::",       "");
-    boost::algorithm::replace_all(result, "const&",      "");
-    boost::algorithm::replace_all(result, "const ",      "");
+/*
+    boost::algorithm::replace_all(result, "boost::",     "b::");
+    boost::algorithm::replace_all(result, "xpressive::", "x::");
+    boost::algorithm::replace_all(result, "detail::",    "d::");
+    boost::algorithm::replace_all(result, "ajg::",       "a::");
+    boost::algorithm::replace_all(result, "synth::",     "s::");
+    boost::algorithm::replace_all(result, "adapters::",  "a::");
+    boost::algorithm::replace_all(result, "bindings::",  "b::");
+    boost::algorithm::replace_all(result, "engines::",   "e::");
+    boost::algorithm::replace_all(result, "templates::", "t::");
+    boost::algorithm::replace_all(result, "tut::",       "t::");
+ // boost::algorithm::replace_all(result, "std::",       "");
+ // boost::algorithm::replace_all(result, "__1::",       "");
+*/
 
     return result;
 }
@@ -235,7 +252,7 @@ inline void signal_handler( int        signum
 template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
 inline void throw_exception(Exception const& e) {
-    if (!silent) {
+    if (!quiet()) {
         std::string const name = unmangle(typeid(Exception).name());
         fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
         fprint_backtrace(stderr, 1);

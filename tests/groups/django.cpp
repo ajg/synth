@@ -515,7 +515,7 @@ DJANGO_TEST(center_filter, "{{ \"Django\"|center:\"2\" }}",  "Django")
 DJANGO_TEST(cut_filter, "{{ 'String with spaces'|cut:' ' }}", "Stringwithspaces")
 
 DJANGO_TEST(date_filter, "{{ past|date }}",                           "Jan 10, 2002")
-DJANGO_TEST(date_filter, "{{ before_past|date:'r' }}",                "Tue, 08 Jan 2002 13:02:03")
+DJANGO_TEST(date_filter, "{{ before_past|date:'r' }}",                "Tue, 08 Jan 2002 13:02:03 +0000")
 DJANGO_TEST(date_filter, "{{ after_past|date:'SHORT_DATE_FORMAT' }}", "03/01/2002")
 
 DJANGO_TEST(default_filter, "{{ True|default:\"default\" }}",  "True")

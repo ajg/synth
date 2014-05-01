@@ -11,19 +11,12 @@
 #include <boost/array.hpp>
 #include <boost/function.hpp>
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 
 namespace ajg {
 namespace synth {
 namespace engines {
 namespace django {
-namespace {
-namespace algo = boost::algorithm;
-} // namespace
 
 //
 // formatter
@@ -42,6 +35,7 @@ struct formatter {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::date_type                                     date_type;
     typedef typename traits_type::time_type                                     time_type;
@@ -53,6 +47,10 @@ struct formatter {
     typedef typename value_type::behavior_type                                  behavior_type;
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
+
+  private:
+
+    typedef detail::transformer<string_type>                                    transform;
 
   private:
 
@@ -116,48 +114,43 @@ struct formatter {
         string_type ZP;
 
         inline static native_flags from_datetime(datetime_type datetime) {
-            static boost::array<string_type, native_flags::size> const format_flags = {
-                { traits_type::literal("%a")
-                , traits_type::literal("%A")
-                , traits_type::literal("%b")
-                , traits_type::literal("%B")
-                , traits_type::literal("%c")
-                , traits_type::literal("%d")
-                , traits_type::literal(AJG_SYNTH_IF_WINDOWS("%y", "%G")) // TODO: Find workaround for Windows.
-                , traits_type::literal("%j")
-                , traits_type::literal("%m")
-                , traits_type::literal("%U")
-                , traits_type::literal("%w")
-                , traits_type::literal("%W")
-                , traits_type::literal("%x")
-                , traits_type::literal("%y")
-                , traits_type::literal("%Y")
-                , traits_type::literal("%f")
-                , traits_type::literal("%F")
-                , traits_type::literal("%H")
-                , traits_type::literal("%I")
-                , traits_type::literal("%M")
-                , traits_type::literal("%p")
-                , traits_type::literal("%R")
-                , traits_type::literal("%s")
-                , traits_type::literal("%S")
-                , traits_type::literal("%T")
-                , traits_type::literal("%q")
-                , traits_type::literal("%Q")
-                , traits_type::literal("%X")
-                , traits_type::literal("%z")
-                , traits_type::literal("%Z")
-                , traits_type::literal("%ZP")
-                }
-            };
+            static std::vector<string_type> const format_flags = boost::assign::list_of<string_type>
+                (traits_type::literal("%a"))
+                (traits_type::literal("%A"))
+                (traits_type::literal("%b"))
+                (traits_type::literal("%B"))
+                (traits_type::literal("%c"))
+                (traits_type::literal("%d"))
+                (traits_type::literal(AJG_SYNTH_IF_WINDOWS("%y", "%G"))) // TODO: Find workaround for Windows.
+                (traits_type::literal("%j"))
+                (traits_type::literal("%m"))
+                (traits_type::literal("%U"))
+                (traits_type::literal("%w"))
+                (traits_type::literal("%W"))
+                (traits_type::literal("%x"))
+                (traits_type::literal("%y"))
+                (traits_type::literal("%Y"))
+                (traits_type::literal("%f"))
+                (traits_type::literal("%F"))
+                (traits_type::literal("%H"))
+                (traits_type::literal("%I"))
+                (traits_type::literal("%M"))
+                (traits_type::literal("%p"))
+                (traits_type::literal("%R"))
+                (traits_type::literal("%s"))
+                (traits_type::literal("%S"))
+                (traits_type::literal("%T"))
+                (traits_type::literal("%q"))
+                (traits_type::literal("%Q"))
+                (traits_type::literal("%X"))
+                (traits_type::literal("%z"))
+                (traits_type::literal("%Z"))
+                (traits_type::literal("%ZP"))
+                ;
 
-            static string_type const delimiter     = string_type(1, char_type('|'));
-            static string_type const format_string = algo::join(format_flags, delimiter);
-            string_type const formatted_string     = traits_type::format_datetime(format_string, datetime);
-
-            std::vector<string_type> specifiers;
-            specifiers.reserve(native_flags::size);
-            algo::split(specifiers, formatted_string, algo::is_any_of(delimiter));
+            static string_type const format_string     = transform::join(format_flags, traits_type::literal("|"));
+            string_type const formatted_string         = traits_type::format_datetime(format_string, datetime);
+            std::vector<string_type> const& specifiers = transform::split(formatted_string, traits_type::literal("|"), native_flags::size);
             BOOST_ASSERT(specifiers.size() == native_flags::size);
 
             native_flags const flags =
@@ -247,10 +240,10 @@ struct formatter {
         inline static cooked_flags cook_flags(native_flags const& flags, datetime_type const& datetime) {
             date_type     const date        = datetime.date();
             timezone_type const timezone    = datetime.zone();
-            size_type     const day         = date.day();
-            size_type     const year        = date.year();
-            size_type     const iso_week    = date.week_number();
-            size_type     const month_days  = date.end_of_month().day();
+            size_type     const day         = static_cast<size_type>(date.day());
+            size_type     const year        = static_cast<size_type>(date.year());
+            size_type     const iso_week    = static_cast<size_type>(date.week_number());
+            size_type     const month_days  = static_cast<size_type>(date.end_of_month().day());
             boolean_type  const is_am       = flags.p == traits_type::literal("AM");
             boolean_type  const is_pm       = flags.p == traits_type::literal("PM");
             boolean_type  const has_minutes = flags.M != traits_type::literal("00");
@@ -258,10 +251,12 @@ struct formatter {
             boolean_type  const is_noon     = flags.H == traits_type::literal("12") && !has_minutes;
             boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
             boolean_type  const is_dst      = datetime.is_dst();
+            duration_type const offset      = timezone ? traits_type::to_duration(timezone, is_dst) : duration_type();
+            integer_type  const offset_secs = static_cast<integer_type>(offset.total_seconds());
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
-            string_type   const succint     = trim_zeros(flags.I)
+            string_type   const succint     = transform::trim_leading_zeros(flags.I)
                                             + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
@@ -271,61 +266,72 @@ struct formatter {
                                             + flags.d + char_type('T')
                                             + flags.H + char_type(':')
                                             + flags.M + char_type(':')
-                                            + flags.S;
+                                            + flags.S
+                                            + (timezone ? stringify(offset, true) : string_type());
+            string_type   const tz_trail    = stringify(offset, false);
             string_type   const rfc2822     = flags.a + traits_type::literal(", ")
                                             + flags.d + char_type(' ')
                                             + flags.b + char_type(' ')
                                             + flags.Y + char_type(' ')
-                                            + flags.T +
-                (!timezone ? string_type() : traits_type::to_string(traits_type::to_duration(timezone, is_dst)));
+                                            + flags.T + char_type(' ')
+                                            + tz_trail;
 
          // time_type     const utc_epoch   = traits_type::to_time(std::time_t(0));
             time_type     const utc_epoch   = traits_type::to_time(traits_type::to_date(1970, 1, 1));
             duration_type const since_epoch = datetime.utc_time() - utc_epoch;
             datetime_type const local_dt    = traits_type::local_datetime();
+            size_type     const unix_stamp  = static_cast<size_type>(since_epoch.seconds());
 
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
-            cooked.b = algo::to_lower_copy(flags.b);
+            cooked.b = transform::lower(flags.b);
             cooked.B = string_type(); // NOTE: "Not implemented" per the spec.
             cooked.c = iso8601;
             cooked.d = flags.d;
             cooked.D = flags.a;
-            cooked.e = flags.z; // XXX: Or traits_type::to_string(timezone, is_dst);
+            cooked.e = flags.z; // XXX: Compare against traits_type::to_string(timezone, is_dst);
             cooked.E = flags.B; // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;
-            cooked.g = trim_zeros(flags.I);
-            cooked.G = trim_zeros(flags.H);
+            cooked.g = transform::trim_leading_zeros(flags.I);
+            cooked.G = transform::trim_leading_zeros(flags.H);
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
             cooked.I = traits_type::literal(is_dst ? "1" : "0");
-            cooked.j = trim_zeros(flags.d);
+            cooked.j = transform::trim_leading_zeros(flags.d);
             cooked.l = flags.A;
-            cooked.L = behavior_type::to_string(is_leapyear);
+            cooked.L = traits_type::literal(is_leapyear ? "True" : "False");
             cooked.m = flags.m;
             cooked.M = flags.b;
-            cooked.n = trim_zeros(flags.m);
+            cooked.n = transform::trim_leading_zeros(flags.m);
             cooked.N = flags.b; // TODO: Use A.P. style.
             cooked.o = flags.G;
-            cooked.O = traits_type::literal(""); // TODO: Implement.
+            cooked.O = tz_trail;
             cooked.P = informal;
             cooked.r = rfc2822;
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
-            cooked.t = behavior_type::to_string(month_days);
+            cooked.t = transform::stringize(month_days);
             cooked.T = traits_type::to_string(local_dt.zone(), local_dt.is_dst());
-            cooked.u = algo::trim_left_copy_if(flags.f, algo::is_any_of("."));
-            cooked.U = behavior_type::to_string(since_epoch.seconds());
+            cooked.u = transform::trim_left(flags.f, traits_type::literal("."));
+            cooked.U = transform::stringize(unix_stamp);
             cooked.w = flags.w;
-            cooked.W = behavior_type::to_string(iso_week);
+            cooked.W = transform::stringize(iso_week);
             cooked.y = flags.y;
             cooked.Y = flags.Y;
-            cooked.z = trim_zeros(flags.j);
-            cooked.Z = traits_type::literal("");            // TODO: Implement.
+            cooked.z = transform::trim_leading_zeros(flags.j);
+            cooked.Z = transform::stringize(offset_secs);
             return cooked;
+        }
+
+        inline static string_type stringify(duration_type const& offset, boolean_type const colon) {
+            return (offset.is_negative() ? char_type('-') : char_type('+'))
+                 + (transform::digitize(static_cast<size_type>(offset.hours()), 2))
+                 + (colon ? string_type(1, char_type(':')) : string_type())
+                 + (transform::digitize(static_cast<size_type>(offset.minutes()), 2))
+                 ;
         }
 
         inline static string_type ordinal_suffix(int const n) {
@@ -336,11 +342,6 @@ struct formatter {
             case 3: case 23: return traits_type::literal("rd");
             default:         return traits_type::literal("th");
             }
-        }
-
-        inline static string_type trim_zeros(string_type const& s) {
-            string_type const trimmed = algo::trim_left_copy_if(s, algo::is_any_of("0"));
-            return trimmed.empty() ? string_type(1, char_type('0')) : trimmed;
         }
     };
 
@@ -458,7 +459,7 @@ struct formatter {
   private:
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return boost::algorithm::replace_all_copy(s, traits_type::literal(" "), options.nonbreaking_space);
+        return transform::replace(s, traits_type::literal(" "), options.nonbreaking_space);
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n
@@ -466,7 +467,7 @@ struct formatter {
                                             , options_type const& options
                                             ) {
         string_type const suffix = n == 1 ? string_type() : traits_type::literal("s");
-        return behavior_type::to_string(n) + options.nonbreaking_space + s + suffix;
+        return transform::stringize(n) + options.nonbreaking_space + s + suffix;
     }
 };
 

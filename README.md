@@ -494,9 +494,7 @@ Future Work
  - Engines:
    * Django:
      + Implement multi-level inheritance
-     + Support non-UTC timezones
      + Option to pre-load libraries, tags and filters
-     + Implement missing date/time format specifiers
      + Make markers dynamically configurable
      + Consider using hex character entities (vs. named) to match Django's engine
      + Native `i18n` library

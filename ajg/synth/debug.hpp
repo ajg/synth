@@ -33,7 +33,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 
@@ -124,21 +123,6 @@ inline std::string abbreviate(char const* s) {
             empty = false;
         }
     }
-
-/*
-    boost::algorithm::replace_all(result, "boost::",     "b::");
-    boost::algorithm::replace_all(result, "xpressive::", "x::");
-    boost::algorithm::replace_all(result, "detail::",    "d::");
-    boost::algorithm::replace_all(result, "ajg::",       "a::");
-    boost::algorithm::replace_all(result, "synth::",     "s::");
-    boost::algorithm::replace_all(result, "adapters::",  "a::");
-    boost::algorithm::replace_all(result, "bindings::",  "b::");
-    boost::algorithm::replace_all(result, "engines::",   "e::");
-    boost::algorithm::replace_all(result, "templates::", "t::");
-    boost::algorithm::replace_all(result, "tut::",       "t::");
- // boost::algorithm::replace_all(result, "std::",       "");
- // boost::algorithm::replace_all(result, "__1::",       "");
-*/
 
     return result;
 }

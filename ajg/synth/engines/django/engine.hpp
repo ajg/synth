@@ -21,8 +21,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/transformer.hpp>
@@ -103,6 +101,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     typedef typename kernel_type::match_type                                    match_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename kernel_type::string_match_type                             string_match_type;
+    typedef detail::transformer<string_type>                                    transform;
 
   private:
 
@@ -629,8 +628,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (boost::algorithm::starts_with(op, traits_type::literal("not"))
-                  && boost::algorithm::ends_with(op, traits_type::literal("in"))) {
+            else if (transform::begins_with(op, traits_type::literal("not"))
+                  && transform::ends_with(op, traits_type::literal("in"))) {
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }

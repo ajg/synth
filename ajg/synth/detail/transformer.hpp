@@ -5,17 +5,36 @@
 #ifndef AJG_SYNTH_DETAIL_TRANSFORMER_HPP_INCLUDED
 #define AJG_SYNTH_DETAIL_TRANSFORMER_HPP_INCLUDED
 
-#include <string>
-#include <sstream>
 #include <cctype>
+#include <string>
+#include <locale>
+#include <sstream>
 
 #include <boost/foreach.hpp>
 
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
+
+#include <ajg/synth/exceptions.hpp>
 
 namespace ajg {
 namespace synth {
 namespace detail {
+namespace {
+namespace algo = boost::algorithm;
+} // namespace
+
+
+//
+// transformer
+//     Helper for string-related transformations that are not customizable, unlike those in traits.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
 struct transformer {
@@ -37,7 +56,7 @@ struct transformer {
 
         BOOST_FOREACH(char_type const c, string) {
             boolean_type const allowed = (std::isalnum)(c) || c == '_' || c == '-' || c == '.' || c == '/';
-            allowed ? ss << c : ss << "%" << to_hex(c, 2);
+            allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
 
         BOOST_ASSERT(ss);
@@ -53,7 +72,7 @@ struct transformer {
 
         BOOST_FOREACH(char_type const c, string) {
             boolean_type const allowed = (std::isalnum)(c) || boost::algorithm::is_any_of("/#%[]=:;$&()+,!?")(c);
-            allowed ? ss << c : ss << "%" << to_hex(c, 2);
+            allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
 
         BOOST_ASSERT(ss);
@@ -69,7 +88,7 @@ struct transformer {
 
         BOOST_FOREACH(char_type const c, string) {
             boolean_type const allowed = c >= 32;
-            allowed ? ss << c : ss << "\\x" << to_hex(c, 2);
+            allowed ? ss << c : ss << "\\x" << hexize(c, 2);
         }
 
         BOOST_ASSERT(ss);
@@ -92,7 +111,7 @@ struct transformer {
             case char_type('&'):  ss << "&amp;";  break;
             case char_type('"'):  ss << "&quot;"; break;
             case char_type('\''): ss << "&apos;"; break;
-            default: ascii ? ss << "&#x" << to_hex(c, 4) : ss << c;
+            default: ascii ? ss << "&#x" << hexize(c, 4) : ss << c;
             }
         }
 
@@ -135,10 +154,184 @@ struct transformer {
     }
 
 //
-// to_hex
+// stringize
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static string_type to_hex( char_type    const c
+    template <class T>
+    inline static string_type stringize(T const& t) {
+        sstream_type ss;
+        ss << t;
+        BOOST_ASSERT(ss);
+        return ss.str();
+    }
+
+//
+// join
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type join(std::vector<string_type> const& strings, string_type const& delimiter) {
+        return algo::join(strings, delimiter);
+    }
+
+//
+// split
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static std::vector<string_type> split( string_type const& string
+                                                , string_type const& delimiters
+                                                , size_type   const  hint = 0
+                                                ) {
+        std::vector<string_type> result;
+        if (hint > 0) result.reserve(hint);
+        algo::split(result, string, algo::is_any_of(delimiters));
+        return result;
+    }
+
+//
+// space
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static std::vector<string_type> space( string_type const& string
+                                                , size_type   const  hint = 0
+                                                ) {
+        std::vector<string_type> result;
+        if (hint > 0) result.reserve(hint);
+        int (*predicate)(int) = std::isspace;
+        algo::split(result, string, predicate);
+        return result;
+    }
+
+//
+// erase
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type remove(string_type const& string, string_type const& what) {
+        return algo::erase_all_copy(string, what);
+    }
+
+//
+// replace
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type replace(string_type const& string, string_type const& what, string_type const& with) {
+        return algo::replace_all_copy(string, what, with);
+    }
+
+//
+// lower
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static boolean_type begins_with(string_type const& s, string_type const& prefix) {
+        return algo::starts_with(s, prefix);
+    }
+
+//
+// upper
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static boolean_type ends_with(string_type const& s, string_type const& suffix) {
+        return algo::ends_with(s, suffix);
+    }
+
+//
+// lower
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type lower(string_type const& s) {
+        return algo::to_lower_copy(s);
+    }
+
+//
+// upper
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type upper(string_type const& s) {
+        return algo::to_upper_copy(s);
+    }
+
+//
+// strip
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type strip(string_type const& s) {
+        return algo::trim_copy(s);
+    }
+
+//
+// strip_left
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type strip_left(string_type const& s) {
+        return algo::trim_left_copy(s);
+    }
+
+//
+// strip_right
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type strip_right(string_type const& s) {
+        return algo::trim_right_copy(s);
+    }
+
+//
+// trim
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type trim(string_type const& s, string_type const& characters) {
+        return algo::trim_copy_if(s, algo::is_any_of(characters));
+    }
+
+//
+// trim_left
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type trim_left(string_type const& s, string_type const& characters) {
+        return algo::trim_left_copy_if(s, algo::is_any_of(characters));
+    }
+
+//
+// trim_right
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type trim_right(string_type const& s, string_type const& characters) {
+        return algo::trim_right_copy_if(s, algo::is_any_of(characters));
+    }
+
+//
+// trim_leading_zeros
+//     Similar to trim_left, except will return a one-zero string in place of the empty string.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type trim_leading_zeros(string_type const& s) {
+        static string_type const zero(1, char_type('0'));
+        string_type const trimmed = trim_left(s, zero);
+        return trimmed.empty() ? zero : trimmed;
+    }
+
+//
+// digitize
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type digitize(size_type const n, size_type const width) {
+        if (width != 2) {
+            AJG_SYNTH_THROW(not_implemented("width != 2"));
+        }
+        else if (n >= 100) {
+            AJG_SYNTH_THROW(std::out_of_range("n"));
+        }
+        else if (n < 10) {
+            return char_type('0') + stringize(n);
+        }
+        else {
+            return stringize(n);
+        }
+    }
+
+//
+// hexize
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type hexize( char_type    const c
                                     , size_type    const width
                                     , boolean_type const lowercase = false
                                     ) {

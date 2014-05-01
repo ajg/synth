@@ -18,14 +18,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/assign/list_of.hpp>
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
 #include <boost/xpressive/regex_token_iterator.hpp>
 
 // TODO[c++11]: Replace with <random>.
@@ -217,25 +209,19 @@ struct builtin_filters {
 
         inline static value_type escape_slashes(value_type const& value) {
             string_type const string = value.to_string();
-            // TODO: string_stream_type stream;
-            if (size_type const escapes = std::count_if(string.begin(), string.end(), algo::is_any_of("'\"\\"))) {
-                string_type result;
-                result.reserve(string.size() + escapes);
+            string_stream_type ss;
 
-                BOOST_FOREACH(char_type const c, string) {
-                    switch (c) {
-                    case char_type('\''): result += traits_type::literal("\\'");  break;
-                    case char_type('"'):  result += traits_type::literal("\\\""); break;
-                    case char_type('\\'): result += traits_type::literal("\\\\"); break;
-                    default: result += c;
-                    }
+            BOOST_FOREACH(char_type const c, string) {
+                switch (c) {
+                case char_type('\''): ss << "\\'";  break;
+                case char_type('"'):  ss << "\\\""; break;
+                case char_type('\\'): ss << "\\\\"; break;
+                default: ss << c;
                 }
+            }
 
-                return result;
-            }
-            else { // No escapes.
-                return value;
-            }
+            BOOST_ASSERT(ss);
+            return ss.str();
         }
     };
 
@@ -297,7 +283,7 @@ struct builtin_filters {
             with_arity<1>::validate(arguments.first.size());
             string_type const from = value.to_string();
             string_type const what = arguments.first[0].to_string();
-            return algo::erase_all_copy(from, what);
+            return transform::remove(from, what);
         }
     };
 
@@ -678,8 +664,8 @@ struct builtin_filters {
             boolean_type const safe = !options.autoescape || value.safe();
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
-                string_type p = safe ? value_type(line).escape().to_string() : line;
-                algo::replace_all(p, kernel.newline, traits_type::literal("<br />"));
+                string_type const s = safe ? value_type(line).escape().to_string() : line;
+                string_type const p = transform::replace(s, kernel.newline, traits_type::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -699,8 +685,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type const text = algo::replace_all_copy(value.to_string(),
-                kernel.newline, traits_type::literal("<br />"));
+            string_type const text = transform::replace(value.to_string(), kernel.newline, traits_type::literal("<br />"));
             return value_type(text).mark_safe();
         }
     };
@@ -717,16 +702,14 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            std::vector<string_type>            lines;
             string_stream_type stream;
 
             string_type  const input   = value.to_string();
             string_type  const pattern = traits_type::literal("%%0%dd. %%s");
             boolean_type const safe    = !options.autoescape || value.safe();
 
-            algo::split(lines, input, algo::is_any_of("\n"));
-
-            size_type   const width = behavior_type::to_string(lines.size()).size();
+            std::vector<string_type> const& lines = transform::split(input, traits_type::literal("\n"));
+            size_type   const width = transform::stringize(lines.size()).size();
             string_type const spec  = (format_type(pattern) % width).str();
 
             size_type i = 1;
@@ -771,7 +754,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return algo::to_lower_copy(value.to_string());
+            return transform::lower(value.to_string());
         }
     };
 
@@ -814,7 +797,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type phone = algo::to_lower_copy(value.to_string());
+            string_type phone = transform::lower(value.to_string());
             std::transform(phone.begin(), phone.end(), phone.begin(), translate);
             return phone;
         }
@@ -922,17 +905,14 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<1>::validate(arguments.first.size());
-            std::vector<string_type> tags;
-            formatter const format = { tags };
-            int (*predicate)(int) = std::isspace;
             string_type const source = arguments.first[0].to_string();
-            algo::split(tags, source, predicate);
-            return x::regex_replace(value.to_string(), kernel.html_tag, format);
+            replacer const r = { transform::space(source) };
+            return x::regex_replace(value.to_string(), kernel.html_tag, r);
         }
 
       private:
 
-        struct formatter {
+        struct replacer {
             std::vector<string_type> const& tags;
 
             template <class Match>
@@ -1051,10 +1031,10 @@ struct builtin_filters {
                 }
             };
 
-            string_type slug = algo::trim_copy(value.to_string());
+            string_type slug = transform::strip(value.to_string());
             std::replace(slug.begin(), slug.end(), char_type(' '), char_type('-'));
             slug.erase(std::remove_if(slug.begin(), slug.end(), invalid::fn), slug.end());
-            return algo::to_lower_copy(slug);
+            return transform::lower(slug);
         }
     };
 
@@ -1479,7 +1459,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return algo::to_upper_copy(value.to_string());
+            return transform::upper(value.to_string());
         }
     };
 
@@ -1610,7 +1590,7 @@ struct builtin_filters {
             char_type last = '\0';
             BOOST_FOREACH(char_type const c, input) {
                 if (++i == width) {
-                    algo::trim_left(word);
+                    word = transform::strip_left(word);
                     result += newline + word;
                     i = word.length();
                     word.clear();

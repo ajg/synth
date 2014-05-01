@@ -16,8 +16,6 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/adapters/map.hpp>
 #include <ajg/synth/adapters/bool.hpp>
@@ -614,7 +612,7 @@ struct builtin_tags {
                 mapping_type values;
 
                 BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
-                    string_type const s = boost::algorithm::trim_copy(val.str());
+                    string_type const s = transform::strip(val.str());
                     values[s] = kernel.evaluate(val, context, options);
                 }
 

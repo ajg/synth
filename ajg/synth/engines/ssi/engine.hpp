@@ -86,6 +86,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     typedef typename kernel_type::match_type                                    match_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename kernel_type::string_match_type                             string_match_type;
+    typedef detail::transformer<string_type>                                    transform;
 
   private:
 
@@ -194,7 +195,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
         string_type const temp  = extract_attribute(attr(this->quoted_value));
-        string_type const name  = boost::algorithm::to_lower_copy(attr(this->name).str());
+        string_type const name  = transform::lower(attr(this->name).str());
         string_type const value = interpolate ? this->interpolate(args, temp) : temp;
         return std::make_pair(name, value);
     }

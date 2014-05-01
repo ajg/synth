@@ -92,6 +92,11 @@ struct default_traits {
 
   public:
 
+///
+/// literal:
+///     TODO: Move to detail::transformer.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
     inline static string_type literal(char const* const s) {
         return widen(std::string(s));
     }
@@ -104,6 +109,7 @@ struct default_traits {
 ///
 /// transcode:
 ///     Centralizes string conversions in one place.
+///     TODO: Move to detail::transformer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <class To, class From>
@@ -115,6 +121,7 @@ struct default_traits {
 /// narrow, widen:
 ///     These are misnomers since `Char` doesn't have to be 'wider' than `char`; they are shorcuts
 ///     to `transcode` and useful for interacting with APIs that only support one or the other.
+///     TODO: Move to detail::transformer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <class C> inline static std::basic_string<char> narrow(std::basic_string<C> const& s) { return transcode<char, C>(s); }

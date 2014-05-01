@@ -9,7 +9,6 @@
 #include <string>
 
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 
 #include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/detail/transformer.hpp>

@@ -12,8 +12,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -62,6 +60,7 @@ struct command {
     typedef ::option::Descriptor                                                descriptor_type;
     typedef ::option::Option                                                    option_type;
     typedef ::option::Parser                                                    parser_type;
+    typedef detail::transformer<string_type>                                    transform;
 
   public:
 
@@ -140,9 +139,9 @@ struct command {
                 AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
             }
 
-                 if (boost::algorithm::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
-            else if (boost::algorithm::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
-            else if (boost::algorithm::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
+                 if (transform::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
+            else if (transform::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
+            else if (transform::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
             else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
         }
 

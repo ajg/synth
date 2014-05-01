@@ -15,9 +15,6 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
@@ -215,11 +212,9 @@ struct value : value_facade<Traits, value> {
     }
 
     static sequence_type make_trail(value_type const& value) {
-        namespace algo = boost::algorithm;
-
-        std::vector<string_type> names;
-        string_type const source = value.to_string(), delimiter = traits_type::literal(".");
-        algo::split(names, source, algo::is_any_of(delimiter));
+        string_type const source    = value.to_string();
+        string_type const delimiter = traits_type::literal(".");
+        std::vector<string_type> const& names = detail::transformer<string_type>::split(source, delimiter);
 
         sequence_type trail;
         BOOST_FOREACH(string_type const& name, names) {

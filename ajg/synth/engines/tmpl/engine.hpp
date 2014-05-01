@@ -89,6 +89,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     typedef typename kernel_type::id_type                                       id_type;
     typedef typename kernel_type::regex_type                                    regex_type;
     typedef typename kernel_type::match_type                                    match_type;
+    typedef detail::transformer<string_type>                                    transform;
 
   private:
 
@@ -298,7 +299,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                     AJG_SYNTH_THROW(std::logic_error("duplicate escape mode"));
                 }
                 else {
-                    string_type const mode = boost::algorithm::to_lower_copy(value.str());
+                    string_type const mode = transform::lower(value.str());
 
                          if (mode == traits_type::literal("none")
                           || mode == traits_type::literal("0"))   escape = attributes::none;

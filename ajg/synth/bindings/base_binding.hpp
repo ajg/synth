@@ -51,6 +51,7 @@ struct base_binding {
     typedef django_options_type                                                 options_type;
     typedef typename django_options_type::arguments_type                        arguments_type;
     typedef typename django_options_type::formats_type                          formats_type;
+ // typedef typename django_options_type::markers_type                          markers_type;
     typedef typename django_options_type::library_type                          library_type;
     typedef typename django_options_type::libraries_type                        libraries_type;
     typedef typename django_options_type::loader_type                           loader_type;
@@ -72,6 +73,7 @@ struct base_binding {
                 , boolean_type   const  autoescape
                 , string_type    const& default_value
                 , formats_type   const& formats
+             // , markers_type   const& markers
                 , boolean_type   const& debug
                 , paths_type     const& paths
                 , libraries_type const& libraries

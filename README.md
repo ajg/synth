@@ -499,6 +499,10 @@ Future Work
      + Implement missing date/time format specifiers
      + Make markers dynamically configurable
      + Consider using hex character entities (vs. named) to match Django's engine
+     + Native `i18n` library
+     + Native `l10n` library
+     + Native `tz` library
+     + Native `static` library
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * TMPL:

@@ -61,9 +61,9 @@ namespace debug {
 /// count, level, quiet
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct count : detail::mutable_atomic_singleton<int> {};
-struct level : detail::mutable_atomic_singleton<int> {};
-struct quiet : detail::mutable_atomic_singleton<bool> {};
+struct count : detail::mutable_atomic_singleton<count, int> {};
+struct level : detail::mutable_atomic_singleton<level, int> {};
+struct quiet : detail::mutable_atomic_singleton<quiet, bool> {};
 
 ///
 /// reset

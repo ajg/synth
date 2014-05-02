@@ -32,7 +32,8 @@ namespace detail {
 /// mutable_atomic_singleton
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class T, boost::memory_order MemoryOrder = boost::memory_order_seq_cst>
+// The S parameter is so that every concrete derived type is unique.
+template <class S, class T, boost::memory_order MemoryOrder = boost::memory_order_seq_cst>
 struct mutable_atomic_singleton {
   public:
 

@@ -38,9 +38,21 @@ inline typename Traits::date_type get_date(py::object const& dt) {
         );
 }
 
+/*
 template <class Traits>
 inline typename Traits::time_type get_time(py::object const& dt) {
     return Traits::to_time
+        ( get_size<Traits>(dt.attr("hour"))
+        , get_size<Traits>(dt.attr("minute"))
+        , get_size<Traits>(dt.attr("second"))
+        , get_size<Traits>(dt.attr("microsecond")) * 1000
+        );
+}
+*/
+
+template <class Traits>
+inline typename Traits::duration_type get_time_as_duration(py::object const& dt) {
+    return Traits::to_duration
         ( get_size<Traits>(dt.attr("hour"))
         , get_size<Traits>(dt.attr("minute"))
         , get_size<Traits>(dt.attr("second"))
@@ -89,14 +101,14 @@ inline typename Traits::timezone_type get_timezone(py::object const& dt) {
         return Traits::to_timezone(name, offset, dst_name, dst_offset);
     }
     else {
-        return typename Traits::timezone_type();
+        return Traits::empty_timezone();
     }
 }
 
 template <class Traits>
 inline typename Traits::datetime_type get_datetime(py::object const& dt) {
     return Traits::to_datetime( get_date<Traits>(dt)
-                              , get_time<Traits>(dt)
+                              , get_time_as_duration<Traits>(dt)
                               , get_timezone<Traits>(dt)
                               );
 }

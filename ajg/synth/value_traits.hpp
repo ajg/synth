@@ -18,6 +18,9 @@
 #include <boost/none_t.hpp>
 #include <boost/foreach.hpp>
 #include <boost/cstdint.hpp>
+
+// TODO: BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG for nanosecond ptime resolution.
+
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -72,7 +75,8 @@ struct default_traits {
     typedef /* TODO: long */ double                     number_type; // TODO: Rename to floating_type.
 
     typedef boost::gregorian::date                      date_type;
-    typedef boost::posix_time::ptime                    time_type;     // Note: No timezone.
+    // XXX: Consider using something else here because ptime (a) needs a date and (b) has no timezone.
+    typedef boost::posix_time::ptime                    time_type;
     typedef boost::posix_time::second_clock             clock_type;
     typedef boost::posix_time::time_duration            duration_type;
     typedef boost::local_time::local_date_time          datetime_type;
@@ -179,7 +183,7 @@ struct default_traits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static timezone_type utc_timezone() {
-        return to_timezone(literal("UTC"), duration_type());
+        return to_timezone(literal("UTC"), empty_duration());
     }
 
 ///
@@ -210,7 +214,7 @@ struct default_traits {
     inline static timezone_type to_timezone( string_type   const& name
                                            , duration_type const& offset
                                            , string_type   const& dst_name   = string_type()
-                                           , duration_type const& dst_offset = duration_type()
+                                           , duration_type const& dst_offset = traits_type::empty_duration()
                                            ) {
         // e.g. PST-5, PST-5PDT, or PST-5PDT01:00:00
         string_type s = name.substr(0, 3) + to_string(offset);
@@ -256,7 +260,7 @@ struct default_traits {
     }
 
     inline static duration_type to_duration(timezone_type const& tz, boolean_type const is_dst) {
-        return tz ? (is_dst ? tz->dst_offset() : tz->base_utc_offset()) : duration_type();
+        return tz ? (is_dst ? tz->dst_offset() : tz->base_utc_offset()) : traits_type::empty_duration();
     }
 
     inline static duration_type to_duration(time_type const& time) {
@@ -264,11 +268,30 @@ struct default_traits {
     }
 
 ///
+/// to_seconds:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static integer_type to_seconds(duration_type const duration) {
+        // XXX: return static_cast<integer_type>(duration.total_seconds());
+        return static_cast<integer_type>(duration.ticks() / duration_type::ticks_per_second());
+    }
+
+///
+/// empty_*:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static date_type     empty_date()     { return date_type()/*to_date()*/; }
+    inline static time_type     empty_time()     { return time_type()/*to_time()*/; }
+    inline static duration_type empty_duration() { return to_duration(); }
+    inline static timezone_type empty_timezone() { return timezone_type(); }
+ // inline static datetime_type empty_datetime() { return to_datetime(); }
+
+///
 /// is_empty:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static boolean_type is_empty(duration_type const& duration) {
-        return duration == duration_type();
+        return duration == empty_duration();
     }
 
 ///
@@ -284,11 +307,12 @@ struct default_traits {
                                    , size_type const second      = 0
                                    , size_type const nanoseconds = 0
                                    ) {
-        return time_type(date_type(), to_duration(hour, minute, second, nanoseconds));
+        AJG_SYNTH_THROW(not_implemented("to_time"));
+        // return time_type(empty_date(), to_duration(hour, minute, second, nanoseconds));
     }
 
     inline static time_type to_time( date_type     const& date
-                                   , duration_type const& duration = duration_type()
+                                   , duration_type const& duration = traits_type::empty_duration()
                                    ) {
         return time_type(date, duration);
     }
@@ -309,14 +333,21 @@ struct default_traits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static datetime_type to_datetime(time_type const& time) {
-        return datetime_type(time, timezone_type());
+        return datetime_type(time, empty_timezone());
     }
 
-    inline static datetime_type to_datetime( date_type     const& date     = date_type()
-                                           , time_type     const& time     = time_type()
-                                           , timezone_type const& timezone = timezone_type()
+    inline static datetime_type to_datetime( date_type     const& date     = empty_date()
+                                           , time_type     const& time     = empty_time()
+                                           , timezone_type const& timezone = empty_timezone()
                                            ) {
         return datetime_type(to_time(date, to_duration(time)), timezone);
+    }
+
+    inline static datetime_type to_datetime( date_type     const& date     = empty_date()
+                                           , duration_type const& duration = duration_type()
+                                           , timezone_type const& timezone = empty_timezone()
+                                           ) {
+        return datetime_type(to_time(date, duration), timezone);
     }
 
 ///

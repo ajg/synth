@@ -251,7 +251,7 @@ struct formatter {
             boolean_type  const is_noon     = flags.H == traits_type::literal("12") && !has_minutes;
             boolean_type  const is_leapyear = ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
             boolean_type  const is_dst      = datetime.is_dst();
-            duration_type const offset      = timezone ? traits_type::to_duration(timezone, is_dst) : duration_type();
+            duration_type const offset      = timezone ? traits_type::to_duration(timezone, is_dst) : traits_type::empty_duration();
             integer_type  const offset_secs = static_cast<integer_type>(offset.total_seconds());
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
@@ -329,7 +329,7 @@ struct formatter {
         inline static string_type stringify(duration_type const& offset, boolean_type const colon) {
             return (offset.is_negative() ? char_type('-') : char_type('+'))
                  + (transform::digitize(static_cast<size_type>(offset.hours()), 2))
-                 + (colon ? string_type(1, char_type(':')) : string_type())
+                 + (colon ? traits_type::literal(":") : string_type())
                  + (transform::digitize(static_cast<size_type>(offset.minutes()), 2))
                  ;
         }
@@ -416,13 +416,13 @@ struct formatter {
                                       ) {
         BOOST_STATIC_CONSTANT(size_type, N = 6);
 
-        static size_type const seconds[N] = { 60 * 60 * 24 * 365
-                                            , 60 * 60 * 24 * 30
-                                            , 60 * 60 * 24 * 7
-                                            , 60 * 60 * 24
-                                            , 60 * 60
-                                            , 60
-                                            };
+        static integer_type const seconds[N] = { 60 * 60 * 24 * 365
+                                               , 60 * 60 * 24 * 30
+                                               , 60 * 60 * 24 * 7
+                                               , 60 * 60 * 24
+                                               , 60 * 60
+                                               , 60
+                                               };
         static string_type const units[N] = { traits_type::literal("year")
                                             , traits_type::literal("month")
                                             , traits_type::literal("week")
@@ -430,14 +430,15 @@ struct formatter {
                                             , traits_type::literal("hour")
                                             , traits_type::literal("minute")
                                             };
+        integer_type const total = traits_type::to_seconds(duration);
 
-        if (duration.is_negative()) {
+        if (duration.is_negative() || total <= 0) {
             return formatter::pluralize_unit(0, units[N - 1], options);
         }
 
         string_type result;
-        size_type const total = duration.total_seconds();
-        size_type count = 0, i = 0;
+        integer_type count = 0;
+        size_type i = 0;
 
         for (; i < N; ++i) {
             if ((count = total / seconds[i])) {

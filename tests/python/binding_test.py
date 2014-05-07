@@ -72,9 +72,14 @@ dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 {{ datetime_1984 }}
 
 {{ datetime_1984|timesince:datetime_id4 }}
-{# TODO: {{ datetime_id4|timesince:datetime_1984 }} #}
-{# TODO: {{ datetime_1984|timeuntil:datetime_id4 }} #}
+{{ datetime_id4|timesince:datetime_1984 }}
+{{ datetime_id4|timesince:datetime_id4 }}
+{{ datetime_1984|timesince:datetime_1984 }}
+
+{{ datetime_1984|timeuntil:datetime_id4 }}
 {{ datetime_id4|timeuntil:datetime_1984 }}
+{{ datetime_id4|timeuntil:datetime_id4 }}
+{{ datetime_1984|timeuntil:datetime_1984 }}
 
 """
 golden = """
@@ -127,8 +132,13 @@ bar
 1984-11-02 00:00:00
 
 0&nbsp;minutes
+208&nbsp;years, 5&nbsp;months
+0&nbsp;minutes
+0&nbsp;minutes
 
-
+208&nbsp;years, 5&nbsp;months
+0&nbsp;minutes
+0&nbsp;minutes
 0&nbsp;minutes
 
 """

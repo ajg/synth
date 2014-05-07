@@ -86,12 +86,12 @@ inline std::ostream& log( char const* const function
                         ) {
     std::ostream& stream = std::cerr;
 
-    if (int const c = count::get()) {
-        count::set(c + 1);
-        stream << std::endl;
-    } else {
-        count::set(c + 1);
-        stream << std::boolalpha;
+    // TODO: atomic count::inc()
+    int const c = count::get();
+    count::set(c + 1);
+
+    if (c == 0) {
+        stream << std::boolalpha << std::endl;
     }
 
     std::string const indent(level::get() * 2, ' ');

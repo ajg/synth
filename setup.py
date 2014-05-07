@@ -10,8 +10,8 @@ import sys
 from distutils import sysconfig
 from distutils.core import setup, Extension
 
-# TODO: Allow some of these to be overridden via environment variable and/or command option.
-DEBUG = False
+# TODO: Allow CHAR and BOOST to be passed via command-line.
+DEBUG = ('-g' in sys.argv or '--debug' in sys.argv)
 CHAR  = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
 BOOST = 'auto' # TODO: Implement `local` and `system`.
 
@@ -90,7 +90,18 @@ def find_synth_version():
 # TODO: For some reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++
 #       ones, to which it doesn't apply, which causes GCC to print out a warning while building.
 def initialize_compiler(platform):
-    if not DEBUG:
+    if DEBUG:
+        # Don't optimize when debug is on.
+        if platform != 'windows':
+            cflags = sysconfig.get_config_var('CFLAGS')
+            opt = sysconfig.get_config_var('OPT')
+            sysconfig._config_vars['CFLAGS'] = cflags.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
+            sysconfig._config_vars['OPT'] = opt.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
+
+        if platform == 'linux':
+            ldshared = sysconfig.get_config_var('LDSHARED')
+            sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
+    else:
         # Don't produce debug symbols when debug is off.
         if platform != 'windows':
             cflags = sysconfig.get_config_var('CFLAGS')
@@ -187,7 +198,7 @@ def get_undef_macros():
     undefines = []
 
     if DEBUG:
-        defines += ['NDEBUG']
+        undefines += ['NDEBUG']
 
     return undefines
 

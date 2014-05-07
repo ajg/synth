@@ -69,6 +69,7 @@
 
 #ifndef AJG_SYNTH_CONFIG_HANDLE_EXCEPTION
 #define AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e) (::boost::throw_exception(e))
+#include <boost/throw_exception.hpp>
 #endif
 
 //
@@ -77,6 +78,7 @@
 
 #ifndef AJG_SYNTH_CONFIG_HANDLE_ASSERT
 #define AJG_SYNTH_CONFIG_HANDLE_ASSERT(e) (BOOST_ASSERT(e))
+#include <boost/assert.hpp>
 #endif
 
 #endif // AJG_SYNTH_CONFIG_HPP_INCLUDED

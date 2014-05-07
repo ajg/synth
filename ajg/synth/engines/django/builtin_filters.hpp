@@ -913,7 +913,7 @@ struct builtin_filters {
       private:
 
         struct replacer {
-            std::vector<string_type> const& tags;
+            std::vector<string_type> const tags;
 
             template <class Match>
             string_type operator()(Match const& match) const {

@@ -19,6 +19,7 @@
 #include <external/optionparser.h>
 
 #include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/detail/transformer.hpp>
 
 namespace ajg {
 namespace synth {

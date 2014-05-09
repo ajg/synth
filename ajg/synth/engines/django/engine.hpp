@@ -284,7 +284,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         symbols_type const& symbols;
         explicit not_in(symbols_type const& symbols) : symbols(symbols) {}
 
-        bool operator ()(typename match_type::value_type const& match) const {
+        boolean_type operator ()(typename match_type::value_type const& match) const {
             return this->symbols.find(match.str()) == this->symbols.end();
         }
     };

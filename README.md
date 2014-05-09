@@ -435,6 +435,7 @@ Future Work
 
  - Build:
    * Pre-commit script/hook
+   * Add `-fsanitize=undefined` when available (GCC 4.9+ so far)
    * Visual Studio 2013:
      + Add project for command-line tool
      + Pass /W4 cleanly
@@ -530,6 +531,7 @@ Future Work
 
  - Refactoring:
    * Rename value_facade to base_value
+   * Rename `detail::transformer` to `text` and move all trait-independent textual functionality there
    * Make documentation comments uniformly `///`
    * Replace catching `invalid_method` with dedicated attribute methods
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`

@@ -62,7 +62,6 @@ struct default_traits {
   public:
 
     typedef default_traits                              traits_type;
-    typedef void_t                                      void_type;
     typedef boost::none_t                               none_type;
     typedef bool                                        boolean_type;
 

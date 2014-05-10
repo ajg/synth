@@ -22,7 +22,6 @@ struct engine : base_engine<Traits> {
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
 
-    typedef typename traits_type::void_type                                     void_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -32,7 +31,7 @@ struct engine : base_engine<Traits> {
 
     typedef null::value<traits_type>                                            value_type;
     typedef std::map<string_type, value_type>                                   context_type;
-    typedef void_type                                                           options_type;
+    typedef struct {}                                                           options_type;
 
     template <class Iterator>
     struct kernel;

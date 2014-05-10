@@ -1198,7 +1198,7 @@ struct builtin_tags {
 
       private:
 
-        inline static typename options_type::tag_type const& get_library_tag
+        inline static typename options_type::tag_type const get_library_tag
                 ( string_type  const& name
                 , context_type const& context
                 , options_type const& options

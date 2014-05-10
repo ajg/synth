@@ -39,12 +39,10 @@ def flip(s):
     return ''.join(map(lambda c: c.upper() if c.islower() else c.lower(), s))
 
 def ackermann(m, n):
-    return 'TODO'
-
     if m == 0:
         return n + 1
     elif n == 0:
-        return ackermann(m - 1, 1, s)
+        return ackermann(m - 1, 1)
     else:
         return ackermann(m - 1, ackermann(m, n - 1))
 
@@ -80,7 +78,7 @@ mAY THE fORCE BE WITH YOU.
 
 (42)
 (66.6)
-(TODO)
+(125)
 """
 
 

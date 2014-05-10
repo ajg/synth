@@ -13,37 +13,74 @@ class Library(object):
         self.filters = filters
 
 def library_loader(name):
-    if name == 'tags.examples':
-        return Library(tags={'x': None, 'y': None, 'z': None})
-    elif name == 'example_filters':
-        return Library(filters={'flip': flip})
-    elif name in ('foo', 'bar', 'qux'):
+    if name in ('empty_library'):
         return Library()
+
+    elif name == 'dummy.tags.and.filters':
+        return Library(
+            tags={'a': None, 'b': None, 'c': None},
+            filters={'x': None, 'y': None, 'z': None},
+        )
+
+    elif name == 'test_tags':
+        return Library(tags={
+            'ackermann':      ackermann,      # nullary
+            'identity':       identity,       # unary
+            'answer_to_life': answer_to_life, # binary
+        })
+
+    elif name == 'test_filters':
+        return Library(filters={'flip': flip})
+
     else:
         raise Exception('Library not found')
 
-def flip(string):
-    return ''.join(map(lambda c: c.upper() if c.islower() else c.lower(), string))
+def flip(s):
+    return ''.join(map(lambda c: c.upper() if c.islower() else c.lower(), s))
+
+def ackermann(m, n):
+    return 'TODO'
+
+    if m == 0:
+        return n + 1
+    elif n == 0:
+        return ackermann(m - 1, 1, s)
+    else:
+        return ackermann(m - 1, ackermann(m, n - 1))
+
+def identity(x):
+    return x
+
+def answer_to_life():
+    return 42
 
 
 context = {'motto': 'May the Force be with you.'}
-source = """
-
-{% load x y z from tags.examples %}
-{% load flip from example_filters %}
-{% load foo bar qux %}
-
+source = """\
+{% load empty_library %}
+{% load a x b y c z from dummy.tags.and.filters %}
+{% load flip from test_filters %}
 {{ motto }}
 {{ motto|flip }}
-
+{% load ackermann from test_tags %}
+{% load identity from test_tags %}
+{% load answer_to_life from test_tags %}
+({% answer_to_life %})
+({% identity 66.6 %})
+({% ackermann 3 4 %})
 """
-golden = """
-
-
+golden = """\
 
 
 
 May the Force be with you.
 mAY THE fORCE BE WITH YOU.
 
+
+
+(42)
+(66.6)
+(TODO)
 """
+
+

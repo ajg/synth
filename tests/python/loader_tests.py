@@ -24,9 +24,16 @@ def library_loader(name):
 
     elif name == 'test_tags':
         return Library(tags={
+            # niladic ('simple') tags:
             'ackermann':      ackermann,      # nullary
             'identity':       identity,       # unary
             'answer_to_life': answer_to_life, # binary
+            'add':            add,            # n-ary
+            # polyadic tags:
+            # 'rot13':        rot13,          # monadic
+            # '?':            ?,              # dyadic
+            # 'sizable':      sizable,        # triadic
+            # 'unless':       unless,         # variadic (monadic or dyadic)
         })
 
     elif name == 'test_filters':
@@ -38,6 +45,12 @@ def library_loader(name):
 def flip(s):
     return ''.join(map(lambda c: c.upper() if c.islower() else c.lower(), s))
 
+def answer_to_life():
+    return 42
+
+def identity(x):
+    return x
+
 def ackermann(m, n):
     if m == 0:
         return n + 1
@@ -46,11 +59,9 @@ def ackermann(m, n):
     else:
         return ackermann(m - 1, ackermann(m, n - 1))
 
-def identity(x):
-    return x
+def add(*args):
+    return sum(args)
 
-def answer_to_life():
-    return 42
 
 
 context = {'motto': 'May the Force be with you.'}
@@ -63,9 +74,14 @@ source = """\
 {% load ackermann from test_tags %}
 {% load identity from test_tags %}
 {% load answer_to_life from test_tags %}
+{% load add from test_tags %}
 ({% answer_to_life %})
-({% identity 66.6 %})
+({% identity 'wow' %})
 ({% ackermann 3 4 %})
+({% add %})
+({% add 1.1 %})
+({% add 1.1 2.2 %})
+({% add 1.1 2.2 3.3 %})
 """
 golden = """\
 
@@ -76,9 +92,14 @@ mAY THE fORCE BE WITH YOU.
 
 
 
+
 (42)
-(66.6)
+(wow)
 (125)
+()
+(1.1)
+(3.3)
+(6.6)
 """
 
 

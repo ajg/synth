@@ -13,14 +13,14 @@ print('Loaded synth; version: ' + synth.version())
 #       refactor and figure out how to reuse the native unit tests.
 
 def main():
-    import python.binding_test   as binding_test
-    import python.directory_test as directory_test
-    import python.loader_test    as loader_test
+    import python.binding_tests   as binding_tests
+    import python.directory_tests as directory_tests
+    import python.loader_tests    as loader_tests
 
     print 'Running test harness...'
-    run_test('binding_test',   *binding_test.get())
-    run_test('directory_test', *directory_test.get())
-    run_test('loader_test',    *loader_test.get())
+    run_test('binding_tests',   *binding_tests.get())
+    run_test('directory_tests', *directory_tests.get())
+    run_test('loader_tests',    *loader_tests.get())
 
     if failures != 0:
         raise Exception('One or more tests failed')

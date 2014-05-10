@@ -157,8 +157,9 @@ struct options {
     typedef boost::shared_ptr<abstract_loader_type>                             loader_type;   // TODO[c++11]: Use unique_ptr?
     typedef boost::shared_ptr<abstract_resolver_type>                           resolver_type; // TODO[c++11]: Use unique_ptr?
 
-    typedef value_type (tag_fn_type)(options_type&, context_type&, arguments_type&);
-    typedef value_type (filter_fn_type)(options_type const&, context_type const&, value_type const&, arguments_type const&);
+    // TODO: Unify w.r.t. builtin_tags::tag_type and builtin_filters::filter_type.
+    typedef void       (tag_fn_type)(arguments_type const&, ostream_type&, context_type&, options_type&);
+    typedef value_type (filter_fn_type)(value_type const&, arguments_type const&, context_type&, options_type&);
 
     typedef boost::function<tag_fn_type>                                        tag_type;
     typedef boost::function<filter_fn_type>                                     filter_type;

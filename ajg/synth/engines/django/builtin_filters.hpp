@@ -68,8 +68,8 @@ struct builtin_filters {
     typedef value_type (*filter_type)( kernel_type    const&
                                      , value_type     const&
                                      , arguments_type const&
-                                     , context_type   const&
-                                     , options_type   const&
+                                     , context_type   const& // TODO: unconst?
+                                     , options_type   const& // TODO: unconst?
                                      );
 
   private:

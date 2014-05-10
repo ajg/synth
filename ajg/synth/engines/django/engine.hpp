@@ -456,7 +456,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         typename options_type::filters_type::const_iterator it = options.loaded_filters.find(name);
 
         if (it != options.loaded_filters.end()) { // Let library filters override built-in ones.
-            return it->second(options, context, value, arguments);
+            return it->second(value, arguments, const_cast<context_type&>(context), const_cast<options_type&>(options));
         }
 
         if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {

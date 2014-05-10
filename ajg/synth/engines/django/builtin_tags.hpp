@@ -71,8 +71,8 @@ struct builtin_tags {
 
     typedef void (*tag_type)( kernel_type  const& kernel
                             , match_type   const& match
-                            , context_type const& context
-                            , options_type const& options
+                            , context_type const& context // TODO: unconst?
+                            , options_type const& options // TODO: unconst?
                             , ostream_type&       ostream
                             );
 
@@ -1181,19 +1181,16 @@ struct builtin_tags {
                           ) {
             typedef typename options_type::tag_type tag_type;
 
-            string_type const& name = match(kernel.unreserved_name)[id].str();
-            match_type  const& args = match(kernel.arguments);
-            match_type  const& body = match(kernel.block);
-            tag_type    const& tag  = get_library_tag(name, context, options);
+            string_type const& name  = match(kernel.unreserved_name)[id].str();
+            match_type  const& args  = match(kernel.arguments);
+            match_type  const& body  = match(kernel.block);
+            tag_type    const& tag   = get_library_tag(name, context, options);
 
-            arguments_type arguments    = kernel.evaluate_arguments(args, context, options);
-            context_type   context_copy = context;
-            options_type   options_copy = options;
+            arguments_type arguments = kernel.evaluate_arguments(args, context, options);
+            // NOTE: kernel, match can't be passed because their types aren't available in options.
+            tag(arguments, ostream, const_cast<context_type&>(context), const_cast<options_type&>(options));
+            kernel.render_block(ostream, body, context, options);
 
-            if (value_type const& value = tag(options_copy, context_copy, arguments)) {
-                ostream << value;
-            }
-            kernel.render_block(ostream, body, context_copy, options_copy);
         }
 
       private:

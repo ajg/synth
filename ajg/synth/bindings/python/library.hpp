@@ -27,6 +27,7 @@ struct library : Options::abstract_library_type {
     typedef typename options_type::boolean_type          boolean_type;
     typedef typename options_type::string_type           string_type;
     typedef typename options_type::value_type            value_type;
+    typedef typename options_type::ostream_type          ostream_type;
     typedef typename options_type::arguments_type        arguments_type;
     typedef typename options_type::names_type            names_type;
     typedef typename options_type::tag_type              tag_type;
@@ -41,7 +42,7 @@ struct library : Options::abstract_library_type {
             tag_names_ = names_type(begin, end);
 
             BOOST_FOREACH(string_type const& name, tag_names_) {
-                tags_[name] = tag_type(boost::bind(call_tag, tags[name], _1, _2, _3));
+                tags_[name] = tag_type(boost::bind(call_tag, tags[name], _1, _2, _3, _4));
             }
         }
 
@@ -63,16 +64,23 @@ struct library : Options::abstract_library_type {
     virtual tag_type     get_tag(string_type const& name) { return tags_[name]; }
     virtual filter_type  get_filter(string_type const& name) { return filters_[name]; }
 
-    static value_type call_tag(py::object tag, options_type&, context_type&, arguments_type& arguments) {
+    static void call_tag( py::object            tag
+                        , arguments_type const& arguments
+                        , ostream_type&         ostream
+                        , context_type&
+                        , options_type&
+                        ) {
         std::pair<py::tuple, py::dict> const args = from_arguments(arguments);
-        return tag(*args.first, **args.second);
+        value_type const& simple_tag_result = tag(*args.first, **args.second);
+        ostream << simple_tag_result;
+        return;
     }
 
     static value_type call_filter( py::object            filter
-                                 , options_type   const&
-                                 , context_type   const&
                                  , value_type     const& value
                                  , arguments_type const& arguments
+                                 , context_type&
+                                 , options_type&
                                  ) {
         std::pair<py::tuple, py::dict> const args = from_arguments(value, arguments);
         return filter(*args.first, **args.second);

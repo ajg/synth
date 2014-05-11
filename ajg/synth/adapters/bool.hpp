@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_ADAPTERS_BOOL_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_BOOL_HPP_INCLUDED
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -15,19 +15,17 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior>
-struct adapter<Behavior, bool>
-    : public base_adapter<Behavior> {
-
-    AJG_SYNTH_ADAPTER(bool)
-    adapted_type adapted_;
-
+struct adapter<Behavior, bool> : concrete_adapter<Behavior, bool> {
   public:
 
-    floating_type to_floating()  const { return adapted_ ? 1 : 0; }
-    boolean_type to_boolean() const { return adapted_; }
+    AJG_SYNTH_ADAPTER_TYPEDEFS(bool);
+    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, bool>(adapted) {}
 
-    void input (istream_type& in)        { in >> adapted_; }
-    void output(ostream_type& out) const { out << (adapted_ ? "True" : "False"); } // TODO: Configure via Traits.
+    floating_type to_floating()  const { return this->adapted_ ? 1 : 0; }
+    boolean_type to_boolean() const { return this->adapted_; }
+
+    void input (istream_type& in)        { in >> this->adapted_; }
+    void output(ostream_type& out) const { out << (this->adapted_ ? "True" : "False"); } // TODO: Configure via Traits.
 };
 
 }} // namespace ajg::synth

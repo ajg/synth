@@ -14,10 +14,9 @@ namespace synth {
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapterT) \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted) \
   public: \
-    typedef adapterT                                adapter_type; \
-    typedef adaptedT                                adapted_type; \
+    typedef Adapted                                 adapted_type; \
     typedef Behavior                                behavior_type; \
     typedef base_adapter<behavior_type>             base_type; \
     typedef typename behavior_type::value_type      value_type; \
@@ -36,19 +35,19 @@ namespace synth {
     \
     typedef typename value_type::iterator           iterator; \
     typedef typename value_type::const_iterator     const_iterator; \
-    typedef typename value_type::range_type         range_type; \
-    \
-    friend struct base_adapter<behavior_type>
+    typedef typename value_type::range_type         range_type
+
 
 // TODO: Refactor this into a concrete_adapter<T>.
-#define AJG_SYNTH_ADAPTER(adaptedT) \
-    AJG_SYNTH_ADAPTER_TYPEDEFS(adaptedT, adapter); \
+#define AJG_SYNTH_ADAPTER(Adapted) \
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted); \
+    friend struct base_adapter<behavior_type>; \
   protected: \
     virtual boolean_type equal_adapted(base_type const& that) const { return this->template equal_as<adapter>(that); } \
     virtual boolean_type less_adapted(base_type const& that) const { return this->template less_as<adapter>(that); } \
   public: \
     adapter(adapted_type const& adapted) : adapted_(adapted) {} \
-    std::type_info const& type() const { return typeid(adaptedT); }
+    std::type_info const& type() const { return typeid(Adapted); }
 
 //
 // adapter (unspecialized)

@@ -39,7 +39,7 @@ struct value_facade {
     typedef Traits                                                              traits_type;
     typedef Value<traits_type>                                                  value_type;
     typedef value_behavior<traits_type, Value>                                  behavior_type;
-    typedef base_adapter<behavior_type>                                         adapter_type;
+    typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type;
 
     typedef typename traits_type::none_type                                     none_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -89,14 +89,14 @@ struct value_facade {
 
     // TODO: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves or using adapter().as<...> != 0
     inline boolean_type typed_like (value_type const& that) const { return this->type() == that.type(); }
-    inline boolean_type typed_equal(value_type const& that) const { return this->adapter().equal_adapted(that.adapter()); }
-    inline boolean_type typed_less (value_type const& that) const { return this->adapter().less_adapted(that.adapter()); }
+    inline boolean_type typed_equal(value_type const& that) const { return this->adapter()->equal_adapted(*that.adapter()); }
+    inline boolean_type typed_less (value_type const& that) const { return this->adapter()->less_adapted(*that.adapter()); }
     template <class T>
-    inline T const& typed_as() const { return this->adapter().template get_adapted<T>(); }
+    inline T const& typed_as() const { return this->adapter()->template get_adapted<T>(); }
 
   public:
 
-    inline std::type_info const& type() const { return this->adapter().type(); }
+    inline std::type_info const& type() const { return this->adapter()->type(); }
 
     // TODO: Defer all these to behavior_type.
 
@@ -104,12 +104,12 @@ struct value_facade {
     inline boolean_type is_boolean()  const { return this->template is<boolean_type>(); }
     inline boolean_type is_string()   const { return this->template is<string_type>(); }
     inline boolean_type is_floating() const { return this->template is<floating_type>(); }
-    inline boolean_type is_numeric()  const { return this->adapter().is_numeric(); }
+    inline boolean_type is_numeric()  const { return this->adapter()->is_numeric(); }
 
-    inline boolean_type  to_boolean()  const { return this->adapter().to_boolean(); }
-    inline floating_type to_floating()   const { return this->adapter().to_floating(); }
-    inline datetime_type to_datetime() const { return this->adapter().to_datetime(); }
-    inline string_type   to_string()   const { return this->adapter().to_string(); }
+    inline boolean_type  to_boolean()  const { return this->adapter()->to_boolean(); }
+    inline floating_type to_floating() const { return this->adapter()->to_floating(); }
+    inline datetime_type to_datetime() const { return this->adapter()->to_datetime(); }
+    inline string_type   to_string()   const { return this->adapter()->to_string(); }
     inline size_type     to_size()     const { return behavior_type::to_size(*this); }
 
     inline size_type empty()  const { return this->size() == 0; }             // TODO: Defer to adapter.
@@ -119,15 +119,15 @@ struct value_facade {
     inline value_type back()  const { return *this->at(-1); } // return *--this->end(); // TODO: Defer to adapter.
 
     inline const_iterator       at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_floating())); } // TODO: Defer to adapter.
-    inline const_iterator       find (value_type const& value) const { return this->adapter().find(value); }
-    inline optional<value_type> index(value_type const& key)   const { return this->adapter().index(key); }
+    inline const_iterator       find (value_type const& value) const { return this->adapter()->find(value); }
+    inline optional<value_type> index(value_type const& key)   const { return this->adapter()->index(key); }
 
     // Even the non-const versions are immutable and are provided simply as a convenience.
     inline iterator begin() { return const_cast<facade_type const*>(this)->begin(); }
     inline iterator end()   { return const_cast<facade_type const*>(this)->end(); }
 
-    inline const_iterator begin() const { return this->adapter().begin(); }
-    inline const_iterator end()   const { return this->adapter().end(); }
+    inline const_iterator begin() const { return this->adapter()->begin(); }
+    inline const_iterator end()   const { return this->adapter()->end(); }
 
     inline boolean_type is_iterable() const { // TODO: Defer to adapter.
         try {
@@ -160,11 +160,11 @@ struct value_facade {
 
   protected:
 
-    inline const adapter_type& adapter() const {
+    inline adapter_type const& adapter() const {
         if (!adapter_) {
             AJG_SYNTH_THROW(std::logic_error("uninitialized value"));
         }
-        return *adapter_;
+        return adapter_;
     }
 
   private:
@@ -177,7 +177,7 @@ struct value_facade {
             return output << text::literal("<uninitialized>");
         }
         else */ {
-            return value.adapter().output(output), output;
+            return value.adapter()->output(output), output;
         }
     }
 
@@ -187,7 +187,7 @@ struct value_facade {
 
   private:
 
-    boost::shared_ptr<adapter_type const> adapter_;
+    adapter_type adapter_;
 };
 
 }} // namespace ajg::synth

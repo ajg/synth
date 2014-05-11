@@ -17,11 +17,10 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <ajg/synth/adapters/base_adapter.hpp>
+
 namespace ajg {
 namespace synth {
-
-template <class Traits>
-struct base_adapter;
 
 ///
 /// value_behavior
@@ -49,6 +48,8 @@ struct value_behavior {
 
     typedef std::vector<value_type>                                             sequence_type;
     typedef std::map<string_type, value_type>                                   mapping_type;
+
+ // typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type;
 
   public:
 

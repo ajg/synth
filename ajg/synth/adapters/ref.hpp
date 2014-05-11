@@ -20,10 +20,14 @@ namespace synth {
 
 template <class Behavior, class T>
 struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Behavior> {
+  public:
 
     // AJG_SYNTH_ADAPTER(boost::reference_wrapper<T>)
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>, adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>);
+
+  public:
+
     // /*const*/ adapted_type adapted_;
 
     adapter(adapted_type const& adapted) : adapted_(adapted) {}

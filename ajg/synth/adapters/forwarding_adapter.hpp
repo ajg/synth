@@ -10,11 +10,11 @@
 namespace ajg {
 namespace synth {
 
-// TODO: Move to separate file.
 template <class Behavior, class T, class Adapted, class Derived = adapter<Behavior, Adapted> >
 struct forwarding_adapter : public base_adapter<Behavior> {
+  public:
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted, forwarding_adapter);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
 
   protected:
 
@@ -37,7 +37,7 @@ struct forwarding_adapter : public base_adapter<Behavior> {
     const_iterator end()   const { return valid() ? forward().end()   : const_iterator(); }
 
     floating_type to_floating()  const { return valid() ? forward().to_floating()  : floating_type(0); }
-    boolean_type to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(false); }
+    boolean_type  to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(false); }
 
     boolean_type equal(base_type const& that) const {
         return valid() ? forward().equal(that) : boolean_type(false);

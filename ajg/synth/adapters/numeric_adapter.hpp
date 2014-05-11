@@ -14,8 +14,8 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
-#include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/detail/is_integer.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -26,35 +26,22 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class Numeric>
-struct numeric_adapter : public base_adapter<Behavior> {
+struct numeric_adapter : concrete_adapter<Behavior, Numeric> {
+  public:
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Numeric, numeric_adapter);
-    adapted_type /*const*/ adapted_;
-
-  protected:
-
-    numeric_adapter(adapted_type const& adapted) : adapted_(adapted) {}
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Numeric);
 
   protected:
 
-    virtual boolean_type equal_adapted(base_type const& that) const {
-        return this->template equal_as<numeric_adapter>(that);
-    }
-
-    virtual boolean_type less_adapted(base_type const& that) const {
-        return this->template less_as<numeric_adapter>(that);
-    }
+    numeric_adapter(adapted_type const& adapted) : concrete_adapter<Behavior, Numeric>(adapted) {}
 
   public:
 
-    std::type_info const& type() const { return typeid(Numeric); }
+    boolean_type  is_numeric()  const { return true; }
+    floating_type to_floating() const { return static_cast<floating_type>(this->adapted_); }
+    boolean_type  to_boolean()  const { return this->adapted_ != Numeric(0); }
 
-    boolean_type is_numeric() const { return true; }
-
-    floating_type to_floating() const { return static_cast<floating_type>(adapted_); }
-    boolean_type to_boolean() const { return adapted_ != Numeric(0); }
-
-    void input (istream_type& in)        { in  >> adapted_; }
+    void input (istream_type& in)        { in >> this->adapted_; }
     void output(ostream_type& out) const { output_number<Numeric>(out); }
 
   private:
@@ -64,24 +51,24 @@ struct numeric_adapter : public base_adapter<Behavior> {
     void output_number(ostream_type& out, typename boost::disable_if<boost::is_integral<T> >::type* = 0) const {
         boost::io::basic_ios_all_saver<char_type> saver(out);
 
-        if (detail::is_integer(adapted_)) {
+        if (detail::is_integer(this->adapted_)) {
             out << std::fixed << std::setprecision(0);
         }
 
         if (out.flags() & out.hex) {
         // If they hex is desired, we convert to an
         // integral first, and then output as hex.
-            out << static_cast<integer_type>(adapted_);
+            out << static_cast<integer_type>(this->adapted_);
         }
         else {
-            out << adapted_;
+            out << this->adapted_;
         }
     }
 
     // For integral types
     template <class T>
     void output_number(ostream_type& out, typename boost::enable_if<boost::is_integral<T> >::type* = 0) const {
-        out << adapted_;
+        out << this->adapted_;
     }
 };
 

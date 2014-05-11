@@ -27,7 +27,7 @@ struct adapter<Behavior, std::complex<T> > : public base_adapter<Behavior> {
 
   public:
 
-    number_type  to_number()  const { return number_type(adapted_.real()); }
+    floating_type to_floating() const { return static_cast<floating_type>(adapted_.real()); }
     boolean_type to_boolean() const { return adapted_ != T(0); }
     void input (istream_type& in)        { in >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }

@@ -47,7 +47,7 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
     typedef typename traits_type::path_type                                     path_type;
@@ -524,7 +524,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         }
         else if (is(literal, this->number_literal)) {
             double const d = (std::atof)(text::narrow(string).c_str());
-            return value_type(static_cast<number_type>(d)).token(token);
+            return value_type(static_cast<floating_type>(d)).token(token);
         }
         else if (is(literal, this->string_literal)) {
             BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:

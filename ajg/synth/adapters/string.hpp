@@ -32,7 +32,7 @@ struct adapter<Behavior, std::basic_string
 
   public:
 
-    number_type  to_number()  const { return behavior_type::to_number(adapted_); }
+    floating_type to_floating()  const { return behavior_type::to_floating(adapted_); }
     boolean_type to_boolean() const { return !adapted_.empty(); }
     void input (istream_type& in)        { in  >> adapted_; }
     void output(ostream_type& out) const { out << adapted_; }

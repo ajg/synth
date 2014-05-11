@@ -25,7 +25,7 @@ struct adapter<Behavior, boost::none_t>
 
   public:
 
-    number_type  to_number()  const { return 0; }
+    floating_type to_floating()  const { return 0; }
     boolean_type to_boolean() const { return false; }
 
  // void input (istream_type& in)        { in >> adapted_; }

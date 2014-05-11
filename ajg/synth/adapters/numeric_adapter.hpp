@@ -51,7 +51,7 @@ struct numeric_adapter : public base_adapter<Behavior> {
 
     boolean_type is_numeric() const { return true; }
 
-    number_type  to_number()  const { return number_type(adapted_); }
+    floating_type to_floating() const { return static_cast<floating_type>(adapted_); }
     boolean_type to_boolean() const { return adapted_ != Numeric(0); }
 
     void input (istream_type& in)        { in  >> adapted_; }

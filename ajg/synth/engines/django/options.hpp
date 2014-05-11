@@ -135,7 +135,7 @@ struct options {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::date_type                                     date_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
@@ -192,7 +192,7 @@ struct options {
     options( boolean_type     const  autoescape    = true
            , value_type       const& default_value = string_type()
            , formats_type     const& formats       = formats_type()
-           , boolean_type     const  debug         = boolean_type()
+           , boolean_type     const  debug         = boolean_type(false)
            , paths_type       const& directories   = paths_type()
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()

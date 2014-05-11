@@ -59,7 +59,7 @@ struct builtin_tags {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
@@ -1114,11 +1114,6 @@ struct builtin_tags {
             return TAG(kernel.reserved("widthratio") >> kernel.value >> kernel.value >> kernel.value);
         }
 
-        template <class T>
-        inline static T round(T const r) {
-            return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
-        }
-
         static void render( kernel_type  const& kernel
                           , match_type   const& match
                           , context_type const& context
@@ -1129,12 +1124,19 @@ struct builtin_tags {
             match_type const& limit = match(kernel.value, 1);
             match_type const& width = match(kernel.value, 2);
 
-            number_type const ratio
-                = kernel.evaluate(value, context, options).to_number()
-                / kernel.evaluate(limit, context, options).to_number()
-                * kernel.evaluate(width, context, options).to_number();
+            floating_type const ratio
+                = kernel.evaluate(value, context, options).to_floating()
+                / kernel.evaluate(limit, context, options).to_floating()
+                * kernel.evaluate(width, context, options).to_floating();
 
             ostream << round(ratio);
+        }
+
+      private:
+
+        template <class T>
+        inline static T round(T const r) {
+            return (r > 0.0) ? (std::floor)(r + 0.5) : (std::ceil)(r - 0.5);
         }
     };
 

@@ -36,11 +36,11 @@ struct forwarding_adapter : public base_adapter<Behavior> {
     const_iterator begin() const { return valid() ? forward().begin() : const_iterator(); }
     const_iterator end()   const { return valid() ? forward().end()   : const_iterator(); }
 
-    number_type  to_number()  const { return valid() ? forward().to_number()  : number_type(); }
-    boolean_type to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(); }
+    floating_type to_floating()  const { return valid() ? forward().to_floating()  : floating_type(0); }
+    boolean_type to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(false); }
 
     boolean_type equal(base_type const& that) const {
-        return valid() ? forward().equal(that) : boolean_type();
+        return valid() ? forward().equal(that) : boolean_type(false);
     }
 
     void input (istream_type& in)        { if (valid()) forward().input(in); }

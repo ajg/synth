@@ -28,7 +28,7 @@ struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
 
     // FIXME: These should be forwarded to the real value.
     // boolean_type equal(base_type const& that) const { return this->template is_equal_as<adapter>(that); }
-    number_type  to_number()  const { return adapted_.which(); }
+    floating_type to_floating()  const { return adapted_.which(); }
     boolean_type to_boolean() const { return true; }
 
 

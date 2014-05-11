@@ -30,7 +30,7 @@ struct adapter<Behavior, T[N]>
 
   public:
 
-    number_type  to_number()  const { return N; }
+    floating_type to_floating()  const { return N; }
     boolean_type to_boolean() const { return N != 0; }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
@@ -82,7 +82,7 @@ struct adapter<Behavior, T[]> : public base_adapter<Behavior> {
 
   public:
 
-    number_type  to_number()  const { return length_; }
+    floating_type to_floating()  const { return length_; }
     boolean_type to_boolean() const { return length_ != 0; }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }

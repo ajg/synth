@@ -53,7 +53,7 @@ struct binding : private boost::noncopyable
                         , autoescape
                         , default_value
                         , formats_type()
-                        , boolean_type()
+                        , boolean_type(false)
                         , paths
                         , libraries_type()
                         , loaders_type()

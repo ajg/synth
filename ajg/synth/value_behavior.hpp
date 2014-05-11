@@ -38,7 +38,7 @@ struct value_behavior {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
@@ -68,14 +68,14 @@ struct value_behavior {
     }
 
     template <class From>
-    inline static number_type to_number(From const& from) {
-        return to<number_type>(from);
+    inline static floating_type to_floating(From const& from) {
+        return to<floating_type>(from);
     }
 
     inline static size_type to_size(value_type const& value) {
-        number_type const number = value.to_number();
-        if (number <= 0) return 0;
-        return static_cast<size_type>(number);
+        floating_type const f = value.to_floating();
+        if (f <= 0) return 0;
+        return static_cast<size_type>(f);
     }
 
     inline static string_type to_string(base_adapter<behavior_type> const& adapter) {
@@ -89,7 +89,7 @@ struct value_behavior {
     inline static T to_(value_type const& value) {
         if (value.template is<T>())  return value.template as<T>();
         else if (value.is_boolean()) return T(value.to_boolean());
-        else if (value.is_numeric()) return T(value.to_number());
+        else if (value.is_numeric()) return T(value.to_floating());
         else if (value.is_string())  return T(value.to_string());
         // TODO: Sequences, mappings, etc.
         else AJG_SYNTH_THROW(not_implemented("value_traits::to"));
@@ -121,7 +121,7 @@ struct value_behavior {
         //       if (...) return a.adapter()->equal(*that.adapter());
         if (a.typed_like(b))                        return a.typed_equal(b);
         else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() == b.to_boolean();
-        else if (a.is_numeric() && b.is_numeric())  return a.to_number()  == b.to_number();
+        else if (a.is_numeric() && b.is_numeric())  return a.to_floating()  == b.to_floating();
         else if (a.is_string()  && b.is_string())   return a.to_string()  == b.to_string();
         // TODO: Sequences, mappings, etc.
         else return false;
@@ -130,7 +130,7 @@ struct value_behavior {
     inline static boolean_type less(value_type const& a, value_type const& b) {
         if (a.typed_like(b))                        return a.typed_less(b);
         else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() < b.to_boolean();
-        else if (a.is_numeric() && b.is_numeric())  return a.to_number()  < b.to_number();
+        else if (a.is_numeric() && b.is_numeric())  return a.to_floating()  < b.to_floating();
         else if (a.is_string()  && b.is_string())   return a.to_string()  < b.to_string();
         // TODO: Sequences, mappings, etc.
         else return false;

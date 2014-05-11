@@ -23,7 +23,7 @@ struct adapter<Behavior, bool>
 
   public:
 
-    number_type  to_number()  const { return adapted_ ? 1 : 0; }
+    floating_type to_floating()  const { return adapted_ ? 1 : 0; }
     boolean_type to_boolean() const { return adapted_; }
 
     void input (istream_type& in)        { in >> adapted_; }

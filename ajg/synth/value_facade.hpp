@@ -46,7 +46,7 @@ struct value_facade {
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::integer_type                                  integer_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
@@ -100,14 +100,14 @@ struct value_facade {
 
     // TODO: Defer all these to behavior_type.
 
-    inline boolean_type is_none()    const { return this->template is<none_type>(); }
-    inline boolean_type is_boolean() const { return this->template is<boolean_type>(); }
-    inline boolean_type is_string()  const { return this->template is<string_type>(); }
-    inline boolean_type is_number()  const { return this->template is<number_type>(); }
-    inline boolean_type is_numeric() const { return this->adapter().is_numeric(); }
+    inline boolean_type is_none()     const { return this->template is<none_type>(); }
+    inline boolean_type is_boolean()  const { return this->template is<boolean_type>(); }
+    inline boolean_type is_string()   const { return this->template is<string_type>(); }
+    inline boolean_type is_floating() const { return this->template is<floating_type>(); }
+    inline boolean_type is_numeric()  const { return this->adapter().is_numeric(); }
 
     inline boolean_type  to_boolean()  const { return this->adapter().to_boolean(); }
-    inline number_type   to_number()   const { return this->adapter().to_number(); }
+    inline floating_type to_floating()   const { return this->adapter().to_floating(); }
     inline datetime_type to_datetime() const { return this->adapter().to_datetime(); }
     inline string_type   to_string()   const { return this->adapter().to_string(); }
     inline size_type     to_size()     const { return behavior_type::to_size(*this); }
@@ -118,7 +118,7 @@ struct value_facade {
     inline value_type front() const { return *this->begin(); }                          // TODO: Defer to adapter.
     inline value_type back()  const { return *this->at(-1); } // return *--this->end(); // TODO: Defer to adapter.
 
-    inline const_iterator       at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_number())); } // TODO: Defer to adapter.
+    inline const_iterator       at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_floating())); } // TODO: Defer to adapter.
     inline const_iterator       find (value_type const& value) const { return this->adapter().find(value); }
     inline optional<value_type> index(value_type const& key)   const { return this->adapter().index(key); }
 

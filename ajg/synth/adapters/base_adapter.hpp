@@ -43,7 +43,7 @@ struct base_adapter {
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
@@ -67,7 +67,7 @@ struct base_adapter {
 
     virtual boolean_type  is_numeric()  const { return false; }
 
-    virtual number_type   to_number()   const { AJG_SYNTH_THROW(invalid_method("to_number")); }
+    virtual floating_type to_floating()   const { AJG_SYNTH_THROW(invalid_method("to_floating")); }
     virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(invalid_method("to_boolean")); }
     virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(invalid_method("to_datetime")); }
     virtual string_type   to_string()   const { return behavior_type::to_string(*this); }

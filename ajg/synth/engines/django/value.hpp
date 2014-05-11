@@ -35,7 +35,7 @@ struct value : value_facade<Traits, value> {
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::string_type                                   string_type;
 
@@ -84,7 +84,7 @@ struct value : value_facade<Traits, value> {
             if (method.name == "find") {
                 try {
                     // If that fails, try using the value as an index.
-                    return this->at(attribute.to_number());
+                    return this->at(attribute.to_floating());
                 }
                 catch (std::exception const&) {
                     // Do nothing, and pass through to the `throw' below,
@@ -107,7 +107,7 @@ struct value : value_facade<Traits, value> {
             if (method.name == "index") {
                 try {
                     // If that fails, try using the value as an index.
-                    const_iterator const it = this->at(attribute.to_number());
+                    const_iterator const it = this->at(attribute.to_floating());
                     return it == this->end() ? boost::none : *it;
                 }
                 catch (std::exception const&) {

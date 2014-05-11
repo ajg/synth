@@ -87,7 +87,7 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
 
         // 4. List-index lookup
         if (PySequence_Check(o)) {
-            Py_ssize_t n = static_cast<Py_ssize_t>(what.to_number());
+            Py_ssize_t n = static_cast<Py_ssize_t>(what.to_floating());
 
             if (n < PySequence_Size(o)) {
                 return value_type(py::object(adapted_[py::long_(n)]));

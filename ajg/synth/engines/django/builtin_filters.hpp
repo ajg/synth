@@ -54,7 +54,7 @@ struct builtin_filters {
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::integer_type                                  integer_type;
-    typedef typename traits_type::number_type                                   number_type;
+    typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
     typedef typename traits_type::path_type                                     path_type;
@@ -188,7 +188,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<1>::validate(arguments.first.size());
-            return value.to_number() + arguments.first[0].to_number();
+            return value.to_floating() + arguments.first[0].to_floating();
         }
     };
 
@@ -381,8 +381,8 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<1>::validate(arguments.first.size());
-            integer_type const dividend = static_cast<integer_type>(value.to_number());
-            integer_type const divisor  = static_cast<integer_type>(arguments.first[0].to_number());
+            integer_type const dividend = static_cast<integer_type>(value.to_floating());
+            integer_type const divisor  = static_cast<integer_type>(arguments.first[0].to_floating());
             return dividend % divisor == 0;
         }
     };
@@ -431,7 +431,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            integer_type const integer = static_cast<integer_type>(value.to_number());
+            integer_type const integer = static_cast<integer_type>(value.to_floating());
             size_type    const size    = static_cast<size_type>((std::abs)(integer));
             return traits_type::format_size(size);
         }
@@ -485,13 +485,13 @@ struct builtin_filters {
             with_arity<0, 1>::validate(arguments.first.size());
             // Get the number and the decimal places.
             string_stream_type stream;
-            int const n = arguments.first.empty() ? -1 : static_cast<int>(arguments.first[0].to_number());
-            number_type const number = value.to_number();
+            int const n = arguments.first.empty() ? -1 : static_cast<int>(arguments.first[0].to_floating());
+            floating_type const f = value.to_floating();
 
             // If it's an integer and n < 0, we don't want decimals.
-            boolean_type const is_integer = detail::is_integer(number);
+            boolean_type const is_integer = detail::is_integer(f);
             int const precision = n < 0 && is_integer ? 0 : (std::abs)(n);
-            stream << std::fixed << std::setprecision(precision) << number;
+            stream << std::fixed << std::setprecision(precision) << f;
 
             return value_type(stream.str()).mark_safe();
         }
@@ -526,8 +526,8 @@ struct builtin_filters {
                                         ) {
             with_arity<1>::validate(arguments.first.size());
             try {
-                number_type  const number   = value.to_number();
-                integer_type const position = static_cast<integer_type>(arguments.first[0].to_number());
+                floating_type const number   = value.to_floating();
+                integer_type const position = static_cast<integer_type>(arguments.first[0].to_floating());
                 integer_type const integer  = static_cast<integer_type>(number);
 
                 if (position > 0) {
@@ -843,7 +843,7 @@ struct builtin_filters {
                 plural   = args[1].to_string();
             }
 
-            return value.to_number() == 1 ? singular : plural;
+            return value.to_floating() == 1 ? singular : plural;
         }
     };
 
@@ -1005,8 +1005,8 @@ struct builtin_filters {
             value_type const lower = args[0];
             value_type const upper = args[1];
             range_type  range = value.slice
-                ( lower ? optional<integer_type>(static_cast<integer_type>(lower.to_number())) : boost::none
-                , upper ? optional<integer_type>(static_cast<integer_type>(upper.to_number())) : boost::none
+                ( lower ? optional<integer_type>(static_cast<integer_type>(lower.to_floating())) : boost::none
+                , upper ? optional<integer_type>(static_cast<integer_type>(upper.to_floating())) : boost::none
                 );
             std::copy(range.first, range.second, std::back_inserter(result));
             return result;

@@ -61,20 +61,19 @@ template <class Char>
 struct default_traits {
   public:
 
-    typedef default_traits                              traits_type;
-    typedef boost::none_t                               none_type;
-    typedef bool                                        boolean_type;
+    typedef default_traits                                                      traits_type;
+    typedef boost::none_t                                                       none_type;
+    typedef bool                                                                boolean_type;
+    typedef Char                                                                char_type;
 
-    typedef Char                                        char_type;
-
-    // TODO: Consider using arbitrary-precision types.
+    // TODO: Consider using arbitrary-precision types for integer_type and natural_type.
     typedef std::size_t                                                         size_type;
  // typedef boost::uintmax_t                                                    natural_type;
     typedef boost::intmax_t                                                     integer_type;
-    typedef /* TODO: long */ double                                             number_type; // TODO: Rename to floating_type.
+    typedef /* TODO? long */ double                                             floating_type;
 
+    // XXX: Consider using something else for time_type because ptime (a) needs a date and (b) has no timezone.
     typedef boost::gregorian::date                                              date_type;
-    // XXX: Consider using something else here because ptime (a) needs a date and (b) has no timezone.
     typedef boost::posix_time::ptime                                            time_type;
     typedef boost::posix_time::second_clock                                     clock_type;
     typedef boost::posix_time::time_duration                                    duration_type;

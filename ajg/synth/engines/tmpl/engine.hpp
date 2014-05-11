@@ -89,7 +89,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     typedef typename kernel_type::id_type                                       id_type;
     typedef typename kernel_type::regex_type                                    regex_type;
     typedef typename kernel_type::match_type                                    match_type;
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   private:
 
@@ -231,12 +231,12 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         return t.render_to_stream(ostream, context, options);
     }
 
-    void render_text( ostream_type&       ostream
-                    , match_type   const& text
-                    , context_type const& context
-                    , options_type const& options
-                    ) const {
-        ostream << text.str();
+    void render_plain( ostream_type&       ostream
+                     , match_type   const& plain
+                     , context_type const& context
+                     , options_type const& options
+                     ) const {
+        ostream << plain.str();
     }
 
     void render_block( ostream_type&       ostream
@@ -270,7 +270,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (is(match, this->text))  render_text(ostream, match, context, options);
+             if (is(match, this->plain)) render_plain(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
@@ -299,7 +299,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                     AJG_SYNTH_THROW(std::logic_error("duplicate escape mode"));
                 }
                 else {
-                    string_type const mode = transform::lower(value.str());
+                    string_type const mode = text::lower(value.str());
 
                          if (mode == traits_type::literal("none")
                           || mode == traits_type::literal("0"))   escape = attributes::none;

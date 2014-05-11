@@ -531,7 +531,6 @@ Future Work
 
  - Refactoring:
    * Rename value_facade to base_value
-   * Rename `detail::transformer` to `text` and move all trait-independent textual functionality there
    * Make documentation comments uniformly `///`
    * Replace catching `invalid_method` with dedicated attribute methods
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`

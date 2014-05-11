@@ -18,7 +18,7 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_facade.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -44,6 +44,10 @@ struct value : value_facade<Traits, value> {
     typedef std::vector<value_type>                                             sequence_type; // TODO: Derive from behavior_type.
     typedef std::map<string_type, value_type>                                   mapping_type; // TODO: Derive from behavior_type.
 
+  private:
+
+    typedef detail::text<string_type>                                           text;
+
   public:
 
     value() : facade_type(), safe_(false), token_(boost::none) {}
@@ -67,7 +71,7 @@ struct value : value_facade<Traits, value> {
 
     value_type escape() const {
         // XXX: Should this method escape binary and control characters?
-        return detail::transformer<string_type>::escape_entities(this->to_string());
+        return text::escape_entities(this->to_string());
     }
 
     /*
@@ -214,7 +218,7 @@ struct value : value_facade<Traits, value> {
     static sequence_type make_trail(value_type const& value) {
         string_type const source    = value.to_string();
         string_type const delimiter = traits_type::literal(".");
-        std::vector<string_type> const& names = detail::transformer<string_type>::split(source, delimiter);
+        std::vector<string_type> const& names = text::split(source, delimiter);
 
         sequence_type trail;
         BOOST_FOREACH(string_type const& name, names) {

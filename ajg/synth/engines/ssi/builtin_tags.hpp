@@ -13,7 +13,7 @@
 #include <boost/foreach.hpp>
 
 #include <ajg/synth/detail/pipe.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -48,7 +48,7 @@ struct builtin_tags {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -167,8 +167,8 @@ enum { interpolated = true, raw = false };
                 if (name == traits_type::literal("var")) {
                     string_type const result = args.kernel.lookup_variable(args.context, args.options, value);
                     if      (encoding == traits_type::literal("none"))   args.ostream << result;
-                    else if (encoding == traits_type::literal("url"))    args.ostream << transform::uri_encode(result);
-                    else if (encoding == traits_type::literal("entity")) args.ostream << transform::escape_entities(result);
+                    else if (encoding == traits_type::literal("url"))    args.ostream << text::uri_encode(result);
+                    else if (encoding == traits_type::literal("entity")) args.ostream << text::escape_entities(result);
                     else AJG_SYNTH_THROW(invalid_attribute("encoding"));
                 }
                 else if (name == traits_type::literal("encoding")) {

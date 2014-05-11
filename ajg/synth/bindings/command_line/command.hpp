@@ -19,7 +19,7 @@
 #include <external/optionparser.h>
 
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -61,7 +61,7 @@ struct command {
     typedef ::option::Descriptor                                                descriptor_type;
     typedef ::option::Option                                                    option_type;
     typedef ::option::Parser                                                    parser_type;
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -140,9 +140,9 @@ struct command {
                 AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
             }
 
-                 if (transform::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
-            else if (transform::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
-            else if (transform::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
+                 if (text::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
+            else if (text::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
+            else if (text::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
             else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
         }
 

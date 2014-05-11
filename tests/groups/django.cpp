@@ -9,7 +9,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/detail/filesystem.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/django.hpp>
 #include <ajg/synth/engines/null/resolver.hpp>
 
@@ -38,7 +38,7 @@ typedef traits_type::string_type                                                
 
 typedef value_type::behavior_type                                               behavior_type;
 typedef s::engines::null::resolver<options_type>                                null_resolver_type;
-typedef s::detail::transformer<string_type>                                     transform;
+typedef s::detail::text<string_type>                                            text;
 
 struct data_type : tests::data::kitchen_sink<engine_type> {};
 
@@ -471,10 +471,10 @@ DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
 DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", NO_CONTEXT)
 DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", context)
 
-DJANGO_TEST(ssi_tag, "{% ssi " + transform::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")
-DJANGO_TEST(ssi_tag, "{% ssi " + transform::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " parsed %}",     "")
-DJANGO_TEST(ssi_tag, "{% ssi " + transform::quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " %}",        "foo: {{ foo }}\nbar: {{ bar }}\nqux: {{ qux }}\n")
-DJANGO_TEST(ssi_tag, "{% ssi " + transform::quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
+DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")
+DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " parsed %}",     "")
+DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " %}",        "foo: {{ foo }}\nbar: {{ bar }}\nqux: {{ qux }}\n")
+DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
 
 unit_test(ssi_tag) {
     ensure_throws(std::invalid_argument, string_template_type("{% ssi '../foo' %}").render_to_string());

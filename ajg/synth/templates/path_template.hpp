@@ -15,7 +15,7 @@
 #include <boost/foreach.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/templates/base_template.hpp>
 
 namespace ajg {
@@ -63,7 +63,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
         // First try looking in the directories specified.
         BOOST_FOREACH(path_type const& directory, directories) {
-            path_type const& base = detail::transformer<string_type>::trim_right(directory, traits_type::literal("/"));
+            path_type const& base = detail::text<string_type>::trim_right(directory, traits_type::literal("/"));
             path_type const& full = base + char_type('/') + path;
             if (stat(traits_type::narrow(full).c_str(), &stats) == 0) { // Found it.
                 return info_type(full, stats.st_size);

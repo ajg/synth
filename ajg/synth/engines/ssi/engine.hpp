@@ -85,7 +85,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
     typedef typename kernel_type::match_type                                    match_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename kernel_type::string_match_type                             string_match_type;
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   private:
 
@@ -194,7 +194,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         // TODO: value, and possibly name, need to be unencoded
         //       (html entities) before processing, in some cases.
         string_type const temp  = extract_attribute(attr(this->quoted_value));
-        string_type const name  = transform::lower(attr(this->name).str());
+        string_type const name  = text::lower(attr(this->name).str());
         string_type const value = interpolate ? this->interpolate(args, temp) : temp;
         return std::make_pair(name, value);
     }
@@ -261,12 +261,12 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         return t.render_to_stream(ostream, context, options);
     }
 
-    void render_text( ostream_type&       ostream
-                    , match_type   const& text
-                    , context_type const& context
-                    , options_type const& options
-                    ) const {
-        ostream << text.str();
+    void render_plain( ostream_type&       ostream
+                     , match_type   const& plain
+                     , context_type const& context
+                     , options_type const& options
+                     ) const {
+        ostream << plain.str();
     }
 
     void render_block( ostream_type&       ostream
@@ -317,19 +317,16 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (is(match, this->text))  render_text(ostream, match, context, options);
+             if (is(match, this->plain)) render_plain(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
-    /// Creates a regex instance to parse a full SSI tag ("directive").
-    /// Meaning: tag_start name attribute* tag_end
-    ///
-    /// \param  name The identifier that follows the tag_start.
-    /// \return A `regex_type` instance that can match an entire tag.
-    /// \pre    name is a valid identifier, character-wise.
-    /// \post   The name is stored in s1.
+///
+/// make_tag:
+///     Creates a regex for a full SSI tag ("directive"); i.e. tag_start name attribute* tag_end.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
     regex_type make_tag(string_type const& name) const {
         return tag_start >> *_s >> (s1 = name) >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;

@@ -11,7 +11,7 @@
 #include <boost/foreach.hpp>
 
 #include <ajg/synth/detail/find.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -53,7 +53,7 @@ struct builtin_tags {
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -274,8 +274,8 @@ struct builtin_tags {
             if (attrs.escape) {
                 switch (*attrs.escape) {
                 case engine_type::attributes::none: break; // Do nothing.
-                case engine_type::attributes::html: result = transform::escape_entities(result.to_string()); break;
-                case engine_type::attributes::url:  result = transform::uri_encode(result.to_string());      break;
+                case engine_type::attributes::html: result = text::escape_entities(result.to_string()); break;
+                case engine_type::attributes::url:  result = text::uri_encode(result.to_string());      break;
                 case engine_type::attributes::js:   AJG_SYNTH_THROW(not_implemented("js escape mode"));
 
                 }

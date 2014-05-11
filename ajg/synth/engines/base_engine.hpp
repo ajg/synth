@@ -120,12 +120,12 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
         //       to present more precise error message lines.
         typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
 
-        this->text = +(~x::before(this->skipper) >> _);
+        this->plain = +(~x::before(this->skipper) >> _);
 
-        // block = skip(text[...])(*tag[...]); // Using skip is slightly slower than this:
+        // block = skip(plain[...])(*tag[...]); // Using skip is slightly slower than this:
         this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
-            ( x::ref(this->tag)  [set_furthest(iterator_, _)]
-            | x::ref(this->text) [set_furthest(iterator_, _)]
+            ( x::ref(this->tag)   [set_furthest(iterator_, _)]
+            | x::ref(this->plain) [set_furthest(iterator_, _)]
             );
     }
 
@@ -208,8 +208,9 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
         }
 
         // On failure, throw a semi-informative exception.
-        size_type   const room(std::distance(furthest, end_)), limit(error_line_limit);
-        string_type const site(furthest, detail::advance_to(furthest, (std::min)(room, limit)));
+        size_type   const buffer(std::distance(furthest, end_));
+        size_type   const limit(error_line_limit);
+        string_type const site(furthest, detail::advance_to(furthest, (std::min)(buffer, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
         AJG_SYNTH_THROW(parsing_error(traits_type::narrow(line)));
     }
@@ -217,7 +218,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
   AJG_SYNTH_IF_MSVC(public, protected):
 
     regex_type tag;
-    regex_type text;
+    regex_type plain;
     regex_type block;
     regex_type nothing;
     regex_type skipper;

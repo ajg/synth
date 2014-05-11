@@ -25,7 +25,7 @@
 #include <ajg/synth/adapters/utility.hpp>
 #include <ajg/synth/adapters/variant.hpp>
 #include <ajg/synth/detail/filesystem.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -65,7 +65,7 @@ struct builtin_tags {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -263,7 +263,7 @@ struct builtin_tags {
                           ) {
 
             if (optional<value_type> const& token = detail::find(traits_type::literal("csrf_token"), context)) {
-                string_type const& s = transform::escape_entities(token->to_string());
+                string_type const& s = text::escape_entities(token->to_string());
 
                 if (s != traits_type::literal("NOTPROVIDED")) {
                     ostream << "<div style='display:none'>";
@@ -612,7 +612,7 @@ struct builtin_tags {
                 mapping_type values;
 
                 BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
-                    string_type const s = transform::strip(val.str());
+                    string_type const s = text::strip(val.str());
                     values[s] = kernel.evaluate(val, context, options);
                 }
 

@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_DETAIL_TRANSFORMER_HPP_INCLUDED
-#define AJG_SYNTH_DETAIL_TRANSFORMER_HPP_INCLUDED
+#ifndef AJG_SYNTH_DETAIL_TEXT_HPP_INCLUDED
+#define AJG_SYNTH_DETAIL_TEXT_HPP_INCLUDED
 
 #include <cctype>
 #include <string>
@@ -32,14 +32,14 @@ namespace algo = boost::algorithm;
 
 
 //
-// transformer
-//     Helper for string-related transformations that are not customizable, unlike those in traits.
+// text
+//     Helper for textual examination and manipulation that is trait-independent.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
-struct transformer {
+struct text {
 
-    typedef transformer                                                         transformer_type;
+    typedef text                                                                text_type;
     typedef String                                                              string_type;
 
     typedef bool                                                                boolean_type;
@@ -346,4 +346,4 @@ struct transformer {
 
 }}} // namespace ajg::synth::detail
 
-#endif // AJG_SYNTH_DETAIL_TRANSFORMER_HPP_INCLUDED
+#endif // AJG_SYNTH_DETAIL_TEXT_HPP_INCLUDED

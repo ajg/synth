@@ -27,7 +27,7 @@
 #include <boost/random/uniform_int_distribution.hpp>
 
 #include <ajg/synth/detail/is_integer.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -63,7 +63,7 @@ struct builtin_filters {
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::context_type                                 context_type;
 
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
     typedef value_type (*filter_type)( kernel_type    const&
                                      , value_type     const&
@@ -283,7 +283,7 @@ struct builtin_filters {
             with_arity<1>::validate(arguments.first.size());
             string_type const from = value.to_string();
             string_type const what = arguments.first[0].to_string();
-            return transform::remove(from, what);
+            return text::remove(from, what);
         }
     };
 
@@ -415,7 +415,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return transform::escape_controls(value.to_string());
+            return text::escape_controls(value.to_string());
         }
     };
 
@@ -561,7 +561,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return transform::iri_encode(value.to_string());
+            return text::iri_encode(value.to_string());
         }
     };
 
@@ -665,7 +665,7 @@ struct builtin_filters {
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type const s = safe ? value_type(line).escape().to_string() : line;
-                string_type const p = transform::replace(s, kernel.newline, traits_type::literal("<br />"));
+                string_type const p = text::replace(s, kernel.newline, traits_type::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -685,8 +685,8 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type const text = transform::replace(value.to_string(), kernel.newline, traits_type::literal("<br />"));
-            return value_type(text).mark_safe();
+            string_type const s = text::replace(value.to_string(), kernel.newline, traits_type::literal("<br />"));
+            return value_type(s).mark_safe();
         }
     };
 
@@ -708,8 +708,8 @@ struct builtin_filters {
             string_type  const pattern = traits_type::literal("%%0%dd. %%s");
             boolean_type const safe    = !options.autoescape || value.safe();
 
-            std::vector<string_type> const& lines = transform::split(input, traits_type::literal("\n"));
-            size_type   const width = transform::stringize(lines.size()).size();
+            std::vector<string_type> const& lines = text::split(input, traits_type::literal("\n"));
+            size_type   const width = text::stringize(lines.size()).size();
             string_type const spec  = (format_type(pattern) % width).str();
 
             size_type i = 1;
@@ -754,7 +754,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return transform::lower(value.to_string());
+            return text::lower(value.to_string());
         }
     };
 
@@ -797,7 +797,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type phone = transform::lower(value.to_string());
+            string_type phone = text::lower(value.to_string());
             std::transform(phone.begin(), phone.end(), phone.begin(), translate);
             return phone;
         }
@@ -861,7 +861,7 @@ struct builtin_filters {
             with_arity<0>::validate(arguments.first.size());
             // NOTE: Since this filter is for debugging, we don't normally try to do anything fancy.
             //       In the Python binding it can be overridden with a call to the real pprint.
-            return value.is_string() ? transform::quote(value.to_string(), '\'') : value.to_string();
+            return value.is_string() ? text::quote(value.to_string(), '\'') : value.to_string();
         }
     };
 
@@ -906,7 +906,7 @@ struct builtin_filters {
                                         ) {
             with_arity<1>::validate(arguments.first.size());
             string_type const source = arguments.first[0].to_string();
-            replacer const r = { transform::space(source) };
+            replacer const r = { text::space(source) };
             return x::regex_replace(value.to_string(), kernel.html_tag, r);
         }
 
@@ -1031,10 +1031,10 @@ struct builtin_filters {
                 }
             };
 
-            string_type slug = transform::strip(value.to_string());
+            string_type slug = text::strip(value.to_string());
             std::replace(slug.begin(), slug.end(), char_type(' '), char_type('-'));
             slug.erase(std::remove_if(slug.begin(), slug.end(), invalid::fn), slug.end());
-            return transform::lower(slug);
+            return text::lower(slug);
         }
     };
 
@@ -1138,14 +1138,14 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type text = value.to_string();
+            string_type s = value.to_string();
 
-            for (size_type i = 0, n = text.length(); i < n; ++i) {
-                boolean_type const boundary = i == 0 || std::isspace(text[i - 1]);
-                text[i] = boundary ? std::toupper(text[i]) : std::tolower(text[i]);
+            for (size_type i = 0, n = s.length(); i < n; ++i) {
+                boolean_type const boundary = i == 0 || std::isspace(s[i - 1]);
+                s[i] = boundary ? std::toupper(s[i]) : std::tolower(s[i]);
             }
 
-            return text;
+            return s;
         }
     };
 
@@ -1165,14 +1165,14 @@ struct builtin_filters {
             if (limit == 0) return string_type();
 
             size_type   const ellip = kernel.ellipsis.length();
-            string_type const text  = value.to_string();
+            string_type const s     = value.to_string();
 
-            if (text.length() > limit) {
+            if (s.length() > limit) {
                 size_type const trunc = ellip < limit ? limit - ellip : 0;
-                return text.substr(0, trunc) + kernel.ellipsis;
+                return s.substr(0, trunc) + kernel.ellipsis;
             }
             else {
-                return text;
+                return s;
             }
         }
     };
@@ -1205,18 +1205,18 @@ struct builtin_filters {
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
                 string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
-                string_type const text = string_type(last, match.first);
+                string_type const s(last, match.first);
 
                 last = match.second;
                 size_type current = length;
 
-                if ((length += text.length()) > limit) {
+                if ((length += s.length()) > limit) {
                     size_type const trunc = current + ellip < limit ? limit - (current + ellip) : 0;
-                    stream << text.substr(0, trunc) + kernel.ellipsis;
+                    stream << s.substr(0, trunc) + kernel.ellipsis;
                     break;
                 }
                 else {
-                    stream << text << tag;
+                    stream << s << tag;
 
                     if (name[0] == char_type('/')) {
                         if (!open_tags.empty() && open_tags.top() == name.substr(1)) {
@@ -1459,7 +1459,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return transform::upper(value.to_string());
+            return text::upper(value.to_string());
         }
     };
 
@@ -1475,7 +1475,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            return transform::uri_encode(value.to_string());
+            return text::uri_encode(value.to_string());
         }
     };
 
@@ -1590,7 +1590,7 @@ struct builtin_filters {
             char_type last = '\0';
             BOOST_FOREACH(char_type const c, input) {
                 if (++i == width) {
-                    word = transform::strip_left(word);
+                    word = text::strip_left(word);
                     result += newline + word;
                     i = word.length();
                     word.clear();

@@ -23,7 +23,7 @@
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/django/value.hpp>
 #include <ajg/synth/engines/django/loader.hpp>
@@ -100,7 +100,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     typedef typename kernel_type::match_type                                    match_type;
     typedef typename kernel_type::string_regex_type                             string_regex_type;
     typedef typename kernel_type::string_match_type                             string_match_type;
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   private:
 
@@ -353,7 +353,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
 
     string_type extract_string(match_type const& match) const {
         BOOST_ASSERT(is(match, this->string_literal));
-        return detail::transformer<string_type>::unquote(match.str());
+        return detail::text<string_type>::unquote(match.str());
     }
 
     names_type extract_names(match_type const& match) const {
@@ -380,12 +380,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         return t.render_to_stream(ostream, context, options);
     }
 
-    void render_text( ostream_type&       ostream
-                    , match_type   const& text
-                    , context_type const& context
-                    , options_type const& options
-                    ) const {
-        ostream << text.str();
+    void render_plain( ostream_type&       ostream
+                     , match_type   const& plain
+                     , context_type const& context
+                     , options_type const& options
+                     ) const {
+        ostream << plain.str();
     }
 
     void render_block( ostream_type&       ostream
@@ -419,7 +419,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (is(match, this->text))  render_text(ostream, match, context, options);
+             if (is(match, this->plain)) render_plain(ostream, match, context, options);
         else if (is(match, this->block)) render_block(ostream, match, context, options);
         else if (is(match, this->tag))   render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
@@ -627,8 +627,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (transform::begins_with(op, traits_type::literal("not"))
-                  && transform::ends_with(op, traits_type::literal("in"))) {
+            else if (text::begins_with(op, traits_type::literal("not"))
+                  && text::ends_with(op, traits_type::literal("in"))) {
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }

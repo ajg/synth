@@ -11,7 +11,7 @@
 #include <boost/array.hpp>
 #include <boost/function.hpp>
 
-#include <ajg/synth/detail/transformer.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -50,7 +50,7 @@ struct formatter {
 
   private:
 
-    typedef detail::transformer<string_type>                                    transform;
+    typedef detail::text<string_type>                                           text;
 
   private:
 
@@ -148,9 +148,9 @@ struct formatter {
                 (traits_type::literal("%ZP"))
                 ;
 
-            static string_type const format_string     = transform::join(format_flags, traits_type::literal("|"));
+            static string_type const format_string     = text::join(format_flags, traits_type::literal("|"));
             string_type const formatted_string         = traits_type::format_datetime(format_string, datetime);
-            std::vector<string_type> const& specifiers = transform::split(formatted_string, traits_type::literal("|"), native_flags::size);
+            std::vector<string_type> const& specifiers = text::split(formatted_string, traits_type::literal("|"), native_flags::size);
             BOOST_ASSERT(specifiers.size() == native_flags::size);
 
             native_flags const flags =
@@ -256,7 +256,7 @@ struct formatter {
             string_type   const meridiem    = is_am ? traits_type::literal("a.m.")
                                             : is_pm ? traits_type::literal("p.m.")
                                             : string_type();
-            string_type   const succint     = transform::trim_leading_zeros(flags.I)
+            string_type   const succint     = text::trim_leading_zeros(flags.I)
                                             + (has_minutes ? char_type(':') + flags.M : string_type());
             string_type   const informal    = is_midnight ? traits_type::literal("midnight")
                                             : is_noon     ? traits_type::literal("noon")
@@ -285,7 +285,7 @@ struct formatter {
             cooked_flags cooked;
             cooked.a = meridiem;
             cooked.A = flags.p;
-            cooked.b = transform::lower(flags.b);
+            cooked.b = text::lower(flags.b);
             cooked.B = string_type(); // NOTE: "Not implemented" per the spec.
             cooked.c = iso8601;
             cooked.d = flags.d;
@@ -294,18 +294,18 @@ struct formatter {
             cooked.E = flags.B; // TODO: Make locale-aware.
             cooked.f = informal;
             cooked.F = flags.B;
-            cooked.g = transform::trim_leading_zeros(flags.I);
-            cooked.G = transform::trim_leading_zeros(flags.H);
+            cooked.g = text::trim_leading_zeros(flags.I);
+            cooked.G = text::trim_leading_zeros(flags.H);
             cooked.h = flags.I;
             cooked.H = flags.H;
             cooked.i = flags.M;
             cooked.I = traits_type::literal(is_dst ? "1" : "0");
-            cooked.j = transform::trim_leading_zeros(flags.d);
+            cooked.j = text::trim_leading_zeros(flags.d);
             cooked.l = flags.A;
             cooked.L = traits_type::literal(is_leapyear ? "True" : "False");
             cooked.m = flags.m;
             cooked.M = flags.b;
-            cooked.n = transform::trim_leading_zeros(flags.m);
+            cooked.n = text::trim_leading_zeros(flags.m);
             cooked.N = flags.b; // TODO: Use A.P. style.
             cooked.o = flags.G;
             cooked.O = tz_trail;
@@ -313,24 +313,24 @@ struct formatter {
             cooked.r = rfc2822;
             cooked.s = flags.S;
             cooked.S = ordinal_suffix(day);
-            cooked.t = transform::stringize(month_days);
+            cooked.t = text::stringize(month_days);
             cooked.T = traits_type::to_string(local_dt.zone(), local_dt.is_dst());
-            cooked.u = transform::trim_left(flags.f, traits_type::literal("."));
-            cooked.U = transform::stringize(unix_stamp);
+            cooked.u = text::trim_left(flags.f, traits_type::literal("."));
+            cooked.U = text::stringize(unix_stamp);
             cooked.w = flags.w;
-            cooked.W = transform::stringize(iso_week);
+            cooked.W = text::stringize(iso_week);
             cooked.y = flags.y;
             cooked.Y = flags.Y;
-            cooked.z = transform::trim_leading_zeros(flags.j);
-            cooked.Z = transform::stringize(offset_secs);
+            cooked.z = text::trim_leading_zeros(flags.j);
+            cooked.Z = text::stringize(offset_secs);
             return cooked;
         }
 
         inline static string_type stringify(duration_type const& offset, boolean_type const colon) {
             return (offset.is_negative() ? char_type('-') : char_type('+'))
-                 + (transform::digitize(static_cast<size_type>(offset.hours()), 2))
+                 + (text::digitize(static_cast<size_type>(offset.hours()), 2))
                  + (colon ? traits_type::literal(":") : string_type())
-                 + (transform::digitize(static_cast<size_type>(offset.minutes()), 2))
+                 + (text::digitize(static_cast<size_type>(offset.minutes()), 2))
                  ;
         }
 
@@ -460,7 +460,7 @@ struct formatter {
   private:
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return transform::replace(s, traits_type::literal(" "), options.nonbreaking_space);
+        return text::replace(s, traits_type::literal(" "), options.nonbreaking_space);
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n
@@ -468,7 +468,7 @@ struct formatter {
                                             , options_type const& options
                                             ) {
         string_type const suffix = n == 1 ? string_type() : traits_type::literal("s");
-        return transform::stringize(n) + options.nonbreaking_space + s + suffix;
+        return text::stringize(n) + options.nonbreaking_space + s + suffix;
     }
 };
 

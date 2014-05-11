@@ -176,12 +176,11 @@ struct value_behavior {
     }
 
     inline static void enumerate( base_adapter<behavior_type> const& adapter
-                                , ostream_type&                    ostream
-                                , string_type               const& delimiter = traits_type::literal(", ")
+                                , ostream_type&                      ostream
                                 ) {
         size_type i = 0;
         BOOST_FOREACH(value_type const& value, adapter) {
-            if (i++) ostream << delimiter;
+            if (i++) ostream << ", ";
             ostream << value;
         }
     }

@@ -29,6 +29,7 @@
 #include <boost/xpressive/regex_primitives.hpp>
 
 #include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/detail/container.hpp>
 
 namespace ajg {
@@ -96,6 +97,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
     typedef typename string_type::const_iterator                                string_iterator_type;
     typedef x::basic_regex<string_iterator_type>                                string_regex_type;
     typedef x::match_results<string_iterator_type>                              string_match_type;
+    typedef detail::text<string_type>                                           text;
 
     struct parse_result {
       private:
@@ -212,7 +214,7 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
         size_type   const limit(error_line_limit);
         string_type const site(furthest, detail::advance_to(furthest, (std::min)(buffer, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
-        AJG_SYNTH_THROW(parsing_error(traits_type::narrow(line)));
+        AJG_SYNTH_THROW(parsing_error(text::narrow(line)));
     }
 
   AJG_SYNTH_IF_MSVC(public, protected):

@@ -15,6 +15,7 @@
 #include <boost/assign/list_of.hpp>
 
 #include <ajg/synth/detail/find.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -177,6 +178,7 @@ struct options {
     typedef std::map<string_type, string_type>                                  blocks_type;
     typedef std::map<marker_type, size_type>                                    cycles_type;
     typedef std::map<marker_type, value_type>                                   changes_type;
+    typedef detail::text<string_type>                                           text;
 
   private:
 
@@ -197,7 +199,7 @@ struct options {
            , resolvers_type   const& resolvers     = resolvers_type()
            )
         : autoescape(autoescape)
-        , nonbreaking_space(traits_type::literal("&nbsp;"))
+        , nonbreaking_space(text::literal("&nbsp;"))
         , default_value(default_value)
         , formats(merge_default_formats(formats))
         , debug(debug)
@@ -216,13 +218,13 @@ struct options {
     inline static formats_type merge_default_formats(formats_type formats) {
         typedef typename formats_type::value_type format_type;
         static formats_type const defaults = boost::assign::list_of<format_type>
-            (traits_type::literal("DATE_FORMAT"),           traits_type::literal("N j, Y"))
-            (traits_type::literal("DATETIME_FORMAT"),       traits_type::literal("N j, Y, P"))
-            (traits_type::literal("MONTH_DAY_FORMAT"),      traits_type::literal("F j"))
-            (traits_type::literal("SHORT_DATE_FORMAT"),     traits_type::literal("m/d/Y"))
-            (traits_type::literal("SHORT_DATETIME_FORMAT"), traits_type::literal("m/d/Y P"))
-            (traits_type::literal("TIME_FORMAT"),           traits_type::literal("P"))
-            (traits_type::literal("YEAR_MONTH_FORMAT"),     traits_type::literal("F Y"))
+            (text::literal("DATE_FORMAT"),           text::literal("N j, Y"))
+            (text::literal("DATETIME_FORMAT"),       text::literal("N j, Y, P"))
+            (text::literal("MONTH_DAY_FORMAT"),      text::literal("F j"))
+            (text::literal("SHORT_DATE_FORMAT"),     text::literal("m/d/Y"))
+            (text::literal("SHORT_DATETIME_FORMAT"), text::literal("m/d/Y P"))
+            (text::literal("TIME_FORMAT"),           text::literal("P"))
+            (text::literal("YEAR_MONTH_FORMAT"),     text::literal("F Y"))
             ;
 
         BOOST_FOREACH(format_type const& format, defaults) {

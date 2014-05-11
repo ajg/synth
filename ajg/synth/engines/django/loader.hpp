@@ -34,6 +34,10 @@ struct loader {
     typedef typename options_type::library_type                                 library_type;
     typedef typename options_type::loader_type                                  loader_type;
 
+  private:
+
+    typedef detail::text<string_type>                                           text;
+
   public:
 
     static void load( context_type&      context
@@ -55,7 +59,7 @@ struct loader {
         }
 
         if (!library) {
-            AJG_SYNTH_THROW(missing_library(traits_type::narrow(library_name)));
+            AJG_SYNTH_THROW(missing_library(text::narrow(library_name)));
         }
         else if (names) {
             BOOST_FOREACH(string_type const& name, *names) {
@@ -63,7 +67,7 @@ struct loader {
                 filter_type const& filter = library->get_filter(name);
 
                 if (!tag && !filter) {
-                    AJG_SYNTH_THROW(missing_key(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_key(text::narrow(name)));
                 }
                 if (tag) {
                     options.loaded_tags[name] = tag;
@@ -79,7 +83,7 @@ struct loader {
                     options.loaded_tags[name] = tag;
                 }
                 else {
-                    AJG_SYNTH_THROW(missing_tag(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
                 }
             }
             BOOST_FOREACH(string_type const& name, library->list_filters()) {
@@ -87,7 +91,7 @@ struct loader {
                     options.loaded_filters[name] = filter;
                 }
                 else {
-                    AJG_SYNTH_THROW(missing_filter(traits_type::narrow(name)));
+                    AJG_SYNTH_THROW(missing_filter(text::narrow(name)));
                 }
             }
         }

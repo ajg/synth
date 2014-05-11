@@ -125,7 +125,7 @@ struct value : value_facade<Traits, value> {
             return *attr;
         }
         else {
-            AJG_SYNTH_THROW(missing_attribute(traits_type::narrow(attribute.to_string())));
+            AJG_SYNTH_THROW(missing_attribute(text::narrow(attribute.to_string())));
         }
     }
 
@@ -217,7 +217,7 @@ struct value : value_facade<Traits, value> {
 
     static sequence_type make_trail(value_type const& value) {
         string_type const source    = value.to_string();
-        string_type const delimiter = traits_type::literal(".");
+        string_type const delimiter = text::literal(".");
         std::vector<string_type> const& names = text::split(source, delimiter);
 
         sequence_type trail;

@@ -42,6 +42,10 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     typedef std::pair<path_type, size_type>                                     info_type;
 
+  private:
+
+    typedef detail::text<string_type>                                           text;
+
   public:
 
     path_template(path_type const& path, paths_type const& directories = paths_type())
@@ -50,7 +54,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
             this->reset();
         }
         else {
-            iterator_type begin(traits_type::narrow(this->info_.first));
+            iterator_type begin(text::narrow(this->info_.first));
             iterator_type end = begin ? begin.make_end() : iterator_type();
             this->reset(begin, end);
         }
@@ -63,14 +67,14 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
         // First try looking in the directories specified.
         BOOST_FOREACH(path_type const& directory, directories) {
-            path_type const& base = detail::text<string_type>::trim_right(directory, traits_type::literal("/"));
+            path_type const& base = detail::text<string_type>::trim_right(directory, text::literal("/"));
             path_type const& full = base + char_type('/') + path;
-            if (stat(traits_type::narrow(full).c_str(), &stats) == 0) { // Found it.
+            if (stat(text::narrow(full).c_str(), &stats) == 0) { // Found it.
                 return info_type(full, stats.st_size);
             }
         }
 
-        std::string const narrow_path = traits_type::narrow(path);
+        std::string const narrow_path = text::narrow(path);
 
         // Then try the current directory.
         if (stat(narrow_path.c_str(), &stats) != 0) { // TODO: Use wstat where applicable.

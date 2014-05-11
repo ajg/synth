@@ -23,7 +23,7 @@ namespace tmpl {
     ( as_xpr(kernel.tag_open) >> content >> kernel.tag_close \
     | as_xpr(kernel.alt_open) >> content >> kernel.alt_close \
     )
-#define NAME(name)       (x::icase(kernel.tag_prefix + traits_type::literal(name)))
+#define NAME(name)       (x::icase(kernel.tag_prefix + text::literal(name)))
 #define OPEN_TAG(name)   TAG(*_s >> NAME(name) >> !(+_s >> kernel.name_attribute) >> *_s)
 #define MIDDLE_TAG(name) TAG(*_s >> NAME(name) >> *_s >> !as_xpr(kernel.tag_finish))
 #define SINGLE_TAG(name) TAG(*_s >> NAME(name) >> +_s >> kernel.name_attribute >> *_s >> !as_xpr(kernel.tag_finish))
@@ -192,15 +192,15 @@ struct builtin_tags {
 
             BOOST_FOREACH(value_type const& item, value) {
                 if (options_type::loop_variables) {
-                    context_copy[traits_type::literal("__SIZE__")]    = size;
-                    context_copy[traits_type::literal("__TOTAL__")]   = size;
-                    context_copy[traits_type::literal("__FIRST__")]   = to_int(index == 1);
-                    context_copy[traits_type::literal("__LAST__")]    = to_int(index == size);
-                    context_copy[traits_type::literal("__INNER__")]   = to_int(index != 1 && index != size);
-                    context_copy[traits_type::literal("__OUTER__")]   = to_int(index == 1 || index == size);
-                    context_copy[traits_type::literal("__ODD__")]     = to_int(index % 2 == 1);
-                    context_copy[traits_type::literal("__EVEN__")]    = to_int(index % 2 == 0);
-                    context_copy[traits_type::literal("__COUNTER__")] = index++;
+                    context_copy[text::literal("__SIZE__")]    = size;
+                    context_copy[text::literal("__TOTAL__")]   = size;
+                    context_copy[text::literal("__FIRST__")]   = to_int(index == 1);
+                    context_copy[text::literal("__LAST__")]    = to_int(index == size);
+                    context_copy[text::literal("__INNER__")]   = to_int(index != 1 && index != size);
+                    context_copy[text::literal("__OUTER__")]   = to_int(index == 1 || index == size);
+                    context_copy[text::literal("__ODD__")]     = to_int(index % 2 == 1);
+                    context_copy[text::literal("__EVEN__")]    = to_int(index % 2 == 0);
+                    context_copy[text::literal("__COUNTER__")] = index++;
                 }
 
                 BOOST_FOREACH(value_type const& pair, item) {

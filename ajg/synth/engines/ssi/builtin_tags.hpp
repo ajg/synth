@@ -106,7 +106,7 @@ enum { interpolated = true, raw = false };
     BOOST_FOREACH(match_type const& attr, args.kernel.unnest(x).nested_results()) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
-        if_statement else AJG_SYNTH_THROW(invalid_attribute(traits_type::narrow(name))); \
+        if_statement else AJG_SYNTH_THROW(invalid_attribute(text::narrow(name))); \
     } \
 } while (0)
 
@@ -122,9 +122,9 @@ enum { interpolated = true, raw = false };
                                          , char const* const  b     = 0
                                          , char const* const  c     = 0
                                          ) {
-        if ((a == 0 || value != traits_type::literal(a)) &&
-            (b == 0 || value != traits_type::literal(b)) &&
-            (c == 0 || value != traits_type::literal(c))) {
+        if ((a == 0 || value != text::literal(a)) &&
+            (b == 0 || value != text::literal(b)) &&
+            (c == 0 || value != text::literal(c))) {
             AJG_SYNTH_THROW(invalid_attribute(name));
         }
     }
@@ -135,18 +135,18 @@ enum { interpolated = true, raw = false };
 
     struct config_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("config"));
+            return kernel.make_tag(text::literal("config"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("sizefmt")) {
+                if (name == text::literal("sizefmt")) {
                     validate_attribute("sizefmt", value, "bytes", "abbrev");
                     args.options.size_format = value;
                 }
-                else if (name == traits_type::literal("timefmt")) args.options.time_format = value;
-                else if (name == traits_type::literal("echomsg")) args.options.echo_message = value;
-                else if (name == traits_type::literal("errmsg"))  args.options.error_message = value;
+                else if (name == text::literal("timefmt")) args.options.time_format = value;
+                else if (name == text::literal("echomsg")) args.options.echo_message = value;
+                else if (name == text::literal("errmsg"))  args.options.error_message = value;
             );
         }
     };
@@ -158,20 +158,20 @@ enum { interpolated = true, raw = false };
 
     struct echo_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("echo"));
+            return kernel.make_tag(text::literal("echo"));
         }
 
         static void render(args_type const& args) {
-            string_type encoding = traits_type::literal("entity");
+            string_type encoding = text::literal("entity");
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("var")) {
+                if (name == text::literal("var")) {
                     string_type const result = args.kernel.lookup_variable(args.context, args.options, value);
-                    if      (encoding == traits_type::literal("none"))   args.ostream << result;
-                    else if (encoding == traits_type::literal("url"))    args.ostream << text::uri_encode(result);
-                    else if (encoding == traits_type::literal("entity")) args.ostream << text::escape_entities(result);
+                    if      (encoding == text::literal("none"))   args.ostream << result;
+                    else if (encoding == text::literal("url"))    args.ostream << text::uri_encode(result);
+                    else if (encoding == text::literal("entity")) args.ostream << text::escape_entities(result);
                     else AJG_SYNTH_THROW(invalid_attribute("encoding"));
                 }
-                else if (name == traits_type::literal("encoding")) {
+                else if (name == text::literal("encoding")) {
                     validate_attribute("encoding", value, "none", "url", "entity");
                     encoding = value;
                 }
@@ -185,18 +185,18 @@ enum { interpolated = true, raw = false };
 
     struct exec_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("exec"));
+            return kernel.make_tag(text::literal("exec"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("cgi")) {
+                if (name == text::literal("cgi")) {
                     // TODO:
                     // BOOST_ASSERT(detail::file_exists(value));
                     AJG_SYNTH_THROW(not_implemented("exec cgi"));
                 }
-                else if (name == traits_type::literal("cmd")) {
-                    detail::pipe pipe(traits_type::narrow(value));
+                else if (name == text::literal("cmd")) {
+                    detail::pipe pipe(text::narrow(value));
                     pipe.read_into(args.ostream);
                 }
             );
@@ -209,17 +209,17 @@ enum { interpolated = true, raw = false };
 
     struct flastmod_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("flastmod"));
+            return kernel.make_tag(text::literal("flastmod"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("virtual")) {
+                if (name == text::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
-                else if (name == traits_type::literal("file")) {
-                    std::time_t const stamp = detail::stat_file(traits_type::narrow(value)).st_mtime;
+                else if (name == text::literal("file")) {
+                    std::time_t const stamp = detail::stat_file(text::narrow(value)).st_mtime;
                     args.ostream << traits_type::format_time(args.options.time_format, traits_type::to_time(stamp));
                 }
             );
@@ -232,20 +232,20 @@ enum { interpolated = true, raw = false };
 
     struct fsize_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("fsize"));
+            return kernel.make_tag(text::literal("fsize"));
         }
 
         static void render(args_type const& args) {
-            boolean_type const abbreviate = args.options.size_format == traits_type::literal("abbrev");
+            boolean_type const abbreviate = args.options.size_format == text::literal("abbrev");
             validate_attribute("size_format", args.options.size_format, "bytes", "abbrev");
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("virtual")) {
+                if (name == text::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
-                else if (name == traits_type::literal("file")) {
-                    size_type const size = detail::stat_file(traits_type::narrow(value)).st_size;
+                else if (name == text::literal("file")) {
+                    size_type const size = detail::stat_file(text::narrow(value)).st_size;
                     abbreviate ? args.ostream << traits_type::format_size(size) : args.ostream << size;
                 }
             );
@@ -258,10 +258,10 @@ enum { interpolated = true, raw = false };
 
     struct if_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return  (kernel.make_tag(traits_type::literal("if"))   >> kernel.block)
-                >> *(kernel.make_tag(traits_type::literal("elif")) >> kernel.block)
-                >> !(kernel.make_tag(traits_type::literal("else")) >> kernel.block)
-                >>  (kernel.make_tag(traits_type::literal("endif")));
+            return  (kernel.make_tag(text::literal("if"))   >> kernel.block)
+                >> *(kernel.make_tag(text::literal("elif")) >> kernel.block)
+                >> !(kernel.make_tag(text::literal("else")) >> kernel.block)
+                >>  (kernel.make_tag(text::literal("endif")));
         }
 
         static void render(args_type const& args) {
@@ -285,9 +285,9 @@ enum { interpolated = true, raw = false };
             string_match_type match;
             string_type const name = tag[s1].str();
 
-            if (name == traits_type::literal("if") || name == traits_type::literal("elif")) {
+            if (name == text::literal("if") || name == text::literal("elif")) {
                 AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(tag, raw,
-                    if (name == traits_type::literal("expr")) {
+                    if (name == text::literal("expr")) {
                         if (!has_expr) has_expr = true;
                         else AJG_SYNTH_THROW(duplicate_attribute("expr"));
 
@@ -305,8 +305,8 @@ enum { interpolated = true, raw = false };
             }
             else {
                 AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(tag);
-                     if (name == traits_type::literal("else"))  return true;
-                else if (name == traits_type::literal("endif")) return false;
+                     if (name == text::literal("else"))  return true;
+                else if (name == text::literal("endif")) return false;
                 else AJG_SYNTH_THROW(std::logic_error("invalid tag"));
             }
         }
@@ -318,16 +318,16 @@ enum { interpolated = true, raw = false };
 
     struct include_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("include"));
+            return kernel.make_tag(text::literal("include"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("virtual")) {
+                if (name == text::literal("virtual")) {
                     // TODO: Parse REQUEST_URI and figure our path out.
                     AJG_SYNTH_THROW(not_implemented("include virtual"));
                 }
-                else if (name == traits_type::literal("file")) {
+                else if (name == text::literal("file")) {
                     args.kernel.render_path(args.ostream, traits_type::to_path(value), args.context, args.options);
                 }
             );
@@ -340,13 +340,13 @@ enum { interpolated = true, raw = false };
 
     struct printenv_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("printenv"));
+            return kernel.make_tag(text::literal("printenv"));
         }
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(args.match);
             BOOST_FOREACH(typename environment_type::value_type const& nv, args.kernel.environment) {
-                args.ostream << traits_type::widen(nv.first) << '=' << traits_type::widen(nv.second) << std::endl;
+                args.ostream << text::widen(nv.first) << '=' << text::widen(nv.second) << std::endl;
             }
         }
     };
@@ -357,7 +357,7 @@ enum { interpolated = true, raw = false };
 
     struct set_tag {
         static regex_type syntax(kernel_type const& kernel) {
-            return kernel.make_tag(traits_type::literal("set"));
+            return kernel.make_tag(text::literal("set"));
         }
 
         static void render(args_type const& args) {
@@ -365,11 +365,11 @@ enum { interpolated = true, raw = false };
             optional<value_type>  value_;
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
-                if (name == traits_type::literal("var")) {
+                if (name == text::literal("var")) {
                     if (name_) AJG_SYNTH_THROW(duplicate_attribute("name"));
                     else name_ = value;
                 }
-                else if (name == traits_type::literal("value")) {
+                else if (name == text::literal("value")) {
                     if (value_) AJG_SYNTH_THROW(duplicate_attribute("value"));
                     else value_ = value;
                 }

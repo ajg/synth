@@ -8,6 +8,7 @@
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 
+#include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/bindings/python/conversions.hpp>
 
@@ -33,7 +34,8 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
 
   private:
 
-    typedef typename py::stl_input_iterator<object_type> stl_iterator_type;
+    typedef typename py::stl_input_iterator<object_type>                        stl_iterator_type;
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -60,7 +62,7 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
         // TODO: Support arbitrary values as keys for non-django general case.
 
         PyObject   *const o = adapted_.ptr();
-        std::string const k = traits_type::narrow(what.to_string());
+        std::string const k = text::narrow(what.to_string());
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
@@ -107,7 +109,7 @@ struct adapter<Behavior, py::object> : public base_adapter<Behavior> {
             return I(stl_iterator_type(py::list(obj)));
         }
         else {
-            std::string const& type = traits_type::narrow(class_name(obj));
+            std::string const& type = text::narrow(class_name(obj));
             AJG_SYNTH_THROW(std::runtime_error(type + " object is not iterable"));
         }
     }

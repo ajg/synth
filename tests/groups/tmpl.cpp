@@ -82,7 +82,7 @@ unit_test(default variables) {
 
 unit_test(html tags) {
     string_template_type t("<foo>\nA foo <bar /> element.\n</foo>");
-    ensure_equals(t.render_to_string(context), t.text());
+    ensure_equals(t.render_to_string(context), t.str());
 }}}
 
 unit_test(comment tag) {

@@ -26,6 +26,7 @@
 #include <boost/date_time/local_time/local_time.hpp>
 
 #include <ajg/synth/value_iterator.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 //
 // TODO: Construct a consistent taxonomy--
@@ -58,7 +59,6 @@ struct void_t { typedef void_t type; };
 
 template <class Char>
 struct default_traits {
-
   public:
 
     typedef default_traits                              traits_type;
@@ -68,70 +68,36 @@ struct default_traits {
     typedef Char                                        char_type;
 
     // TODO: Consider using arbitrary-precision types.
-    typedef std::size_t                                 size_type;
- // typedef boost::uintmax_t                            natural_type;
-    typedef boost::intmax_t                             integer_type;
-    typedef /* TODO: long */ double                     number_type; // TODO: Rename to floating_type.
+    typedef std::size_t                                                         size_type;
+ // typedef boost::uintmax_t                                                    natural_type;
+    typedef boost::intmax_t                                                     integer_type;
+    typedef /* TODO: long */ double                                             number_type; // TODO: Rename to floating_type.
 
-    typedef boost::gregorian::date                      date_type;
+    typedef boost::gregorian::date                                              date_type;
     // XXX: Consider using something else here because ptime (a) needs a date and (b) has no timezone.
-    typedef boost::posix_time::ptime                    time_type;
-    typedef boost::posix_time::second_clock             clock_type;
-    typedef boost::posix_time::time_duration            duration_type;
-    typedef boost::local_time::local_date_time          datetime_type;
- // typedef boost::local_time::local_time_period        period_type;
-    typedef boost::local_time::time_zone_ptr            timezone_type;
+    typedef boost::posix_time::ptime                                            time_type;
+    typedef boost::posix_time::second_clock                                     clock_type;
+    typedef boost::posix_time::time_duration                                    duration_type;
+    typedef boost::local_time::local_date_time                                  datetime_type;
+ // typedef boost::local_time::local_time_period                                period_type;
+    typedef boost::local_time::time_zone_ptr                                    timezone_type;
 
-    typedef std::basic_string<char_type>                string_type;
+    typedef std::basic_string<char_type>                                        string_type;
 
-    typedef string_type                                 path_type;
-    typedef std::vector<path_type>                      paths_type;
+    typedef string_type                                                         path_type;
+    typedef std::vector<path_type>                                              paths_type;
 
-    typedef std::set<string_type>                       symbols_type; // TODO[c++11]: unordered?
-    typedef std::vector<string_type>                    names_type;   // TODO: scope_type? namespace_type?
+    typedef std::set<string_type>                                               symbols_type; // TODO[c++11]: unordered?
+    typedef std::vector<string_type>                                            names_type;   // TODO: scope_type? namespace_type?
 
-    typedef std::basic_istream<char_type>               istream_type;
-    typedef std::basic_ostream<char_type>               ostream_type;
+    typedef std::basic_istream<char_type>                                       istream_type;
+    typedef std::basic_ostream<char_type>                                       ostream_type;
+
+  private:
+
+    typedef detail::text<string_type>                                           text;
 
   public:
-
-///
-/// literal:
-///     TODO: Move to detail::transformer.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    inline static string_type literal(char const* const s) {
-        return widen(std::string(s));
-    }
-
-    /* TODO: Investigate if we can sacrifice compile-time for runtime.
-    template <size_type N>
-    inline static ... literal(char const (&n)[N]) { ... }
-    */
-
-///
-/// transcode:
-///     Centralizes string conversions in one place.
-///     TODO: Move to detail::transformer.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <class To, class From>
-    inline static std::basic_string<To> transcode(std::basic_string<From> const& s) {
-        return std::basic_string<To>(s.begin(), s.end());
-    }
-
-///
-/// narrow, widen:
-///     These are misnomers since `Char` doesn't have to be 'wider' than `char`; they are shorcuts
-///     to `transcode` and useful for interacting with APIs that only support one or the other.
-///     TODO: Move to detail::transformer.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <class C> inline static std::basic_string<char> narrow(std::basic_string<C> const& s) { return transcode<char, C>(s); }
-    template <class C> inline static std::basic_string<Char> widen (std::basic_string<C> const& s) { return transcode<Char, C>(s); }
-
-    inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) { return s; }
-    inline static std::basic_string<Char> const& widen (std::basic_string<Char> const& s) { return s; }
 
 // TODO: Move everything below to value_behavior.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +107,7 @@ struct default_traits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static path_type to_path(string_type const& s) {
-        return transcode<typename path_type::value_type>(s);
+        return text::template transcode<typename path_type::value_type>(s);
     }
 
 ///
@@ -182,7 +148,7 @@ struct default_traits {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static timezone_type utc_timezone() {
-        return to_timezone(literal("UTC"), empty_duration());
+        return to_timezone(text::literal("UTC"), empty_duration());
     }
 
 ///
@@ -199,9 +165,9 @@ struct default_traits {
         //
 
         duration_type const one_hour = to_duration(1, 0, 0);
-        return to_timezone( widen(std::string(tzname[0]))
+        return to_timezone( text::widen(std::string(tzname[0]))
                           , to_duration(0, 0, timezone)
-                          , widen(std::string(tzname[1]))
+                          , text::widen(std::string(tzname[1]))
                           , one_hour // FIXME: This is just a guess.
                           );
     }
@@ -217,7 +183,7 @@ struct default_traits {
                                            ) {
         // e.g. PST-5, PST-5PDT, or PST-5PDT01:00:00
         string_type s = name.substr(0, 3) + to_string(offset);
-        string_type const period = literal(",M3.2.0/2,M11.1.0/2"); // FIXME: Roughly U.S.-only
+        string_type const period = text::literal(",M3.2.0/2,M11.1.0/2"); // FIXME: Roughly U.S.-only
 
         if (!dst_name.empty() && !is_empty(dst_offset)) {
             s += dst_name.substr(0, 3) + to_string(dst_offset) + period;
@@ -229,8 +195,8 @@ struct default_traits {
             s += dst_name.substr(0, 3) + period;
         }
 
-
-        return timezone_type(new boost::local_time::posix_time_zone(narrow(s)));
+        // TODO: Consider using caching here (even thread-local) to reduce allocations.
+        return timezone_type(new boost::local_time::posix_time_zone(text::narrow(s)));
     }
 
 ///
@@ -242,7 +208,7 @@ struct default_traits {
     }
 
     inline static string_type to_string(duration_type const& duration) {
-        string_type const s = widen(boost::posix_time::to_simple_string(duration));
+        string_type const s = text::widen(boost::posix_time::to_simple_string(duration));
         return duration.is_negative() ? /* char_type('-') + */ s : char_type('+') + s;
     }
 

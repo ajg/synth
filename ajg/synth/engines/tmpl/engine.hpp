@@ -98,14 +98,14 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
   public:
 
     kernel()
-        : tag_open      (traits_type::literal("<"))
-        , tag_close     (traits_type::literal(">"))
-        , tag_finish    (traits_type::literal("/"))
-        , tag_prefix    (traits_type::literal("TMPL_"))
-        , tag_attribute (traits_type::literal("NAME"))
-        , alt_open      (traits_type::literal("<!--"))
-        , alt_close     (traits_type::literal("-->"))
-        , default_value (traits_type::literal("")) {
+        : tag_open      (text::literal("<"))
+        , tag_close     (text::literal(">"))
+        , tag_finish    (text::literal("/"))
+        , tag_prefix    (text::literal("TMPL_"))
+        , tag_attribute (text::literal("NAME"))
+        , alt_open      (text::literal("<!--"))
+        , alt_close     (text::literal("-->"))
+        , default_value (text::literal("")) {
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,12 +301,12 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                 else {
                     string_type const mode = text::lower(value.str());
 
-                         if (mode == traits_type::literal("none")
-                          || mode == traits_type::literal("0"))   escape = attributes::none;
-                    else if (mode == traits_type::literal("html")
-                          || mode == traits_type::literal("1"))   escape = attributes::html;
-                    else if (mode == traits_type::literal("url")) escape = attributes::url;
-                    else if (mode == traits_type::literal("js"))  escape = attributes::js;
+                         if (mode == text::literal("none")
+                          || mode == text::literal("0"))   escape = attributes::none;
+                    else if (mode == text::literal("html")
+                          || mode == text::literal("1"))   escape = attributes::html;
+                    else if (mode == text::literal("url")) escape = attributes::url;
+                    else if (mode == text::literal("js"))  escape = attributes::js;
                     else {
                         AJG_SYNTH_THROW(std::invalid_argument("invalid escape mode"));
                     }

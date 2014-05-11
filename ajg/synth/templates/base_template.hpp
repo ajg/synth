@@ -54,6 +54,9 @@ struct base_template : boost::noncopyable {
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+  private:
+
+    typedef detail::text<string_type>                                           text;
 
   protected:
 
@@ -90,7 +93,7 @@ struct base_template : boost::noncopyable {
                        , context_type const& context = context_type()
                        , options_type const& options = options_type()
                        ) const {
-        std::string const narrow_path = traits_type::narrow(path);
+        std::string const narrow_path = text::narrow(path);
         std::basic_ofstream<char_type> file;
 
         try {
@@ -104,7 +107,7 @@ struct base_template : boost::noncopyable {
     }
 
     range_type const& range() const { return this->range_; }
-    string_type       text()  const { return string_type(this->range_.first, this->range_.second); }
+    string_type       str()   const { return string_type(this->range_.first, this->range_.second); }
 
   private:
 

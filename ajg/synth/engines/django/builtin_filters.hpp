@@ -88,7 +88,7 @@ struct builtin_filters {
   private:
 
     inline static separator_type const& separator() {
-        static string_type    const word_delimiters(traits_type::literal(" \t\n.,;:!?'\"-"));
+        static string_type    const word_delimiters(text::literal(" \t\n.,;:!?'\"-"));
         static separator_type const separator(word_delimiters.c_str());
         return separator;
     }
@@ -113,64 +113,64 @@ struct builtin_filters {
     inline static filter_type get(string_type const& name) {
         // TODO: Consider replacing with fastmatch.h switch or unordered_map.
         static filters_type const filters = boost::assign::map_list_of
-            (traits_type::literal("add"),                add_filter::process)
-            (traits_type::literal("addslashes"),         addslashes_filter::process)
-            (traits_type::literal("capfirst"),           capfirst_filter::process)
-            (traits_type::literal("center"),             center_filter::process)
-            (traits_type::literal("cut"),                cut_filter::process)
-            (traits_type::literal("date"),               date_filter::process)
-            (traits_type::literal("default"),            default_filter::process)
-            (traits_type::literal("default_if_none"),    default_if_none_filter::process)
-            (traits_type::literal("dictsort"),           dictsort_filter::process)
-            (traits_type::literal("dictsortreversed"),   dictsortreversed_filter::process)
-            (traits_type::literal("divisibleby"),        divisibleby_filter::process)
-            (traits_type::literal("escape"),             escape_filter::process)
-            (traits_type::literal("escapejs"),           escapejs_filter::process)
-            (traits_type::literal("filesizeformat"),     filesizeformat_filter::process)
-            (traits_type::literal("first"),              first_filter::process)
-            (traits_type::literal("fix_ampersands"),     fix_ampersands_filter::process)
-            (traits_type::literal("floatformat"),        floatformat_filter::process)
-            (traits_type::literal("force_escape"),       force_escape_filter::process)
-            (traits_type::literal("get_digit"),          get_digit_filter::process)
-            (traits_type::literal("iriencode"),          iriencode_filter::process)
-            (traits_type::literal("join"),               join_filter::process)
-            (traits_type::literal("last"),               last_filter::process)
-            (traits_type::literal("length"),             length_filter::process)
-            (traits_type::literal("length_is"),          length_is_filter::process)
-            (traits_type::literal("linebreaks"),         linebreaks_filter::process)
-            (traits_type::literal("linebreaksbr"),       linebreaksbr_filter::process)
-            (traits_type::literal("linenumbers"),        linenumbers_filter::process)
-            (traits_type::literal("ljust"),              ljust_filter::process)
-            (traits_type::literal("lower"),              lower_filter::process)
-            (traits_type::literal("make_list"),          make_list_filter::process)
-            (traits_type::literal("phone2numeric"),      phone2numeric_filter::process)
-            (traits_type::literal("pluralize"),          pluralize_filter::process)
-            (traits_type::literal("pprint"),             pprint_filter::process)
-            (traits_type::literal("random"),             random_filter::process)
-            (traits_type::literal("removetags"),         removetags_filter::process)
-            (traits_type::literal("rjust"),              rjust_filter::process)
-            (traits_type::literal("safe"),               safe_filter::process)
-            (traits_type::literal("safeseq"),            safeseq_filter::process)
-            (traits_type::literal("slice"),              slice_filter::process)
-            (traits_type::literal("slugify"),            slugify_filter::process)
-            (traits_type::literal("stringformat"),       stringformat_filter::process)
-            (traits_type::literal("striptags"),          striptags_filter::process)
-            (traits_type::literal("time"),               time_filter::process)
-            (traits_type::literal("timesince"),          timesince_filter::process)
-            (traits_type::literal("timeuntil"),          timeuntil_filter::process)
-            (traits_type::literal("title"),              title_filter::process)
-            (traits_type::literal("truncatechars"),      truncatechars_filter::process)
-            (traits_type::literal("truncatechars_html"), truncatechars_html_filter::process)
-            (traits_type::literal("truncatewords"),      truncatewords_filter::process)
-            (traits_type::literal("truncatewords_html"), truncatewords_html_filter::process)
-            (traits_type::literal("unordered_list"),     unordered_list_filter::process)
-            (traits_type::literal("upper"),              upper_filter::process)
-            (traits_type::literal("urlencode"),          urlencode_filter::process)
-            (traits_type::literal("urlize"),             urlize_filter::process)
-            (traits_type::literal("urlizetrunc"),        urlizetrunc_filter::process)
-            (traits_type::literal("wordcount"),          wordcount_filter::process)
-            (traits_type::literal("wordwrap"),           wordwrap_filter::process)
-            (traits_type::literal("yesno"),              yesno_filter::process)
+            (text::literal("add"),                add_filter::process)
+            (text::literal("addslashes"),         addslashes_filter::process)
+            (text::literal("capfirst"),           capfirst_filter::process)
+            (text::literal("center"),             center_filter::process)
+            (text::literal("cut"),                cut_filter::process)
+            (text::literal("date"),               date_filter::process)
+            (text::literal("default"),            default_filter::process)
+            (text::literal("default_if_none"),    default_if_none_filter::process)
+            (text::literal("dictsort"),           dictsort_filter::process)
+            (text::literal("dictsortreversed"),   dictsortreversed_filter::process)
+            (text::literal("divisibleby"),        divisibleby_filter::process)
+            (text::literal("escape"),             escape_filter::process)
+            (text::literal("escapejs"),           escapejs_filter::process)
+            (text::literal("filesizeformat"),     filesizeformat_filter::process)
+            (text::literal("first"),              first_filter::process)
+            (text::literal("fix_ampersands"),     fix_ampersands_filter::process)
+            (text::literal("floatformat"),        floatformat_filter::process)
+            (text::literal("force_escape"),       force_escape_filter::process)
+            (text::literal("get_digit"),          get_digit_filter::process)
+            (text::literal("iriencode"),          iriencode_filter::process)
+            (text::literal("join"),               join_filter::process)
+            (text::literal("last"),               last_filter::process)
+            (text::literal("length"),             length_filter::process)
+            (text::literal("length_is"),          length_is_filter::process)
+            (text::literal("linebreaks"),         linebreaks_filter::process)
+            (text::literal("linebreaksbr"),       linebreaksbr_filter::process)
+            (text::literal("linenumbers"),        linenumbers_filter::process)
+            (text::literal("ljust"),              ljust_filter::process)
+            (text::literal("lower"),              lower_filter::process)
+            (text::literal("make_list"),          make_list_filter::process)
+            (text::literal("phone2numeric"),      phone2numeric_filter::process)
+            (text::literal("pluralize"),          pluralize_filter::process)
+            (text::literal("pprint"),             pprint_filter::process)
+            (text::literal("random"),             random_filter::process)
+            (text::literal("removetags"),         removetags_filter::process)
+            (text::literal("rjust"),              rjust_filter::process)
+            (text::literal("safe"),               safe_filter::process)
+            (text::literal("safeseq"),            safeseq_filter::process)
+            (text::literal("slice"),              slice_filter::process)
+            (text::literal("slugify"),            slugify_filter::process)
+            (text::literal("stringformat"),       stringformat_filter::process)
+            (text::literal("striptags"),          striptags_filter::process)
+            (text::literal("time"),               time_filter::process)
+            (text::literal("timesince"),          timesince_filter::process)
+            (text::literal("timeuntil"),          timeuntil_filter::process)
+            (text::literal("title"),              title_filter::process)
+            (text::literal("truncatechars"),      truncatechars_filter::process)
+            (text::literal("truncatechars_html"), truncatechars_html_filter::process)
+            (text::literal("truncatewords"),      truncatewords_filter::process)
+            (text::literal("truncatewords_html"), truncatewords_html_filter::process)
+            (text::literal("unordered_list"),     unordered_list_filter::process)
+            (text::literal("upper"),              upper_filter::process)
+            (text::literal("urlencode"),          urlencode_filter::process)
+            (text::literal("urlize"),             urlize_filter::process)
+            (text::literal("urlizetrunc"),        urlizetrunc_filter::process)
+            (text::literal("wordcount"),          wordcount_filter::process)
+            (text::literal("wordwrap"),           wordwrap_filter::process)
+            (text::literal("yesno"),              yesno_filter::process)
             ;
         typename std::map<string_type, filter_type>::const_iterator it = filters.find(name);
         return it == filters.end() ? 0 : it->second;
@@ -300,7 +300,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             string_type const format = arguments.first.empty() ?
-                traits_type::literal("DATE_FORMAT") : arguments.first[0].to_string();
+                text::literal("DATE_FORMAT") : arguments.first[0].to_string();
             return formatter_type::format_datetime(options, format, value.to_datetime());
         }
     };
@@ -467,7 +467,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0>::validate(arguments.first.size());
             static string_regex_type const regex = as_xpr('&') >> ~x::before((+_w | '#' >> +_d) >> ';');
-            return value_type(x::regex_replace(value.to_string(), regex, traits_type::literal("&amp;"))).mark_safe();
+            return value_type(x::regex_replace(value.to_string(), regex, text::literal("&amp;"))).mark_safe();
         }
     };
 
@@ -665,7 +665,7 @@ struct builtin_filters {
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type const s = safe ? value_type(line).escape().to_string() : line;
-                string_type const p = text::replace(s, kernel.newline, traits_type::literal("<br />"));
+                string_type const p = text::replace(s, kernel.newline, text::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
             }
 
@@ -685,7 +685,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            string_type const s = text::replace(value.to_string(), kernel.newline, traits_type::literal("<br />"));
+            string_type const s = text::replace(value.to_string(), kernel.newline, text::literal("<br />"));
             return value_type(s).mark_safe();
         }
     };
@@ -705,10 +705,10 @@ struct builtin_filters {
             string_stream_type stream;
 
             string_type  const input   = value.to_string();
-            string_type  const pattern = traits_type::literal("%%0%dd. %%s");
+            string_type  const pattern = text::literal("%%0%dd. %%s");
             boolean_type const safe    = !options.autoescape || value.safe();
 
-            std::vector<string_type> const& lines = text::split(input, traits_type::literal("\n"));
+            std::vector<string_type> const& lines = text::split(input, text::literal("\n"));
             size_type   const width = text::stringize(lines.size()).size();
             string_type const spec  = (format_type(pattern) % width).str();
 
@@ -775,12 +775,12 @@ struct builtin_filters {
             value_type const sequence = value.is_numeric() ? value.to_string() : value;
 
             size_type i = 0;
-            stream << traits_type::literal("[");
+            stream << text::literal("[");
             BOOST_FOREACH(value_type const& item, sequence) {
-                if (i++) stream << traits_type::literal(", ");
+                if (i++) stream << text::literal(", ");
                 stream << item;
             }
-            stream << traits_type::literal("]");
+            stream << text::literal("]");
             return stream.str();
         }
     };
@@ -836,7 +836,7 @@ struct builtin_filters {
                 kernel.template split_argument<','>(arguments.first[0], context, options);
 
             switch (args.size()) {
-            case 0: plural = traits_type::literal("s");           break;
+            case 0: plural = text::literal("s");           break;
             case 1: plural = args[0].to_string(); break;
             default: // 2+
                 singular = args[0].to_string();
@@ -1068,7 +1068,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0>::validate(arguments.first.size());
             static string_regex_type const tag = '<' >> -*~(as_xpr('>')) >> '>';
-            return x::regex_replace(value.to_string(), tag, traits_type::literal(""));
+            return x::regex_replace(value.to_string(), tag, text::literal(""));
         }
     };
 
@@ -1085,7 +1085,7 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             string_type const format = arguments.first.empty() ?
-                traits_type::literal("TIME_FORMAT") : arguments.first[0].to_string();
+                text::literal("TIME_FORMAT") : arguments.first[0].to_string();
             return formatter_type::format_datetime(options, format, value.to_datetime());
         }
     };
@@ -1200,7 +1200,7 @@ struct builtin_filters {
             regex_iterator_type begin(last, done, kernel.html_tag), end;
             std::stack<string_type> open_tags;
             size_type length = 0;
-            static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
+            static string_type const boundaries = text::literal(" \t\n\v\f\r>");
 
             BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
                 string_type const tag  = match.str();
@@ -1310,7 +1310,7 @@ struct builtin_filters {
                                         , options_type   const& options
                                         ) {
             with_arity<1>::validate(arguments.first.size());
-            static string_type const boundaries = traits_type::literal(" \t\n\v\f\r>");
+            static string_type const boundaries = text::literal(" \t\n\v\f\r>");
             size_type const limit = arguments.first[0].to_size();
             if (limit == 0) return string_type();
 

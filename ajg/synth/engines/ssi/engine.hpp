@@ -103,8 +103,8 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
   public:
 
     kernel()
-        : tag_start (traits_type::literal("<!--#"))
-        , tag_end   (traits_type::literal("-->"))
+        : tag_start (text::literal("<!--#"))
+        , tag_end   (text::literal("-->"))
         , environment()
         {
 //
@@ -215,26 +215,26 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
             return string_type(value->to_string());
         }
         // Second, check for magic variables.
-        else if (name == traits_type::literal("DOCUMENT_NAME")) {
+        else if (name == text::literal("DOCUMENT_NAME")) {
             AJG_SYNTH_THROW(not_implemented("DOCUMENT_NAME"));
         }
-        else if (name == traits_type::literal("DOCUMENT_URI")) {
+        else if (name == text::literal("DOCUMENT_URI")) {
             AJG_SYNTH_THROW(not_implemented("DOCUMENT_URI"));
         }
-        else if (name == traits_type::literal("DATE_LOCAL")) {
+        else if (name == text::literal("DATE_LOCAL")) {
             return traits_type::format_datetime(options.time_format, traits_type::local_datetime());
         }
-        else if (name == traits_type::literal("DATE_GMT")) {
+        else if (name == text::literal("DATE_GMT")) {
             return traits_type::format_time(options.time_format, traits_type::utc_time());
             // OR: return traits_type::format_datetime(options.time_format, traits_type::utc_datetime());
         }
-        else if (name == traits_type::literal("LAST_MODIFIED")) {
+        else if (name == text::literal("LAST_MODIFIED")) {
             AJG_SYNTH_THROW(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
         else if (optional<typename environment_type::mapped_type> const variable =
-                    detail::find(traits_type::narrow(name), this->environment)) {
-            return traits_type::widen(*variable);
+                    detail::find(text::narrow(name), this->environment)) {
+            return text::widen(*variable);
         }
         // Otherwise, use the undefined echo message.
         else {
@@ -361,21 +361,21 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
         if (string_match_type const& regex = expr(this->regex_expression)) {
             string_match_type const& left  = expr(this->string_expression);
 
-            if (op == traits_type::literal("=")
-             || op == traits_type::literal("==")) return equals_regex(args, left, regex);
-            if (op == traits_type::literal("!=")) return !equals_regex(args, left, regex);
+            if (op == text::literal("=")
+             || op == text::literal("==")) return equals_regex(args, left, regex);
+            if (op == text::literal("!=")) return !equals_regex(args, left, regex);
             AJG_SYNTH_THROW(std::logic_error("invalid regex operator"));
         }
         else {
             string_type const left  = parse_string(args, expr(this->string_expression, 0));
             string_type const right = parse_string(args, expr(this->string_expression, 1));
-            if (op == traits_type::literal("=")
-             || op == traits_type::literal("==")) return left == right;
-            if (op == traits_type::literal("!=")) return left != right;
-            if (op == traits_type::literal("<"))  return left <  right;
-            if (op == traits_type::literal(">"))  return left >  right;
-            if (op == traits_type::literal("<=")) return left <= right;
-            if (op == traits_type::literal(">=")) return left >= right;
+            if (op == text::literal("=")
+             || op == text::literal("==")) return left == right;
+            if (op == text::literal("!=")) return left != right;
+            if (op == text::literal("<"))  return left <  right;
+            if (op == text::literal(">"))  return left >  right;
+            if (op == text::literal("<=")) return left <= right;
+            if (op == text::literal(">=")) return left >= right;
             AJG_SYNTH_THROW(std::logic_error("invalid string operator"));
         }
     }
@@ -419,7 +419,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
   private:
 
     static string_type replace_variable(args_type const& args, string_match_type const& match) {
-        return match.str() == traits_type::literal("\\$") ? traits_type::literal("$") :
+        return match.str() == text::literal("\\$") ? text::literal("$") :
             args.kernel.lookup_variable(args.context, args.options, match[s1].str());
     }
 

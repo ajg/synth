@@ -174,7 +174,7 @@ struct value_facade {
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         /* if (!value.initialized()) {
-            return output << traits_type::literal("<uninitialized>");
+            return output << text::literal("<uninitialized>");
         }
         else */ {
             return value.adapter().output(output), output;

@@ -9,6 +9,7 @@
 #include <string>
 #include <locale>
 #include <sstream>
+#include <iomanip>
 
 #include <boost/foreach.hpp>
 
@@ -30,22 +31,60 @@ namespace {
 namespace algo = boost::algorithm;
 } // namespace
 
-
 //
-// text
-//     Helper for textual examination and manipulation that is trait-independent.
+// text:
+//     Utilities for non-configurable and trait-independent textual examination and manipulation.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class String>
 struct text {
+  public:
 
-    typedef text                                                                text_type;
     typedef String                                                              string_type;
-
     typedef bool                                                                boolean_type;
     typedef typename string_type::value_type                                    char_type;
     typedef typename string_type::size_type                                     size_type;
     typedef std::basic_ostringstream<char_type>                                 sstream_type;
+
+  public:
+
+///
+/// literal:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline static string_type literal(char const* const s) {
+        return widen(std::string(s));
+    }
+
+    /* TODO: Investigate if we can sacrifice compile-time for runtime.
+    template <size_type N>
+    inline static ... literal(char const (&n)[N]) { ... }
+    */
+
+///
+/// transcode:
+///     Centralizes string conversions in one place.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <class To, class From>
+    inline static std::basic_string<To> transcode(std::basic_string<From> const& s) {
+        return std::basic_string<To>(s.begin(), s.end());
+    }
+
+///
+/// narrow, widen:
+///     These are misnomers since `Char` doesn't have to be 'wider' than `char`; they are shorcuts
+///     to `transcode` and useful for interacting with APIs that only support one or the other.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    typedef char_type Char; // To improve the formatting below.
+
+    template <class C> inline static std::basic_string<char> narrow(std::basic_string<C> const& s) { return transcode<char, C>(s); }
+    template <class C> inline static std::basic_string<Char> widen (std::basic_string<C> const& s) { return transcode<Char, C>(s); }
+
+    inline static std::basic_string<char> const& narrow(std::basic_string<char> const& s) { return s; }
+    inline static std::basic_string<Char> const& widen (std::basic_string<Char> const& s) { return s; }
+
 
 //
 // uri_encode

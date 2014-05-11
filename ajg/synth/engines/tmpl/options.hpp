@@ -22,11 +22,11 @@ template <class Value>
 struct options {
   public:
 
-    typedef options                                options_type;
-    typedef Value                                  value_type;
+    typedef options                                                             options_type;
+    typedef Value                                                               value_type;
 
-    typedef typename value_type::traits_type       traits_type;
-    typedef typename traits_type::boolean_type     boolean_type;
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
 
   public:
 

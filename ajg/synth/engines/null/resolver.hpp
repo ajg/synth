@@ -20,14 +20,21 @@ using boost::optional;
 template <class Options>
 struct resolver : Options::abstract_resolver_type {
   public:
-    typedef Options                               options_type;
-    typedef typename options_type::traits_type    traits_type;
-    typedef typename options_type::size_type      size_type;
-    typedef typename options_type::string_type    string_type;
-    typedef typename options_type::value_type     value_type;
-    typedef typename options_type::context_type   context_type;
-    typedef typename options_type::arguments_type arguments_type;
-    typedef std::map<string_type, string_type>    patterns_type;
+
+    typedef Options                                                             options_type;
+    typedef typename options_type::traits_type                                  traits_type;
+    typedef typename options_type::size_type                                    size_type;
+    typedef typename options_type::string_type                                  string_type;
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+    typedef std::map<string_type, string_type>                                  patterns_type;
+
+  private:
+
+    typedef detail::text<string_type>                                           text;
+
+  public:
 
     virtual optional<string_type> resolve( string_type  const& path
                                          , context_type const& context
@@ -49,12 +56,12 @@ struct resolver : Options::abstract_resolver_type {
 
         string_type path, query;
         BOOST_FOREACH(value_type const& arg, arguments.first) {
-            path += traits_type::literal("/") + arg.to_string();
+            path += text::literal("/") + arg.to_string();
         }
         size_type i = 0;
         BOOST_FOREACH(typename arguments_type::second_type::value_type const& karg, arguments.second) {
-            query += i++ ? traits_type::literal("&") : traits_type::literal("?");
-            query += karg.first + traits_type::literal("=") + karg.second.to_string();
+            query += i++ ? text::literal("&") : text::literal("?");
+            query += karg.first + text::literal("=") + karg.second.to_string();
         }
         return it->second + path + query;
     }

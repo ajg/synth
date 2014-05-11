@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include <ajg/synth/detail/text.hpp>
+
 namespace ajg {
 namespace synth {
 namespace engines {
@@ -16,14 +18,18 @@ template <class Value>
 struct options {
   public:
 
-    typedef options                                options_type;
-    typedef Value                                  value_type;
+    typedef options                                                             options_type;
+    typedef Value                                                               value_type;
 
-    typedef typename value_type::traits_type       traits_type;
-    typedef typename traits_type::boolean_type     boolean_type;
-    typedef typename traits_type::size_type        size_type;
-    typedef typename traits_type::string_type      string_type;
-    typedef typename traits_type::paths_type       paths_type;
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::paths_type                                    paths_type;
+
+  private:
+
+    typedef detail::text<string_type>                                           text;
 
   public:
 
@@ -32,11 +38,11 @@ struct options {
 
   public:
 
-    options( string_type const& echo_message  = traits_type::literal("(none)")
+    options( string_type const& echo_message  = text::literal("(none)")
            , paths_type  const& directories   = paths_type()
-           , string_type const& size_format   = traits_type::literal("bytes")
-           , string_type const& time_format   = traits_type::literal("%A, %d-%b-%Y %H:%M:%S %Z")
-           , string_type const& error_message = traits_type::literal("[an error occurred while processing this directive]")
+           , string_type const& size_format   = text::literal("bytes")
+           , string_type const& time_format   = text::literal("%A, %d-%b-%Y %H:%M:%S %Z")
+           , string_type const& error_message = text::literal("[an error occurred while processing this directive]")
            )
         : echo_message(echo_message)
         , directories(directories)

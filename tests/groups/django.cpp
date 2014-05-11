@@ -44,7 +44,7 @@ struct data_type : tests::data::kitchen_sink<engine_type> {};
 
 AJG_SYNTH_TEST_GROUP_WITH_DATA("django", data_type);
 
-static string_type const absolute_path = traits_type::widen(get_current_working_directory());
+static string_type const absolute_path = text::widen(get_current_working_directory());
 
 } // namespace
 

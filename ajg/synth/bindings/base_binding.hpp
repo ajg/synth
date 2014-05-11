@@ -16,6 +16,7 @@
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -65,6 +66,10 @@ struct base_binding {
     typedef typename traits_type::ostream_type                                  ostream_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+  private:
+
+    typedef detail::text<string_type>                                           text;
+
   public:
 
     template <class Source>
@@ -80,9 +85,9 @@ struct base_binding {
                 , loaders_type   const& loaders
                 , resolvers_type const& resolvers
                 )
-        : django_template_(engine_name == traits_type::literal("django") ? new django_template_type(source) : 0)
-        , ssi_template_   (engine_name == traits_type::literal("ssi")    ? new ssi_template_type   (source) : 0)
-        , tmpl_template_  (engine_name == traits_type::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
+        : django_template_(engine_name == text::literal("django") ? new django_template_type(source) : 0)
+        , ssi_template_   (engine_name == text::literal("ssi")    ? new ssi_template_type   (source) : 0)
+        , tmpl_template_  (engine_name == text::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
         , django_options_(autoescape, default_value, formats, debug, paths, libraries, loaders, resolvers)
         , ssi_options_(default_value, paths) // TODO: size_format, time_format, formats, debug, error_message, ...
         , tmpl_options_() {                  // TODO: paths, debug, ...

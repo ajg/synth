@@ -38,19 +38,19 @@ unit_test(sanity check) {
     ensure_equals(t.render_to_string(), "");
 }}}
 
-unit_test(plain text) {
+unit_test(plain string) {
     string_template_type const t("ABC");
     ensure_equals(t.render_to_string(), "ABC");
 }}}
 
 unit_test(html tags) {
     string_template_type const t("<foo>\nA foo <bar /> element.\n</foo>");
-    ensure_equals(t.render_to_string(), t.text());
+    ensure_equals(t.render_to_string(), t.str());
 }}}
 
 unit_test(html comment) {
     string_template_type const t("<!-- A comment -->");
-    ensure_equals(t.render_to_string(), t.text());
+    ensure_equals(t.render_to_string(), t.str());
 }}}
 
 unit_test(environment variable) {

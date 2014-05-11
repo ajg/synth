@@ -153,7 +153,7 @@ struct command {
 
     inline static string_type to_string(option_type const* option) {
         if (option == 0 || option->arg == 0) return string_type();
-        else return traits_type::widen(std::string(option->arg));
+        else return text::widen(std::string(option->arg));
     }
 
     inline static boolean_type to_boolean(option_type const* option) {

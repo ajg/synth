@@ -168,8 +168,8 @@ struct builtin_tags {
             match_type  const& block   = match(kernel.block);
             boolean_type autoescape = true;
 
-                 if (setting == traits_type::literal("on"))  autoescape = true;
-            else if (setting == traits_type::literal("off")) autoescape = false;
+                 if (setting == text::literal("on"))  autoescape = true;
+            else if (setting == text::literal("off")) autoescape = false;
             else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
             options_type options_copy = options; // NOTE: Don't make the copy const.
@@ -200,7 +200,7 @@ struct builtin_tags {
             string_type const  name  = open[id].str();
 
             if (close && name != close[id].str()) {
-                std::string const original = traits_type::narrow(name);
+                std::string const original = text::narrow(name);
                 AJG_SYNTH_THROW(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
@@ -262,10 +262,10 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
 
-            if (optional<value_type> const& token = detail::find(traits_type::literal("csrf_token"), context)) {
+            if (optional<value_type> const& token = detail::find(text::literal("csrf_token"), context)) {
                 string_type const& s = text::escape_entities(token->to_string());
 
-                if (s != traits_type::literal("NOTPROVIDED")) {
+                if (s != text::literal("NOTPROVIDED")) {
                     ostream << "<div style='display:none'>";
                     ostream << "<input type='hidden' name='csrfmiddlewaretoken' value='" << s << "' />";
                     ostream << "</div>";
@@ -893,8 +893,8 @@ struct builtin_tags {
         typedef std::vector<entry_type>             entries_type;
 
         inline static entries_type regroup(value_type const& values, string_type const& attrs) {
-            static string_type const grouper_name = traits_type::literal("grouper");
-            static string_type const list_name    = traits_type::literal("list");
+            static string_type const grouper_name = text::literal("grouper");
+            static string_type const list_name    = text::literal("list");
             entries_type entries;
 
             BOOST_FOREACH(typename value_type::group_type const& group, values.group_by(attrs)) {
@@ -936,7 +936,7 @@ struct builtin_tags {
             kernel.render_block(ss, body, context, options);
             // TODO: Use bidirectional_input_stream to feed directly to regex_replace.
             string_type const string = ss.str();
-            x::regex_replace(it, string.begin(), string.end(), gap, traits_type::literal("$1$2"));
+            x::regex_replace(it, string.begin(), string.end(), gap, text::literal("$1$2"));
         }
     };
 
@@ -969,7 +969,7 @@ struct builtin_tags {
             }
             else {
                 string_type line;
-                std::string const path_ = traits_type::narrow(path);
+                std::string const path_ = text::narrow(path);
                 std::basic_ifstream<char_type> file(path_.c_str());
                 while (std::getline(file, line)) ostream << line << kernel.newline;
             }
@@ -1205,7 +1205,7 @@ struct builtin_tags {
             if (it != options.loaded_tags.end()) {
                 return it->second;
             }
-            AJG_SYNTH_THROW(missing_tag(traits_type::narrow(name)));
+            AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
         }
     };
 

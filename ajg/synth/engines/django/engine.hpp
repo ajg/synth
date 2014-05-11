@@ -111,16 +111,16 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
   public:
 
     kernel()
-        : newline        (traits_type::literal("\n"))
-        , ellipsis       (traits_type::literal("..."))
-        , brace_open     (marker(traits_type::literal("{"),  traits_type::literal("openbrace")))
-        , brace_close    (marker(traits_type::literal("}"),  traits_type::literal("closebrace")))
-        , block_open     (marker(traits_type::literal("{%"), traits_type::literal("openblock")))
-        , block_close    (marker(traits_type::literal("%}"), traits_type::literal("closeblock")))
-        , comment_open   (marker(traits_type::literal("{#"), traits_type::literal("opencomment")))
-        , comment_close  (marker(traits_type::literal("#}"), traits_type::literal("closecomment")))
-        , variable_open  (marker(traits_type::literal("{{"), traits_type::literal("openvariable")))
-        , variable_close (marker(traits_type::literal("}}"), traits_type::literal("closevariable")))
+        : newline        (text::literal("\n"))
+        , ellipsis       (text::literal("..."))
+        , brace_open     (marker(text::literal("{"),  text::literal("openbrace")))
+        , brace_close    (marker(text::literal("}"),  text::literal("closebrace")))
+        , block_open     (marker(text::literal("{%"), text::literal("openblock")))
+        , block_close    (marker(text::literal("%}"), text::literal("closeblock")))
+        , comment_open   (marker(text::literal("{#"), text::literal("opencomment")))
+        , comment_close  (marker(text::literal("#}"), text::literal("closecomment")))
+        , variable_open  (marker(text::literal("{{"), text::literal("openvariable")))
+        , variable_close (marker(text::literal("}}"), text::literal("closevariable")))
         {
 //
 // common grammar
@@ -297,9 +297,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
     inline regex_type marker  (string_type const& s, string_type const& name) { return as_xpr((this->markers[name] = s)); }
     inline regex_type word    (string_type const s) { return as_xpr(s) >> _b; }
     inline regex_type word    (char const* const s) { return as_xpr(s) >> _b; }
-    inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first); }
-    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(traits_type::literal(s)).first) >> *_s; }
-    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(traits_type::literal(s)).first) >> *_s; }
+    inline regex_type op      (char const* const s) { return this->word(*this->keywords_.insert(text::literal(s)).first); }
+    inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(text::literal(s)).first) >> *_s; }
+    inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(text::literal(s)).first) >> *_s; }
 
     template <char_type Delimiter>
     sequence_type split_argument( value_type   const& argument
@@ -332,7 +332,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 catch (missing_variable const& e) {
                     string_type const string(token.begin(), token.end());
 
-                    if (traits_type::narrow(string) != e.name) {
+                    if (text::narrow(string) != e.name) {
                         AJG_SYNTH_THROW(e);
                     }
 
@@ -463,7 +463,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return filter(*this, value, arguments, context, options);
         }
         else {
-            AJG_SYNTH_THROW(missing_filter(traits_type::narrow(name)));
+            AJG_SYNTH_THROW(missing_filter(text::narrow(name)));
         }
     }
 
@@ -523,7 +523,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             }
         }
         else if (is(literal, this->number_literal)) {
-            double const d = (std::atof)(traits_type::narrow(string).c_str());
+            double const d = (std::atof)(text::narrow(string).c_str());
             return value_type(static_cast<number_type>(d)).token(token);
         }
         else if (is(literal, this->string_literal)) {
@@ -538,7 +538,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 return variable->copy().token(token);
             }
             else {
-                AJG_SYNTH_THROW(missing_variable(traits_type::narrow(string)));
+                AJG_SYNTH_THROW(missing_variable(text::narrow(string)));
             }
         }
         else {
@@ -575,7 +575,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
-        if (op == traits_type::literal("not")) {
+        if (op == text::literal("not")) {
             return !evaluate_expression(operand, context, options);
         }
         else {
@@ -599,36 +599,36 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             else if (!(is(segment, this->expression))) {
                 AJG_SYNTH_THROW(std::logic_error("invalid binary expression"));
             }
-            else if (op == traits_type::literal("==")) {
+            else if (op == text::literal("==")) {
                 value = value == this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal("!=")) {
+            else if (op == text::literal("!=")) {
                 value = value != this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal("<")) {
+            else if (op == text::literal("<")) {
                 value = value < this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal(">")) {
+            else if (op == text::literal(">")) {
                 value = value > this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal("<=")) {
+            else if (op == text::literal("<=")) {
                 value = value <= this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal(">=")) {
+            else if (op == text::literal(">=")) {
                 value = value >= this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal("and")) {
+            else if (op == text::literal("and")) {
                 value = value ? this->evaluate_expression(segment, context, options) : value;
             }
-            else if (op == traits_type::literal("or")) {
+            else if (op == text::literal("or")) {
                 value = value ? value : this->evaluate_expression(segment, context, options);
             }
-            else if (op == traits_type::literal("in")) {
+            else if (op == text::literal("in")) {
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = elements.contains(value);
             }
-            else if (text::begins_with(op, traits_type::literal("not"))
-                  && text::ends_with(op, traits_type::literal("in"))) {
+            else if (text::begins_with(op, text::literal("not"))
+                  && text::ends_with(op, text::literal("in"))) {
                 value_type const elements = this->evaluate_expression(segment, context, options);
                 value = !elements.contains(value);
             }

@@ -314,23 +314,32 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
         typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
 
         BOOST_ASSERT(argument.is_literal());
-        string_type const& source = argument.token();
+        string_type token = argument.token();
+        size_type const l = token.length();
+
+        if (l >= 2) { // Adjust the token by trimming the quotes:
+            if ((token[0] == char_type('"')  && token[l - 1] == char_type('"')) ||
+                (token[0] == char_type('\'') && token[l - 1] == char_type('\''))) {
+                token = token.substr(1, l - 2);
+            }
+        }
+
         static char_type const delimiter[2] = { Delimiter, 0 };
-        tokenizer_type const tokenizer(source, separator_type(delimiter, 0, boost::keep_empty_tokens));
+        tokenizer_type const tokenizer(token, separator_type(delimiter, 0, boost::keep_empty_tokens));
         static string_kernel_type const string_kernel;
         string_match_type match;
         sequence_type sequence;
 
-        BOOST_FOREACH(string_type const& token, tokenizer) {
-            if (std::distance(token.begin(), token.end()) == 0) {
+        BOOST_FOREACH(string_type const& t, tokenizer) {
+            if (std::distance(t.begin(), t.end()) == 0) {
                 sequence.push_back(value_type(none_type()));
             }
-            else if (x::regex_match(token.begin(), token.end(), match, string_kernel.chain)) {
+            else if (x::regex_match(t.begin(), t.end(), match, string_kernel.chain)) {
                 try {
                     sequence.push_back(string_kernel.evaluate_chain(match, context, options));
                 }
                 catch (missing_variable const& e) {
-                    string_type const string(token.begin(), token.end());
+                    string_type const string(t.begin(), t.end());
 
                     if (text::narrow(string) != e.name) {
                         AJG_SYNTH_THROW(e);
@@ -527,8 +536,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
             return value_type(static_cast<floating_type>(d)).token(token);
         }
         else if (is(literal, this->string_literal)) {
-            BOOST_ASSERT(token.length() >= 2); // Adjust the token by trimming the quotes:
-            return value_type(extract_string(literal)).token(token.substr(1, token.length() - 2));
+            return value_type(extract_string(literal)).token(token);
         }
         else if (is(literal, this->super_literal)) {
             return options.get_base_block();

@@ -197,6 +197,7 @@ struct options {
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
            , resolvers_type   const& resolvers     = resolvers_type()
+           , boolean_type     const  raw_tags      = boolean_type(false)
            )
         : autoescape(autoescape)
         , nonbreaking_space(text::literal("&nbsp;"))
@@ -207,6 +208,7 @@ struct options {
         , libraries(libraries)
         , loaders(loaders)
         , resolvers(resolvers)
+        , raw_tags(raw_tags || debug) // FIXME: Temporary hack for django-synth.
         , loaded_tags()
         , loaded_filters()
         , blocks_(0)
@@ -247,6 +249,7 @@ struct options {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
+    boolean_type      raw_tags;
 
     inline boolean_type top_level() const {
         return this->blocks_ == 0;

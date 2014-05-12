@@ -1172,7 +1172,7 @@ struct builtin_tags {
 
     struct library_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return TAG(kernel.unreserved_name >> kernel.arguments) >> kernel.block;
+            return (s1 = TAG(kernel.unreserved_name >> kernel.arguments)) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -1187,8 +1187,20 @@ struct builtin_tags {
             match_type  const& args  = match(kernel.arguments);
             match_type  const& body  = match(kernel.block);
             tag_type    const& tag   = get_library_tag(name, context, options);
+            arguments_type arguments;
 
-            arguments_type arguments = kernel.evaluate_arguments(args, context, options);
+            if (!options.raw_tags) { // Sanity.
+                arguments = kernel.evaluate_arguments(args, context, options);
+            }
+            else { // Insanity; needed to emulate Django's custom tags' tokenization mechanism.
+                arguments.first.push_back(match[s1].str());
+                arguments.first.push_back(name);
+
+                BOOST_FOREACH(match_type const& arg, kernel.select_nested(args, kernel.argument)) {
+                    arguments.first.push_back(value_type(text::strip_right(arg.str())));
+                }
+            }
+
             // NOTE: kernel, match can't be passed because their types aren't available in options.
             tag(arguments, ostream, const_cast<context_type&>(context), const_cast<options_type&>(options));
             kernel.render_block(ostream, body, context, options);

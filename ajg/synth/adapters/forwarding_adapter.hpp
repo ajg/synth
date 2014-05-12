@@ -36,6 +36,9 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Sub?*/> {
   protected:
 
     virtual boolean_type equal_adapted(adapter_type const& that) const {
+        // TODO: Check all cases:
+        //     a. type(*that) == type(*this)
+        //     b. type(that->adapted) == type(this->adapted)
         return forward().template equal_as<adapter<Behavior, T> >(that);
     }
 

@@ -43,6 +43,7 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
 
 //
 // specialization for native arrays of statically unknown size
+//     TODO[c++14]: Remove support for this nastiness and defer to std::dynarray.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>

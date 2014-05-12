@@ -86,7 +86,7 @@ struct base_adapter {
   private:
 
     template <class T, class A>                    friend struct synth::adapter;
-    template <class T, class _, class A, class D>  friend struct forwarding_adapter;
+    template <class B, class T, class A, class S>  friend struct forwarding_adapter;
     template <class T, template <class> class V>   friend struct value_facade;
 
     template <class Adapter> // TODO: Deal with forwarding_adapters.

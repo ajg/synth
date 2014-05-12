@@ -24,7 +24,7 @@ concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > {
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     // FIXME: These should be forwarded to the real value.
-    // boolean_type equal(adapter_type const& that) const { return this->template is_equal_as<adapter>(that); }
+    // boolean_type equal(adapter_type const& that) const { return this->template equal_as<adapter>(that); }
     floating_type to_floating() const { return this->adapted_.which(); }
     boolean_type  to_boolean()  const { return true; }
 

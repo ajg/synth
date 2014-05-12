@@ -25,10 +25,10 @@ struct adapter<Behavior, std::basic_string<typename Behavior::char_type, Traits,
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    floating_type to_floating() const { return behavior_type::to_floating(this->adapted_); }
+    floating_type to_floating() const { return behavior_type::to_floating(this->adapted()); }
 
-    void input (istream_type& in)        { in  >> this->adapted_; }
-    void output(ostream_type& out) const { out << this->adapted_; }
+    void input (istream_type& in)        { in  >> this->adapted(); }
+    void output(ostream_type& out) const { out << this->adapted(); }
 };
 
 //

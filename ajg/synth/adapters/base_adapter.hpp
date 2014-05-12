@@ -94,10 +94,10 @@ struct base_adapter {
 
     template <class T> // TODO: Deal with forwarding_adapters.
     inline T const& get_adapted() const {
-        typedef synth::adapter<Behavior, T> concrete_adapter_type;
-        concrete_adapter_type const* const concrete_adapter = this->template get<concrete_adapter_type>();
-        BOOST_ASSERT(concrete_adapter);
-        return concrete_adapter->adapted_;
+        typedef synth::adapter<Behavior, T> specialized_type;
+        specialized_type const* const specialization = this->template get<specialized_type>();
+        BOOST_ASSERT(specialization);
+        return specialization->adapted_;
     }
 
   protected:
@@ -109,14 +109,14 @@ struct base_adapter {
     inline boolean_type equal_as(adapter_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
         Adapter const* const that_ = that->template get<Adapter>();
-        return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
+        return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::bare_adapted_type>()(this_->adapted_, that_->adapted_);
     }
 
     template <class Adapter>
     inline boolean_type less_as(adapter_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
         Adapter const* const that_ = that->template get<Adapter>();
-        return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
+        return this_ != 0 && that_ != 0 && std::less<typename Adapter::bare_adapted_type>()(this_->adapted_, that_->adapted_);
     }
 };
 

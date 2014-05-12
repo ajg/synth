@@ -25,7 +25,7 @@ struct adapter<Behavior, boost::none_t>   : concrete_adapter<Behavior, boost::no
     floating_type to_floating() const { return 0; }
     boolean_type to_boolean() const { return false; }
 
- // void input (istream_type& in)        { in >> this->adapted_; }
+ // void input (istream_type& in)        { in >> this->adapted(); }
     void output(ostream_type& out) const { out << "None"; } // TODO: Configure via Traits.
 };
 

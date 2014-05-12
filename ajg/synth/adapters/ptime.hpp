@@ -22,9 +22,9 @@ struct adapter<Behavior, boost::posix_time::ptime>   : concrete_adapter<Behavior
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    boolean_type  to_boolean()  const { return !this->adapted_.is_not_a_date_time(); }
-    datetime_type to_datetime() const { return traits_type::to_datetime(this->adapted_); }
-    void output(ostream_type& out) const { out << this->adapted_; }
+    boolean_type  to_boolean()  const { return !this->adapted().is_not_a_date_time(); }
+    datetime_type to_datetime() const { return traits_type::to_datetime(this->adapted()); }
+    void output(ostream_type& out) const { out << this->adapted(); }
 };
 
 }} // namespace ajg::synth

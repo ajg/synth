@@ -27,8 +27,8 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_a
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     boolean_type to_boolean() const {
-        if (this->adapted_.empty()) {
-            return boolean_type(value_type(this->adapted_.data()));
+        if (this->adapted().empty()) {
+            return boolean_type(value_type(this->adapted().data()));
         }
         else {
             return true;
@@ -36,24 +36,24 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_a
     }
 
     void output(ostream_type& out) const {
-        if (this->adapted_.empty()) {
-            out << value_type(this->adapted_.data());
+        if (this->adapted().empty()) {
+            out << value_type(this->adapted().data());
         }
         else {
             behavior_type::enumerate(*this, out);
         }
     }
 
-    iterator begin() { return iterator(this->adapted_.begin()); }
-    iterator end()   { return iterator(this->adapted_.end()); }
+    iterator begin() { return iterator(this->adapted().begin()); }
+    iterator end()   { return iterator(this->adapted().end()); }
 
-    const_iterator begin() const { return const_iterator(this->adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(this->adapted_.end()); }
+    const_iterator begin() const { return const_iterator(this->adapted().begin()); }
+    const_iterator end()   const { return const_iterator(this->adapted().end()); }
 
     optional<value_type> index(value_type const& what) const {
         K const key = behavior_type::template to<K>(what);
-        typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted_.find(key);
-        if (it == this->adapted_.not_found()) {
+        typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted().find(key);
+        if (it == this->adapted().not_found()) {
             return boost::none;
         }
         return value_type(it->second);

@@ -24,8 +24,8 @@ template <class Behavior, class T> // NOTE: Adapted as a const reference since s
 struct adapter<Behavior, boost::scoped_ptr<T> >  : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > > {
     adapter(boost::scoped_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > >(&adapted) {}
 
-    template <class A> A forward() const { return A(boost::cref(*this->adapted_->get())); }
-    typename Behavior::boolean_type valid() const { return this->adapted_->get() != 0; }
+    template <class A> A forward() const { return A(boost::cref(*this->adapted()->get())); }
+    typename Behavior::boolean_type valid() const { return this->adapted()->get() != 0; }
 };
 
 /*

@@ -19,11 +19,11 @@ template <class Behavior, class T>
 struct adapter<Behavior, T*>  : forwarding_adapter<Behavior, T, T*> {
     adapter(T* const adapted) : forwarding_adapter<Behavior, T, T*>(adapted) {}
 
-    template <class A> A forward() const { return A(boost::ref(*this->adapted_)); }
-    typename Behavior::boolean_type valid() const { return this->adapted_ != 0; }
+    template <class A> A forward() const { return A(boost::ref(*this->adapted())); }
+    typename Behavior::boolean_type valid() const { return this->adapted() != 0; }
 
  // template <class Adapter> optional<Adapter> forward() const {
- //     return this->adapted_ ? Adapter(boost::ref(*adapted_)) : boost::none;
+ //     return this->adapted() ? Adapter(boost::ref(*adapted_)) : boost::none;
  // }
 };
 

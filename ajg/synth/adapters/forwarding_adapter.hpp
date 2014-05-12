@@ -12,8 +12,8 @@
 namespace ajg {
 namespace synth {
 
-template <class Behavior, class T, class Adapted, class Sub = adapter<Behavior, Adapted> >
-struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Sub?*/> {
+template <class Behavior, class T, class Adapted, class Specialized = adapter<Behavior, Adapted> >
+struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Specialized?*/> {
     forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
@@ -55,10 +55,10 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Sub?*/> {
   private:
 
     inline cref_type forward() const {
-        return static_cast<Sub const*>(this)->template forward<cref_type>();
+        return static_cast<Specialized const*>(this)->template forward<cref_type>();
     }
 
-    inline boolean_type valid() const { return static_cast<Sub const*>(this)->valid(); }
+    inline boolean_type valid() const { return static_cast<Specialized const*>(this)->valid(); }
 };
 
 }} // namespace ajg::synth

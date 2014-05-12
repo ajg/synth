@@ -23,8 +23,8 @@ template <class Behavior, class T>
 struct adapter<Behavior, boost::shared_ptr<T> >  : forwarding_adapter<Behavior, T, boost::shared_ptr<T> > {
     adapter(boost::shared_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, boost::shared_ptr<T> >(adapted) {}
 
-    template <class A> A forward() const { return A(boost::cref(*this->adapted_)); }
-    typename Behavior::boolean_type valid() const { return this->adapted_; }
+    template <class A> A forward() const { return A(boost::cref(*this->adapted())); }
+    typename Behavior::boolean_type valid() const { return this->adapted(); }
 };
 
 }} // namespace ajg::synth

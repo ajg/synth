@@ -31,43 +31,43 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    virtual boolean_type to_boolean() const { return boolean_type(this->adapted_); }
-    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted_); }
+    virtual boolean_type to_boolean() const { return boolean_type(this->adapted()); }
+    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted()); }
 
- // virtual void input (istream_type& in)        { in >> this->adapted_; }
- // virtual void output(ostream_type& out) const { out << this->adapted_; }
-    virtual void output(ostream_type& out) const { out << get_string<traits_type>(this->adapted_); }
+ // virtual void input (istream_type& in)        { in >> this->adapted(); }
+ // virtual void output(ostream_type& out) const { out << this->adapted(); }
+    virtual void output(ostream_type& out) const { out << get_string<traits_type>(this->adapted()); }
 
-    virtual iterator begin() { return begin<iterator>(this->adapted_); }
-    virtual iterator end()   { return end<iterator>(this->adapted_); }
+    virtual iterator begin() { return begin<iterator>(this->adapted()); }
+    virtual iterator end()   { return end<iterator>(this->adapted()); }
 
-    virtual const_iterator begin() const { return begin<const_iterator>(this->adapted_); }
-    virtual const_iterator end()   const { return end<const_iterator>(this->adapted_); }
+    virtual const_iterator begin() const { return begin<const_iterator>(this->adapted()); }
+    virtual const_iterator end()   const { return end<const_iterator>(this->adapted()); }
 
-    virtual boolean_type is_boolean() const { return PyBool_Check(this->adapted_.ptr()); }
-    virtual boolean_type is_string()  const { return PyString_Check(this->adapted_.ptr()); }
-    virtual boolean_type is_numeric() const { return PyNumber_Check(this->adapted_.ptr()); }
+    virtual boolean_type is_boolean() const { return PyBool_Check(this->adapted().ptr()); }
+    virtual boolean_type is_string()  const { return PyString_Check(this->adapted().ptr()); }
+    virtual boolean_type is_numeric() const { return PyNumber_Check(this->adapted().ptr()); }
 
     optional<value_type> index(value_type const& what) const {
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
 
-        PyObject   *const o = this->adapted_.ptr();
+        PyObject   *const o = this->adapted().ptr();
         std::string const k = text::narrow(what.to_string());
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
             // TODO: If value is a py::object, use PyMapping_HasKey(o, <value>.ptr())
             if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
-                return value_type(py::object(this->adapted_[py::str(k)]));
+                return value_type(py::object(this->adapted()[py::str(k)]));
             }
         }
 
         // 2. Attribute lookup
         // TODO: If value is a py::object, use PyObject_HasAttr(o, <value>.ptr()) and attr(...)
         if (PyObject_HasAttrString(o, k.c_str())) {
-            py::object obj = this->adapted_.attr(py::str(k));
+            py::object obj = this->adapted().attr(py::str(k));
 
             // 3. Method call
             if (PyCallable_Check(obj.ptr())) {
@@ -82,7 +82,7 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
             Py_ssize_t n = static_cast<Py_ssize_t>(what.to_floating());
 
             if (n < PySequence_Size(o)) {
-                return value_type(py::object(this->adapted_[py::long_(n)]));
+                return value_type(py::object(this->adapted()[py::long_(n)]));
             }
         }
 

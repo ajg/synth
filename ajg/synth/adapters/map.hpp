@@ -22,8 +22,8 @@ struct adapter<Behavior, std::map<K, V> >  : container_adapter<Behavior, std::ma
 
     optional<typename Behavior::value_type> index(typename Behavior::value_type const& what) const {
         K const key = Behavior::template to<K>(what);
-        typename std::map<K, V>::const_iterator const it = this->adapted_.find(key);
-        if (it == this->adapted_.end()) {
+        typename std::map<K, V>::const_iterator const it = this->adapted().find(key);
+        if (it == this->adapted().end()) {
             return boost::none;
         }
         return typename Behavior::value_type(it->second);

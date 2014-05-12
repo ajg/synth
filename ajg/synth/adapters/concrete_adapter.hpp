@@ -13,12 +13,12 @@
 namespace ajg {
 namespace synth {
 
-template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Sub = adapter<Behavior, Adapted> >
+template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Specialized = adapter<Behavior, Adapted> >
 struct concrete_adapter : base_adapter<Behavior> {
     concrete_adapter(typename boost::remove_reference<Adapted>::type const& adapted) : adapted_(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-    typedef typename boost::remove_reference<Adapted>::type adapted_type;
+    typedef typename boost::remove_reference<Adapted>::type bare_adapted_type;
 
   public:
 
@@ -26,12 +26,17 @@ struct concrete_adapter : base_adapter<Behavior> {
 
   protected:
 
-    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<Sub/*concrete_adapter*/>(that); }
-    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<Sub/*concrete_adapter*/>(that); }
+    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<Specialized>(that); }
+    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<Specialized>(that); }
 
   protected:
 
-    Adapted adapted_; // TODO: Expose an accessor adapted() instead.
+    inline bare_adapted_type&       adapted()       { return adapted_; }
+    inline bare_adapted_type const& adapted() const { return adapted_; }
+
+  private:
+
+    Adapted adapted_;
 
   private:
 

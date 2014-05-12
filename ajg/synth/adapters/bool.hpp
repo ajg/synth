@@ -20,11 +20,11 @@ struct adapter<Behavior, bool>   : concrete_adapter<Behavior, bool> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    floating_type to_floating()  const { return this->adapted_ ? 1 : 0; }
-    boolean_type to_boolean() const { return this->adapted_; }
+    floating_type to_floating()  const { return this->adapted() ? 1 : 0; }
+    boolean_type to_boolean() const { return this->adapted(); }
 
-    void input (istream_type& in)        { in >> this->adapted_; }
-    void output(ostream_type& out) const { out << (this->adapted_ ? "True" : "False"); } // TODO: Configure via Traits.
+    void input (istream_type& in)        { in >> this->adapted(); }
+    void output(ostream_type& out) const { out << (this->adapted() ? "True" : "False"); } // TODO: Configure via Traits.
 };
 
 }} // namespace ajg::synth

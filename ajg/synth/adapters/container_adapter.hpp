@@ -16,16 +16,16 @@ struct container_adapter : concrete_adapter<Behavior, Adapted> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    boolean_type to_boolean() const { return !this->adapted_.empty(); }
+    boolean_type to_boolean() const { return !this->adapted().empty(); }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
 
     // TODO[c++11]: Use std::begin & std::end.
 
-    iterator begin() { return iterator(this->adapted_.begin()); }
-    iterator end()   { return iterator(this->adapted_.end()); }
+    iterator begin() { return iterator(this->adapted().begin()); }
+    iterator end()   { return iterator(this->adapted().end()); }
 
-    const_iterator begin() const { return const_iterator(this->adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(this->adapted_.end()); }
+    const_iterator begin() const { return const_iterator(this->adapted().begin()); }
+    const_iterator end()   const { return const_iterator(this->adapted().end()); }
 };
 
 }} // namespace ajg::synth

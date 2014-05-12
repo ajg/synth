@@ -24,10 +24,10 @@ struct adapter<Behavior, std::complex<T> >  : concrete_adapter<Behavior, std::co
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    floating_type to_floating() const { return static_cast<floating_type>(this->adapted_.real()); }
-    boolean_type to_boolean() const { return this->adapted_ != T(0); }
-    void input (istream_type& in)        { in >> this->adapted_; }
-    void output(ostream_type& out) const { out << this->adapted_; }
+    floating_type to_floating() const { return static_cast<floating_type>(this->adapted().real()); }
+    boolean_type to_boolean() const { return this->adapted() != T(0); }
+    void input (istream_type& in)        { in >> this->adapted(); }
+    void output(ostream_type& out) const { out << this->adapted(); }
 };
 
 }} // namespace ajg::synth

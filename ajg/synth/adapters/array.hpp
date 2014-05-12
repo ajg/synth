@@ -37,8 +37,8 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
-    const_iterator begin() const { return const_iterator(static_cast<T const*>(this->adapted_)); }
-    const_iterator end()   const { return const_iterator(static_cast<T const*>(this->adapted_) + N); }
+    const_iterator begin() const { return const_iterator(static_cast<T const*>(this->adapted())); }
+    const_iterator end()   const { return const_iterator(static_cast<T const*>(this->adapted()) + N); }
 };
 
 //
@@ -58,8 +58,8 @@ struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Beh
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
-    const_iterator begin() const { return this->adapted_ + 0; }
-    const_iterator end()   const { return this->adapted_ + this->length_; }
+    const_iterator begin() const { return this->adapted() + 0; }
+    const_iterator end()   const { return this->adapted() + this->length_; }
 
     std::type_info const& type() const { return typeid(T*); } // XXX: return typeid(T[]);
 

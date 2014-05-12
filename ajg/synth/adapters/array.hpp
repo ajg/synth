@@ -13,6 +13,7 @@ template <class T, std::size_t N> class array;
 }
 
 #include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/container_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -97,12 +98,8 @@ struct adapter<Behavior, T[]> : public base_adapter<Behavior> {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T, std::size_t N>
-struct adapter<Behavior, boost::array<T, N> > : public adapter<Behavior, T[N]> {
-    typedef T                  array_type[N];
-    typedef boost::array<T, N> adapted_type;
-
-    adapter(adapted_type const& adapted)
-        : adapter<Behavior, array_type>(*reinterpret_cast<const array_type*>(adapted.data())) {}
+struct adapter<Behavior, boost::array<T, N> >  : container_adapter<Behavior, boost::array<T, N> > {
+    adapter(boost::array<T, N> const& adapted) : container_adapter<Behavior, boost::array<T, N> >(adapted) {}
 };
 
 }} // namespace ajg::synth

@@ -22,6 +22,8 @@ struct container_adapter : concrete_adapter<Behavior, Adapted> {
     boolean_type to_boolean() const { return !this->adapted_.empty(); }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
 
+    // TODO[c++11]: Use std::begin & std::end.
+
     iterator begin() { return iterator(this->adapted_.begin()); }
     iterator end()   { return iterator(this->adapted_.end()); }
 

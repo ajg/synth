@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/container_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -17,32 +17,16 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class K, class V>
-struct adapter<Behavior, std::map<K, V> >
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, std::map<K, V> >  : container_adapter<Behavior, std::map<K, V> > {
+    adapter(std::map<K, V> const& adapted) : container_adapter<Behavior, std::map<K, V> >(adapted) {}
 
-    typedef K                     key_type;
-    typedef std::map<key_type, V> map_type;
-    AJG_SYNTH_ADAPTER(map_type)
-    adapted_type adapted_;
-
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
-
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
-
-    optional<value_type> index(value_type const& what) const {
-        key_type const key = behavior_type::template to<key_type>(what);
-        typename map_type::const_iterator const it = adapted_.find(key);
-        if (it == adapted_.end()) {
+    optional<typename Behavior::value_type> index(typename Behavior::value_type const& what) const {
+        K const key = Behavior::template to<K>(what);
+        typename std::map<K, V>::const_iterator const it = this->adapted_.find(key);
+        if (it == this->adapted_.end()) {
             return boost::none;
         }
-        return value_type(it->second);
+        return typename Behavior::value_type(it->second);
     }
 };
 
@@ -51,34 +35,9 @@ struct adapter<Behavior, std::map<K, V> >
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class K, class V>
-struct adapter<Behavior, std::multimap<K, V> >
-    : public base_adapter<Behavior> {
-
-    typedef std::multimap<K, V> map_type;
-    AJG_SYNTH_ADAPTER(map_type)
-    adapted_type adapted_;
-
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
-
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
-
-    /* TODO: Return a sequence or set of values, or the first one?
-    optional<value_type> index(value_type const& what) const {
-        key_type const key = behavior_type::template to<key_type>(what);
-        typename map_type::const_iterator it const = adapted_.find(key);
-        if (it == adapted_.end()) {
-            return boost::none;
-        }
-        return it->second;
-    }
-    */
+struct adapter<Behavior, std::multimap<K, V> >  : container_adapter<Behavior, std::multimap<K, V> > {
+    adapter(std::multimap<K, V> const& adapted) : container_adapter<Behavior, std::multimap<K, V> >(adapted) {}
+    // TODO: Implement index(), but returning a sequence or set of values, or the first one?
 };
 
 }} // namespace ajg::synth

@@ -66,8 +66,6 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Beh
     wrapped_adapter_type adapted_;
 };
 
-
-
 /*
 template <class Behavior, class T>
 struct adapter<Behavior, reference_wrapper<T> >
@@ -78,11 +76,8 @@ struct adapter<Behavior, reference_wrapper<T> >
     // adapter<Behavior, typename remove_const<T>::type> adapted_;
     // T const& adapted_;
 
-    bool   valid() const { return true; }
-    // T const& get() const { return adapted_; }
+    boolean_type valid() const { return true; }
 };*/
-
-
 
 }} // namespace ajg::synth
 

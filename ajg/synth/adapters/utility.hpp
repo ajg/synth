@@ -9,12 +9,5 @@
 
 #include <ajg/synth/adapters/pair.hpp>
 
-namespace ajg {
-namespace synth {
-
-// Nothing here for now.
-
-}} // namespace ajg::synth
-
 #endif // AJG_SYNTH_ADAPTERS_UTILITY_HPP_INCLUDED
 

@@ -60,10 +60,7 @@ struct forwarding_adapter : public base_adapter<Behavior> { // TODO: Use concret
         return static_cast<Derived const*>(this)->template forward<cref_type>();
     }
 
-    // inline T&       get()         { return static_cast<Derived const*>(this)->get(); }
-    // inline T const& get()   const { return static_cast<Derived const*>(this)->get(); }
-    inline bool     valid() const { return static_cast<Derived const*>(this)->valid(); }
-
+    inline boolean_type valid() const { return static_cast<Derived const*>(this)->valid(); }
 };
 
 }} // namespace ajg::synth

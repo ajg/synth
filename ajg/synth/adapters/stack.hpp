@@ -7,7 +7,7 @@
 
 #include <stack>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/container_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -17,22 +17,8 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::stack<T> >
-    : public base_adapter<Behavior> {
-
-    AJG_SYNTH_ADAPTER(std::stack<T>)
-    adapted_type adapted_;
-
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
-
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
+struct adapter<Behavior, std::stack<T> >  : container_adapter<Behavior, std::stack<T> > {
+    adapter(std::stack<T> const& adapted) : container_adapter<Behavior, std::stack<T> >(adapted) {}
 };
 
 }} // namespace ajg::synth

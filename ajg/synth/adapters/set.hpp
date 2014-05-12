@@ -7,7 +7,7 @@
 
 #include <set>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/container_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -17,23 +17,8 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::set<T> >
-    : public base_adapter<Behavior> {
-
-    typedef std::set<T> set_type;
-    AJG_SYNTH_ADAPTER(set_type)
-    adapted_type adapted_;
-
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
-
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
+struct adapter<Behavior, std::set<T> >  : container_adapter<Behavior, std::set<T> > {
+    adapter(std::set<T> const& adapted) : container_adapter<Behavior, std::set<T> >(adapted) {}
 };
 
 //
@@ -41,23 +26,8 @@ struct adapter<Behavior, std::set<T> >
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::multiset<T> >
-    : public base_adapter<Behavior> {
-
-    typedef std::multiset<T> set_type;
-    AJG_SYNTH_ADAPTER(set_type)
-    adapted_type adapted_;
-
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.empty(); }
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
-
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
+struct adapter<Behavior, std::multiset<T> >  : container_adapter<Behavior, std::multiset<T> > {
+    adapter(std::multiset<T> const& adapted) : container_adapter<Behavior, std::multiset<T> >(adapted) {}
 };
 
 }} // namespace ajg::synth

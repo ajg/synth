@@ -21,13 +21,11 @@ namespace synth {
 
 template <class Behavior, class T>
 struct adapter<Behavior, boost::shared_ptr<T> > : public forwarding_adapter<Behavior, T, boost::shared_ptr<T> > {
-
     adapter(boost::shared_ptr<T> const& adapted) : adapted_(adapted) {}
     boost::shared_ptr<T> adapted_;
 
     template <class A> A forward() const { return A(boost::cref(*adapted_)); }
-    // T&   get()   const { return *adapted_; }
-    bool valid() const { return bool(adapted_); }
+    typename Behavior::boolean_type valid() const { return adapted_; }
 };
 
 

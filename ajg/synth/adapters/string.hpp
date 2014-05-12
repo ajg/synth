@@ -20,9 +20,7 @@ template < class Behavior
          , class StringBehavior
          , class Allocator
          >
-struct adapter<Behavior, std::basic_string
-        <typename Behavior::char_type, StringBehavior, Allocator> >
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, std::basic_string<typename Behavior::char_type, StringBehavior, Allocator> > : base_adapter<Behavior> {
 
     typedef std::basic_string< typename Behavior::char_type
                              , StringBehavior

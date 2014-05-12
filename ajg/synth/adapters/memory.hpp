@@ -18,16 +18,12 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::auto_ptr<T> >
-    : public forwarding_adapter<Behavior, T, std::auto_ptr<T> > {
-
+struct adapter<Behavior, std::auto_ptr<T> > : forwarding_adapter<Behavior, T, std::auto_ptr<T> > {
     adapter(std::auto_ptr<T> const& adapted) : adapted_(adapted) {}
     std::auto_ptr<T> const& adapted_;
 
-
     template <class A> A forward() const { return A(boost::cref(*adapted_)); }
-    // T&   get()   const { return *adapted_; }
-    bool valid() const { return adapted_.get() != 0; }
+    typename Behavior::boolean_type valid() const { return adapted_.get() != 0; }
 };
 
 }} // namespace ajg::synth

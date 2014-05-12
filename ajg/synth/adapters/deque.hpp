@@ -17,11 +17,8 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::deque<T> > : container_adapter<Behavior, std::deque<T> > {
-  public:
-
-    AJG_SYNTH_ADAPTER_TYPEDEFS(std::deque<T>);
-    adapter(adapted_type const& adapted) : container_adapter<Behavior, std::deque<T> >(adapted) {}
+struct adapter<Behavior, std::deque<T> >  : container_adapter<Behavior, std::deque<T> > {
+    adapter(std::deque<T> const& adapted) : container_adapter<Behavior, std::deque<T> >(adapted) {}
 };
 
 }} // namespace ajg::synth

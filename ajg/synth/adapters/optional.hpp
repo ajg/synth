@@ -18,14 +18,11 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, optional<T> >
-    : public forwarding_adapter<Behavior, T, optional<T> > {
+struct adapter<Behavior, boost::optional<T> > : forwarding_adapter<Behavior, T, boost::optional<T> > {
+    adapter(boost::optional<T> const& adapted) : adapted_(adapted) {}
+    boost::optional<T> adapted_;
 
-    adapter(optional<T> const& adapted) : adapted_(adapted) {}
-    optional<T> adapted_;
-
-    bool   valid() const { return adapted_; }
-    // T const& get() const { return *adapted_; }
+    typename Behavior::boolean_type valid() const { return adapted_; }
     template <class A> A forward() const { return A(boost::ref(*adapted_)); }
 };
 

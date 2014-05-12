@@ -16,9 +16,7 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, T*>
-    : public forwarding_adapter<Behavior, T, T*> {
-
+struct adapter<Behavior, T*> : public forwarding_adapter<Behavior, T, T*> {
     adapter(T* adapted) : adapted_(adapted) {}
     T* adapted_;
 
@@ -26,10 +24,8 @@ struct adapter<Behavior, T*>
  //     return adapted_ ? Adapter(boost::ref(*adapted_)) : boost::none;
  // }
 
-
     template <class A> A forward() const { return A(boost::ref(*adapted_)); }
-    // T const& get() const { return *adapted_; }
-    bool valid() const { return adapted_ != 0; }
+    typename Behavior::boolean_type valid() const { return adapted_ != 0; }
 };
 
 }} // namespace ajg::synth

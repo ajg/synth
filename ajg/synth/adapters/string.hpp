@@ -23,7 +23,7 @@ template < class Behavior
 struct adapter<Behavior, std::basic_string<typename Behavior::char_type, Traits, Allocator> >  : container_adapter<Behavior, std::basic_string<typename Behavior::char_type, Traits, Allocator> > {
     adapter(std::basic_string<typename Behavior::char_type, Traits, Allocator> const& adapted) : container_adapter<Behavior, std::basic_string<typename Behavior::char_type, Traits, Allocator> >(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(std::basic_string<typename Behavior::char_type, Traits, Allocator>);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     floating_type to_floating() const { return behavior_type::to_floating(this->adapted_); }
 

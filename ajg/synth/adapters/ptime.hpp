@@ -20,7 +20,7 @@ template <class Behavior>
 struct adapter<Behavior, boost::posix_time::ptime>   : concrete_adapter<Behavior, boost::posix_time::ptime> {
     adapter(boost::posix_time::ptime const& adapted) : concrete_adapter<Behavior, boost::posix_time::ptime>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::posix_time::ptime);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     boolean_type  to_boolean()  const { return !this->adapted_.is_not_a_date_time(); }
     datetime_type to_datetime() const { return traits_type::to_datetime(this->adapted_); }

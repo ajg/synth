@@ -12,12 +12,9 @@ namespace synth {
 
 template <class Behavior, class Adapted>
 struct container_adapter : concrete_adapter<Behavior, Adapted> {
-  protected:
+    container_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
-    container_adapter(adapted_type const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
-
-  public:
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     boolean_type to_boolean() const { return !this->adapted_.empty(); }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }

@@ -14,7 +14,7 @@ template <class Behavior, class T, class Adapted, class Sub = adapter<Behavior, 
 struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Sub?*/> {
     forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     const_iterator begin() const { return valid() ? forward().begin() : const_iterator(); }
     const_iterator end()   const { return valid() ? forward().end()   : const_iterator(); }

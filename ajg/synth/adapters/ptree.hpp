@@ -24,7 +24,7 @@ template <class Behavior, class K, class V>
 struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> > {
     adapter(boost::property_tree::basic_ptree<K, V> const& adapted) : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> >(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::property_tree::basic_ptree<K, V>);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     boolean_type to_boolean() const {
         if (this->adapted_.empty()) {

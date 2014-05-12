@@ -23,7 +23,7 @@ template <class Behavior, class First, class Second>
 struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior, std::pair<First, Second> > {
     adapter(std::pair<First, Second> const& adapted) : concrete_adapter<Behavior, std::pair<First, Second> >(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(std::pair<First, Second>);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     void output(ostream_type& out) const { out << this->adapted_.first << ": " << this->adapted_.second; }
 

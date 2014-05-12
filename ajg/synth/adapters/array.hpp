@@ -33,8 +33,7 @@ template <class Behavior, class T, std::size_t N>
 struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adapter<Behavior, T[N]> > {
     adapter(T const (&adapted)[N]) : concrete_adapter<Behavior, T const (&)[N], adapter<Behavior, T[N]> >(adapted) {}
 
-    typedef T delete_this_type[N];
-    AJG_SYNTH_ADAPTER_TYPEDEFS(delete_this_type);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     floating_type to_floating()  const { return N; }
     boolean_type to_boolean() const { return N != 0; }
@@ -53,7 +52,7 @@ template <class Behavior, class T>
 struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Behavior, T[]> > {
     adapter(T* const adapted, std::size_t const length) : concrete_adapter<Behavior, T* const, adapter<Behavior, T[]> >(adapted), length_(length) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(T* const);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     floating_type to_floating()  const { return this->length_; }
     boolean_type  to_boolean() const { return this->length_ != 0; }

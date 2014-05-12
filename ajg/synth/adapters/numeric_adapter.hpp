@@ -25,7 +25,7 @@ template <class Behavior, class Adapted>
 struct numeric_adapter : concrete_adapter<Behavior, Adapted> {
     numeric_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     boolean_type  is_numeric()  const { return true; }
     floating_type to_floating() const { return static_cast<floating_type>(this->adapted_); }

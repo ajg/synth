@@ -14,10 +14,9 @@ namespace synth {
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_ADAPTER_TYPEDEFS(...) \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(behavior) \
   public: \
-    typedef __VA_ARGS__                             adapted_type; \
-    typedef Behavior                                behavior_type; \
+    typedef behavior                                behavior_type; \
     typedef typename behavior_type::value_type      value_type; \
     typedef typename behavior_type::traits_type     traits_type; \
     typedef typename behavior_type::adapter_type    adapter_type; \

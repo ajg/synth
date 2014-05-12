@@ -39,7 +39,7 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> 
     template <class U, class V>
     adapter(boost::reference_wrapper<T> const& adapted, const U& u, const V& v) : adapted_(adapted, u, v) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
   protected:
 

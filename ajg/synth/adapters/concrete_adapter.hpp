@@ -15,7 +15,8 @@ template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Sub =
 struct concrete_adapter : base_adapter<Behavior> {
     concrete_adapter(Adapted const& adapted) : adapted_(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    typedef Adapted adapted_type;
 
   public:
 

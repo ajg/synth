@@ -21,7 +21,7 @@ struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > :
 concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > {
     adapter(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& adapted) : concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     // FIXME: These should be forwarded to the real value.
     // boolean_type equal(adapter_type const& that) const { return this->template is_equal_as<adapter>(that); }

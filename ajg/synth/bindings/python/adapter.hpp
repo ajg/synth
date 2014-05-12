@@ -27,17 +27,9 @@ using bindings::python::get_datetime;
 
 template <class Behavior>
 struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
-  public:
+    adapter(py::object const& adapted) : concrete_adapter<Behavior, py::object>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(py::object);
-    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, py::object>(adapted) {}
-
-  private:
-
-    typedef typename py::stl_input_iterator<py::object>                         stl_iterator_type;
-    typedef detail::text<string_type>                                           text;
-
-  public:
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
     virtual boolean_type to_boolean() const { return boolean_type(this->adapted_); }
     virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted_); }
@@ -96,6 +88,11 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
 
         return boost::none;
     }
+
+  private:
+
+    typedef typename py::stl_input_iterator<py::object>                         stl_iterator_type;
+    typedef detail::text<string_type>                                           text;
 
   private:
 

@@ -94,7 +94,7 @@ struct value_behavior {
         else if (value.is_numeric()) return T(value.to_floating());
         else if (value.is_string())  return T(value.to_string());
         // TODO: Sequences, mappings, etc.
-        else AJG_SYNTH_THROW(not_implemented("value_traits::to"));
+        else AJG_SYNTH_THROW(not_implemented("value_traits::to_"));
     }
 
     // Extremely crude implementation for the general case:

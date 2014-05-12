@@ -13,8 +13,8 @@ namespace ajg {
 namespace synth {
 
 template <class Behavior, class T, class Adapted, class Specialized = adapter<Behavior, Adapted> >
-struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Specialized?*/> {
-    forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
+struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
+    forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted, Specialized>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 

@@ -18,9 +18,10 @@ namespace synth {
   public: \
     typedef Adapted                                 adapted_type; \
     typedef Behavior                                behavior_type; \
-    typedef base_adapter<behavior_type>             base_type; \
+    /*typedef base_adapter<behavior_type>           base_type; */ \
     typedef typename behavior_type::value_type      value_type; \
     typedef typename behavior_type::traits_type     traits_type; \
+    typedef typename behavior_type::adapter_type    adapter_type; \
     \
     typedef typename traits_type::boolean_type      boolean_type; \
     typedef typename traits_type::char_type         char_type; \
@@ -43,8 +44,8 @@ namespace synth {
     AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted); \
     friend struct base_adapter<behavior_type>; \
   protected: \
-    virtual boolean_type equal_adapted(base_type const& that) const { return this->template equal_as<adapter>(that); } \
-    virtual boolean_type less_adapted(base_type const& that) const { return this->template less_as<adapter>(that); } \
+    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<adapter>(that); } \
+    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<adapter>(that); } \
   public: \
     adapter(adapted_type const& adapted) : adapted_(adapted) {} \
     std::type_info const& type() const { return typeid(Adapted); }

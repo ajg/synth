@@ -11,7 +11,7 @@ namespace ajg {
 namespace synth {
 
 template <class Behavior, class T, class Adapted, class Derived = adapter<Behavior, Adapted> >
-struct forwarding_adapter : public base_adapter<Behavior> {
+struct forwarding_adapter : public base_adapter<Behavior> { // TODO: Use concrete_adapter?
   public:
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
@@ -23,11 +23,11 @@ struct forwarding_adapter : public base_adapter<Behavior> {
 
   protected:
 
-    virtual boolean_type equal_adapted(base_type const& that) const {
+    virtual boolean_type equal_adapted(adapter_type const& that) const {
         return forward().template equal_as<adapter<Behavior, T> >(that);
     }
 
-    virtual boolean_type less_adapted(base_type const& that) const {
+    virtual boolean_type less_adapted(adapter_type const& that) const {
         return forward().template less_as<adapter<Behavior, T> >(that);
     }
 
@@ -39,7 +39,7 @@ struct forwarding_adapter : public base_adapter<Behavior> {
     floating_type to_floating()  const { return valid() ? forward().to_floating()  : floating_type(0); }
     boolean_type  to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(false); }
 
-    boolean_type equal(base_type const& that) const {
+    boolean_type equal(adapter_type const& that) const {
         return valid() ? forward().equal(that) : boolean_type(false);
     }
 

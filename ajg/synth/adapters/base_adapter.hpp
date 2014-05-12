@@ -39,6 +39,7 @@ struct base_adapter {
     typedef base_adapter                                                        base_type;
     typedef typename behavior_type::traits_type                                 traits_type;
     typedef typename behavior_type::value_type                                  value_type;
+    typedef typename behavior_type::adapter_type                                adapter_type;
 
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -101,20 +102,20 @@ struct base_adapter {
 
   protected:
 
-    virtual boolean_type equal_adapted(base_type const& that) const = 0;
-    virtual boolean_type less_adapted (base_type const& that) const = 0;
+    virtual boolean_type equal_adapted(adapter_type const& that) const = 0;
+    virtual boolean_type less_adapted (adapter_type const& that) const = 0;
 
     template <class Adapter>
-    inline boolean_type equal_as(base_type const& that) const {
+    inline boolean_type equal_as(adapter_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
-        Adapter const* const that_ = that.template get<Adapter>();
+        Adapter const* const that_ = that->template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::equal_to<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 
     template <class Adapter>
-    inline boolean_type less_as(base_type const& that) const {
+    inline boolean_type less_as(adapter_type const& that) const {
         Adapter const* const this_ = this->template get<Adapter>();
-        Adapter const* const that_ = that.template get<Adapter>();
+        Adapter const* const that_ = that->template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::less<typename Adapter::adapted_type>()(this_->adapted_, that_->adapted_);
     }
 };

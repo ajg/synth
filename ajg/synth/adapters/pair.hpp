@@ -31,7 +31,7 @@ struct adapter<Behavior, std::pair<First, Second> >
 
     boolean_type to_boolean() const { return true; }
     void output(ostream_type& out) const { out << this->adapted_.first << ": " << this->adapted_.second; }
-    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
+    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_pair_iterator(adapted_, first); }
     const_iterator end()   const { return const_pair_iterator(adapted_, past); }

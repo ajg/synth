@@ -15,6 +15,7 @@
 #include <utility>
 
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <ajg/synth/adapters/base_adapter.hpp>
@@ -49,7 +50,7 @@ struct value_behavior {
     typedef std::vector<value_type>                                             sequence_type;
     typedef std::map<string_type, value_type>                                   mapping_type;
 
- // typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type;
+    typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type;
 
   public:
 

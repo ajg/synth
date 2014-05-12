@@ -39,7 +39,7 @@ struct value_facade {
     typedef Traits                                                              traits_type;
     typedef Value<traits_type>                                                  value_type;
     typedef value_behavior<traits_type, Value>                                  behavior_type;
-    typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type;
+    typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type; // TODO: Use behavior_type's.
 
     typedef typename traits_type::none_type                                     none_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -89,8 +89,8 @@ struct value_facade {
 
     // TODO: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves or using adapter().as<...> != 0
     inline boolean_type typed_like (value_type const& that) const { return this->type() == that.type(); }
-    inline boolean_type typed_equal(value_type const& that) const { return this->adapter()->equal_adapted(*that.adapter()); }
-    inline boolean_type typed_less (value_type const& that) const { return this->adapter()->less_adapted(*that.adapter()); }
+    inline boolean_type typed_equal(value_type const& that) const { return this->adapter()->equal_adapted(that.adapter()); }
+    inline boolean_type typed_less (value_type const& that) const { return this->adapter()->less_adapted(that.adapter()); }
     template <class T>
     inline T const& typed_as() const { return this->adapter()->template get_adapted<T>(); }
 

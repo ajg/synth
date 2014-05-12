@@ -33,7 +33,7 @@ struct adapter<Behavior, T[N]>
     floating_type to_floating()  const { return N; }
     boolean_type to_boolean() const { return N != 0; }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
+    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return const_iterator(pointer<0>()); }
     const_iterator end()   const { return const_iterator(pointer<N>()); }
@@ -67,11 +67,11 @@ struct adapter<Behavior, T[]> : public base_adapter<Behavior> {
 
   protected:
 
-    virtual boolean_type equal_adapted(base_type const& that) const {
+    virtual boolean_type equal_adapted(adapter_type const& that) const {
         return this->template equal_as<adapter>(that);
     }
 
-    virtual boolean_type less_adapted(base_type const& that) const {
+    virtual boolean_type less_adapted(adapter_type const& that) const {
         return this->template less_as<adapter>(that);
     }
 
@@ -85,7 +85,7 @@ struct adapter<Behavior, T[]> : public base_adapter<Behavior> {
     floating_type to_floating()  const { return length_; }
     boolean_type to_boolean() const { return length_ != 0; }
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-    boolean_type equal(base_type const& that) const { return this->equal_sequence(that); }
+    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
     const_iterator begin() const { return adapted_ + 0; }
     const_iterator end()   const { return adapted_ + length_; }

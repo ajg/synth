@@ -42,17 +42,17 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Beh
 
     typedef adapter<Behavior, typename boost::remove_const<T>::type> wrapped_adapter_type;
 
-    virtual boolean_type equal_adapted(base_type const& that) const {
+    virtual boolean_type equal_adapted(adapter_type const& that) const {
         return adapted_.template equal_as<wrapped_adapter_type>(that);
     }
 
-    virtual boolean_type less_adapted(base_type const& that) const {
+    virtual boolean_type less_adapted(adapter_type const& that) const {
         return adapted_.template less_as<wrapped_adapter_type>(that);
     }
 
   public:
 
-    boolean_type equal(base_type const& that) const { return adapted_.equal(that); }
+    boolean_type equal(adapter_type const& that) const { return adapted_.equal(that); }
     boolean_type to_boolean() const { return adapted_.to_boolean(); }
     floating_type to_floating()  const { return adapted_.to_floating(); }
     // integer_type to_integer() const { return adapted_.to_integer(); }

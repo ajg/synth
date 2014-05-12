@@ -29,12 +29,12 @@ struct concrete_adapter : base_adapter<Behavior> {
 
   protected:
 
-    virtual boolean_type equal_adapted(base_type const& that) const { return this->template equal_as<concrete_adapter>(that); }
-    virtual boolean_type less_adapted(base_type const& that) const { return this->template less_as<concrete_adapter>(that); }
+    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<concrete_adapter>(that); }
+    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<concrete_adapter>(that); }
 
   protected:
 
-    adapted_type adapted_;
+    adapted_type adapted_; // TODO: Expose an accessor adapted() instead.
 };
 
 }} // namespace ajg::synth

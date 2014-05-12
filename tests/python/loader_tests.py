@@ -25,12 +25,12 @@ def library_loader(name):
     elif name == 'test_tags':
         return Library(tags={
             # niladic ('simple') tags:
-            'ackermann':      ackermann,      # nullary
+            'answer_to_life': answer_to_life, # nullary
             'identity':       identity,       # unary
-            'answer_to_life': answer_to_life, # binary
+            'ackermann':      ackermann,      # binary
             'add':            add,            # n-ary
             # polyadic tags:
-            # 'rot13':        rot13,          # monadic
+            'rot13':          rot13,          # monadic
             # '?':            ?,              # dyadic
             # 'sizable':      sizable,        # triadic
             # 'unless':       unless,         # variadic (monadic or dyadic)
@@ -62,6 +62,8 @@ def ackermann(m, n):
 def add(*args):
     return sum(args)
 
+def rot13():
+    return token
 
 
 context = {'motto': 'May the Force be with you.'}

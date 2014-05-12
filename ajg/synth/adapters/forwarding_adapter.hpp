@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ADAPTERS_FORWARDING_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_FORWARDING_ADAPTER_HPP_INCLUDED
 
+#include <boost/type_traits/remove_reference.hpp>
+
 #include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {

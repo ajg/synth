@@ -22,12 +22,9 @@ namespace synth {
 // specialization for native arrays of statically known size
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Note: A reference is stored and not a copy because:
-// a) To store a copy it'd have to be initialized element by element.
-// b) It is difficult to envision a situation with a temporary (rvalue) native array.
-//    UPDATE: Actually, it is not so difficult.
-//      TODO: Consider making this a copy after all.
-// c) The Boost.Array specialization makes use of that fact.
+// NOTE: A reference is stored and not a copy because initializing an array within a constructor's
+//       initializer list ranges from difficult to impossible in C++03.
+// TODO[c++11]: Store array by value.
 
 template <class Behavior, class T, std::size_t N>
 struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adapter<Behavior, T[N]> > {

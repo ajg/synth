@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ADAPTERS_CONCRETE_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_CONCRETE_ADAPTER_HPP_INCLUDED
 
+#include <boost/type_traits/remove_reference.hpp>
+
 #include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
 
@@ -13,10 +15,10 @@ namespace synth {
 
 template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Sub = adapter<Behavior, Adapted> >
 struct concrete_adapter : base_adapter<Behavior> {
-    concrete_adapter(Adapted const& adapted) : adapted_(adapted) {}
+    concrete_adapter(typename boost::remove_reference<Adapted>::type const& adapted) : adapted_(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-    typedef Adapted adapted_type;
+    typedef typename boost::remove_reference<Adapted>::type adapted_type;
 
   public:
 
@@ -29,7 +31,7 @@ struct concrete_adapter : base_adapter<Behavior> {
 
   protected:
 
-    adapted_type adapted_; // TODO: Expose an accessor adapted() instead.
+    Adapted adapted_; // TODO: Expose an accessor adapted() instead.
 
   private:
 

@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include <boost/io/ios_state.hpp>
+#include <boost/type_traits/is_integral.hpp>
 
 #include <ajg/synth/detail/is_integer.hpp>
 #include <ajg/synth/adapters/concrete_adapter.hpp>

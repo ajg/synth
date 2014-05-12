@@ -6,9 +6,8 @@
 #define AJG_SYNTH_ADAPTERS_COMPLEX_HPP_INCLUDED
 
 #include <complex>
-#include <functional>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -20,17 +19,16 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::complex<T> > : public base_adapter<Behavior> {
-
-    AJG_SYNTH_ADAPTER(std::complex<T>)
-    adapted_type adapted_;
-
+struct adapter<Behavior, std::complex<T> > : concrete_adapter<Behavior, std::complex<T> > {
   public:
 
-    floating_type to_floating() const { return static_cast<floating_type>(adapted_.real()); }
-    boolean_type to_boolean() const { return adapted_ != T(0); }
-    void input (istream_type& in)        { in >> adapted_; }
-    void output(ostream_type& out) const { out << adapted_; }
+    AJG_SYNTH_ADAPTER_TYPEDEFS(std::complex<T>);
+    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, std::complex<T> >(adapted) {}
+
+    floating_type to_floating() const { return static_cast<floating_type>(this->adapted_.real()); }
+    boolean_type to_boolean() const { return this->adapted_ != T(0); }
+    void input (istream_type& in)        { in >> this->adapted_; }
+    void output(ostream_type& out) const { out << this->adapted_; }
 };
 
 }} // namespace ajg::synth

@@ -7,7 +7,6 @@
 
 #include <boost/optional/optional_fwd.hpp>
 
-#include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
@@ -19,11 +18,9 @@ namespace synth {
 
 template <class Behavior, class T>
 struct adapter<Behavior, boost::optional<T> > : forwarding_adapter<Behavior, T, boost::optional<T> > {
-    adapter(boost::optional<T> const& adapted) : adapted_(adapted) {}
-    boost::optional<T> adapted_;
-
-    typename Behavior::boolean_type valid() const { return adapted_; }
-    template <class A> A forward() const { return A(boost::ref(*adapted_)); }
+    adapter(boost::optional<T> const& adapted) : forwarding_adapter<Behavior, T, boost::optional<T> >(adapted) {}
+    typename Behavior::boolean_type valid() const { return this->adapted_; }
+    template <class A> A forward() const { return A(boost::ref(*this->adapted_)); }
 };
 
 }} // namespace ajg::synth

@@ -21,7 +21,7 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class K, class V>
-struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> > : public base_adapter<Behavior> {
+struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> > : base_adapter<Behavior> {
 
     typedef K                                              key_type;
     typedef boost::property_tree::basic_ptree<key_type, V> ptree_type;

@@ -17,27 +17,24 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, BOOST_VARIANT_ENUM_PARAMS(class T)>
-struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
-    : public base_adapter<Behavior> {
-
-    typedef boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> variant_type;
-    AJG_SYNTH_ADAPTER(variant_type)
-    adapted_type adapted_;
+struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > :
+concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > {
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>);
 
   public:
 
+    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >(adapted) {}
+
     // FIXME: These should be forwarded to the real value.
     // boolean_type equal(adapter_type const& that) const { return this->template is_equal_as<adapter>(that); }
-    floating_type to_floating()  const { return adapted_.which(); }
-    boolean_type to_boolean() const { return true; }
+    floating_type to_floating() const { return this->adapted_.which(); }
+    boolean_type  to_boolean()  const { return true; }
 
-
-    // TODO: These rely on T0 ... TN all having these operators available,
-    //       which obviously isn't the general case. So it might be better
-    //       to switch to using one of our own individual adapters for
-    //       this purpose (probably through a static_visitor.)
-    void input (istream_type& in)        { AJG_SYNTH_THROW(not_implemented("input")); } // in >> adapted_; }
-    void output(ostream_type& out) const { out << adapted_; }
+    // TODO: These rely on T0 ... TN all having these operators available, which obviously isn't the
+    //       general case. So it might be better to switch to using one of our own individual
+    //       adapters for this purpose (probably through a static_visitor.)
+    void input (istream_type& in)        { AJG_SYNTH_THROW(not_implemented("input")); } // in >> this->adapted_; }
+    void output(ostream_type& out) const { out << this->adapted_; }
 };
 
 }} // namespace ajg::synth

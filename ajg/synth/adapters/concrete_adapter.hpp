@@ -11,7 +11,7 @@
 namespace ajg {
 namespace synth {
 
-template <class Behavior, class Adapted>
+template <class Behavior, class Adapted, class X = adapter<Behavior, Adapted> >
 struct concrete_adapter : base_adapter<Behavior> {
   public:
 
@@ -29,8 +29,8 @@ struct concrete_adapter : base_adapter<Behavior> {
 
   protected:
 
-    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<concrete_adapter>(that); }
-    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<concrete_adapter>(that); }
+    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<X/*concrete_adapter*/>(that); }
+    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<X/*concrete_adapter*/>(that); }
 
   protected:
 

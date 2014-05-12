@@ -16,16 +16,14 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, T*> : public forwarding_adapter<Behavior, T, T*> {
-    adapter(T* adapted) : adapted_(adapted) {}
-    T* adapted_;
+struct adapter<Behavior, T*>  : forwarding_adapter<Behavior, T, T*> {
+    adapter(T* const adapted) : forwarding_adapter<Behavior, T, T*>(adapted) {}
+    template <class A> A forward() const { return A(boost::ref(*this->adapted_)); }
+    typename Behavior::boolean_type valid() const { return this->adapted_ != 0; }
 
  // template <class Adapter> optional<Adapter> forward() const {
- //     return adapted_ ? Adapter(boost::ref(*adapted_)) : boost::none;
+ //     return this->adapted_ ? Adapter(boost::ref(*adapted_)) : boost::none;
  // }
-
-    template <class A> A forward() const { return A(boost::ref(*adapted_)); }
-    typename Behavior::boolean_type valid() const { return adapted_ != 0; }
 };
 
 }} // namespace ajg::synth

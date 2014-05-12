@@ -18,17 +18,22 @@ namespace synth {
 // specialization for boost::reference_wrapper
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 template <class Behavior, class T>
-struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Behavior> {
-  public:
+struct adapter<Behavior, boost::reference_wrapper<T> >  : forwarding_adapter<Behavior, T, boost::reference_wrapper<T> > {
+    adapter(boost::reference_wrapper<T> const& adapted) : forwarding_adapter<Behavior, T, boost::reference_wrapper<T> >(adapted) {}
+    template <class A> A forward() const { ? }
+    boolean_type valid() const { return true; }
+};
+*/
 
-    // AJG_SYNTH_ADAPTER(boost::reference_wrapper<T>)
+template <class Behavior, class T>
+struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> {
+  public:
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>);
 
   public:
-
-    // /*const*/ adapted_type adapted_;
 
     adapter(adapted_type const& adapted) : adapted_(adapted) {}
 
@@ -65,19 +70,6 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : public base_adapter<Beh
 
     wrapped_adapter_type adapted_;
 };
-
-/*
-template <class Behavior, class T>
-struct adapter<Behavior, reference_wrapper<T> >
-    : public forwarding_adapter<Behavior, T, reference_wrapper<T> > {
-
-    adapter(reference_wrapper<T const> const& adapted) : adapted_(adapted) {}
-    adapter<Behavior, T> adapted_;
-    // adapter<Behavior, typename remove_const<T>::type> adapted_;
-    // T const& adapted_;
-
-    boolean_type valid() const { return true; }
-};*/
 
 }} // namespace ajg::synth
 

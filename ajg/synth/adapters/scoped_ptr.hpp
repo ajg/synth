@@ -5,6 +5,7 @@
 #ifndef AJG_SYNTH_ADAPTERS_SCOPED_PTR_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_SCOPED_PTR_HPP_INCLUDED
 
+// #include <ajg/synth/adapters/pointer.hpp>
 #include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/adapters/forwarding_adapter.hpp>
 
@@ -19,15 +20,19 @@ namespace synth {
 // specialization for boost::scoped_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, boost::scoped_ptr<T> > : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> > {
-    adapter(boost::scoped_ptr<T> const& adapted) : adapted_(adapted) {}
-    boost::scoped_ptr<T> const& adapted_;
-
-    template <class A> A forward() const { return A(boost::cref(*adapted_)); }
-    typename Behavior::boolean_type valid() const { return adapted_.get() != 0; }
+template <class Behavior, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
+struct adapter<Behavior, boost::scoped_ptr<T> >  : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > > {
+    adapter(boost::scoped_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > >(&adapted) {}
+    template <class A> A forward() const { return A(boost::cref(*this->adapted_->get())); }
+    typename Behavior::boolean_type valid() const { return this->adapted_->get() != 0; }
 };
 
+/*
+template <class Behavior, class T>
+struct adapter<Behavior, boost::scoped_ptr<T> > : adapter<Behavior, T*> {
+    adapter(boost::scoped_ptr<T> const& adapted) : adapter<Behavior, T*>(adapted.get()) {}
+};
+*/
 
 }} // namespace ajg::synth
 

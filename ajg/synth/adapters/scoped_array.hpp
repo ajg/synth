@@ -22,10 +22,8 @@ namespace synth {
 
 template <class Behavior, class T>
 struct adapter<Behavior, boost::scoped_array<T> > : adapter<Behavior, T[]> {
-    adapter(boost::scoped_array<T> const& adapted, size_t const length)
-        : adapter<Behavior, T[]>(adapted.get(), length) {}
+    adapter(boost::scoped_array<T> const& adapted, std::size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
-
 
 }} // namespace ajg::synth
 

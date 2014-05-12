@@ -10,7 +10,7 @@
 #include <boost/variant.hpp>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -20,25 +20,23 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class First, class Second>
-struct adapter<Behavior, std::pair<First, Second> >
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior, std::pair<First, Second> > {
+    adapter(std::pair<First, Second> const& adapted) : concrete_adapter<Behavior, std::pair<First, Second> >(adapted) {}
 
-    typedef std::pair<First, Second> pair_type;
-    typedef boost::variant<First, Second> variant_type;
-    AJG_SYNTH_ADAPTER(pair_type)
+    AJG_SYNTH_ADAPTER_TYPEDEFS(std::pair<First, Second>);
 
-  public:
+    void output(ostream_type& out) const { out << this->adapted_.first << ": " << this->adapted_.second; }
 
     boolean_type to_boolean() const { return true; }
-    void output(ostream_type& out) const { out << this->adapted_.first << ": " << this->adapted_.second; }
     boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
-    const_iterator begin() const { return const_pair_iterator(adapted_, first); }
-    const_iterator end()   const { return const_pair_iterator(adapted_, past); }
-
-    adapted_type adapted_;
+    const_iterator begin() const { return const_pair_iterator(this->adapted_, first); }
+    const_iterator end()   const { return const_pair_iterator(this->adapted_, past); }
 
   private:
+
+    typedef std::pair<First, Second>        pair_type;
+    typedef boost::variant<First, Second>   variant_type;
 
     enum position { first, second, past };
 

@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include <ajg/synth/adapters/adapter.hpp>
 #include <ajg/synth/adapters/forwarding_adapter.hpp>
 
 namespace ajg {
@@ -20,6 +19,7 @@ namespace synth {
 template <class Behavior, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
 struct adapter<Behavior, std::auto_ptr<T> >  : forwarding_adapter<Behavior, T, std::auto_ptr<T> const*, adapter<Behavior, std::auto_ptr<T> > > {
     adapter(std::auto_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, std::auto_ptr<T> const*, adapter<Behavior, std::auto_ptr<T> > >(&adapted) {}
+
     template <class A> A forward() const { return A(boost::cref(*this->adapted_->get())); }
     typename Behavior::boolean_type valid() const { return this->adapted_->get() != 0; }
 };

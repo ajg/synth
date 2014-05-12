@@ -15,11 +15,10 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior>
-struct adapter<Behavior, bool> : concrete_adapter<Behavior, bool> {
-  public:
+struct adapter<Behavior, bool>   : concrete_adapter<Behavior, bool> {
+    adapter(bool const& adapted) : concrete_adapter<Behavior, bool>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(bool);
-    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, bool>(adapted) {}
 
     floating_type to_floating()  const { return this->adapted_ ? 1 : 0; }
     boolean_type to_boolean() const { return this->adapted_; }

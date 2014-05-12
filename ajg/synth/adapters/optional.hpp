@@ -19,6 +19,7 @@ namespace synth {
 template <class Behavior, class T>
 struct adapter<Behavior, boost::optional<T> > : forwarding_adapter<Behavior, T, boost::optional<T> > {
     adapter(boost::optional<T> const& adapted) : forwarding_adapter<Behavior, T, boost::optional<T> >(adapted) {}
+
     typename Behavior::boolean_type valid() const { return this->adapted_; }
     template <class A> A forward() const { return A(boost::ref(*this->adapted_)); }
 };

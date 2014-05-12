@@ -21,8 +21,8 @@ namespace synth {
 
 #define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type) \
     template <class Behavior> \
-    struct adapter<Behavior, type> : public numeric_adapter<Behavior, type> { \
-        adapter(type const value) : numeric_adapter<Behavior, type>(value) {} \
+    struct adapter<Behavior, type> : numeric_adapter<Behavior, type> { \
+        adapter(type const value)  : numeric_adapter<Behavior, type>(value) {} \
     } \
 
 //

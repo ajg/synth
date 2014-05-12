@@ -19,11 +19,10 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class T>
-struct adapter<Behavior, std::complex<T> > : concrete_adapter<Behavior, std::complex<T> > {
-  public:
+struct adapter<Behavior, std::complex<T> >  : concrete_adapter<Behavior, std::complex<T> > {
+    adapter(std::complex<T> const& adapted) : concrete_adapter<Behavior, std::complex<T> >(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(std::complex<T>);
-    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, std::complex<T> >(adapted) {}
 
     floating_type to_floating() const { return static_cast<floating_type>(this->adapted_.real()); }
     boolean_type to_boolean() const { return this->adapted_ != T(0); }

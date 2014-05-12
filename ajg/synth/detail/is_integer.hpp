@@ -5,6 +5,11 @@
 #ifndef AJG_SYNTH_DETAIL_IS_INTEGER_HPP_INCLUDED
 #define AJG_SYNTH_DETAIL_IS_INTEGER_HPP_INCLUDED
 
+#include <cmath>
+
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_integral.hpp>
+
 namespace ajg {
 namespace synth {
 namespace detail {
@@ -14,10 +19,13 @@ namespace detail {
 //     Determines whether a floating-point number is an integer.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class FloatingPoint>
-inline bool is_integer(FloatingPoint const& fp) {
-    FloatingPoint integer_part;
-    return (std::modf)(fp, &integer_part) == FloatingPoint(0.0);
+template <class T>
+inline typename boost::enable_if<boost::is_integral<T>, bool>::type is_integer(T const) { return true; }
+
+template <class T>
+inline typename boost::disable_if<boost::is_integral<T>, bool>::type is_integer(T const t) {
+    T integral_part;
+    return (std::modf)(t, &integral_part) == static_cast<T>(0.0);
 }
 
 }}} // namespace ajg::synth::detail

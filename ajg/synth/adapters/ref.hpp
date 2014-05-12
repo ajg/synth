@@ -28,20 +28,18 @@ struct adapter<Behavior, boost::reference_wrapper<T> >  : forwarding_adapter<Beh
 */
 
 template <class Behavior, class T>
-struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> {
+struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> { // TODO: Use concrete_adapter.
   public:
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>);
-
-  public:
-
-    adapter(adapted_type const& adapted) : adapted_(adapted) {}
+    adapter(boost::reference_wrapper<T> const& adapted) : adapted_(adapted) {}
 
     template <class U>
-    adapter(adapted_type const& adapted, const U& u) : adapted_(adapted, u) {}
+    adapter(boost::reference_wrapper<T> const& adapted, const U& u) : adapted_(adapted, u) {}
 
     template <class U, class V>
-    adapter(adapted_type const& adapted, const U& u, const V& v) : adapted_(adapted, u, v) {}
+    adapter(boost::reference_wrapper<T> const& adapted, const U& u, const V& v) : adapted_(adapted, u, v) {}
+
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::reference_wrapper<T>);
 
   protected:
 
@@ -58,7 +56,7 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> 
   public:
 
     boolean_type equal(adapter_type const& that) const { return adapted_.equal(that); }
-    boolean_type to_boolean() const { return adapted_.to_boolean(); }
+    boolean_type  to_boolean() const { return adapted_.to_boolean(); }
     floating_type to_floating()  const { return adapted_.to_floating(); }
     // integer_type to_integer() const { return adapted_.to_integer(); }
     // string_type  to_string()  const { return adapted_.to_string(); }

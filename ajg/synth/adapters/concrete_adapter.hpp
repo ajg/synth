@@ -11,30 +11,28 @@
 namespace ajg {
 namespace synth {
 
-template <class Behavior, class Adapted, class X = adapter<Behavior, Adapted> >
+template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Sub = adapter<Behavior, Adapted> >
 struct concrete_adapter : base_adapter<Behavior> {
-  public:
+    concrete_adapter(Adapted const& adapted) : adapted_(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
 
-    friend struct base_adapter<behavior_type>;
-
-  protected:
-
-    concrete_adapter(adapted_type const& adapted) : adapted_(adapted) {}
-
   public:
 
-    std::type_info const& type() const { return typeid(adapted_type); }
+    std::type_info const& type() const { return typeid(Adapted); }
 
   protected:
 
-    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<X/*concrete_adapter*/>(that); }
-    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<X/*concrete_adapter*/>(that); }
+    virtual boolean_type equal_adapted(adapter_type const& that) const { return this->template equal_as<Sub/*concrete_adapter*/>(that); }
+    virtual boolean_type less_adapted(adapter_type const& that) const { return this->template less_as<Sub/*concrete_adapter*/>(that); }
 
   protected:
 
     adapted_type adapted_; // TODO: Expose an accessor adapted() instead.
+
+  private:
+
+    friend struct base_adapter<behavior_type>;
 };
 
 }} // namespace ajg::synth

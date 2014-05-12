@@ -10,28 +10,11 @@
 namespace ajg {
 namespace synth {
 
-template <class Behavior, class T, class Adapted, class Forwarder = adapter<Behavior, Adapted> >
-struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Forwarder?*/> {
-  public:
+template <class Behavior, class T, class Adapted, class Sub = adapter<Behavior, Adapted> >
+struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Sub?*/> {
+    forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
-
-  protected:
-
-    forwarding_adapter(adapted_type const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
-    ~forwarding_adapter() {}
-
-  protected:
-
-    virtual boolean_type equal_adapted(adapter_type const& that) const {
-        return forward().template equal_as<adapter<Behavior, T> >(that);
-    }
-
-    virtual boolean_type less_adapted(adapter_type const& that) const {
-        return forward().template less_as<adapter<Behavior, T> >(that);
-    }
-
-  public:
 
     const_iterator begin() const { return valid() ? forward().begin() : const_iterator(); }
     const_iterator end()   const { return valid() ? forward().end()   : const_iterator(); }
@@ -48,6 +31,16 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Forwarder?*/> 
 
     std::type_info const& type() const { return forward().type(); }
 
+  protected:
+
+    virtual boolean_type equal_adapted(adapter_type const& that) const {
+        return forward().template equal_as<adapter<Behavior, T> >(that);
+    }
+
+    virtual boolean_type less_adapted(adapter_type const& that) const {
+        return forward().template less_as<adapter<Behavior, T> >(that);
+    }
+
   private:
 
     typedef typename boost::remove_reference<T>::type                           bare_type;
@@ -57,10 +50,10 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted/*, Forwarder?*/> 
   private:
 
     inline cref_type forward() const {
-        return static_cast<Forwarder const*>(this)->template forward<cref_type>();
+        return static_cast<Sub const*>(this)->template forward<cref_type>();
     }
 
-    inline boolean_type valid() const { return static_cast<Forwarder const*>(this)->valid(); }
+    inline boolean_type valid() const { return static_cast<Sub const*>(this)->valid(); }
 };
 
 }} // namespace ajg::synth

@@ -5,14 +5,9 @@
 #ifndef AJG_SYNTH_ADAPTERS_NUMERIC_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_NUMERIC_ADAPTER_HPP_INCLUDED
 
-#include <cmath>
-#include <vector>
 #include <iomanip>
 
-#include <boost/cstdint.hpp>
 #include <boost/io/ios_state.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_integral.hpp>
 
 #include <ajg/synth/detail/is_integer.hpp>
 #include <ajg/synth/adapters/concrete_adapter.hpp>
@@ -25,30 +20,25 @@ namespace synth {
 //     Base adapter implementation for primitive numeric types
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class Numeric>
-struct numeric_adapter : concrete_adapter<Behavior, Numeric> {
-  public:
+template <class Behavior, class Adapted>
+struct numeric_adapter : concrete_adapter<Behavior, Adapted> {
+    numeric_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Numeric);
-
-  protected:
-
-    numeric_adapter(adapted_type const& adapted) : concrete_adapter<Behavior, Numeric>(adapted) {}
-
-  public:
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Adapted);
 
     boolean_type  is_numeric()  const { return true; }
     floating_type to_floating() const { return static_cast<floating_type>(this->adapted_); }
-    boolean_type  to_boolean()  const { return this->adapted_ != Numeric(0); }
+    boolean_type  to_boolean()  const { return this->adapted_ != static_cast<Adapted>(0); }
 
     void input (istream_type& in)        { in >> this->adapted_; }
-    void output(ostream_type& out) const { output_number<Numeric>(out); }
+    void output(ostream_type& out) const {
+        // The fast, happy, integral path:
+        if (boost::is_integral<Adapted>::value) {
+            out << this->adapted_;
+            return;
+        }
 
-  private:
-
-    // For floating-point types
-    template <class T>
-    void output_number(ostream_type& out, typename boost::disable_if<boost::is_integral<T> >::type* = 0) const {
+        // The slow, sad, fractional path:
         boost::io::basic_ios_all_saver<char_type> saver(out);
 
         if (detail::is_integer(this->adapted_)) {
@@ -63,12 +53,6 @@ struct numeric_adapter : concrete_adapter<Behavior, Numeric> {
         else {
             out << this->adapted_;
         }
-    }
-
-    // For integral types
-    template <class T>
-    void output_number(ostream_type& out, typename boost::enable_if<boost::is_integral<T> >::type* = 0) const {
-        out << this->adapted_;
     }
 };
 

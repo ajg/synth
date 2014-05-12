@@ -10,7 +10,7 @@
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -21,18 +21,14 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior, class K, class V>
-struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> > : base_adapter<Behavior> {
+struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> > {
+    adapter(boost::property_tree::basic_ptree<K, V> const& adapted) : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> >(adapted) {}
 
-    typedef K                                              key_type;
-    typedef boost::property_tree::basic_ptree<key_type, V> ptree_type;
-    AJG_SYNTH_ADAPTER(ptree_type)
-    adapted_type adapted_;
-
-  public:
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::property_tree::basic_ptree<K, V>);
 
     boolean_type to_boolean() const {
-        if (adapted_.empty()) {
-            return boolean_type(value_type(adapted_.data()));
+        if (this->adapted_.empty()) {
+            return boolean_type(value_type(this->adapted_.data()));
         }
         else {
             return true;
@@ -40,24 +36,24 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> > : base_adapte
     }
 
     void output(ostream_type& out) const {
-        if (adapted_.empty()) {
-            out << value_type(adapted_.data());
+        if (this->adapted_.empty()) {
+            out << value_type(this->adapted_.data());
         }
         else {
             behavior_type::enumerate(*this, out);
         }
     }
 
-    iterator begin() { return iterator(adapted_.begin()); }
-    iterator end()   { return iterator(adapted_.end()); }
+    iterator begin() { return iterator(this->adapted_.begin()); }
+    iterator end()   { return iterator(this->adapted_.end()); }
 
-    const_iterator begin() const { return const_iterator(adapted_.begin()); }
-    const_iterator end()   const { return const_iterator(adapted_.end()); }
+    const_iterator begin() const { return const_iterator(this->adapted_.begin()); }
+    const_iterator end()   const { return const_iterator(this->adapted_.end()); }
 
     optional<value_type> index(value_type const& what) const {
-        key_type const key = behavior_type::template to<key_type>(what);
-        typename ptree_type::const_assoc_iterator const it = adapted_.find(key);
-        if (it == adapted_.not_found()) {
+        K const key = behavior_type::template to<K>(what);
+        typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted_.find(key);
+        if (it == this->adapted_.not_found()) {
             return boost::none;
         }
         return value_type(it->second);

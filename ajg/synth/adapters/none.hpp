@@ -17,11 +17,10 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior>
-struct adapter<Behavior, boost::none_t> : concrete_adapter<Behavior, boost::none_t> {
-  public:
+struct adapter<Behavior, boost::none_t>   : concrete_adapter<Behavior, boost::none_t> {
+    adapter(boost::none_t const& adapted) : concrete_adapter<Behavior, boost::none_t>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(boost::none_t);
-    adapter(adapted_type const& adapted) : concrete_adapter<Behavior, boost::none_t>(adapted) {}
 
     floating_type to_floating() const { return 0; }
     boolean_type to_boolean() const { return false; }

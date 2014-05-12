@@ -7,7 +7,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <ajg/synth/adapters/adapter.hpp>
+#include <ajg/synth/adapters/concrete_adapter.hpp>
 
 namespace ajg {
 namespace synth {
@@ -17,18 +17,14 @@ namespace synth {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Behavior>
-struct adapter<Behavior, boost::posix_time::ptime>
-    : public base_adapter<Behavior> {
+struct adapter<Behavior, boost::posix_time::ptime>   : concrete_adapter<Behavior, boost::posix_time::ptime> {
+    adapter(boost::posix_time::ptime const& adapted) : concrete_adapter<Behavior, boost::posix_time::ptime>(adapted) {}
 
-    typedef boost::posix_time::ptime ptime_type;
-    AJG_SYNTH_ADAPTER(ptime_type)
-    adapted_type adapted_;
+    AJG_SYNTH_ADAPTER_TYPEDEFS(boost::posix_time::ptime);
 
-  public:
-
-    boolean_type to_boolean() const { return !adapted_.is_not_a_date_time(); }
-    datetime_type to_datetime() const { return traits_type::to_datetime(adapted_); }
-    void output(ostream_type& out) const { out << adapted_; }
+    boolean_type  to_boolean()  const { return !this->adapted_.is_not_a_date_time(); }
+    datetime_type to_datetime() const { return traits_type::to_datetime(this->adapted_); }
+    void output(ostream_type& out) const { out << this->adapted_; }
 };
 
 }} // namespace ajg::synth

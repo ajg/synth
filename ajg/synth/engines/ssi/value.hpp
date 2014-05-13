@@ -18,7 +18,7 @@ struct value : base_value<Traits, value> {
 
     typedef value                                                               value_type;
 
-    typedef typename value_type::facade_type                                    facade_type;
+    typedef typename value_type::base_type                                      base_type;
     typedef typename value_type::behavior_type                                  behavior_type;
 
     typedef typename behavior_type::sequence_type                               sequence_type;
@@ -26,8 +26,8 @@ struct value : base_value<Traits, value> {
 
   public:
 
-    value() : facade_type() {}
-    template <class T> value(T const& t) : facade_type(t) {}
+    value() : base_type() {}
+    template <class T> value(T const& t) : base_type(t) {}
 };
 
 }}}} // namespace ajg::synth::engines::ssi

@@ -12,6 +12,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 template <class Behavior, class Adapted/*, class Holder = Adapted*/, class Specialized = adapter<Behavior, Adapted> >
 struct concrete_adapter : base_adapter<Behavior> {
@@ -22,7 +23,13 @@ struct concrete_adapter : base_adapter<Behavior> {
 
   public:
 
-    std::type_info const& type() const { return typeid(Adapted); }
+    virtual std::type_info const& type() const { return typeid(Adapted); }
+
+    virtual string_type to_string() const {
+        std::basic_ostringstream<char_type> ostream;
+        this->output(ostream);
+        return ostream.str();
+    }
 
   protected:
 
@@ -43,7 +50,7 @@ struct concrete_adapter : base_adapter<Behavior> {
     friend struct base_adapter<behavior_type>;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_CONCRETE_ADAPTER_HPP_INCLUDED
 

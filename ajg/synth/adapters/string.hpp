@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::basic_string
@@ -78,7 +79,7 @@ struct adapter<Behavior, typename Behavior::char_type[N]> : adapter<Behavior, st
 #endif
 #endif
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_STRING_HPP_INCLUDED
 

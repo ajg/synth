@@ -18,6 +18,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 #define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type) \
     template <class Behavior> \
@@ -63,7 +64,7 @@ AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(double);
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long double);
 
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_NUMERIC_HPP_INCLUDED
 

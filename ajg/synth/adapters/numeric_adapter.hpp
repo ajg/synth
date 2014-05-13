@@ -15,6 +15,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // numeric_adapter:
@@ -57,7 +58,7 @@ struct numeric_adapter : concrete_adapter<Behavior, Adapted> {
     }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_NUMERIC_ADAPTER_HPP_INCLUDED
 

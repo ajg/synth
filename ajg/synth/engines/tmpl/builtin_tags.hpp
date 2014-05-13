@@ -18,16 +18,16 @@ namespace synth {
 namespace engines {
 namespace tmpl {
 
+using boost::optional;
+
 // TODO[c++11]: Replace with functions.
-#define TAG(content) \
-    ( as_xpr(kernel.tag_open) >> content >> kernel.tag_close \
-    | as_xpr(kernel.alt_open) >> content >> kernel.alt_close \
-    )
 #define NAME(name)       (x::icase(kernel.tag_prefix + text::literal(name)))
 #define OPEN_TAG(name)   TAG(*_s >> NAME(name) >> !(+_s >> kernel.name_attribute) >> *_s)
 #define MIDDLE_TAG(name) TAG(*_s >> NAME(name) >> *_s >> !as_xpr(kernel.tag_finish))
 #define SINGLE_TAG(name) TAG(*_s >> NAME(name) >> +_s >> kernel.name_attribute >> *_s >> !as_xpr(kernel.tag_finish))
 #define CLOSE_TAG(name)  TAG(kernel.tag_finish >> *_s >> NAME(name) >> *_s)
+#define TAG(content)     ( as_xpr(kernel.tag_open) >> content >> kernel.tag_close \
+                         | as_xpr(kernel.alt_open) >> content >> kernel.alt_close)
 
 template <class Kernel>
 struct builtin_tags {

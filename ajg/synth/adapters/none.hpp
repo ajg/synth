@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::none_t
@@ -29,7 +30,7 @@ struct adapter<Behavior, boost::none_t>   : concrete_adapter<Behavior, boost::no
     void output(ostream_type& out) const { out << "None"; } // TODO: Configure via Traits.
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 namespace std {
 

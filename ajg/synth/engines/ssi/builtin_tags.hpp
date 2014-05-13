@@ -20,6 +20,8 @@ namespace synth {
 namespace engines {
 namespace ssi {
 
+using boost::optional;
+
 template <class Kernel>
 struct builtin_tags {
   private:

@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::optional
@@ -24,7 +25,7 @@ struct adapter<Behavior, boost::optional<T> > : forwarding_adapter<Behavior, T, 
     template <class A> A forward() const { return A(boost::ref(*this->adapted())); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_OPTIONAL_HPP_INCLUDED
 

@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // Shortcut macros
@@ -46,7 +47,7 @@ struct adapter;
 template <class Behavior>
 struct adapter<Behavior, base_adapter<Behavior> >; // Left undefined.
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_ADAPTER_HPP_INCLUDED
 

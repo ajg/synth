@@ -22,9 +22,9 @@ namespace ajg {
 namespace synth {
 namespace engines {
 namespace django {
-namespace {
+
 using boost::optional;
-}
+
 
 template <class Options>
 struct abstract_loader {

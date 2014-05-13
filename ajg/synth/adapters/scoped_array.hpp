@@ -15,6 +15,7 @@ template <class T> class scoped_array;
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::scoped_array
@@ -25,7 +26,7 @@ struct adapter<Behavior, boost::scoped_array<T> > : adapter<Behavior, T[]> {
     adapter(boost::scoped_array<T> const& adapted, std::size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_SCOPED_ARRAY_HPP_INCLUDED
 

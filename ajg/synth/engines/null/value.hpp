@@ -20,7 +20,7 @@ struct value : base_value<Traits, value> {
 
     typedef value                                                               value_type;
 
-    typedef typename value_type::facade_type                                    facade_type;
+    typedef typename value_type::base_type                                      base_type;
     typedef typename value_type::behavior_type                                  behavior_type;
 
     typedef typename behavior_type::sequence_type                               sequence_type;
@@ -28,10 +28,10 @@ struct value : base_value<Traits, value> {
 
   public:
 
-                                         value() : facade_type() {}
-    template <class T>                   value(T const& t) : facade_type(t) {}
-    template <class T, class U>          value(T const& t, U const& u) : facade_type(t, u) {}
-    template <class T, class U, class V> value(T const& t, U const& u, V const& v) : facade_type(t, u, v) {}
+                                         value() : base_type() {}
+    template <class T>                   value(T const& t) : base_type(t) {}
+    template <class T, class U>          value(T const& t, U const& u) : base_type(t, u) {}
+    template <class T, class U, class V> value(T const& t, U const& u, V const& v) : base_type(t, u, v) {}
 };
 
 }}}} // namespace ajg::synth::engines::null

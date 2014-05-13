@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::map
@@ -40,7 +41,7 @@ struct adapter<Behavior, std::multimap<K, V> >  : container_adapter<Behavior, st
     // TODO: Implement index(), but returning a sequence or set of values, or the first one?
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_MAP_HPP_INCLUDED
 

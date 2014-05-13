@@ -21,11 +21,15 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 using boost::optional;
 
 template <class Behavior, class Adapted>
 struct adapter;
+
+template <class Behavior, class T, class Adapted, class Specialized>
+struct forwarding_adapter;
 
 //
 // base_adapter
@@ -71,9 +75,10 @@ struct base_adapter {
     virtual floating_type to_floating() const { AJG_SYNTH_THROW(invalid_method("to_floating")); }
     virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(invalid_method("to_boolean")); }
     virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(invalid_method("to_datetime")); }
-    virtual string_type   to_string()   const { return behavior_type::to_string(*this); }
+    virtual string_type   to_string()   const { AJG_SYNTH_THROW(invalid_method("to_string")); }
     virtual range_type    to_range()    const { AJG_SYNTH_THROW(invalid_method("to_range")); }
 
+    // TODO: Rename parameters istream and ostream.
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(invalid_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(invalid_method("output")); }
 
@@ -85,7 +90,7 @@ struct base_adapter {
 
     template <class T> // TODO: Deal with forwarding_adapters.
     inline T const& get_adapted() const {
-        typedef synth::adapter<Behavior, T> specialized_type;
+        typedef adapters::adapter<Behavior, T> specialized_type;
         specialized_type const* const specialization = this->template get<specialized_type>();
         BOOST_ASSERT(specialization);
         return specialization->adapted_;
@@ -112,11 +117,11 @@ struct base_adapter {
 
   private:
 
-    template <class T, class A>                    friend struct synth::adapter;
-    template <class B, class T, class A, class S>  friend struct forwarding_adapter;
+    template <class T, class A>                    friend struct adapters::adapter;
+    template <class B, class T, class A, class S>  friend struct adapters::forwarding_adapter;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_BASE_ADAPTER_HPP_INCLUDED
 

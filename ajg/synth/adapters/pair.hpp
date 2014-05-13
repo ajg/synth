@@ -14,6 +14,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::pair
@@ -87,6 +88,6 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
     typedef pair_iterator<value_type const> const_pair_iterator;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_PAIR_HPP_INCLUDED

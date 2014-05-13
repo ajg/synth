@@ -23,9 +23,7 @@
 
 namespace ajg {
 namespace synth {
-
-template <class Char, class Adapted>
-struct adapter;
+// TODO: Move to engines namespace.
 
 //
 // base_value
@@ -35,11 +33,10 @@ template <class Traits, template <class T> class Value>
 struct base_value {
   public:
 
-    typedef base_value                                                        facade_type;
+    typedef base_value                                                          base_type;
     typedef Traits                                                              traits_type;
     typedef Value<traits_type>                                                  value_type;
     typedef value_behavior<traits_type, Value>                                  behavior_type;
-    typedef boost::shared_ptr<base_adapter<behavior_type> const>                adapter_type; // TODO: Use behavior_type's.
 
     typedef typename traits_type::none_type                                     none_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -55,6 +52,7 @@ struct base_value {
 
   //typedef typename behavior_type::sequence_type                               sequence_type; // TODO
   //typedef typename behavior_type::mapping_type                                mapping_type;  // TODO
+    typedef boost::shared_ptr<adapters::base_adapter<behavior_type> const>      adapter_type;  // TODO: Use behavior_type's.
 
     typedef value_iterator<value_type const>                                    iterator;
     typedef value_iterator<value_type const>                                    const_iterator;
@@ -67,15 +65,15 @@ struct base_value {
 
     template <class T>
     base_value(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<behavior_type, T>(t)) {}
+        : adapter_(new adapters::adapter<behavior_type, T>(t)) {}
 
     template <class T, class U>
     base_value(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<behavior_type, T>(t, u)) {}
+        : adapter_(new adapters::adapter<behavior_type, T>(t, u)) {}
 
     template <class T, class U, class V>
     base_value(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
-        : adapter_(new synth::adapter<behavior_type, T>(t, u, v)) {}
+        : adapter_(new adapters::adapter<behavior_type, T>(t, u, v)) {}
 
   public:
 
@@ -121,16 +119,19 @@ struct base_value {
     inline value_type front() const { return *this->begin(); }                          // TODO: Defer to adapter.
     inline value_type back()  const { return *this->at(-1); } // return *--this->end(); // TODO: Defer to adapter.
 
-    inline const_iterator       at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_floating())); } // TODO: Defer to adapter.
-    inline const_iterator       find (value_type const& value) const { return this->adapter()->find(value); }
-    inline optional<value_type> index(value_type const& key)   const { return this->adapter()->index(key); }
+    inline const_iterator at   (value_type const& index) const { return detail::at(*this, static_cast<integer_type>(index.to_floating())); } // TODO: Defer to adapter.
+    inline const_iterator find (value_type const& value) const { return this->adapter()->find(value); }
+
+    inline boost::optional<value_type> index(value_type const& key) const {
+        return this->adapter()->index(key);
+    }
 
     inline const_iterator begin() const { return this->adapter()->to_range().first; }
     inline const_iterator end()   const { return this->adapter()->to_range().second; }
 
     // Even the non-const versions are immutable and are provided simply as a convenience.
-    inline iterator begin() { return const_cast<facade_type const*>(this)->begin(); }
-    inline iterator end()   { return const_cast<facade_type const*>(this)->end(); }
+    inline iterator begin() { return const_cast<base_type const*>(this)->begin(); }
+    inline iterator end()   { return const_cast<base_type const*>(this)->end(); }
 
     inline boolean_type is_iterable() const { // TODO: Defer to adapter.
         try {
@@ -141,8 +142,8 @@ struct base_value {
         }
     }
 
-    inline range_type slice( optional<integer_type> const lower = boost::none
-                           , optional<integer_type> const upper = boost::none
+    inline range_type slice( boost::optional<integer_type> const lower = boost::none
+                           , boost::optional<integer_type> const upper = boost::none
                            ) const { // TODO: Defer to adapter.
         return detail::slice(*this, lower, upper);
     }

@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::set
@@ -30,6 +31,6 @@ struct adapter<Behavior, std::multiset<T> >  : container_adapter<Behavior, std::
     adapter(std::multiset<T> const& adapted) : container_adapter<Behavior, std::multiset<T> >(adapted) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_SET_HPP_INCLUDED

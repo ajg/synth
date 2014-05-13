@@ -32,9 +32,8 @@ namespace ajg {
 namespace synth {
 namespace engines {
 namespace django {
-namespace {
+
 x::mark_tag const id(9);
-}
 
 template <class Kernel>
 struct builtin_tags {

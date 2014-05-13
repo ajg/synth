@@ -9,12 +9,14 @@
 
 #include <boost/python.hpp>
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 
 namespace ajg {
 namespace synth {
 namespace bindings {
 namespace python {
 
+using boost::optional;
 namespace py = boost::python;
 
 // TODO: Refactor these into a utility struct predicated on Traits.

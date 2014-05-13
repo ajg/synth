@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::list
@@ -21,7 +22,7 @@ struct adapter<Behavior, std::list<T> >  : container_adapter<Behavior, std::list
     adapter(std::list<T> const& adapted) : container_adapter<Behavior, std::list<T> >(adapted) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_LIST_HPP_INCLUDED
 

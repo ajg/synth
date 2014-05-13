@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::deque
@@ -21,7 +22,7 @@ struct adapter<Behavior, std::deque<T> >  : container_adapter<Behavior, std::deq
     adapter(std::deque<T> const& adapted) : container_adapter<Behavior, std::deque<T> >(adapted) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_DEQUE_HPP_INCLUDED
 

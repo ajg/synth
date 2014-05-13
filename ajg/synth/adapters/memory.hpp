@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::auto_ptr
@@ -24,7 +25,7 @@ struct adapter<Behavior, std::auto_ptr<T> >  : forwarding_adapter<Behavior, T, s
     typename Behavior::boolean_type valid() const { return this->adapted()->get() != 0; }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_MEMORY_HPP_INCLUDED
 

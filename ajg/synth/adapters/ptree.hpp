@@ -14,6 +14,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::property_tree::basic_ptree
@@ -58,7 +59,7 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_a
     }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 namespace boost {
 namespace property_tree {

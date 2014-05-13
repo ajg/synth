@@ -14,6 +14,7 @@ template <class T> class shared_ptr;
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::shared_ptr
@@ -27,7 +28,7 @@ struct adapter<Behavior, boost::shared_ptr<T> >  : forwarding_adapter<Behavior, 
     typename Behavior::boolean_type valid() const { return this->adapted(); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_SHARED_PTR_HPP_INCLUDED
 

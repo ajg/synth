@@ -15,6 +15,7 @@ template <class T> class shared_array;
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::shared_array
@@ -25,7 +26,7 @@ struct adapter<Behavior, boost::shared_array<T> > : adapter<Behavior, T[]> {
     adapter(boost::shared_array<T> const& adapted, std::size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_SHARED_ARRAY_HPP_INCLUDED
 

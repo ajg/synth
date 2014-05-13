@@ -10,6 +10,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for native pointers
@@ -27,6 +28,6 @@ struct adapter<Behavior, T*>  : forwarding_adapter<Behavior, T, T*> {
  // }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_POINTER_HPP_INCLUDED

@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 template <class Behavior, class T, class Adapted, class Specialized = adapter<Behavior, Adapted> >
 struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
@@ -55,7 +56,7 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
     inline boolean_type valid() const { return static_cast<Specialized const*>(this)->valid(); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_FORWARDING_ADAPTER_HPP_INCLUDED
 

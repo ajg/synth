@@ -13,6 +13,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::reference_wrapper
@@ -71,7 +72,7 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> 
     wrapped_adapter_type adapted_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_REF_HPP_INCLUDED
 

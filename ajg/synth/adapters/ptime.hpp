@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::posix_time::ptime
@@ -27,7 +28,7 @@ struct adapter<Behavior, boost::posix_time::ptime>   : concrete_adapter<Behavior
     void output(ostream_type& out) const { out << this->adapted(); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_PTREE_HPP_INCLUDED
 

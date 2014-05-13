@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::variant
@@ -34,7 +35,7 @@ concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > {
     void output(ostream_type& out) const { out << this->adapted(); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_OPTIONAL_HPP_INCLUDED
 

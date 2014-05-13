@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // Specialization for std::complex
@@ -30,7 +31,7 @@ struct adapter<Behavior, std::complex<T> >  : concrete_adapter<Behavior, std::co
     void output(ostream_type& out) const { out << this->adapted(); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 namespace std {
 

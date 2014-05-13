@@ -246,7 +246,7 @@ Components
 
 ### Base Components
 
- - `base_adapter`
+ - `adapters::base_adapter`
  - `bindings::base_binding`
  - `engines::base_engine`
  - `engines::base_options`
@@ -534,6 +534,7 @@ Future Work
    * Remove as much dead weight from local Boost copy as possible; and/or
    * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
+   * Move `render_block` to `base_engine::kernel`
    * Remove all no-op tags (e.g. `cycle_as_silent_tag`)
    * Fold all variant tags into their main version (e.g. `load_from_tag`)
    * [v2] Create `c++11`/`c++14` branch

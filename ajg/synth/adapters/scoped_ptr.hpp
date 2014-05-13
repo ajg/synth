@@ -15,6 +15,7 @@ template <class T> class scoped_ptr;
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for boost::scoped_ptr
@@ -35,7 +36,7 @@ struct adapter<Behavior, boost::scoped_ptr<T> > : adapter<Behavior, T*> {
 };
 */
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_SCOPED_PTR_HPP_INCLUDED
 

@@ -14,6 +14,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 namespace {
 namespace py = ::boost::python;
 
@@ -47,7 +48,7 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
     virtual boolean_type is_string()  const { return PyString_Check(this->adapted().ptr()); }
     virtual boolean_type is_numeric() const { return PyNumber_Check(this->adapted().ptr()); }
 
-    optional<value_type> index(value_type const& what) const {
+    boost::optional<value_type> index(value_type const& what) const {
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
@@ -120,6 +121,6 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
     }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_BINDINGS_PYTHON_ADAPTER_HPP_INCLUDED

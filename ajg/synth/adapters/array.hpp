@@ -17,6 +17,7 @@ template <class T, std::size_t N> class array;
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for native arrays of statically known size
@@ -40,7 +41,7 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
                          );
     }
 
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::delimited(out, this->to_range()); }
 };
 
 //
@@ -64,7 +65,7 @@ struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Beh
                          );
     }
 
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
+    void output(ostream_type& out) const { behavior_type::delimited(out, this->to_range()); }
 
   protected:
 
@@ -90,7 +91,7 @@ struct adapter<Behavior, boost::array<T, N> >  : container_adapter<Behavior, boo
     adapter(boost::array<T, N> const& adapted) : container_adapter<Behavior, boost::array<T, N> >(adapted) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_ARRAY_HPP_INCLUDED
 

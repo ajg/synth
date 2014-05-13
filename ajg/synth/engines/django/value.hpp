@@ -31,7 +31,7 @@ struct value : base_value<Traits, value> {
 
     typedef value                                                               value_type;
     typedef Traits                                                              traits_type;
-    typedef typename value_type::facade_type                                    facade_type;
+    typedef typename value_type::base_type                                      base_type;
     typedef typename value_type::behavior_type                                  behavior_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -51,9 +51,9 @@ struct value : base_value<Traits, value> {
 
   public:
 
-    value() : facade_type(), safe_(false), token_(boost::none) {}
-    value(value const& that) : facade_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
-    template <class T> value(T const& t) : facade_type(t), safe_(false), token_(boost::none) {}
+    value() : base_type(), safe_(false), token_(boost::none) {}
+    value(value const& that) : base_type(that), safe_(that.safe_), token_(that.token_) {} // TODO[c++11] = default.
+    template <class T> value(T const& t) : base_type(t), safe_(false), token_(boost::none) {}
 
   public:
 
@@ -99,7 +99,7 @@ struct value : base_value<Traits, value> {
     */
 
     // TODO: Move this to traits.
-    optional<value_type> get_attribute(value_type const& attribute) const {
+    boost::optional<value_type> get_attribute(value_type const& attribute) const {
         try {
             // First try to locate the value as a key.
             return this->index(attribute);
@@ -122,7 +122,7 @@ struct value : base_value<Traits, value> {
     }
 
     value_type must_get_attribute(value_type const& attribute) const {
-        if (optional<value_type> attr = this->get_attribute(attribute)) {
+        if (boost::optional<value_type> attr = this->get_attribute(attribute)) {
             return *attr;
         }
         else {
@@ -230,8 +230,8 @@ struct value : base_value<Traits, value> {
 
   private:
 
-    boolean_type          safe_;
-    optional<string_type> token_;
+    boolean_type                 safe_;
+    boost::optional<string_type> token_; // TODO: Change to plain string, with empty meaning !is_literal.
 };
 
 }}}} // namespace ajg::synth::engines::django

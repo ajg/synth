@@ -11,6 +11,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for std::vector
@@ -21,7 +22,7 @@ struct adapter<Behavior, std::vector<T> >  : container_adapter<Behavior, std::ve
     adapter(std::vector<T> const& adapted) : container_adapter<Behavior, std::vector<T> >(adapted) {}
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_VECTOR_HPP_INCLUDED
 

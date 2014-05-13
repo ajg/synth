@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 template <class Behavior, class Adapted>
 struct container_adapter : concrete_adapter<Behavior, Adapted> {
@@ -19,10 +20,10 @@ struct container_adapter : concrete_adapter<Behavior, Adapted> {
     boolean_type to_boolean() const { return !this->adapted().empty(); }
     range_type   to_range()   const { return range_type(this->adapted().begin(), this->adapted().end()); } // TODO[c++11]: Use std::begin & std::end.
 
-    void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
+    void output(ostream_type& out) const { return behavior_type::delimited(out, this->to_range()); }
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_CONTAINER_ADAPTER_HPP_INCLUDED
 

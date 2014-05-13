@@ -9,6 +9,7 @@
 
 namespace ajg {
 namespace synth {
+namespace adapters {
 
 //
 // specialization for bool
@@ -27,7 +28,7 @@ struct adapter<Behavior, bool>   : concrete_adapter<Behavior, bool> {
     void output(ostream_type& out) const { out << (this->adapted() ? "True" : "False"); } // TODO: Configure via Traits.
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::adapters
 
 #endif // AJG_SYNTH_ADAPTERS_BOOL_HPP_INCLUDED
 

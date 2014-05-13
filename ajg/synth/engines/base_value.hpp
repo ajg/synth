@@ -2,8 +2,8 @@
 //  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED
-#define AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED
+#ifndef AJG_SYNTH_ENGINES_BASE_VALUE_HPP_INCLUDED
+#define AJG_SYNTH_ENGINES_BASE_VALUE_HPP_INCLUDED
 
 #include <cstddef>
 #include <iterator>
@@ -23,7 +23,7 @@
 
 namespace ajg {
 namespace synth {
-// TODO: Move to engines namespace.
+namespace engines {
 
 //
 // base_value
@@ -194,6 +194,6 @@ struct base_value {
     adapter_type adapter_;
 };
 
-}} // namespace ajg::synth
+}}} // namespace ajg::synth::engines
 
-#endif // AJG_SYNTH_VALUE_FACADE_HPP_INCLUDED
+#endif // AJG_SYNTH_ENGINES_BASE_VALUE_HPP_INCLUDED

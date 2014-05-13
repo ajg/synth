@@ -68,17 +68,14 @@ struct base_adapter {
 
     virtual boolean_type  is_numeric()  const { return false; }
 
-    virtual floating_type to_floating()   const { AJG_SYNTH_THROW(invalid_method("to_floating")); }
+    virtual floating_type to_floating() const { AJG_SYNTH_THROW(invalid_method("to_floating")); }
     virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(invalid_method("to_boolean")); }
     virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(invalid_method("to_datetime")); }
     virtual string_type   to_string()   const { return behavior_type::to_string(*this); }
+    virtual range_type    to_range()    const { AJG_SYNTH_THROW(invalid_method("to_range")); }
 
     virtual void input (istream_type& in)        { AJG_SYNTH_THROW(invalid_method("input")); }
     virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(invalid_method("output")); }
-
-    // TODO: Refactor these into a single to_range function.
-    virtual const_iterator begin() const { AJG_SYNTH_THROW(invalid_method("begin")); }
-    virtual const_iterator end()   const { AJG_SYNTH_THROW(invalid_method("end")); }
 
     virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(invalid_method("find")); }
     virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(invalid_method("index")); }

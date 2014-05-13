@@ -32,13 +32,16 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    floating_type to_floating()  const { return N; }
-    boolean_type to_boolean() const { return N != 0; }
+    floating_type to_floating() const { return N; }
+    boolean_type  to_boolean()  const { return N != 0; }
+    range_type    to_range()    const {
+        return range_type( static_cast<T const*>(this->adapted())
+                         , static_cast<T const*>(this->adapted()) + N
+                         );
+    }
+
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
-
-    const_iterator begin() const { return const_iterator(static_cast<T const*>(this->adapted())); }
-    const_iterator end()   const { return const_iterator(static_cast<T const*>(this->adapted()) + N); }
 };
 
 //
@@ -52,16 +55,18 @@ struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Beh
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    floating_type to_floating()  const { return this->length_; }
-    boolean_type  to_boolean() const { return this->length_ != 0; }
+    std::type_info const& type() const { return typeid(T*); } // XXX: return typeid(T[]);
+
+    floating_type to_floating() const { return this->length_; }
+    boolean_type  to_boolean()  const { return this->length_ != 0; }
+    range_type    to_range()    const {
+        return range_type( static_cast<T const*>(this->adapted())
+                         , static_cast<T const*>(this->adapted()) + this->length_
+                         );
+    }
 
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
     boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
-
-    const_iterator begin() const { return this->adapted() + 0; }
-    const_iterator end()   const { return this->adapted() + this->length_; }
-
-    std::type_info const& type() const { return typeid(T*); } // XXX: return typeid(T[]);
 
   protected:
 

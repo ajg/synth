@@ -31,18 +31,17 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    virtual boolean_type to_boolean() const { return boolean_type(this->adapted()); }
-    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted()); }
-
  // virtual void input (istream_type& in)        { in >> this->adapted(); }
  // virtual void output(ostream_type& out) const { out << this->adapted(); }
     virtual void output(ostream_type& out) const { out << get_string<traits_type>(this->adapted()); }
 
-    virtual iterator begin() { return begin<iterator>(this->adapted()); }
-    virtual iterator end()   { return end<iterator>(this->adapted()); }
-
-    virtual const_iterator begin() const { return begin<const_iterator>(this->adapted()); }
-    virtual const_iterator end()   const { return end<const_iterator>(this->adapted()); }
+    virtual boolean_type  to_boolean()  const { return boolean_type(this->adapted()); }
+    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted()); }
+    virtual range_type    to_range()    const {
+        return range_type( begin<const_iterator>(this->adapted())
+                         , end<const_iterator>(this->adapted())
+                         );
+    }
 
     virtual boolean_type is_boolean() const { return PyBool_Check(this->adapted().ptr()); }
     virtual boolean_type is_string()  const { return PyString_Check(this->adapted().ptr()); }

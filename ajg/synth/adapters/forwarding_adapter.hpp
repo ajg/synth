@@ -18,11 +18,11 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    const_iterator begin() const { return valid() ? forward().begin() : const_iterator(); }
-    const_iterator end()   const { return valid() ? forward().end()   : const_iterator(); }
+    std::type_info const& type() const { return forward().type(); }
 
-    floating_type to_floating()  const { return valid() ? forward().to_floating() : floating_type(0); }
-    boolean_type  to_boolean() const { return valid() ? forward().to_boolean() : boolean_type(false); }
+    floating_type to_floating() const { return valid() ? forward().to_floating() : floating_type(0); }
+    boolean_type  to_boolean()  const { return valid() ? forward().to_boolean() : boolean_type(false); }
+    range_type    to_range()    const { return valid() ? forward().to_range() : range_type(); }
 
     boolean_type equal(adapter_type const& that) const {
         return valid() ? forward().equal(that) : boolean_type(false);
@@ -30,8 +30,6 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
 
     void input (istream_type& in)        { if (valid()) forward().input(in); }
     void output(ostream_type& out) const { if (valid()) forward().output(out); }
-
-    std::type_info const& type() const { return forward().type(); }
 
   protected:
 

@@ -125,12 +125,12 @@ struct base_value {
     inline const_iterator       find (value_type const& value) const { return this->adapter()->find(value); }
     inline optional<value_type> index(value_type const& key)   const { return this->adapter()->index(key); }
 
+    inline const_iterator begin() const { return this->adapter()->to_range().first; }
+    inline const_iterator end()   const { return this->adapter()->to_range().second; }
+
     // Even the non-const versions are immutable and are provided simply as a convenience.
     inline iterator begin() { return const_cast<facade_type const*>(this)->begin(); }
     inline iterator end()   { return const_cast<facade_type const*>(this)->end(); }
-
-    inline const_iterator begin() const { return this->adapter()->begin(); }
-    inline const_iterator end()   const { return this->adapter()->end(); }
 
     inline boolean_type is_iterable() const { // TODO: Defer to adapter.
         try {

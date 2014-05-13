@@ -25,13 +25,15 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
-    void output(ostream_type& out) const { out << this->adapted().first << ": " << this->adapted().second; }
-
     boolean_type to_boolean() const { return true; }
-    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
+    range_type   to_range()   const {
+        return range_type( const_pair_iterator(this->adapted(), first)
+                         , const_pair_iterator(this->adapted(), past)
+                         );
+    }
 
-    const_iterator begin() const { return const_pair_iterator(this->adapted(), first); }
-    const_iterator end()   const { return const_pair_iterator(this->adapted(), past); }
+    void output(ostream_type& out) const { out << this->adapted().first << ": " << this->adapted().second; }
+    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
   private:
 

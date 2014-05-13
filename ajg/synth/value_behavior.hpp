@@ -137,6 +137,8 @@ struct value_behavior {
         // TODO: Sequences, mappings, etc.
         else return false;
     }
+
+    /*
     inline static boolean_type equal_sequence( base_adapter<behavior_type> const& a
                                              , base_adapter<behavior_type> const& b
                                              ) {
@@ -148,6 +150,7 @@ struct value_behavior {
                                             ) {
         return less_range(a.begin(), b.begin(), a.end(), b.end());
     }
+    */
 
     // TODO: Use the right STL function.
     inline static boolean_type equal_range( const_iterator i1, const_iterator i2
@@ -181,7 +184,7 @@ struct value_behavior {
                                 , ostream_type&                      ostream
                                 ) {
         size_type i = 0;
-        BOOST_FOREACH(value_type const& value, adapter) {
+        BOOST_FOREACH(value_type const& value, adapter.to_range()) {
             if (i++) ostream << ", ";
             ostream << value;
         }

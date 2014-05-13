@@ -44,11 +44,9 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_a
         }
     }
 
-    iterator begin() { return iterator(this->adapted().begin()); }
-    iterator end()   { return iterator(this->adapted().end()); }
-
-    const_iterator begin() const { return const_iterator(this->adapted().begin()); }
-    const_iterator end()   const { return const_iterator(this->adapted().end()); }
+    range_type to_range() const {
+        return range_type(this->adapted().begin(), this->adapted().end());
+    }
 
     optional<value_type> index(value_type const& what) const {
         K const key = behavior_type::template to<K>(what);

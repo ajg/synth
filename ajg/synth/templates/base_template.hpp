@@ -60,9 +60,9 @@ struct base_template : boost::noncopyable {
 
   protected:
 
-    base_template() : kernel_(&shared_kernel()) {}
-    base_template(range_type const& range) : kernel_(&shared_kernel()) { this->reset(range); }
-    base_template(iterator_type const& begin, iterator_type const& end) : kernel_(&shared_kernel()) { this->reset(begin, end); }
+    base_template(options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(options); }
+    base_template(range_type const& range, options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(range, options); }
+    base_template(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(begin, end, options); }
 
   public:
 
@@ -127,18 +127,18 @@ struct base_template : boost::noncopyable {
 
   protected:
 
-    inline void reset() {
+    inline void reset(options_type const& options) {
         this->range_ = range_type();
         this->result_ = result_type();
     }
 
-    inline void reset(range_type const& range) {
+    inline void reset(range_type const& range, options_type const& options) {
         this->range_ = range;
-        kernel_->parse(this->range_.first, this->range_.second, this->result_);
+        kernel_->parse(this->range_.first, this->range_.second, this->result_, options);
     }
 
-    inline void reset(iterator_type const& begin, iterator_type const& end) {
-        this->reset(range_type(begin, end));
+    inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options) {
+        this->reset(range_type(begin, end), options);
     }
 
   private:
@@ -147,6 +147,8 @@ struct base_template : boost::noncopyable {
     kernel_type const*  kernel_;
     result_type         result_;
     range_type          range_;
+    // options_type         options_;
+    // options_type const&  options_;
 };
 
 }}} // namespace ajg::synth::templates

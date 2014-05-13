@@ -41,8 +41,8 @@ struct value : value_facade<Traits, value> {
 
     typedef typename value_type::const_iterator                                 const_iterator;
 
-    typedef std::vector<value_type>                                             sequence_type; // TODO: Derive from behavior_type.
-    typedef std::map<string_type, value_type>                                   mapping_type; // TODO: Derive from behavior_type.
+    typedef typename behavior_type::sequence_type                               sequence_type;
+    typedef typename behavior_type::mapping_type                                mapping_type;
 
   private:
 

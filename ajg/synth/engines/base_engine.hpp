@@ -49,11 +49,13 @@ using boost::xpressive::s2;
 
 namespace x = boost::xpressive;
 
-template <class Traits>
+template <class Options>
 struct base_engine {
 
     typedef base_engine                                                         engine_type;
-    typedef Traits                                                              traits_type;
+    typedef Options                                                             options_type;
+    typedef typename options_type::traits_type                                  traits_type;
+    typedef typename options_type::value_type                                   value_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -74,9 +76,9 @@ struct base_engine {
 
 }; // base_engine
 
-template <class Traits>
+template <class Options>
 template <class Iterator>
-struct base_engine<Traits>::kernel : boost::noncopyable {
+struct base_engine<Options>::kernel : boost::noncopyable {
   public:
 
     typedef kernel                                                              kernel_type;
@@ -90,7 +92,6 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
     typedef x::basic_regex<iterator_type>                                       regex_type;
     typedef x::match_results<iterator_type>                                     match_type;
     typedef x::sub_match<iterator_type>                                         sub_match_type;
-    typedef x::placeholder<iterator_type>                                       placeholder_type;
 
     // Define string iterators/regexes specifically. This is useful when they are different from the
     // main iterator_type and regex_type (e.g. when the latter two involve the use of a file_iterator.)
@@ -192,17 +193,19 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
   public:
 
     template <class I>
-    void parse(std::pair<I, I> const& range, result_type& result) const {
+    inline void parse(std::pair<I, I> const& range, result_type& result, options_type const& options) const {
         return this->parse(range.first, range.second, result);
     }
 
     template <class I>
-    void parse(I const& begin, I const& end, result_type& result) const {
+    inline void parse(I const& begin, I const& end, result_type& result, options_type const& options) const {
         iterator_type const  begin_   = begin;
         iterator_type const  end_     = end;
         iterator_type        furthest = begin_;
 
         result.match_.let(this->iterator_ = furthest);
+        result.match_.let(this->options_  = const_cast<options_type&>(options));
+
         if (x::regex_match(begin_, end_, result.match_, this->block)) {
             // On success, all input should have been consumed.
             BOOST_ASSERT(furthest == end_);
@@ -227,7 +230,8 @@ struct base_engine<Traits>::kernel : boost::noncopyable {
 
   private:
 
-    placeholder_type iterator_;
+    x::placeholder<iterator_type>       iterator_;
+    x::placeholder<options_type/*&*/>   options_;
 
 //
 // set_furthest_iterator:

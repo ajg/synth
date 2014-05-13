@@ -50,6 +50,8 @@ struct options {
         , time_format(time_format)
         , error_message(error_message) {}
 
+  public:
+
     string_type  echo_message;
     paths_type   directories;
     string_type  size_format;

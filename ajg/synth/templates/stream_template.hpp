@@ -21,7 +21,9 @@ struct stream_template : base_template<Engine,
 
     typedef stream_template                                                     template_type;
     typedef Engine                                                              engine_type;
-    typedef typename engine_type::traits_type                                   traits_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename options_type::traits_type                                  traits_type;
+
     typedef typename traits_type::istream_type                                  istream_type;
 
   private:
@@ -30,14 +32,14 @@ struct stream_template : base_template<Engine,
 
   public:
 
-    stream_template(istream_type& istream) : istream_(istream), bidi_istream_(istream_) {
-        this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end());
+    stream_template(istream_type& istream, options_type const& options = options_type()) : istream_(istream), bidi_istream_(istream_) {
+        this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end(), options);
     }
 
     // NOTE: Provided because base_binding can't cope with a mutable source argument yet.
     // TODO: Introduce source_type or such to all templates and pass it via base_template.
-    stream_template(istream_type const& istream) : istream_(const_cast<istream_type&>(istream)), bidi_istream_(istream_) {
-        this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end());
+    stream_template(istream_type const& istream, options_type const& options = options_type()) : istream_(const_cast<istream_type&>(istream)), bidi_istream_(istream_) {
+        this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end(), options);
     }
 
   public:

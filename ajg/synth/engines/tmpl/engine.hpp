@@ -32,8 +32,8 @@ namespace synth {
 namespace engines {
 namespace tmpl {
 
-template <class Traits>
-struct engine : base_engine<Traits> {
+template <class Traits, class Options = options<value<Traits> > >
+struct engine : base_engine<Options> {
   public:
 
     typedef engine                                                              engine_type;
@@ -46,13 +46,14 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef tmpl::value<traits_type>                                            value_type;
-    typedef options<value_type>                                                 options_type;
+    typedef typename engine_type::value_type                                    value_type;
+    typedef typename engine_type::options_type                                  options_type;
+
     typedef typename detail::if_c< options_type::case_sensitive
                                  , std::less<string_type>
                                  , insensitive_less<string_type>
                                  >::type                                        less_type;
-    typedef std::map<string_type, value_type, less_type>                        context_type;
+    typedef std::map<string_type, value_type, less_type>                        context_type; // TODO: Move to options.
 
   private:
 
@@ -73,9 +74,9 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-template <class Traits>
+template <class Traits, class Options>
 template <class Iterator>
-struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE kernel<Iterator>{
+struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator>{
   public:
 
     typedef kernel                                                              kernel_type;
@@ -227,7 +228,7 @@ struct engine<Traits>::kernel : base_engine<traits_type>::AJG_SYNTH_TEMPLATE ker
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        templates::path_template<engine_type> const t(path);
+        templates::path_template<engine_type> const t(path, options.directories, options);
         return t.render_to_stream(ostream, context, options);
     }
 

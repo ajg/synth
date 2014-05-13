@@ -36,8 +36,8 @@ namespace synth {
 namespace engines {
 namespace django {
 
-template <class Traits>
-struct engine : base_engine<Traits> {
+template <class Traits, class Options = options<value<Traits> > >
+struct engine : base_engine<Options> {
   public:
 
     typedef engine                                                              engine_type;
@@ -55,9 +55,8 @@ struct engine : base_engine<Traits> {
     typedef typename traits_type::ostream_type                                  ostream_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
 
-    typedef django::loader<engine_type>                                         loader_type;
-    typedef django::value<traits_type>                                          value_type;
-    typedef options<value_type>                                                 options_type;
+    typedef typename engine_type::value_type                                    value_type;
+    typedef typename engine_type::options_type                                  options_type;
 
     typedef typename options_type::context_type                                 context_type;
     typedef typename options_type::names_type                                   names_type;
@@ -66,6 +65,7 @@ struct engine : base_engine<Traits> {
     typedef typename value_type::behavior_type                                  behavior_type;
     typedef typename value_type::sequence_type                                  sequence_type;
 
+    typedef loader<engine_type>                                                 loader_type;
 
   private:
 
@@ -79,9 +79,9 @@ struct engine : base_engine<Traits> {
 
 }; // engine
 
-template <class Traits>
+template <class Traits, class Options>
 template <class Iterator>
-struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
+struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
@@ -342,7 +342,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                     string_type const string(t.begin(), t.end());
 
                     if (text::narrow(string) != e.name) {
-                        AJG_SYNTH_THROW(e);
+                        throw;
                     }
 
                     // A missing variable means an embedded argument was meant as a string literal.
@@ -385,7 +385,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                     , context_type const& context
                     , options_type const& options
                     ) const {
-        templates::path_template<engine_type> const t(path, options.directories);
+        templates::path_template<engine_type> const t(path, options.directories, options);
         return t.render_to_stream(ostream, context, options);
     }
 
@@ -546,7 +546,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE kernel<I
                 return variable->copy().token(token);
             }
             else {
-                AJG_SYNTH_THROW(missing_variable(text::narrow(string)));
+                // TODO: Don't use exceptions for unexceptional control flow.
+                /*AJG_SYNTH_THROW*/throw (missing_variable(text::narrow(string)));
             }
         }
         else {

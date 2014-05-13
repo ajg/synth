@@ -27,6 +27,7 @@ struct options {
 
     typedef typename value_type::traits_type                                    traits_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::paths_type                                    paths_type;
 
   public:
 
@@ -38,7 +39,11 @@ struct options {
 
   public:
 
-    options() {}
+    options(paths_type const& directories = paths_type()) : directories(directories) {}
+
+  public:
+
+    paths_type directories;
 };
 
 }}}} // namespace ajg::synth::engines::tmpl

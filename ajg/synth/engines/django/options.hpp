@@ -110,7 +110,7 @@ struct abstract_library {
     virtual ~abstract_library() {}
 };
 
-template <class T> struct engine;
+template <class T, class O> struct engine;
 template <class K> struct builtin_tags;
 template <class K> struct builtin_filters;
 template <class E> struct loader;
@@ -182,7 +182,7 @@ struct options {
 
   private:
 
-    template <class T> friend struct django::engine;
+    template <class T, class O> friend struct django::engine;
     template <class K> friend struct django::builtin_tags;
     template <class K> friend struct django::builtin_filters;
     template <class E> friend struct django::loader;

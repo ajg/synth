@@ -17,18 +17,19 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
 
     typedef string_template                                                     template_type;
     typedef Engine                                                              engine_type;
-    typedef typename engine_type::traits_type                                   traits_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename options_type::traits_type                                  traits_type;
     typedef typename traits_type::string_type                                   string_type;
 
   public:
 
-    string_template(string_type const& string) : string_(string) {
-        this->reset(this->string_.begin(), this->string_.end());
+    string_template(string_type const& string, options_type const& options = options_type()) : string_(string) {
+        this->reset(this->string_.begin(), this->string_.end(), options);
     }
 
     template <class I>
-    string_template(I const& begin, I const& end) : string_(begin, end) {
-        this->reset(this->string_.begin(), this->string_.end());
+    string_template(I const& begin, I const& end, options_type const& options = options_type()) : string_(begin, end) {
+        this->reset(this->string_.begin(), this->string_.end(), options);
     }
 
   public:

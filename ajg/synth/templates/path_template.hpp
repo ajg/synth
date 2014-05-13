@@ -31,7 +31,8 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
     typedef typename path_template::kernel_type                                 kernel_type;
     typedef typename kernel_type::iterator_type                                 iterator_type;
     typedef typename kernel_type::range_type                                    range_type;
-    typedef typename engine_type::traits_type                                   traits_type;
+    typedef typename engine_type::options_type                                  options_type;
+    typedef typename options_type::traits_type                                  traits_type;
 
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -48,15 +49,16 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
   public:
 
-    path_template(path_type const& path, paths_type const& directories = paths_type())
+    // TODO: Get directories from options (when available, otherwise the default, paths_type())
+    path_template(path_type const& path, paths_type const& directories = paths_type(), options_type const& options = options_type())
             : info_(locate_file(path, directories)) {
         if (this->info_.second == 0) { // Empty file.
-            this->reset();
+            this->reset(options);
         }
         else {
             iterator_type begin(text::narrow(this->info_.first));
             iterator_type end = begin ? begin.make_end() : iterator_type();
-            this->reset(begin, end);
+            this->reset(begin, end, options);
         }
     }
 

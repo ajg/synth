@@ -88,11 +88,11 @@ struct library : Options::abstract_library_type {
 
   private:
 
-    names_type /*const*/ tag_names_;
-    names_type /*const*/ filter_names_;
+    names_type tag_names_;
+    names_type filter_names_;
 
-    tags_type    /*const*/ tags_;
-    filters_type /*const*/ filters_;
+    tags_type    tags_;
+    filters_type filters_;
 };
 
 }}}} // namespace ajg::synth::bindings::python

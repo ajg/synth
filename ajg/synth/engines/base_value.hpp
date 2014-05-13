@@ -28,14 +28,14 @@ template <class Char, class Adapted>
 struct adapter;
 
 //
-// value_facade
+// base_value
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Traits, template <class T> class Value>
-struct value_facade {
+struct base_value {
   public:
 
-    typedef value_facade                                                        facade_type;
+    typedef base_value                                                        facade_type;
     typedef Traits                                                              traits_type;
     typedef Value<traits_type>                                                  value_type;
     typedef value_behavior<traits_type, Value>                                  behavior_type;
@@ -63,18 +63,18 @@ struct value_facade {
   protected:
 
     // An uninitialized value
-    value_facade() : adapter_() {}
+    base_value() : adapter_() {}
 
     template <class T>
-    value_facade(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    base_value(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<behavior_type, T>(t)) {}
 
     template <class T, class U>
-    value_facade(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    base_value(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<behavior_type, T>(t, u)) {}
 
     template <class T, class U, class V>
-    value_facade(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    base_value(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : adapter_(new synth::adapter<behavior_type, T>(t, u, v)) {}
 
   public:
@@ -173,7 +173,7 @@ struct value_facade {
   private:
 
     template <class V>                                           friend struct value_iterator;
- // template <template <class T, template <class> class Value> > friend struct value_facade;
+ // template <template <class T, template <class> class Value> > friend struct base_value;
 
     friend ostream_type& operator <<(ostream_type& output, value_type const& value) {
         /* if (!value.initialized()) {

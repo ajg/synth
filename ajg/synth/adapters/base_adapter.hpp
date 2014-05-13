@@ -83,14 +83,8 @@ struct base_adapter {
     virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(invalid_method("find")); }
     virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(invalid_method("index")); }
 
-  private:
-
-    template <class T, class A>                    friend struct synth::adapter;
-    template <class B, class T, class A, class S>  friend struct forwarding_adapter;
-    template <class T, template <class> class V>   friend struct value_facade;
-
-    template <class Adapter> // TODO: Deal with forwarding_adapters.
-    inline Adapter const* get() const { return dynamic_cast<Adapter const*>(this); }
+    virtual boolean_type equal_adapted(adapter_type const& that) const = 0;
+    virtual boolean_type less_adapted (adapter_type const& that) const = 0;
 
     template <class T> // TODO: Deal with forwarding_adapters.
     inline T const& get_adapted() const {
@@ -102,8 +96,8 @@ struct base_adapter {
 
   protected:
 
-    virtual boolean_type equal_adapted(adapter_type const& that) const = 0;
-    virtual boolean_type less_adapted (adapter_type const& that) const = 0;
+    template <class Adapter> // TODO: Deal with forwarding_adapters.
+    inline Adapter const* get() const { return dynamic_cast<Adapter const*>(this); }
 
     template <class Adapter>
     inline boolean_type equal_as(adapter_type const& that) const {
@@ -118,6 +112,11 @@ struct base_adapter {
         Adapter const* const that_ = that->template get<Adapter>();
         return this_ != 0 && that_ != 0 && std::less<typename Adapter::bare_adapted_type>()(this_->adapted_, that_->adapted_);
     }
+
+  private:
+
+    template <class T, class A>                    friend struct synth::adapter;
+    template <class B, class T, class A, class S>  friend struct forwarding_adapter;
 };
 
 }} // namespace ajg::synth

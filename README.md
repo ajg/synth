@@ -244,22 +244,14 @@ Components
  - `variant`
    * `boost::variant`
 
-### Input Formats
-
- - `ini`
- - `json`
- - `xml`
-
 ### Base Components
 
  - `base_adapter`
  - `bindings::base_binding`
  - `engines::base_engine`
+ - `engines::base_options`
+ - `engines::base_value`
  - `templates::base_template`
-
-### Facades
-
- - `value_facade`
 
 ### [Version](./ajg/synth/version.hpp)
 
@@ -282,6 +274,12 @@ Components
  - `AJG_SYNTH_CONFIG_MAX_FRAMES`        (default: `1024`)
  - `AJG_SYNTH_CONFIG_HANDLE_ASSERT`     (default: `BOOST_ASSERT`)
  - `AJG_SYNTH_CONFIG_HANDLE_EXCEPTION`  (default: `boost::throw_exception`)
+
+### Context Data Input Formats
+
+ - `ini`
+ - `json`
+ - `xml`
 
 Django Engine
 -------------
@@ -530,7 +528,6 @@ Future Work
      + Add `render_descriptor` to engines
 
  - Refactoring:
-   * Rename value_facade to base_value
    * Make documentation comments uniformly `///`
    * Replace catching `invalid_method` with dedicated attribute methods
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`

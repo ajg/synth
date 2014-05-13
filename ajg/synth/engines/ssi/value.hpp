@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_SSI_VALUE_HPP_INCLUDED
 
-#include <ajg/synth/value_facade.hpp>
+#include <ajg/synth/engines/base_value.hpp>
 
 namespace ajg {
 namespace synth {
@@ -13,7 +13,7 @@ namespace engines {
 namespace ssi {
 
 template <class Traits>
-struct value : value_facade<Traits, value> {
+struct value : base_value<Traits, value> {
   public:
 
     typedef value                                                               value_type;

@@ -16,7 +16,7 @@
 #include <boost/optional.hpp>
 
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/value_facade.hpp>
+#include <ajg/synth/engines/base_value.hpp>
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/detail/text.hpp>
 
@@ -26,7 +26,7 @@ namespace engines {
 namespace django {
 
 template <class Traits>
-struct value : value_facade<Traits, value> {
+struct value : base_value<Traits, value> {
   public:
 
     typedef value                                                               value_type;

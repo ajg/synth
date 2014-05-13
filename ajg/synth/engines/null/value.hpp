@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include <ajg/synth/value_facade.hpp>
+#include <ajg/synth/engines/base_value.hpp>
 
 namespace ajg {
 namespace synth {
@@ -15,7 +15,7 @@ namespace engines {
 namespace null {
 
 template <class Traits>
-struct value : value_facade<Traits, value> {
+struct value : base_value<Traits, value> {
   public:
 
     typedef value                                                               value_type;

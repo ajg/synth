@@ -53,6 +53,9 @@ struct value_facade {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
+  //typedef typename behavior_type::sequence_type                               sequence_type; // TODO
+  //typedef typename behavior_type::mapping_type                                mapping_type;  // TODO
+
     typedef value_iterator<value_type const>                                    iterator;
     typedef value_iterator<value_type const>                                    const_iterator;
     typedef std::pair<const_iterator, const_iterator>                           range_type;

@@ -24,17 +24,19 @@ namespace python {
 template <class Options>
 struct library : Options::abstract_library_type {
     typedef Options                                      options_type;
-    typedef typename options_type::boolean_type          boolean_type;
-    typedef typename options_type::string_type           string_type;
     typedef typename options_type::value_type            value_type;
-    typedef typename options_type::ostream_type          ostream_type;
     typedef typename options_type::arguments_type        arguments_type;
-    typedef typename options_type::names_type            names_type;
     typedef typename options_type::tag_type              tag_type;
     typedef typename options_type::filter_type           filter_type;
     typedef typename options_type::context_type          context_type;
     typedef typename options_type::tags_type             tags_type;
     typedef typename options_type::filters_type          filters_type;
+    typedef typename options_type::traits_type           traits_type;
+
+    typedef typename traits_type::boolean_type          boolean_type;
+    typedef typename traits_type::string_type           string_type;
+    typedef typename traits_type::names_type            names_type;
+    typedef typename traits_type::ostream_type          ostream_type;
 
     explicit library(py::object const& lib) {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {

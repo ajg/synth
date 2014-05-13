@@ -16,8 +16,13 @@ template <class Traits>
 struct value : value_facade<Traits, value> {
   public:
 
-    typedef value                               value_type;
-    typedef typename value_type::facade_type    facade_type;
+    typedef value                                                               value_type;
+
+    typedef typename value_type::facade_type                                    facade_type;
+    typedef typename value_type::behavior_type                                  behavior_type;
+
+    typedef typename behavior_type::sequence_type                               sequence_type;
+    typedef typename behavior_type::mapping_type                                mapping_type;
 
   public:
 

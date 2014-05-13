@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/engines/base_options.hpp>
 
 namespace ajg {
 namespace synth {
@@ -15,7 +16,7 @@ namespace engines {
 namespace ssi {
 
 template <class Value>
-struct options {
+struct options : base_options<Value> {
   public:
 
     typedef options                                                             options_type;

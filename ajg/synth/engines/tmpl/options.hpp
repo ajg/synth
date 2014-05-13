@@ -5,7 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_TMPL_OPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_TMPL_OPTIONS_HPP_INCLUDED
 
-#include <vector>
+#include <ajg/synth/engines/base_options.hpp>
 
 namespace ajg {
 namespace synth {
@@ -19,7 +19,7 @@ enum tag_mode
     };
 
 template <class Value>
-struct options {
+struct options : base_options<Value> {
   public:
 
     typedef options                                                             options_type;

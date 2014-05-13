@@ -19,9 +19,11 @@ namespace python {
 
 template <class Options>
 struct loader : Options::abstract_loader_type {
-    typedef Options                                      options_type;
-    typedef typename options_type::string_type           string_type;
-    typedef typename options_type::library_type          library_type;
+    typedef Options                                                             options_type;
+    typedef typename options_type::library_type                                 library_type;
+    typedef typename options_type::traits_type                                  traits_type;
+
+    typedef typename traits_type::string_type                                   string_type;
 
     explicit loader(py::object const& object) : object_(object) {}
     virtual ~loader() {}

@@ -8,6 +8,7 @@
 #include <map>
 
 #include <ajg/synth/engines/null/value.hpp>
+#include <ajg/synth/engines/null/options.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 
 namespace ajg {
@@ -15,37 +16,7 @@ namespace synth {
 namespace engines {
 namespace null {
 
-//
-// base_options
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <class Value>
-struct base_options { // TODO: Move to own file and make other engines' options derive from this.
-  public:
-
-    typedef Value                                                               value_type;
-
-    typedef typename value_type::behavior_type                                  behavior_type;
-    typedef typename value_type::range_type                                     range_type;
-    typedef typename value_type::sequence_type                                  sequence_type;
-    typedef typename value_type::mapping_type                                   mapping_type;
-    typedef typename value_type::traits_type                                    traits_type;
-
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::char_type                                     char_type;
-    typedef typename traits_type::size_type                                     size_type;
-    typedef typename traits_type::floating_type                                 floating_type;
-    typedef typename traits_type::date_type                                     date_type;
-    typedef typename traits_type::datetime_type                                 datetime_type;
-    typedef typename traits_type::duration_type                                 duration_type;
-    typedef typename traits_type::string_type                                   string_type;
-    typedef typename traits_type::paths_type                                    paths_type;
-    typedef typename traits_type::names_type                                    names_type;
-    typedef typename traits_type::istream_type                                  istream_type;
-    typedef typename traits_type::ostream_type                                  ostream_type;
-};
-
-template <class Traits, class Options = base_options<value<Traits> > >
+template <class Traits, class Options = options<value<Traits> > >
 struct engine : base_engine<Options> {
   public:
 

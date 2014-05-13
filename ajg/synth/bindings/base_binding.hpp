@@ -22,11 +22,15 @@ namespace ajg {
 namespace synth {
 namespace bindings {
 
+namespace django = ::ajg::synth::engines::django;
+namespace ssi    = ::ajg::synth::engines::ssi;
+namespace tmpl   = ::ajg::synth::engines::tmpl;
+
 template < class Traits
          , template <class E> class Template
-         , template <class T> class Django   = engines::django::engine
-         , template <class T> class SSI      = engines::ssi::engine
-         , template <class T> class TMPL     = engines::tmpl::engine
+         , template <class T, class O = django::options<django::value<T> > > class Django = django::engine
+         , template <class T, class O = ssi::options<ssi::value<T> > >       class SSI    = ssi::engine
+         , template <class T, class O = tmpl::options<tmpl::value<T> > >     class TMPL   = tmpl::engine
          >
 struct base_binding {
   public:

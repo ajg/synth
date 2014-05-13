@@ -16,6 +16,7 @@
 
 #include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/engines/base_options.hpp>
 
 namespace ajg {
 namespace synth {
@@ -120,7 +121,7 @@ template <class E> struct loader;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct options {
+struct options : base_options<Value> {
   public:
 
     typedef options                                                             options_type;

@@ -25,6 +25,7 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
 
+    // TODO: to_complex()
     boolean_type to_boolean() const { return true; }
     range_type   to_range()   const {
         return range_type( const_pair_iterator(this->adapted(), first)
@@ -33,7 +34,6 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
     }
 
     void output(ostream_type& out) const { out << this->adapted().first << ": " << this->adapted().second; }
-    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
   private:
 

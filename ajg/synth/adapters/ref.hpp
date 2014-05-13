@@ -55,14 +55,16 @@ struct adapter<Behavior, boost::reference_wrapper<T> > : base_adapter<Behavior> 
 
   public:
 
-    boolean_type equal(adapter_type const& that) const { return adapted_.equal(that); }
-    boolean_type  to_boolean() const { return adapted_.to_boolean(); }
+    std::type_info const& type()   const { return typeid(T); }
+
+    boolean_type  to_boolean()   const { return adapted_.to_boolean(); }
     floating_type to_floating()  const { return adapted_.to_floating(); }
+    range_type    to_range()     const { return adapted_.to_range(); }
     // integer_type to_integer() const { return adapted_.to_integer(); }
     // string_type  to_string()  const { return adapted_.to_string(); }
+
     void input (istream_type& in)        { adapted_.input(in); }
     void output(ostream_type& out) const { adapted_.output(out); }
-    std::type_info const& type() const { return typeid(T); }
 
   private:
 

@@ -24,10 +24,6 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
     boolean_type  to_boolean()  const { return valid() ? forward().to_boolean() : boolean_type(false); }
     range_type    to_range()    const { return valid() ? forward().to_range() : range_type(); }
 
-    boolean_type equal(adapter_type const& that) const {
-        return valid() ? forward().equal(that) : boolean_type(false);
-    }
-
     void input (istream_type& in)        { if (valid()) forward().input(in); }
     void output(ostream_type& out) const { if (valid()) forward().output(out); }
 

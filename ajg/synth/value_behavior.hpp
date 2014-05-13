@@ -118,68 +118,6 @@ struct value_behavior {
         return value.template typed_as<T>();
     }
 
-    inline static boolean_type equal(value_type const& a, value_type const& b) {
-        // TODO: Defer to adapter even in non-same_as cases:
-        //       if (...) return a.adapter()->equal(*that.adapter());
-        if (a.typed_like(b))                        return a.typed_equal(b);
-        else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() == b.to_boolean();
-        else if (a.is_numeric() && b.is_numeric())  return a.to_floating()  == b.to_floating();
-        else if (a.is_string()  && b.is_string())   return a.to_string()  == b.to_string();
-        // TODO: Sequences, mappings, etc.
-        else return false;
-    }
-
-    inline static boolean_type less(value_type const& a, value_type const& b) {
-        if (a.typed_like(b))                        return a.typed_less(b);
-        else if (a.is_boolean() && b.is_boolean())  return a.to_boolean() < b.to_boolean();
-        else if (a.is_numeric() && b.is_numeric())  return a.to_floating()  < b.to_floating();
-        else if (a.is_string()  && b.is_string())   return a.to_string()  < b.to_string();
-        // TODO: Sequences, mappings, etc.
-        else return false;
-    }
-
-    /*
-    inline static boolean_type equal_sequence( base_adapter<behavior_type> const& a
-                                             , base_adapter<behavior_type> const& b
-                                             ) {
-        return equal_range(a.begin(), b.begin(), a.end(), b.end());
-    }
-
-    inline static boolean_type less_sequence( base_adapter<behavior_type> const& a
-                                            , base_adapter<behavior_type> const& b
-                                            ) {
-        return less_range(a.begin(), b.begin(), a.end(), b.end());
-    }
-    */
-
-    // TODO: Use the right STL function.
-    inline static boolean_type equal_range( const_iterator i1, const_iterator i2
-                                          , const_iterator e1, const_iterator e2
-                                          ) {
-        for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
-            if (!i1->equal(*i2)) {
-                return false;
-            }
-        }
-
-        // Make sure |this| == |that|.
-        return i1 == e1 && i2 == e2;
-    }
-
-    // TODO: Use std::lexicographic_compare.
-    inline static boolean_type less_range( const_iterator i1, const_iterator i2
-                                         , const_iterator e1, const_iterator e2
-                                         ) {
-        for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
-            if (!i1->less(*i2)) {
-                return false;
-            }
-        }
-
-        // Make sure |this| <= |that|.
-        return i1 == e1;
-    }
-
     inline static void enumerate( base_adapter<behavior_type> const& adapter
                                 , ostream_type&                      ostream
                                 ) {
@@ -193,6 +131,74 @@ struct value_behavior {
     inline static boolean_type contains(value_type const& a, value_type const& b) {
         return !a.find(b).equal(a.end()); // TODO: Defer to adapter.
     }
+
+    inline static boolean_type equal(value_type const& a, value_type const& b) {
+        // TODO: Defer to adapter even in non-same_as cases:
+        //       if (...) return a.adapter()->equal(*that.adapter());
+        if (a.typed_like(b))                        return a.typed_equal(b);
+        else if (a.is_boolean() && b.is_boolean())  return a.to_boolean()  == b.to_boolean();
+        else if (a.is_numeric() && b.is_numeric())  return a.to_floating() == b.to_floating();
+        else if (a.is_string()  && b.is_string())   return a.to_string()   == b.to_string();
+        // TODO: Sequences, mappings, etc.
+        else return false;
+    }
+
+    inline static boolean_type less(value_type const& a, value_type const& b) {
+        if (a.typed_like(b))                        return a.typed_less(b);
+        else if (a.is_boolean() && b.is_boolean())  return a.to_boolean()  < b.to_boolean();
+        else if (a.is_numeric() && b.is_numeric())  return a.to_floating() < b.to_floating();
+        else if (a.is_string()  && b.is_string())   return a.to_string()   < b.to_string();
+        // TODO: Sequences, mappings, etc.
+        else return false;
+    }
+
+    /*
+    inline static boolean_type equal_sequence( base_adapter<behavior_type> const& a
+                                             , base_adapter<behavior_type> const& b
+                                             ) {
+        return equal_range(a.to_range(), b.to_range());
+    }
+
+    inline static boolean_type less_sequence( base_adapter<behavior_type> const& a
+                                            , base_adapter<behavior_type> const& b
+                                            ) {
+        return less_range(a.to_range(), b.to_range());
+    }
+
+    // TODO: Use the right STL function.
+    inline static boolean_type equal_range(range_type const& a, range_type const& b) {
+        const_iterator i1 = a.first;
+        const_iterator i2 = b.first;
+        const_iterator e1 = a.second;
+        const_iterator e2 = b.second;
+
+        for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
+            if (!i1->equal(*i2)) {
+                return false;
+            }
+        }
+
+        // Make sure |this| == |that|.
+        return i1 == e1 && i2 == e2;
+    }
+
+    // TODO: Use std::lexicographic_compare.
+    inline static boolean_type less_range(range_type const& a, range_type const& b) {
+        const_iterator i1 = a.first;
+        const_iterator i2 = b.first;
+        const_iterator e1 = a.second;
+        const_iterator e2 = b.second;
+
+        for (; i1 != e1 && i2 != e2; ++i1, ++i2) {
+            if (!i1->less(*i2)) {
+                return false;
+            }
+        }
+
+        // Make sure |this| <= |that|.
+        return i1 == e1;
+    }
+    */
 };
 
 }} // namespace ajg::synth

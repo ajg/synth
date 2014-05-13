@@ -41,7 +41,6 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
     }
 
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 };
 
 //
@@ -66,7 +65,6 @@ struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Beh
     }
 
     void output(ostream_type& out) const { behavior_type::enumerate(*this, out); }
-    boolean_type equal(adapter_type const& that) const { return this->equal_sequence(that); }
 
   protected:
 

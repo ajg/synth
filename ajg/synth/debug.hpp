@@ -51,11 +51,12 @@ namespace debug {
 #define AJG_SYNTH_DEBUG_LOG() (::ajg::synth::debug::log(__FUNCTION__, __FILE__, __LINE__))
 
 ///
-/// SHOW, LOG
+/// SHOW, LOG, TRACE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define SHOW(e) (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
 #define LOG(e)  (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
+#define TRACE   ::ajg::synth::debug::tracer const _tracer_(__FUNCTION__, __FILE__, __LINE__)
 
 ///
 /// count, level, quiet
@@ -86,18 +87,45 @@ inline std::ostream& log( char const* const function
                         ) {
     std::ostream& stream = std::cerr;
 
-    // TODO: atomic count::inc()
     int const c = count::get();
-    count::set(c + 1);
+    count::set(c + 1); // TODO: atomic ::inc()
 
     if (c == 0) {
         stream << std::boolalpha << std::endl;
     }
 
     std::string const indent(level::get() * 2, ' ');
-    stream << file << ":" << line << ":" << column << ": in " << function << "(...):\t" << indent;
+    stream << file << ":" << line << ":" << column << ":\tin " << function << "(...):\t" << indent;
     return stream;
 }
+
+///
+/// tracer
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct tracer : boost::noncopyable {
+    char const* const function;
+    char const* const file;
+    long        const line;
+    long        const column;
+
+    tracer( char const* const function
+          , char const* const file
+          , long        const line
+          , long        const column = 1)
+              : function(function)
+              , file(file)
+              , line(line)
+              , column(column) {
+        log(this->function, this->file, this->line, this->column) << "[BEGIN]" << std::endl;
+        level::set(level::get() + 1); // TODO: atomic ::inc()
+    }
+
+    ~tracer() {
+        level::set(level::get() - 1); // TODO: atomic ::inc()
+        // log(this->function, this->file, this->line, this->column) << "[END]" << std::endl;
+    }
+};
 
 ///
 /// abbreviate
@@ -109,7 +137,6 @@ inline std::string abbreviate(char const* s) {
 
     bool empty = true;
     int n = 0;
-
 
     while (char const c = *s++) {
         if ((c == '<' && n++ == 0) || (c == '>' && --n == 0)
@@ -146,6 +173,7 @@ inline std::string unmangle(std::string const& mangled) {
 }
 
 // TODO: Reimplement using static regexes.
+// FIXME: Some return types aren't matching properly (e.g. _object* or std::__1::basic_string<...>.
 static boost::xpressive::sregex const signature = boost::xpressive::sregex::compile(
     "((?<=[\\s:~])(\\w+)\\s*\\(([\\w\\s,<>\\[\\].=&':/*]*?)\\)\\s*(const)?\\s*(?={))");
 

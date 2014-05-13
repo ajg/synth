@@ -32,6 +32,7 @@ struct value : value_facade<Traits, value> {
     typedef value                                                               value_type;
     typedef Traits                                                              traits_type;
     typedef typename value_type::facade_type                                    facade_type;
+    typedef typename value_type::behavior_type                                  behavior_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::size_type                                     size_type;

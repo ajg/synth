@@ -26,7 +26,6 @@
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/django/value.hpp>
-#include <ajg/synth/engines/django/loader.hpp>
 #include <ajg/synth/engines/django/options.hpp>
 #include <ajg/synth/engines/django/builtin_tags.hpp>
 #include <ajg/synth/engines/django/builtin_filters.hpp>
@@ -64,8 +63,6 @@ struct engine : base_engine<Options> {
 
     typedef typename value_type::behavior_type                                  behavior_type;
     typedef typename value_type::sequence_type                                  sequence_type;
-
-    typedef loader<engine_type>                                                 loader_type;
 
   private:
 
@@ -697,17 +694,68 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         return boost::none;
     }
 
-    void load_library( context_type&      context
-                     , options_type&      options
-                     , string_type const& library
-                     , names_type  const* names   = 0
+    void load_library( options_type&      options
+                     , string_type const& library_name
+                     , names_type  const& names        = names_type()
                      ) const {
-        loader_type::load(context, options, library, names);
+        typedef typename options_type::tag_type                                 tag_type;
+        typedef typename options_type::filter_type                              filter_type;
+        typedef typename options_type::library_type                             library_type;
+        typedef typename options_type::loader_type                              loader_type;
+
+        library_type library = options.libraries[library_name];
+
+        if (!library) {
+            BOOST_FOREACH(loader_type const& loader, options.loaders) {
+                if ((library = loader->load_library(library_name))) {
+                    options.libraries[library_name] = library;
+                    break;
+                }
+            }
+        }
+
+        if (!library) {
+            AJG_SYNTH_THROW(missing_library(text::narrow(library_name)));
+        }
+        else if (!names.empty()) {
+            BOOST_FOREACH(string_type const& name, names) {
+                tag_type    const& tag    = library->get_tag(name);
+                filter_type const& filter = library->get_filter(name);
+
+                if (!tag && !filter) {
+                    AJG_SYNTH_THROW(missing_key(text::narrow(name)));
+                }
+                if (tag) {
+                    options.loaded_tags[name] = tag;
+                }
+                if (filter) {
+                    options.loaded_filters[name] = filter;
+                }
+            }
+        }
+        else {
+            BOOST_FOREACH(string_type const& name, library->list_tags()) {
+                if (tag_type const& tag = library->get_tag(name)) {
+                    options.loaded_tags[name] = tag;
+                }
+                else {
+                    AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                }
+            }
+            BOOST_FOREACH(string_type const& name, library->list_filters()) {
+                if (filter_type const& filter = library->get_filter(name)) {
+                    options.loaded_filters[name] = filter;
+                }
+                else {
+                    AJG_SYNTH_THROW(missing_filter(text::narrow(name)));
+                }
+            }
+        }
     }
 
   private:
 
-    // NOTE: These must be near the top so they are initialized by the time they're needed.
+    // NOTE: These must be near or at the top so they are initialized by the time they're needed.
     symbols_type       keywords_;
     symbols_type       reserved_;
     markers_type       markers;

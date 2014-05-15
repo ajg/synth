@@ -252,7 +252,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                ) const {
         // Make a non-const copy so that #set can modify it.
         context_type copy = context;
-        render_block(ostream, this->get_match(result), copy, options);
+        this->render_block(ostream, this->get_match(result), copy, options);
     }
 
     void render_path( ostream_type&       ostream
@@ -278,7 +278,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
-            render_match(ostream, nested, context, options);
+            this->render_match(ostream, nested, context, options);
         }
     }
 
@@ -320,9 +320,9 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (is(match, this->plain)) render_plain(ostream, match, context, options);
-        else if (is(match, this->block)) render_block(ostream, match, context, options);
-        else if (is(match, this->tag))   render_tag(ostream, match, context, options);
+             if (is(match, this->plain)) this->render_plain(ostream, match, context, options);
+        else if (is(match, this->block)) this->render_block(ostream, match, context, options);
+        else if (is(match, this->tag))   this->render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 

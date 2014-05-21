@@ -46,9 +46,57 @@ template <class Container>
 inline boost::optional<typename Container::mapped_type> find
         ( typename Container::key_type const& needle
         , Container                    const& container
+        , typename boost::enable_if<has_mapped_type<Container> >::type* = 0
         ) {
     typename Container::const_iterator const it = container.find(needle);
     if (it == container.end()) return boost::none; else return it->second;
+}
+
+/*
+template <class Needle, class Container>
+inline typename Container::value_type find
+        ( Needle                         const& needle
+        , Container                      const& container
+        , typename Container::value_type const& default_
+        , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
+        ) {
+    typename Container::const_iterator const it = std::find(container.begin(), container.end(), needle);
+    if (it == container.end()) return default_; else return *it;
+}
+
+template <class Container>
+inline typename Container::mapped_type find
+        ( typename Container::key_type    const& needle
+        , Container                       const& container
+        , typename Container::mapped_type const& default_
+        , typename boost::enable_if<has_mapped_type<Container> >::type* = 0
+        ) {
+    typename Container::const_iterator const it = container.find(needle);
+    if (it == container.end()) return default_; else return it->second;
+}
+*/
+
+//
+// contains:
+//     TODO: Move to own file.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Needle, class Container>
+inline bool contains
+        ( Needle    const& needle
+        , Container const& container
+        , typename boost::disable_if<has_mapped_type<Container> >::type* = 0
+        ) {
+    return std::find(container.begin(), container.end(), needle) != container.end();
+}
+
+template <class Container>
+inline bool contains
+        ( typename Container::key_type const& needle
+        , Container                    const& container
+        , typename boost::enable_if<has_mapped_type<Container> >::type* = 0
+        ) {
+    return container.find(needle) != container.end();
 }
 
 }}} // namespace ajg::synth::detail

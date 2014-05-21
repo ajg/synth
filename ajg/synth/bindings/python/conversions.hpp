@@ -121,27 +121,40 @@ inline py::object from_value(Value const& value) {
 }
 
 template <class Arguments>
-inline std::pair<py::tuple, py::dict> from_arguments(Arguments const& arguments) {
-    py::list list;
-
+inline std::pair<py::tuple, py::dict> from_arguments(Arguments const& arguments, py::list& list, py::dict& dict) {
     BOOST_FOREACH(typename Arguments::first_type::value_type const& value, arguments.first) {
         list.append(from_value(value));
     }
 
-    std::pair<py::tuple, py::dict> args((py::tuple(list)), py::dict());
-
     BOOST_FOREACH(typename Arguments::second_type::value_type const& pair, arguments.second) {
-        args.second[pair.first] = from_value(pair.second);
+        dict[pair.first] = from_value(pair.second);
     }
 
-    return args;
+    return std::pair<py::tuple, py::dict>((py::tuple(list)), dict);
+}
+
+template <class Arguments>
+inline std::pair<py::tuple, py::dict> from_arguments(Arguments const& arguments) {
+    py::list list;
+    py::dict dict;
+    return from_arguments(arguments, list, dict);
 }
 
 template <class Value, class Arguments>
-inline std::pair<py::tuple, py::dict> from_arguments(Value const& p0, Arguments arguments) {
+inline std::pair<py::tuple, py::dict> from_arguments_with(Value const& p0, Arguments arguments) {
     arguments.first.insert(arguments.first.begin(), 1, p0);
     return from_arguments(arguments);
 }
+
+
+template <class Arguments>
+inline std::pair<py::tuple, py::dict> from_arguments_with_object(py::object const& obj, Arguments arguments) {
+    py::list list;
+    py::dict dict;
+    list.append(obj);
+    return from_arguments(arguments, list, dict);
+}
+
 
 }}}} // namespace ajg::synth::bindings::python
 

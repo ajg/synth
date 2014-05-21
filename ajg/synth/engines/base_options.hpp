@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ENGINES_BASE_OPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_BASE_OPTIONS_HPP_INCLUDED
 
+#include <boost/noncopyable.hpp>
+
 namespace ajg {
 namespace synth {
 namespace engines {
@@ -14,7 +16,7 @@ namespace engines {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct base_options {
+struct base_options : boost::noncopyable {
   public:
 
     typedef Value                                                               value_type;

@@ -36,17 +36,17 @@ struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_a
         }
     }
 
+    range_type to_range() const {
+        return range_type(this->adapted().begin(), this->adapted().end());
+    }
+
     void output(ostream_type& out) const {
         if (this->adapted().empty()) {
             out << value_type(this->adapted().data());
         }
         else {
-            behavior_type::enumerate(*this, out);
+            behavior_type::delimited(out, this->to_range());
         }
-    }
-
-    range_type to_range() const {
-        return range_type(this->adapted().begin(), this->adapted().end());
     }
 
     optional<value_type> index(value_type const& what) const {

@@ -236,7 +236,8 @@ struct text {
         std::vector<string_type> result;
         if (hint > 0) result.reserve(hint);
         int (*predicate)(int) = std::isspace;
-        algo::split(result, string, predicate);
+        string_type const s = algo::trim_copy(string); // Prevent empties.
+        algo::split(result, s, predicate);
         return result;
     }
 

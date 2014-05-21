@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/adapters.hpp>
@@ -32,7 +33,7 @@ template < class Traits
          , template <class T, class O = ssi::options<ssi::value<T> > >       class SSI    = ssi::engine
          , template <class T, class O = tmpl::options<tmpl::value<T> > >     class TMPL   = tmpl::engine
          >
-struct base_binding {
+struct base_binding : boost::noncopyable {
   public:
 
     typedef base_binding                                                        base_binding_type;

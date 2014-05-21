@@ -72,7 +72,7 @@ struct engine : base_engine<Options> {
 
 template <class Traits, class Options>
 template <class Iterator>
-struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator>{
+struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;

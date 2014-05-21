@@ -50,6 +50,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     typedef Iterator                                                            iterator_type;
     typedef engine                                                              engine_type;
     typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::range_type                                    range_type;
 
   public:
 
@@ -57,9 +58,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
   public:
 
-    template <class I> void parse(std::pair<I, I> const&, result_type&, options_type const&) const {}
-    template <class I> void parse(I const&, I const&, result_type&, options_type const&)     const {}
-
+    void parse(range_type const&, result_type&, options_type const&) const {}
     void render(ostream_type&, result_type const&, context_type const&, options_type const&) const {}
 
 }; // kernel

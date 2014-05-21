@@ -11,7 +11,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <ajg/synth/engines.hpp>
@@ -133,14 +133,14 @@ struct base_binding : boost::noncopyable {
 
   private:
 
-    // TODO[c++11]: Use unique_ptr?
-    boost::shared_ptr<django_template_type> django_template_;
-    boost::shared_ptr<ssi_template_type>    ssi_template_;
-    boost::shared_ptr<tmpl_template_type>   tmpl_template_;
-
     django_options_type django_options_;
     ssi_options_type    ssi_options_;
     tmpl_options_type   tmpl_options_;
+
+    // TODO: Consider using a variant to avoid the additional heap allocation.
+    boost::scoped_ptr<django_template_type> django_template_;
+    boost::scoped_ptr<ssi_template_type>    ssi_template_;
+    boost::scoped_ptr<tmpl_template_type>   tmpl_template_;
 };
 
 }}} // namespace ajg::synth::bindings

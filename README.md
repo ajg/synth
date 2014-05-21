@@ -511,6 +511,9 @@ Future Work
      + [v1+] Create `xslt` engine
 
  - Adapters:
+   * Adapter for `boost::tuple`
+   * Adapter for `boost::any`
+   * Adapter for `boost::function`
    * Adapter for `boost::tribool`
    * Adapters for `boost::fusion` sequences
    * Adapters for `boost::local_time` types

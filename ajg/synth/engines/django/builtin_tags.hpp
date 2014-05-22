@@ -43,14 +43,19 @@ struct builtin_tags {
     typedef typename kernel_type::id_type                                       id_type;
     typedef typename kernel_type::regex_type                                    regex_type;
     typedef typename kernel_type::match_type                                    match_type;
+    typedef typename kernel_type::sub_match_type                                sub_match_type;
     typedef typename kernel_type::engine_type                                   engine_type;
+    typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::state_type                                    state_type;
+    typedef typename kernel_type::range_type                                    range_type;
+    typedef typename kernel_type::iterator_type                                 iterator_type;
 
     typedef typename engine_type::context_type                                  context_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename engine_type::value_type                                    value_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
-    typedef typename value_type::range_type                                     range_type;
+ // typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
     typedef typename value_type::mapping_type                                   mapping_type;
     typedef typename value_type::traits_type                                    traits_type;
@@ -61,6 +66,8 @@ struct builtin_tags {
     typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::path_type                                     path_type;
+    typedef typename traits_type::names_type                                    names_type;
+    typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -69,6 +76,7 @@ struct builtin_tags {
   public:
 
     typedef void (*tag_type)( kernel_type  const& kernel
+                            , result_type  const& result
                             , match_type   const& match
                             , context_type const& context // TODO: unconst?
                             , options_type const& options // TODO: unconst?
@@ -80,6 +88,9 @@ struct builtin_tags {
     typedef std::map<id_type, tag_type>                                         tags_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef formatter<options_type>                                             formatter_type;
+    typedef typename options_type::renderer_type                                renderer_type;
+    typedef typename options_type::segment_type                                 segment_type;
+    typedef typename options_type::segments_type                                segments_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef typename arguments_type::second_type::value_type                    named_argument_type;
 
@@ -158,6 +169,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -165,15 +177,14 @@ struct builtin_tags {
                           ) {
             string_type const& setting = match(kernel.name)[id].str();
             match_type  const& block   = match(kernel.block);
-            boolean_type autoescape = true;
+            boolean_type const old_autoescape = options.autoescape;
 
-                 if (setting == text::literal("on"))  autoescape = true;
-            else if (setting == text::literal("off")) autoescape = false;
+                 if (setting == text::literal("on"))  const_cast<options_type&>(options).autoescape = true;
+            else if (setting == text::literal("off")) const_cast<options_type&>(options).autoescape = false;
             else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
-            options_type options_copy = options; // NOTE: Don't make the copy const.
-            options_copy.autoescape = autoescape;
-            kernel.render_block(ostream, block, context, options_copy);
+            kernel.render_block(ostream, result, block, context, options);
+            const_cast<options_type&>(options).autoescape = old_autoescape;
         }
     };
 
@@ -188,6 +199,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -204,7 +216,7 @@ struct builtin_tags {
             }
 
             if (options.top_level()) { // The block is being rendered directly.
-                kernel.render_block(ostream, block, context, options);
+                kernel.render_block(ostream, result, block, context, options);
                 return;
             } // Else, the block is being derived from instead:
 
@@ -216,7 +228,7 @@ struct builtin_tags {
             { // TODO: Either make an options copy or make this strongly exception safe:
                 string_type const previous_block = options.base_block_;
                 const_cast<options_type&>(options).base_block_ = name;
-                kernel.render_block(ss, block, context, options);
+                kernel.render_block(ss, result, block, context, options);
                 const_cast<options_type&>(options).base_block_ = previous_block;
             }
             (*options.blocks_)[name] = ss.str();
@@ -236,6 +248,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -255,6 +268,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -284,6 +298,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -297,12 +312,12 @@ struct builtin_tags {
             size_type   const  current  = detail::find(position, options.cycles_).get_value_or(0);
 
             match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
-            value_type const  value = kernel.evaluate(val, context, options);
+            value_type const  value = kernel.evaluate(result, val, context, options);
             const_cast<options_type&>(options).cycles_[position] = (current + 1) % total;
 
             if (!name) { // e.g. cycle foo
                 ostream << value;
-                kernel.render_block(ostream, block, context, options);
+                kernel.render_block(ostream, result, block, context, options);
             }
             else { // e.g. cycle foo as bar {silent}
                 boolean_type const silent = match[s1].matched;
@@ -310,7 +325,7 @@ struct builtin_tags {
 
                 context_type context_copy = context;
                 context_copy[name[id].str()] = value;
-                kernel.render_block(ostream, block, context_copy, options);
+                kernel.render_block(ostream, result, block, context_copy, options);
             }
         }
     };
@@ -323,6 +338,7 @@ struct builtin_tags {
     struct cycle_as_tag {
         static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -338,6 +354,7 @@ struct builtin_tags {
     struct cycle_as_silent_tag {
         static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -355,6 +372,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -381,6 +399,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -389,29 +408,29 @@ struct builtin_tags {
             match_type const& body = match(kernel.block);
             path_type  const  path = kernel.extract_path(match(kernel.string_literal));
 
-            std::basic_ostream<char_type> null_stream(0);
+            ostream_type null_stream(0);
             typename options_type::blocks_type blocks;
-
-            options_type options_copy = options;
-            options_copy.blocks_ = &blocks;
+            const_cast<options_type&>(options).blocks_ = &blocks;
 
             // First, render the base template as if it were stand-alone, so that block.super is
             // available to the derived template; non-block content is discarded.
-            kernel.render_path(null_stream, path, context, options_copy);
+            kernel.render_path(null_stream, result, path, context, options/*_copy*/);
 
-            options_copy = options; // Discard non-block modifications to options.
-            options_copy.blocks_ = &blocks;
+            // options_copy = options; // Discard non-block modifications to options.
+            // options_copy.blocks_ = &blocks;
 
             // Second, render any blocks in the derived template, while making the base template's
             // versions available to the derivee as block.super; non-block content is discarded.
-            kernel.render_block(null_stream, body, context, options_copy);
+            kernel.render_block(null_stream, result, body, context, options/*_copy*/);
 
-            options_copy = options; // Discard non-block modifications to options.
-            options_copy.blocks_ = &blocks;
+            // options_copy = options; // Discard non-block modifications to options.
+            // options_copy.blocks_ = &blocks;
 
             // Third, render the base template again with any (possibly) overridden blocks.
             // TODO: Parse and generate the result once and reuse it or have render_path do caching.
-            kernel.render_path(ostream, path, context, options_copy);
+            kernel.render_path(ostream, result, path, context, options/*_copy*/);
+
+            const_cast<options_type&>(options).blocks_ = 0;
         }
     };
 
@@ -425,6 +444,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -434,7 +454,7 @@ struct builtin_tags {
 
             BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
                 try {
-                    if (value_type const value = kernel.evaluate(val, context, options)) {
+                    if (value_type const value = kernel.evaluate(result, val, context, options)) {
                         ostream << value;
                         break;
                     }
@@ -462,14 +482,15 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
             string_stream_type ss;
-            kernel.render_block(ss, match(kernel.block), context, options);
-            ostream << kernel.apply_filters(ss.str(), match(kernel.filters), context, options);
+            kernel.render_block(ss, result, match(kernel.block), context, options);
+            ostream << kernel.apply_filters(ss.str(), result, match(kernel.filters), context, options);
         }
     };
 
@@ -486,6 +507,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -495,7 +517,7 @@ struct builtin_tags {
             match_type   const& for_     = match(kernel.block, 0);
             match_type   const& empty    = match(kernel.block, 1);
             boolean_type const  reversed = match[s1].matched;
-            value_type          value    = kernel.evaluate(match(kernel.value), context, options);
+            value_type          value    = kernel.evaluate(result, match(kernel.value), context, options);
 
             if (reversed) {
                 value = value.reverse();
@@ -512,7 +534,7 @@ struct builtin_tags {
 
             if (it == end) {
                 if (empty) { // for ... empty ... endfor case.
-                    kernel.render_block(ostream, empty, context, options);
+                    kernel.render_block(ostream, result, empty, context, options);
                 }
                 return;
             }
@@ -537,7 +559,7 @@ struct builtin_tags {
                     }
                 }
 
-                kernel.render_block(ostream, for_, context_copy, options);
+                kernel.render_block(ostream, result, for_, context_copy, options);
             }
         }
     };
@@ -550,6 +572,7 @@ struct builtin_tags {
     struct for_empty_tag {
         static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -569,6 +592,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -576,10 +600,10 @@ struct builtin_tags {
                           ) {
             match_type   const& if_   = match(kernel.block, 0);
             match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ = kernel.evaluate(match(kernel.value), context, options);
+            boolean_type const  cond_ = kernel.evaluate(result, match(kernel.value), context, options);
 
-                 if (cond_) kernel.render_block(ostream, if_,   context, options);
-            else if (else_) kernel.render_block(ostream, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, result, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, result, else_, context, options);
         }
     };
 
@@ -595,6 +619,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -612,32 +637,32 @@ struct builtin_tags {
 
                 BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
                     string_type const s = text::strip(val.str());
-                    values[s] = kernel.evaluate(val, context, options);
+                    values[s] = kernel.evaluate(result, val, context, options);
                 }
 
                 if (value && value->template as<mapping_type>() == values) {
                     if (else_) {
-                        kernel.render_block(ostream, else_, context, options);
+                        kernel.render_block(ostream, result, else_, context, options);
                     }
                 }
                 else {
                     const_cast<options_type&>(options).changes_[position] = values;
-                    kernel.render_block(ostream, if_, context, options);
+                    kernel.render_block(ostream, result, if_, context, options);
                 }
             }
             else { // No variables, compare contents.
                 string_stream_type ss;
-                kernel.render_block(ss, if_, context, options);
-                string_type const result = ss.str();
+                kernel.render_block(ss, result, if_, context, options);
+                string_type const s = ss.str();
 
-                if (value && value->template as<string_type>() == result) {
+                if (value && value->template as<string_type>() == s) {
                     if (else_) {
-                        kernel.render_block(ostream, else_, context, options);
+                        kernel.render_block(ostream, result, else_, context, options);
                     }
                 }
                 else {
-                    const_cast<options_type&>(options).changes_[position] = result;
-                    ostream << result;
+                    const_cast<options_type&>(options).changes_[position] = s;
+                    ostream << s;
                 }
             }
         }
@@ -655,6 +680,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -664,11 +690,11 @@ struct builtin_tags {
             match_type   const& right = match(kernel.value, 1);
             match_type   const& if_   = match(kernel.block, 0);
             match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ = kernel.evaluate(left, context, options) ==
-                                        kernel.evaluate(right, context, options);
+            boolean_type const  cond_ = kernel.evaluate(result, left, context, options) ==
+                                        kernel.evaluate(result, right, context, options);
 
-                 if (cond_) kernel.render_block(ostream, if_,   context, options);
-            else if (else_) kernel.render_block(ostream, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, result, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, result, else_, context, options);
         }
     };
 
@@ -685,6 +711,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -694,11 +721,11 @@ struct builtin_tags {
             match_type   const& right = match(kernel.value, 1);
             match_type   const& if_   = match(kernel.block, 0);
             match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ = kernel.evaluate(left, context, options) !=
-                                        kernel.evaluate(right, context, options);
+            boolean_type const  cond_ = kernel.evaluate(result, left, context, options) !=
+                                        kernel.evaluate(result, right, context, options);
 
-                 if (cond_) kernel.render_block(ostream, if_,   context, options);
-            else if (else_) kernel.render_block(ostream, else_, context, options);
+                 if (cond_) kernel.render_block(ostream, result, if_,   context, options);
+            else if (else_) kernel.render_block(ostream, result, else_, context, options);
         }
     };
 
@@ -713,6 +740,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -723,7 +751,7 @@ struct builtin_tags {
             if (match_type const& args = match(kernel.arguments)) {
                 boolean_type const only = match[s1].matched;
 
-                arguments_type const& arguments = kernel.evaluate_arguments(args, context, options);
+                arguments_type const& arguments = kernel.evaluate_arguments(result, args, context, options);
                 if (!arguments.first.empty()) {
                     AJG_SYNTH_THROW(std::invalid_argument("positional argument"));
                 }
@@ -732,10 +760,10 @@ struct builtin_tags {
                 BOOST_FOREACH(named_argument_type const& argument, arguments.second) {
                     context_copy[argument.first] = argument.second;
                 }
-                kernel.render_path(ostream, path, context_copy, options);
+                kernel.render_path(ostream, result, path, context_copy, options);
             }
             else {
-                kernel.render_path(ostream, path, context, options);
+                kernel.render_path(ostream, result, path, context, options);
             }
         }
     };
@@ -748,6 +776,7 @@ struct builtin_tags {
     struct include_with_tag {
         static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -763,6 +792,7 @@ struct builtin_tags {
     struct include_with_only_tag {
         static regex_type syntax(kernel_type& kernel) { return kernel.nothing; }
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -771,32 +801,485 @@ struct builtin_tags {
     };
 
 //
-// load_tag
+// library_tag
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    struct load_tag {
-        static regex_type syntax(kernel_type& kernel) {
-            return TAG(kernel.reserved("load") >> kernel.packages) >> kernel.block;
-        }
+    struct library_tag {
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            match_type const& packages = match(kernel.packages);
-            match_type const& block    = match(kernel.block);
-            options_type options_copy  = options;
-            context_type context_copy  = context;
+            SHOW(match.str());
+            SHOW(match.regex_id());
+            SHOW(match.nested_results().size());
 
-            BOOST_FOREACH(match_type const& package, kernel.select_nested(packages, kernel.package)) {
-                string_type const& library = package[id].str();
-                kernel.load_library(context_copy, options_copy, library);
+
+            /*{ match_type const& nested = match; // kernel.unnest(match);
+            // BOOST_FOREACH(match_type const& nested, kernel.select_nested(match, kernel.monadic_tag)) {
+                size_type const position = nested.position(1);
+
+                if (boost::optional<renderer_type> const& renderer = kernel.get_state(result).get_renderer(position)) {
+
+                    // string_type const& name  = nested(kernel.unreserved_name)[id].str();
+                    match_type  const& body  = nested(kernel.block);
+                    match_type  const& args  = nested; // (kernel.arguments);
+                    arguments_type arguments = kernel.evaluate_arguments(result, args, context, options);
+
+                    SHOW(body.empty());
+                    SHOW(body.str());
+                    BOOST_ASSERT(!renderer->empty());
+                    (*renderer)(arguments, ostream, const_cast<context_type&>(context), const_cast<options_type&>(options), &body);
+                }
+                else {
+                    ostream << "[" << position << "]";
+                    // AJG_SYNTH_THROW(std::logic_error("missing renderer"));
+                }
+            }*/
+
+            /*
+            BOOST_FOREACH(match_type const& nested, kernel.select_nested(match, kernel.library_tag)) {
+
+                string_type const& name  = nested(kernel.unreserved_name)[id].str();
+                match_type  const& args  = nested; // (kernel.arguments);
+                match_type  const& body  = nested(kernel.block);
+                arguments_type arguments = kernel.evaluate_arguments(result, args, context, options);
+
+                AJG_SYNTH_THROW(not_implemented("library_tag::render"));
+            }*/
+
+            size_type const position = match.position(1);
+            string_type const& name  = match(kernel.unreserved_name)[id].str();
+            match_type  const& args  = match; // (kernel.arguments);
+            arguments_type arguments = kernel.evaluate_arguments(result, args, context, options);
+            SHOW(name);
+            SHOW(position);
+
+            if (boost::optional<renderer_type> const& renderer = kernel.get_state(result).get_renderer(position)) {
+                BOOST_ASSERT(!renderer->empty());
+                (*renderer)(arguments, ostream, const_cast<context_type&>(context), const_cast<options_type&>(options), &match);
             }
-
-            kernel.render_block(ostream, block, context_copy, options_copy);
+            else {
+                AJG_SYNTH_THROW(std::logic_error("missing renderer"));
+            }
         }
+
+        static void render_block( size_type      const  index
+                                , kernel_type    const& kernel
+                                , result_type    const& result
+                                , arguments_type const& arguments
+                                , ostream_type&         ostream
+                                , context_type&         context
+                                , options_type&         options
+                                , void const*           m
+                                ) {
+            BOOST_ASSERT(m);
+            match_type const& match = *static_cast<match_type const*>(m);
+            match_type const& block = match(kernel.block, index);
+            kernel.render_block(ostream, result, block, context, options);
+        }
+
+        static regex_type syntax(kernel_type& kernel) {
+            // typename x::function<found_tag_name>::type const found_tag = {{}};
+            // return (s1 = TAG(kernel.unreserved_name >> kernel.arguments)) >> kernel.block;
+/*
+
+            typename x::function<on_arg_>::type const on_arg = {{}};
+            typename x::function<on_tag_>::type const on_tag = {{}};
+            typename x::function<on_nil_>::type const on_nil = {{}};
+
+            kernel.library_tag = x::keep(
+                x::keep((TAG((s1 = kernel.unreserved_name) >> *x::keep(kernel.argument[ on_arg(kernel._state, _) ])))
+                    [ x::check(on_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s1, _)) ])
+                // >> !(x::nil[ x::check(on_nil(kernel._state)) ] >> kernel.block)
+                >> !(x::keep(x::nil[ x::check(on_nil(kernel._state)) ]) >> kernel.block)
+            );
+
+            return -+kernel.library_tag;
+*/
+/*
+            typename x::function<on_arg_>::type const on_arg = {{}};
+            typename x::function<on_monadic_tag_>::type const on_monadic_tag = {{}};
+            typename x::function<on_dyadic1_tag_>::type const on_dyadic1_tag = {{}};
+            typename x::function<on_dyadic2_tag_>::type const on_dyadic2_tag = {{}};
+
+            kernel.monadic_tag = x::keep((TAG((s1 = kernel.unreserved_name) >> *kernel.argument[ on_arg(kernel._state, _) ]))[x::check(on_monadic_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s1, _))]);
+            kernel.dyadic_tag  = x::keep((TAG((s1 = kernel.unreserved_name) >> *kernel.argument[ on_arg(kernel._state, _) ]))[x::check(on_dyadic1_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s1, _))])
+              >> kernel.block >> x::keep((TAG((s2 = kernel.unreserved_name) >> *kernel.argument[ on_arg(kernel._state, _) ]))[x::check(on_dyadic2_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s2, _))]);
+
+            return kernel.monadic_tag | kernel.dyadic_tag;
+*/
+            typename x::function<on_arg_>::type const on_arg = {{}};
+            typename x::function<on_continue_>::type const on_continue = {{}};
+            typename x::function<on_polyadic1_tag_>::type const on_polyadic1_tag = {{}};
+            typename x::function<on_polyadic2_tag_>::type const on_polyadic2_tag = {{}};
+
+            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_name) >> *x::keep(kernel.argument[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
+                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_name) >> *x::keep(kernel.argument[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._result, kernel._state, kernel._range, s2, _))]));
+
+            return kernel.polyadic_tag;
+        }
+
+      private:
+
+        struct on_continue_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(state_type& state) const {
+                return /*!state.library_tag_entries_.empty(); //*/ state.library_tag_continue_;
+            }
+        };
+
+        struct on_polyadic1_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+                SHOW(name);
+
+
+                if (!state.library_tag_entries_.empty() && detail::contains(name, state.library_tag_entries_.top().tag.second)) {
+                    return false;
+                }
+                else if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
+
+                    size_type const position = std::distance(range.first, n.first);
+                    SHOW(value_type(tag->second));
+
+
+                    std::vector<string_type> pieces;
+                    pieces.push_back(contents);
+                    pieces.push_back(name);
+                    BOOST_FOREACH(string_type const& arg, args) {
+                        pieces.push_back(arg);
+                    }
+
+                    renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(result), _1, _2, _3, _4, _5);
+                    segments_type segments(1, segment_type(pieces, renderer));
+
+                    if (tag->second.empty()) {
+                        state.set_renderer(position, tag->first(segments));
+                        state.library_tag_continue_ = false;
+                    }
+                    else {
+                        typename options_type::entry_type entry = { position, *tag, segments };
+                        state.library_tag_entries_.push(entry);
+                        state.library_tag_continue_ = true;
+                    }
+
+                    return true;
+                }
+                else {
+                    return false;
+                    // AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                }
+            };
+        };
+
+        struct on_polyadic2_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+                SHOW(name);
+
+                BOOST_ASSERT(!state.library_tag_entries_.empty());
+                /*if (state.library_tag_entries_.empty()) {
+                    state.library_tag_continue_ = false;
+                    return false;
+                }*/
+                typename options_type::entry_type& entry = state.library_tag_entries_.top();
+                size_type const position = entry.position; // std::distance(range.first, n.first);
+                BOOST_ASSERT(!entry.tag.second.empty());
+
+                if (!detail::contains(name, entry.tag.second)) {
+                    return false;
+                }
+
+                std::vector<string_type> pieces;
+                pieces.push_back(contents);
+                pieces.push_back(name);
+                BOOST_FOREACH(string_type const& arg, args) {
+                    pieces.push_back(arg);
+                }
+
+                renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(result), _1, _2, _3, _4, _5);
+                entry.segments.push_back(segment_type(pieces, renderer));
+
+                /*// For now:
+                BOOST_ASSERT(text::begins_with(name, text::literal("end")));*/
+
+                if (text::begins_with(name, text::literal("end"))) {
+                    state.set_renderer(position, entry.tag.first(entry.segments));
+                    state.library_tag_continue_ = false;
+                    state.library_tag_entries_.pop();
+                }
+                else {
+                    state.library_tag_continue_ = true;
+                }
+
+                return true;
+            };
+        };
+
+
+/*
+        struct on_monadic_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+
+                SHOW(name);
+
+                if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
+                    if (!tag->second.empty()) {
+                        return false;
+                    }
+
+                    size_type const position = std::distance(range.first, n.first);
+
+                    std::vector<string_type> matches;
+                    matches.push_back(contents);
+                    matches.push_back(name);
+                    BOOST_FOREACH(string_type const& arg, args) {
+                        matches.push_back(arg);
+                    }
+
+                    renderer_type const renderer = boost::bind(render_body, boost::ref(kernel), boost::ref(result), _1, _2, _3, _4, _5);
+
+                    typename options_type::segments_type segments;
+                    segments.push_back(segment_type(matches, renderer));
+                    state.set_renderer(position, tag->first(segments));
+                    return true;
+                }
+                else {
+                    return false;
+                    // AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                }
+            };
+        };
+
+        struct on_dyadic1_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+
+                SHOW(name);
+
+                if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
+                    if (tag->second.empty()) {
+                        return false;
+                    }
+
+                    size_type const position = std::distance(range.first, n.first);
+                    state.library_tag_entries_.push(typename options_type::entry_type(position, *tag));
+                    return true;
+                }
+                else {
+                    return false;
+                    // AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                }
+            };
+        };
+
+        struct on_dyadic2_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+
+                SHOW(name);
+
+                BOOST_ASSERT(!state.library_tag_entries_.empty());
+
+                typename options_type::entry_type const& entry = state.library_tag_entries_.top();
+                typename options_type::tag_type const& tag = entry.second;
+                size_type const position = entry.first; // std::distance(range.first, n.first);
+
+                BOOST_ASSERT(!tag.second.empty());
+
+
+                std::vector<string_type> matches;
+                matches.push_back(contents);
+                matches.push_back(name);
+                BOOST_FOREACH(string_type const& arg, args) {
+                    matches.push_back(arg);
+                }
+
+                renderer_type const renderer = boost::bind(render_body, boost::ref(kernel), boost::ref(result), _1, _2, _3, _4, _5);
+
+                typename options_type::segments_type segments;
+                segments.push_back(segment_type(matches, renderer));
+                state.set_renderer(position, tag.first(segments)); // state.library_tag_segments_));
+
+                // state.library_tag_segments_.clear();
+                state.library_tag_entries_.pop();
+                // state.library_tag_closed_ = true;
+                return true;
+
+
+            };
+        };
+*/
+        struct on_arg_ {
+            typedef void result_type;
+            void operator()(state_type& state, sub_match_type const& sub_match) const {
+                state.library_tag_args_.push_back(text::strip_right(sub_match.str()));
+            }
+        };
+/*
+
+        static void render_body( kernel_type    const& kernel
+                               , result_type    const& result
+                               , arguments_type const& arguments
+                               , ostream_type&         ostream
+                               , context_type&         context
+                               , options_type&         options
+                               , void const*           body // , match_type const&     block
+                               ) {
+            BOOST_ASSERT(body);
+            kernel.render_block(ostream, result, *static_cast<match_type const*>(body), context, options);
+        }
+        struct on_nil_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(state_type& state) const {
+                SHOW(state.library_tag_entries_.size());
+                SHOW(state.library_tag_closed_);
+                boolean_type const closed = state.library_tag_closed_;
+                state.library_tag_closed_ = false;
+                return !closed;
+                // return state.library_tag_entries_.empty();
+            }
+        };
+
+        struct on_tag_ {
+            typedef boolean_type result_type;
+            boolean_type operator()(kernel_type& kernel, typename kernel_type::result_type& result, state_type& state, range_type const& range, sub_match_type const& n, sub_match_type const& c) const {
+                string_type const name     = text::strip_right(n.str());
+                string_type const contents = text::strip_right(c.str());
+
+
+                std::vector<string_type> const args = state.library_tag_args_;
+                state.library_tag_args_.clear();
+
+                boolean_type const is_expected = !state.library_tag_entries_.empty() &&
+                    detail::contains(name, state.library_tag_entries_.top().second.second);
+                boolean_type const is_closing  = is_expected && text::begins_with(name, text::literal("end"));
+                boolean_type const is_opening  = state.library_tag_entries_.empty() || !is_expected;
+
+                SHOW(name);
+                // SHOW(value_type(args));
+
+                SHOW(is_expected);
+                SHOW(is_closing);
+                SHOW(is_opening);
+
+
+                std::vector<string_type> matches;
+                matches.push_back(contents);
+                matches.push_back(name);
+                BOOST_FOREACH(string_type const& arg, args) {
+                    matches.push_back(arg);
+                }
+
+                renderer_type const renderer = boost::bind(render_body, boost::ref(kernel), boost::ref(result), _1, _2, _3, _4, _5);
+
+                state.library_tag_segments_.push_back(segment_type(matches, renderer));
+
+                if (is_opening) {
+
+                    if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
+                        size_type const position = std::distance(range.first, n.first);
+
+                        if (tag->second.empty()) {
+                            // Monadic tag: invoke immediately.
+                            state.set_renderer(position, tag->first(state.library_tag_segments_));
+                            state.library_tag_segments_.clear();
+                            state.library_tag_closed_ = true;
+                        }
+                        else {
+                            // Polyadic tag: invoke later.
+                            state.library_tag_entries_.push(typename options_type::entry_type(position, *tag));
+                        }
+
+                        return true;
+                    }
+                    else {
+                        AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                    }
+                }
+                else if (is_closing) {
+                    SHOW((state.library_tag_closed_));
+
+                    if (state.library_tag_closed_) {
+
+                        BOOST_ASSERT(!state.library_tag_entries_.empty());
+
+                        typename options_type::entry_type const& entry = state.library_tag_entries_.top();
+                        typename options_type::tag_type const& tag = entry.second;
+
+                        state.set_renderer(entry.first, tag.first(state.library_tag_segments_));
+
+                        state.library_tag_segments_.clear();
+                        state.library_tag_entries_.pop();
+                        state.library_tag_closed_ = true;
+                        return true;
+                    }
+                    else {
+                        state.library_tag_closed_ = true;
+                        return false;
+                    }
+                }
+                else {
+                    return is_expected;
+                }
+            }
+        };
+*/
+    };
+
+//
+// load_tag
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct load_tag {
+        static regex_type syntax(kernel_type& kernel) {
+            typename x::function<loader>::type const load = {{}};
+            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.packages))[load(kernel._state, s1)]);
+        }
+
+        static void render( kernel_type  const& kernel
+                          , result_type  const& result
+                          , match_type   const& match
+                          , context_type const& context
+                          , options_type const& options
+                          , ostream_type&       ostream
+                          ) {}
+
+      private:
+
+        struct loader {
+            typedef void result_type;
+            void operator()(state_type& state, sub_match_type const& packages) const {
+                BOOST_FOREACH(string_type const& library, text::space(packages.str())) {
+                    state.load_library(library);
+                }
+            }
+        };
     };
 
 //
@@ -805,29 +1288,28 @@ struct builtin_tags {
 
     struct load_from_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return TAG(kernel.reserved("load") >> kernel.names >> kernel.keyword("from") >> kernel.package) >> kernel.block;
+            typename x::function<loader>::type const load = {{}};
+            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.names) >> kernel.keyword("from") >> x::keep(s2 = kernel.package))[load(kernel._state, s1, s2)]);
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
                           , ostream_type&       ostream
-                          ) {
-            match_type  const& names   = match(kernel.names);
-            match_type  const& block   = match(kernel.block);
-            string_type const& library = match(kernel.package)[id].str();
-            std::vector<string_type> components;
+                          ) {}
 
-            BOOST_FOREACH(match_type const& name, kernel.select_nested(names, kernel.name)) {
-                components.push_back(name[id].str());
+      private:
+
+        struct loader {
+            typedef void result_type;
+            void operator()(state_type& state, sub_match_type const& names, sub_match_type const& package) const {
+                string_type const& library    = text::strip_right(package);
+                names_type  const& components = text::space(names.str());
+                state.load_library(library, components);
             }
-
-            options_type options_copy = options;
-            context_type context_copy = context;
-            kernel.load_library(context_copy, options_copy, library, &components);
-            kernel.render_block(ostream, block, context_copy, options_copy);
-        }
+        };
     };
 
 //
@@ -840,6 +1322,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -862,6 +1345,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -875,7 +1359,7 @@ struct builtin_tags {
             value_type        values;
             entries_type entries;
             try {
-                values = kernel.evaluate(expr, context, options);
+                values = kernel.evaluate(result, expr, context, options);
             }
             // Fail silently in these cases:
             catch (missing_variable  const&) { goto done; }
@@ -885,7 +1369,7 @@ struct builtin_tags {
           done:
             context_type context_copy = context;
             context_copy[name] = entries;
-            kernel.render_block(ostream, block, context_copy, options);
+            kernel.render_block(ostream, result, block, context_copy, options);
         }
 
         typedef std::map<string_type, value_type>   entry_type;
@@ -920,6 +1404,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -932,7 +1417,7 @@ struct builtin_tags {
             std::ostreambuf_iterator<char_type> it(ostream);
 
             match_type const& body = match(kernel.block);
-            kernel.render_block(ss, body, context, options);
+            kernel.render_block(ss, result, body, context, options);
             // TODO: Use bidirectional_input_stream to feed directly to regex_replace.
             string_type const string = ss.str();
             x::regex_replace(it, string.begin(), string.end(), gap, text::literal("$1$2"));
@@ -950,12 +1435,13 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            value_type   const value  = kernel.evaluate(match(kernel.value), context, options);
+            value_type   const value  = kernel.evaluate(result, match(kernel.value), context, options);
             path_type    const path   = traits_type::to_path(value.to_string());
             boolean_type const parsed = match[s1].matched;
 
@@ -964,7 +1450,7 @@ struct builtin_tags {
             }
 
             if (parsed) {
-                kernel.render_path(ostream, path, context, options);
+                kernel.render_path(ostream, result, path, context, options);
             }
             else {
                 string_type line;
@@ -985,6 +1471,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1011,6 +1498,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1019,8 +1507,8 @@ struct builtin_tags {
             match_type const& expr = match(kernel.value);
             match_type const& args = match(kernel.arguments);
 
-            value_type     const view      = kernel.evaluate(expr, context, options);
-            arguments_type const arguments = kernel.evaluate_arguments(args, context, options);
+            value_type     const view      = kernel.evaluate(result, expr, context, options);
+            arguments_type const arguments = kernel.evaluate_arguments(result, args, context, options);
 
             if (optional<string_type> const& url = kernel.get_view_url(view, arguments, context, options)) {
                 ostream << *url;
@@ -1042,6 +1530,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1052,14 +1541,14 @@ struct builtin_tags {
             match_type  const& block = match(kernel.block);
             string_type const& name  = match(kernel.name)[id].str();
 
-            value_type     const view      = kernel.evaluate(expr, context, options);
-            arguments_type const arguments = kernel.evaluate_arguments(args, context, options);
+            value_type     const view      = kernel.evaluate(result, expr, context, options);
+            arguments_type const arguments = kernel.evaluate_arguments(result, args, context, options);
             string_type    const url       = kernel.get_view_url(view, arguments, context, options)
                                                    .get_value_or(string_type());
 
             context_type context_copy = context;
             context_copy[name] = url;
-            kernel.render_block(ostream, block, context_copy, options);
+            kernel.render_block(ostream, result, block, context_copy, options);
         }
     };
 
@@ -1073,12 +1562,13 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            value_type const& value = kernel.evaluate(match(kernel.value), context, options);
+            value_type const& value = kernel.evaluate(result, match(kernel.value), context, options);
             boolean_type const safe = !options.autoescape || value.safe();
             safe ? ostream << value : ostream << value.escape();
         }
@@ -1095,6 +1585,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1114,6 +1605,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1124,9 +1616,9 @@ struct builtin_tags {
             match_type const& width = match(kernel.value, 2);
 
             floating_type const ratio
-                = kernel.evaluate(value, context, options).to_floating()
-                / kernel.evaluate(limit, context, options).to_floating()
-                * kernel.evaluate(width, context, options).to_floating();
+                = kernel.evaluate(result, value, context, options).to_floating()
+                / kernel.evaluate(result, limit, context, options).to_floating()
+                * kernel.evaluate(result, width, context, options).to_floating();
 
             ostream << round(ratio);
         }
@@ -1150,6 +1642,7 @@ struct builtin_tags {
         }
 
         static void render( kernel_type  const& kernel
+                          , result_type  const& result
                           , match_type   const& match
                           , context_type const& context
                           , options_type const& options
@@ -1160,65 +1653,8 @@ struct builtin_tags {
             string_type const& name  = match(kernel.name)[id].str();
 
             context_type context_copy = context;
-            context_copy[name] = kernel.evaluate(value, context, options);
-            kernel.render_block(ostream, body, context_copy, options);
-        }
-    };
-
-//
-// library_tag
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    struct library_tag {
-        static regex_type syntax(kernel_type& kernel) {
-            return (s1 = TAG(kernel.unreserved_name >> kernel.arguments)) >> kernel.block;
-        }
-
-        static void render( kernel_type  const& kernel
-                          , match_type   const& match
-                          , context_type const& context
-                          , options_type const& options
-                          , ostream_type&       ostream
-                          ) {
-            typedef typename options_type::tag_type tag_type;
-
-            string_type const& name  = match(kernel.unreserved_name)[id].str();
-            match_type  const& args  = match(kernel.arguments);
-            match_type  const& body  = match(kernel.block);
-            tag_type    const& tag   = get_library_tag(name, context, options);
-            arguments_type arguments;
-
-            if (!options.raw_tags) { // Sanity.
-                arguments = kernel.evaluate_arguments(args, context, options);
-            }
-            else { // Insanity; needed to emulate Django's custom tags' tokenization mechanism.
-                arguments.first.push_back(match[s1].str());
-                arguments.first.push_back(name);
-
-                BOOST_FOREACH(match_type const& arg, kernel.select_nested(args, kernel.argument)) {
-                    arguments.first.push_back(value_type(text::strip_right(arg.str())));
-                }
-            }
-
-            // NOTE: kernel, match can't be passed because their types aren't available in options.
-            tag(arguments, ostream, const_cast<context_type&>(context), const_cast<options_type&>(options));
-            kernel.render_block(ostream, body, context, options);
-
-        }
-
-      private:
-
-        inline static typename options_type::tag_type const get_library_tag
-                ( string_type  const& name
-                , context_type const& context
-                , options_type const& options
-                ) {
-            typename options_type::tags_type::const_iterator it = options.loaded_tags.find(name);
-
-            if (it != options.loaded_tags.end()) {
-                return it->second;
-            }
-            AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+            context_copy[name] = kernel.evaluate(result, value, context, options);
+            kernel.render_block(ostream, result, body, context_copy, options);
         }
     };
 

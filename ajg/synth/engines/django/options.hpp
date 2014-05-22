@@ -6,7 +6,9 @@
 #define AJG_SYNTH_ENGINES_DJANGO_OPTIONS_HPP_INCLUDED
 
 #include <map>
+#include <stack>
 #include <vector>
+#include <utility>
 
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
@@ -143,6 +145,7 @@ struct options : base_options<Value> {
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::names_type                                    names_type;
+    typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -159,19 +162,38 @@ struct options : base_options<Value> {
     typedef boost::shared_ptr<abstract_loader_type>                             loader_type;   // TODO[c++11]: Use unique_ptr?
     typedef boost::shared_ptr<abstract_resolver_type>                           resolver_type; // TODO[c++11]: Use unique_ptr?
 
+    // TODO: Move a lot of this crap to `state`.
+
+    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, options_type&, void const*);
+    typedef boost::function<renderer_fn_type>                                   renderer_type;
+
+    typedef std::pair<std::vector<string_type>, renderer_type>                  segment_type;
+    typedef std::vector<segment_type>                                           segments_type;
+
     // TODO: Unify w.r.t. builtin_tags::tag_type and builtin_filters::filter_type.
-    typedef void       (tag_fn_type)(arguments_type const&, ostream_type&, context_type&, options_type&);
+    typedef renderer_type (tag_fn_type)(/*arguments_type const&,*/ segments_type const&);
     typedef value_type (filter_fn_type)(value_type const&, arguments_type const&, context_type&, options_type&);
 
-    typedef boost::function<tag_fn_type>                                        tag_type;
+    typedef std::pair<boost::function<tag_fn_type>, symbols_type>               tag_type;
     typedef boost::function<filter_fn_type>                                     filter_type;
 
     typedef std::map<string_type, tag_type>                                     tags_type;
     typedef std::map<string_type, filter_type>                                  filters_type;
+    typedef std::map<size_type, renderer_type>                                  renderers_type;
 
     typedef std::map<string_type, library_type>                                 libraries_type;
     typedef std::vector<loader_type>                                            loaders_type;
     typedef std::vector<resolver_type>                                          resolvers_type;
+
+    // typedef std::pair<size_type, tag_type>                                      entry_type;
+    typedef struct {
+        size_type     position;
+        tag_type      tag;
+        segments_type segments;
+     // boolean_type  continue;
+
+    } entry_type;
+    typedef std::stack<entry_type>                                              entries_type;
 
   private:
 
@@ -198,7 +220,6 @@ struct options : base_options<Value> {
            , libraries_type   const& libraries     = libraries_type()
            , loaders_type     const& loaders       = loaders_type()
            , resolvers_type   const& resolvers     = resolvers_type()
-           , boolean_type     const  raw_tags      = boolean_type(false)
            )
         : autoescape(autoescape)
         , nonbreaking_space(text::literal("&nbsp;"))
@@ -209,9 +230,6 @@ struct options : base_options<Value> {
         , libraries(libraries)
         , loaders(loaders)
         , resolvers(resolvers)
-        , raw_tags(raw_tags || debug) // FIXME: Temporary hack for django-synth.
-        , loaded_tags()
-        , loaded_filters()
         , blocks_(0)
         , cycles_()
         , changes_() {}
@@ -250,7 +268,6 @@ struct options : base_options<Value> {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
-    boolean_type      raw_tags;
 
     inline boolean_type top_level() const {
         return this->blocks_ == 0;
@@ -274,13 +291,6 @@ struct options : base_options<Value> {
             AJG_SYNTH_THROW(std::logic_error("invalid block"));
         }
     }
-
-    // TODO: Move these to either context or a `state` type:
-
-  protected:
-
-    tags_type     loaded_tags;
-    filters_type  loaded_filters;
 
   private:
 

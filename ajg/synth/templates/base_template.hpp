@@ -60,9 +60,14 @@ struct base_template : boost::noncopyable {
 
   protected:
 
-    base_template(options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(options); }
-    base_template(range_type const& range, options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(range, options); }
-    base_template(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) : kernel_(&shared_kernel()) { this->reset(begin, end, options); }
+    base_template(options_type const& options = options_type())
+        : kernel_(&shared_kernel()), result_(options) { this->reset(options); }
+
+    base_template(range_type const& range, options_type const& options = options_type())
+        : kernel_(&shared_kernel()), result_(options) { this->reset(range, options); }
+
+    base_template(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type())
+        : kernel_(&shared_kernel()), result_(options) { this->reset(begin, end, options); }
 
   public:
 
@@ -129,12 +134,13 @@ struct base_template : boost::noncopyable {
 
     inline void reset(options_type const& options) {
         this->range_ = range_type();
-        this->result_ = result_type();
+        this->result_ = result_type(options);
     }
 
     inline void reset(range_type const& range, options_type const& options) {
         this->range_ = range;
-        kernel_->parse(this->range_.first, this->range_.second, this->result_, options);
+        this->result_ = result_type(options);
+        kernel_->parse(this->range_, this->result_, options);
     }
 
     inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options) {

@@ -49,6 +49,15 @@ using boost::xpressive::s2;
 
 namespace x = boost::xpressive;
 
+// template <class Options>
+struct null_state {
+    // typedef Options                                                             options_type;
+    // inline explicit null_state(options_type const&) {}
+
+    template <class Options>
+    inline explicit null_state(Options const&) {}
+};
+
 template <class Options>
 struct base_engine {
 
@@ -67,7 +76,7 @@ struct base_engine {
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
 
-    template <class Iterator>
+    template <class Iterator, class State = null_state>
     struct kernel;
 
   private:
@@ -77,12 +86,13 @@ struct base_engine {
 }; // base_engine
 
 template <class Options>
-template <class Iterator>
+template <class Iterator, class State>
 struct base_engine<Options>::kernel : boost::noncopyable {
   public:
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
+    typedef State                                                               state_type;
     typedef std::pair<iterator_type, iterator_type>                             range_type;
 
   protected:
@@ -101,9 +111,20 @@ struct base_engine<Options>::kernel : boost::noncopyable {
     typedef detail::text<string_type>                                           text;
 
     struct parse_result {
+      public:
+
+        parse_result(options_type const& options) : state_(options) {}
+
       private:
+
         friend struct base_engine;
-        match_type match_;
+
+      private:
+
+        match_type    match_;
+        state_type    state_;
+        // range_type    range_;
+        // iterator_type iterator_;
     };
 
     typedef parse_result                                                        result_type;
@@ -127,12 +148,13 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
         // block = skip(plain[...])(*tag[...]); // Using skip is slightly slower than this:
         this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
-            ( x::ref(this->tag)   [set_furthest(iterator_, _)]
-            | x::ref(this->plain) [set_furthest(iterator_, _)]
+            ( x::ref(this->tag)   [set_furthest(this->_iterator, _)]
+            | x::ref(this->plain) [set_furthest(this->_iterator, _)]
             );
     }
 
     inline static match_type const& get_match(result_type const& result) { return result.match_; }
+    inline static state_type const& get_state(result_type const& result) { return result.state_; }
 
 //
 // is
@@ -192,30 +214,25 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
   public:
 
-    template <class I>
-    inline void parse(std::pair<I, I> const& range, result_type& result, options_type const& options) const {
-        return this->parse(range.first, range.second, result);
-    }
+    inline void parse(range_type const& range, result_type& result, options_type const& options) const {
+        range_type r = range;
+        iterator_type it = r.first;
 
-    template <class I>
-    inline void parse(I const& begin, I const& end, result_type& result, options_type const& options) const {
-        iterator_type const  begin_   = begin;
-        iterator_type const  end_     = end;
-        iterator_type        furthest = begin_;
+        result.match_.let(this->_state    = result.state_);
+        result.match_.let(this->_result   = result);
+        result.match_.let(this->_range    = r);
+        result.match_.let(this->_iterator = it);
 
-        result.match_.let(this->iterator_ = furthest);
-        result.match_.let(this->options_  = const_cast<options_type&>(options));
-
-        if (x::regex_match(begin_, end_, result.match_, this->block)) {
+        if (x::regex_match(r.first, r.second, result.match_, this->block)) {
             // On success, all input should have been consumed.
-            BOOST_ASSERT(furthest == end_);
+            BOOST_ASSERT(it == r.second);
             return;
         }
 
         // On failure, throw a semi-informative exception.
-        size_type   const buffer(std::distance(furthest, end_));
+        size_type   const buffer(std::distance(it, r.second));
         size_type   const limit(error_line_limit);
-        string_type const site(furthest, detail::advance_to(furthest, (std::min)(buffer, limit)));
+        string_type const site(it, detail::advance_to(it, (std::min)(buffer, limit)));
         string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
         AJG_SYNTH_THROW(parsing_error(text::narrow(line)));
     }
@@ -228,10 +245,15 @@ struct base_engine<Options>::kernel : boost::noncopyable {
     regex_type nothing;
     regex_type skipper;
 
-  private:
+  public: // TODO: protected
 
-    x::placeholder<iterator_type>       iterator_;
-    x::placeholder<options_type/*&*/>   options_;
+    x::placeholder<state_type>          _state;
+    x::placeholder<result_type>         _result;
+     // TODO: Consider folding these into something like base_state.
+    x::placeholder<range_type>          _range;
+    x::placeholder<iterator_type>       _iterator;
+
+  private:
 
 //
 // set_furthest_iterator:

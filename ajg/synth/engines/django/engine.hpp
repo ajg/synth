@@ -142,17 +142,14 @@ struct state {
     }
 
     inline boost::optional<renderer_type> get_renderer(size_type const position) const {
-        SHOW(position);
         return detail::find(position, this->parsed_renderers_);
     }
 
     inline void set_renderer(size_type const position, renderer_type const& renderer) {
-        SHOW(position);
         this->parsed_renderers_[position] = renderer;
     }
 
     void load_library(string_type const& library_name, names_type const& names = names_type()) {
-        SHOW(library_name);
         library_type library = this->loaded_libraries_[library_name];
 
         if (!library) {

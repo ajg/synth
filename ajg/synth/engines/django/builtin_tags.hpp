@@ -855,8 +855,6 @@ struct builtin_tags {
             string_type const& name  = match(kernel.unreserved_name)[id].str();
             match_type  const& args  = match; // (kernel.arguments);
             arguments_type arguments = kernel.evaluate_arguments(result, args, context, options);
-            SHOW(name);
-            SHOW(position);
 
             if (boost::optional<renderer_type> const& renderer = kernel.get_state(result).get_renderer(position)) {
                 BOOST_ASSERT(!renderer->empty());
@@ -939,7 +937,6 @@ struct builtin_tags {
                 string_type const contents = text::strip_right(c.str());
                 std::vector<string_type> const args = state.library_tag_args_;
                 state.library_tag_args_.clear();
-                SHOW(name);
 
 
                 if (!state.library_tag_entries_.empty() && detail::contains(name, state.library_tag_entries_.top().tag.second)) {
@@ -948,9 +945,6 @@ struct builtin_tags {
                 else if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
 
                     size_type const position = std::distance(range.first, n.first);
-                    SHOW(value_type(tag->second));
-
-
                     std::vector<string_type> pieces;
                     pieces.push_back(contents);
                     pieces.push_back(name);
@@ -987,7 +981,6 @@ struct builtin_tags {
                 string_type const contents = text::strip_right(c.str());
                 std::vector<string_type> const args = state.library_tag_args_;
                 state.library_tag_args_.clear();
-                SHOW(name);
 
                 BOOST_ASSERT(!state.library_tag_entries_.empty());
                 /*if (state.library_tag_entries_.empty()) {

@@ -51,7 +51,7 @@ struct engine : base_engine<Options> {
     typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::options_type                                  options_type;
 
-    typedef std::map<string_type, value_type>                                   context_type; // TODO: Move to options.
+    typedef typename options_type::context_type                                 context_type;
 
     typedef typename value_type::behavior_type                                  behavior_type;
 
@@ -248,11 +248,8 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     void render( ostream_type&       ostream
                , result_type  const& result
                , context_type const& context
-               , options_type const& options
                ) const {
-        // Make a non-const copy so that #set can modify it.
-        context_type copy = context;
-        this->render_block(ostream, this->get_match(result), copy, options);
+        this->render_block(ostream, this->get_match(result), context, result.options());
     }
 
     void render_path( ostream_type&       ostream
@@ -261,7 +258,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                     , options_type const& options
                     ) const {
         templates::path_template<engine_type> const t(path, options.directories, options);
-        return t.render_to_stream(ostream, context, options);
+        return t.render_to_stream(ostream, const_cast<context_type&>(context));
     }
 
     void render_plain( ostream_type&       ostream

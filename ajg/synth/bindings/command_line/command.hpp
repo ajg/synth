@@ -32,7 +32,6 @@ enum command_options
     , version_option
     , context_option
     , engine_option
-    , autoescape_option
     , directory_option
     , replacement_option
     };
@@ -72,7 +71,6 @@ struct command {
             , {version_option,     0, "v", "version",     param_illegal,  "  -v,      --version           print library version"}
             , {context_option,     0, "c", "context",     param_required, "  -c file, --context=file      contextual data             *.{ini,json,xml}"}
             , {engine_option,      0, "e", "engine",      param_required, "  -e name, --engine=name       template engine             {django,ssi,tmpl}"}
-            , {autoescape_option,  0, "a", "autoescape",  param_allowed,  "  -a,      --autoescape[=bool] automatically escape values (default: 'true')"}
             , {directory_option,   0, "d", "directory",   param_required, "  -d path, --directory=path    template location(s)        (default: '.')"}
             , {replacement_option, 0, "r", "replacement", param_required, "  -r text, --replacement=text  replaces missing values     (default: '')"}
             , {unknown_option,     0, "",  "",            param_allowed,  "\n"}
@@ -123,7 +121,6 @@ struct command {
         binding_type const binding
             ( input >> std::noskipws
             , to_string(options[engine_option].last())
-            , to_boolean(options[autoescape_option].last())
             , to_string(options[replacement_option].last())
             , directories
             );

@@ -14,7 +14,7 @@ int main() {
     c["user"] = "Dolph Lundgren";
 
     // Render to different destinations:
-    t.render_to_stream(std::cout);
+    t.render_to_stream(std::cout, c);
     t.render_to_path("greeting.txt", c);
     std::cout << t.render_to_string(c);
     return 0;

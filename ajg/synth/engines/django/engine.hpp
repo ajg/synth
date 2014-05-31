@@ -110,8 +110,7 @@ struct state {
 
   public:
 
-    // inline explicit state() {}
-
+    inline explicit state() {}
     inline explicit state(options_type const& options)
         : loaders_(options.loaders), loaded_libraries_(options.libraries) {}
 
@@ -444,16 +443,16 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(text::literal(s)).first) >> *_s; }
     inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(text::literal(s)).first) >> *_s; }
 
-    sequence_type split_argument( result_type  const& // result
+    sequence_type split_argument( result_type  const& result
                                 , value_type   const& argument
-                                , context_type const& context
-                                , options_type const& options
+                                , context_type&       context
                                 , char_type    const  delimiter
                                 ) const {
         typedef typename string_type::const_iterator                                string_iterator_type;
         typedef kernel<string_iterator_type>                                        string_kernel_type;
         typedef typename string_kernel_type::match_type                             string_match_type;
         typedef typename string_kernel_type::result_type                            string_result_type;
+        typedef typename string_kernel_type::range_type                             string_range_type;
 
         typedef boost::char_separator<char_type>                                    separator_type;
         typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
@@ -472,6 +471,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         char_type const d[2] = { delimiter, 0 };
         tokenizer_type const tokenizer(token, separator_type(d, 0, boost::keep_empty_tokens));
         static string_kernel_type const string_kernel;
+        static string_range_type const string_range;
         string_match_type match;
         sequence_type sequence;
 
@@ -481,8 +481,8 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
             }
             else if (x::regex_match(t.begin(), t.end(), match, string_kernel.chain)) {
                 try {
-                    string_result_type const result(options);
-                    sequence.push_back(string_kernel.evaluate_chain(result, match, context, options));
+                    string_result_type const string_result(string_range, result.options());
+                    sequence.push_back(string_kernel.evaluate_chain(string_result, match, context));
                 }
                 catch (missing_variable const& e) {
                     string_type const string(t.begin(), t.end());
@@ -521,27 +521,24 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     void render( ostream_type&       ostream
                , result_type  const& result
-               , context_type const& context
-               , options_type const& options
+               , context_type&       context
                ) const {
-        this->render_block(ostream, result, this->get_match(result), context, options);
+        this->render_block(ostream, result, this->get_match(result), context);
     }
 
     void render_path( ostream_type&       ostream
                     , result_type  const& result
                     , path_type    const& path
-                    , context_type const& context
-                    , options_type const& options
+                    , context_type&       context
                     ) const {
-        templates::path_template<engine_type> const t(path, options.directories, options);
-        return t.render_to_stream(ostream, context, options);
+        templates::path_template<engine_type> const t(path, result.options().directories, result.options());
+        return t.render_to_stream(ostream, context);
     }
 
     void render_plain( ostream_type&       ostream
                      , result_type  const& result
                      , match_type   const& plain
-                     , context_type const& context
-                     , options_type const& options
+                     , context_type&       context
                      ) const {
         ostream << plain.str();
     }
@@ -549,25 +546,23 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     void render_block( ostream_type&       ostream
                      , result_type  const& result
                      , match_type   const& block
-                     , context_type const& context
-                     , options_type const& options
+                     , context_type&       context
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
-            this->render_match(ostream, result, nested, context, options);
+            this->render_match(ostream, result, nested, context);
         }
     }
 
     void render_tag( ostream_type&       ostream
                    , result_type  const& result
                    , match_type   const& match
-                   , context_type const& context
-                   , options_type const& options
+                   , context_type&       context
                    ) const {
         match_type const& m  = this->unnest(match);
         id_type    const  id = m.regex_id();
 
         if (typename builtin_tags_type::tag_type const tag = builtin_tags_.get(id)) {
-            tag(*this, result, m, context, options, ostream);
+            tag(*this, result, m, context, ostream);
         }
         else {
             AJG_SYNTH_THROW(std::logic_error("missing built-in tag"));
@@ -577,20 +572,18 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     void render_match( ostream_type&       ostream
                      , result_type  const& result
                      , match_type   const& match
-                     , context_type const& context
-                     , options_type const& options
+                     , context_type&       context
                      ) const {
-             if (is(match, this->plain)) this->render_plain(ostream, result, match, context, options);
-        else if (is(match, this->block)) this->render_block(ostream, result, match, context, options);
-        else if (is(match, this->tag))   this->render_tag(ostream, result, match, context, options);
+             if (is(match, this->plain)) this->render_plain(ostream, result, match, context);
+        else if (is(match, this->block)) this->render_block(ostream, result, match, context);
+        else if (is(match, this->tag))   this->render_tag(ostream, result, match, context);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
     value_type apply_filters( value_type   const& value
                             , result_type  const& result
                             , match_type   const& match
-                            , context_type const& context
-                            , options_type const& options
+                            , context_type&       context
                             ) const {
         value_type v = value;
 
@@ -601,9 +594,9 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
             arguments_type arguments;
             if (chain) {
-                arguments.first.push_back(this->evaluate_chain(result, chain, context, options));
+                arguments.first.push_back(this->evaluate_chain(result, chain, context));
             }
-            v = this->apply_filter(v, result, name, arguments, context, options);
+            v = this->apply_filter(v, result, name, arguments, context);
         }
 
         return v;
@@ -613,15 +606,14 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                            , result_type    const& result
                            , string_type    const& name
                            , arguments_type const& arguments
-                           , context_type   const& context
-                           , options_type   const& options
+                           , context_type&         context
                            ) const {
         // Let library filters override built-in ones.
         if (boost::optional<typename options_type::filter_type> const& filter = this->get_state(result).get_filter(name)) {
-            return (*filter)(value, arguments, const_cast<context_type&>(context), const_cast<options_type&>(options));
+            return (*filter)(value, arguments, context);
         }
         else if (typename builtin_filters_type::filter_type const filter = builtin_filters_type::get(name)) {
-            return filter(*this, result, value, arguments, context, options);
+            return filter(*this, result, value, arguments, context);
         }
         else {
             AJG_SYNTH_THROW(missing_filter(text::narrow(name)));
@@ -630,26 +622,24 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate( result_type  const& result
                        , match_type   const& match
-                       , context_type const& context
-                       , options_type const& options
+                       , context_type&       context
                        ) const {
 
         try {
-            value_type const& value = this->evaluate_expression(result, match(this->expression), context, options);
-            return this->apply_filters(value, result, match, context, options);
+            value_type const& value = this->evaluate_expression(result, match(this->expression), context);
+            return this->apply_filters(value, result, match, context);
         }
-        catch (missing_variable  const&) { return options.default_value; }
-        catch (missing_attribute const&) { return options.default_value; }
+        catch (missing_variable  const&) { return result.options().default_value; }
+        catch (missing_attribute const&) { return result.options().default_value; }
     }
 
     arguments_type evaluate_arguments( result_type   const& result
                                      , match_type    const& match
-                                     , context_type  const& context
-                                     , options_type  const& options
+                                     , context_type&        context
                                      ) const {
         arguments_type arguments;
         BOOST_FOREACH(match_type const& arg, this->select_nested(match, this->argument)) {
-            value_type const& value = this->evaluate(result, arg(this->value), context, options);
+            value_type const& value = this->evaluate(result, arg(this->value), context);
             if (match_type const& name = arg(this->restricted_identifier)) {
                 arguments.second[name.str()] = value; // Keyword argument.
             }
@@ -662,8 +652,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_literal( result_type  const& result
                                , match_type   const& match
-                               , context_type const& context
-                               , options_type const& options
+                               , context_type&       context
                                ) const {
         BOOST_ASSERT(is(match, this->literal));
         match_type  const& literal = this->unnest(match);
@@ -694,7 +683,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
             return value_type(extract_string(literal)).token(token);
         }
         else if (is(literal, this->super_literal)) {
-            return options.get_base_block();
+            return context.get_base_block();
         }
         else if (is(literal, this->variable_literal)) {
             if (optional<value_type> const& variable = detail::find(string, context)) {
@@ -712,20 +701,19 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_expression( result_type  const& result
                                   , match_type   const& match
-                                  , context_type const& context
-                                  , options_type const& options
+                                  , context_type&       context
                                   ) const {
         match_type const& expr = this->unnest(match);
 
         if (is(expr, this->unary_expression)) {
-            return this->evaluate_unary(result, expr, context, options);
+            return this->evaluate_unary(result, expr, context);
         }
         else if (is(expr, this->binary_expression)) {
-            return this->evaluate_binary(result, expr, context, options);
+            return this->evaluate_binary(result, expr, context);
         }
         else if (is(expr, this->nested_expression)) {
             match_type const& nested = expr(this->expression);
-            return this->evaluate_expression(result, nested, context, options);
+            return this->evaluate_expression(result, nested, context);
         }
         else {
             AJG_SYNTH_THROW(std::logic_error("invalid expression"));
@@ -734,15 +722,14 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_unary( result_type  const& result
                              , match_type   const& match
-                             , context_type const& context
-                             , options_type const& options
+                             , context_type&       context
                              ) const {
         BOOST_ASSERT(is(match, this->unary_expression));
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
         if (op == text::literal("not")) {
-            return !evaluate_expression(result, operand, context, options);
+            return !evaluate_expression(result, operand, context);
         }
         else {
             AJG_SYNTH_THROW(std::logic_error("invalid unary operator"));
@@ -751,12 +738,11 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_binary( result_type  const& result
                               , match_type   const& match
-                              , context_type const& context
-                              , options_type const& options
+                              , context_type&       context
                               ) const {
         BOOST_ASSERT(is(match, this->binary_expression));
         match_type const& chain = match(this->chain);
-        value_type value = this->evaluate_chain(result, chain, context, options);
+        value_type value = this->evaluate_chain(result, chain, context);
         string_type op;
 
         BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
@@ -767,36 +753,36 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                 AJG_SYNTH_THROW(std::logic_error("invalid binary expression"));
             }
             else if (op == text::literal("==")) {
-                value = value == this->evaluate_expression(result, segment, context, options);
+                value = value == this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal("!=")) {
-                value = value != this->evaluate_expression(result, segment, context, options);
+                value = value != this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal("<")) {
-                value = value < this->evaluate_expression(result, segment, context, options);
+                value = value < this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal(">")) {
-                value = value > this->evaluate_expression(result, segment, context, options);
+                value = value > this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal("<=")) {
-                value = value <= this->evaluate_expression(result, segment, context, options);
+                value = value <= this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal(">=")) {
-                value = value >= this->evaluate_expression(result, segment, context, options);
+                value = value >= this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal("and")) {
-                value = value ? this->evaluate_expression(result, segment, context, options) : value;
+                value = value ? this->evaluate_expression(result, segment, context) : value;
             }
             else if (op == text::literal("or")) {
-                value = value ? value : this->evaluate_expression(result, segment, context, options);
+                value = value ? value : this->evaluate_expression(result, segment, context);
             }
             else if (op == text::literal("in")) {
-                value_type const elements = this->evaluate_expression(result, segment, context, options);
+                value_type const elements = this->evaluate_expression(result, segment, context);
                 value = elements.contains(value);
             }
             else if (text::begins_with(op, text::literal("not"))
                   && text::ends_with(op, text::literal("in"))) {
-                value_type const elements = this->evaluate_expression(result, segment, context, options);
+                value_type const elements = this->evaluate_expression(result, segment, context);
                 value = !elements.contains(value);
             }
             else {
@@ -809,13 +795,12 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_link( result_type  const& result
                             , match_type   const& match
-                            , context_type const& context
-                            , options_type const& options
+                            , context_type&       context
                             ) const {
         match_type const& link = this->unnest(match);
 
         if (is(link, this->subscript_link)) { // i.e. value[attribute]
-            return this->evaluate(result, link(this->expression), context, options);
+            return this->evaluate(result, link(this->expression), context);
         }
         else if (is(link, this->attribute_link)) { // i.e. value.attribute
             return string_type(link(this->identifier).str());
@@ -827,30 +812,29 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     value_type evaluate_chain( result_type  const& result
                              , match_type   const& match
-                             , context_type const& context
-                             , options_type const& options
+                             , context_type&       context
                              ) const {
         BOOST_ASSERT(is(match, this->chain));
         match_type const& lit = match(this->literal);
-        value_type value = this->evaluate_literal(result, lit, context, options);
+        value_type value = this->evaluate_literal(result, lit, context);
 
         BOOST_FOREACH(match_type const& link, this->select_nested(match, this->link)) {
-            value_type const attribute = this->evaluate_link(result, link, context, options);
+            value_type const attribute = this->evaluate_link(result, link, context);
             value = value.must_get_attribute(attribute);
         }
 
         return value;
     }
 
-    optional<string_type> get_view_url( value_type     const& view
+    optional<string_type> get_view_url( result_type    const& result
+                                      , value_type     const& view
                                       , arguments_type const& arguments
-                                      , context_type   const& context
-                                      , options_type   const& options
+                                      , context_type&         context
                                       ) const {
         string_type name = view.to_string();
 
-        BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
-            if (optional<string_type> const& url = resolver->reverse(name, arguments, context, options)) {
+        BOOST_FOREACH(typename options_type::resolver_type const& resolver, result.options().resolvers) {
+            if (optional<string_type> const& url = resolver->reverse(name, arguments, context, result.options())) {
                 return url;
             }
         }

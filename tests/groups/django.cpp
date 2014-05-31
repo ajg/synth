@@ -53,28 +53,19 @@ static string_type const absolute_path = text::widen(get_current_working_directo
 ///     django::load_from_tag (Tested implicitly in Python binding tests.)
 ///     django::library_tag   (Tested implicitly in Python binding tests.)
 
-#define DJANGO_TEST_(name, in, out, context) \
-    unit_test(name) { ensure_equals(string_template_type(in).render_to_string(context), out); }}}
-
-#define DJANGO_TEST(name, in, out) DJANGO_TEST_(name, in, out, context)
-
-#define NO_CONTEXT AJG_SYNTH_EMPTY
+#define DJANGO_TEST(name, in, out) \
+    unit_test(name) { ensure_equals(string_template_type(in, options).render_to_string(context), out); }}}
 
 ///
 /// Sanity checks
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DJANGO_TEST_(empty, "", "", NO_CONTEXT)
-DJANGO_TEST_(empty, "", "", context)
+DJANGO_TEST(empty, "", "")
 
-DJANGO_TEST_(text, "ABC", "ABC", NO_CONTEXT)
-DJANGO_TEST_(text, "ABC", "ABC", context)
+DJANGO_TEST(text, "ABC", "ABC")
 
-DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", NO_CONTEXT)
-DJANGO_TEST_(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>", context)
-
-DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", NO_CONTEXT)
-DJANGO_TEST_(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {", context)
+DJANGO_TEST(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>")
+DJANGO_TEST(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {")
 
 ///
 /// Literal tests
@@ -151,7 +142,7 @@ DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing tag) {
-    ensure_throws(s::parsing_error, string_template_type("{% xyz 42 %}"));
+    ensure_throws(s::parsing_error, string_template_type("{% xyz 42 %}", options));
     // ensure_throws(s::missing_tag, string_template_type("{% xyz 42 %}"));
 }}}
 
@@ -159,7 +150,7 @@ DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock %}|bar
 DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock a_block %}|bar", "foo|This is a block|bar")
 
 unit_test(mismatched block) {
-    string_template_type const t("{% block foo %}{% endblock bar %}");
+    string_template_type const t("{% block foo %}{% endblock bar %}", options);
     ensure_throws(std::invalid_argument, t.render_to_string(context));
 }}}
 
@@ -170,8 +161,7 @@ DJANGO_TEST(comment_tag-short, "0{# {{ x|y:'z' }} #}1",                         
 DJANGO_TEST(comment_tag-short, "0{# {% if foo %}bar{% else %} #}1",                  "01")
 DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
 
-DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "", NO_CONTEXT)
-DJANGO_TEST_(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>", context)
+DJANGO_TEST(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>")
 
 DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' %}{% endfor %}",                  "ababababa")
 DJANGO_TEST(cycle_tag, "{% for n in numbers %}{% cycle 'a' 'b' as x %}{{x}}{% endfor %}",        "aabbaabbaabbaabbaa")
@@ -310,7 +300,7 @@ DJANGO_TEST(for_tag-key-value-reversed,
     "[NY: New York][FL: Florida][CA: California]")
 
 unit_test(now_tag) {
-    string_template_type const t("{% now 'y' %}");
+    string_template_type const t("{% now 'y' %}", options);
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
@@ -318,7 +308,7 @@ unit_test(now_tag) {
 }}}
 
 unit_test(now_tag) {
-    string_template_type const t("{% now 'Y' %}");
+    string_template_type const t("{% now 'Y' %}", options);
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
@@ -413,63 +403,61 @@ DJANGO_TEST(widthratio_tag, "{% widthratio 300 100 300 %}", "900")
 DJANGO_TEST(widthratio_tag, "{% widthratio 300 200 100 %}", "150")
 
 unit_test(url_tag) {
-    string_template_type const t("{% url 'x.y.z' 1 2 3 %}");
     null_resolver_type::patterns_type patterns;
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'x.y.z' 1 2 3 %}", options);
 
-    ensure_throws(std::runtime_error, t.render_to_string(context, options));
+    ensure_throws(std::runtime_error, t.render_to_string(context));
 }}}
 
 unit_test(url_tag) {
-    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 %}");
     null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 %}", options);
 
-    ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/2/3");
+    ensure_equals(t.render_to_string(context), "/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_tag) {
-    string_template_type const t("{% url 'foo.bar.qux' 1 b=2 3 %}");
     null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'foo.bar.qux' 1 b=2 3 %}", options);
 
-    ensure_equals(t.render_to_string(context, options), "/foo-bar-qux/1/3?b=2");
+    ensure_equals(t.render_to_string(context), "/foo-bar-qux/1/3?b=2");
 }}}
 
 unit_test(url_as_tag) {
-    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}");
     null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'foo.bar.qux' 1 2 3 as foo %}_{{ foo }}", options);
 
-    ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/1/2/3");
+    ensure_equals(t.render_to_string(context), "_/foo-bar-qux/1/2/3");
 }}}
 
 unit_test(url_as_tag) {
-    string_template_type const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}");
     null_resolver_type::patterns_type patterns;
     patterns["foo.bar.qux"] = "/foo-bar-qux";
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'foo.bar.qux' a=1 2 c=3 as foo %}_{{ foo }}", options);
 
-    ensure_equals(t.render_to_string(context, options), "_/foo-bar-qux/2?a=1&amp;c=3");
+    ensure_equals(t.render_to_string(context), "_/foo-bar-qux/2?a=1&amp;c=3");
 }}}
 
 unit_test(url_as_tag) {
-    string_template_type const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}");
     null_resolver_type::patterns_type patterns;
     options.resolvers.push_back(options_type::resolver_type(new null_resolver_type(patterns)));
+    string_template_type const t("{% url 'x.y.z' 1 2 3 as foo %}_{{ x }}", options);
 
-    ensure_equals(t.render_to_string(context, options), "_");
+    ensure_equals(t.render_to_string(context), "_");
 }}}
 
-DJANGO_TEST(variable_tag, "{{ heterogenous }}", "42, 42, foo, foo")
-
-DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "  ",    NO_CONTEXT)
-DJANGO_TEST_(variable_tag, "{{ foo }} {{ bar }} {{ qux }}", "A B C", context)
-DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", NO_CONTEXT)
-DJANGO_TEST_(variable_tag, "{{ '}}'|join:'}}' }}", "}}}}", context)
+DJANGO_TEST(variable_tag, "{{ heterogenous }}",               "42, 42, foo, foo")
+DJANGO_TEST(variable_tag, "{{ foo }} {{ bar }} {{ qux }}",    "A B C")
+DJANGO_TEST(variable_tag, "{{ foo_ }} {{ bar_ }} {{ qux_ }}", "  ")
+DJANGO_TEST(variable_tag, "{{ '}}'|join:'}}' }}",             "}}}}")
 
 DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " %}",            "")
 DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/empty.tpl", '"') + " parsed %}",     "")
@@ -477,10 +465,10 @@ DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/d
 DJANGO_TEST(ssi_tag, "{% ssi " + text::quote(absolute_path + "/tests/templates/django/variables.tpl", '"') + " parsed %}", "foo: A\nbar: B\nqux: C\n")
 
 unit_test(ssi_tag) {
-    ensure_throws(std::invalid_argument, string_template_type("{% ssi '../foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template_type("{% ssi './foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template_type("{% ssi 'foo' %}").render_to_string());
-    ensure_throws(std::invalid_argument, string_template_type("{% ssi '' %}").render_to_string());
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi '../foo' %}", options).render_to_string(context));
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi './foo' %}", options).render_to_string(context));
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi 'foo' %}", options).render_to_string(context));
+    ensure_throws(std::invalid_argument, string_template_type("{% ssi '' %}", options).render_to_string(context));
 }}}
 
 DJANGO_TEST(verbatim_tag,
@@ -497,7 +485,7 @@ DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing-filter) {
-    string_template_type const t("{{ 42|xyz }}");
+    string_template_type const t("{{ 42|xyz }}", options);
     ensure_throws(s::missing_filter, t.render_to_string(context));
 }}}
 
@@ -814,7 +802,7 @@ DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'6' }}", "False")
 
 // TODO: Better test for random_filter, maybe by making randomness a value trait or engine option.
 unit_test(random_filter) {
-    string_template_type const t("{{ 'abcde'|random }}");
+    string_template_type const t("{{ 'abcde'|random }}", options);
     string_type s = t.render_to_string(context);
     ensure(s == "a" || s == "b" || s == "c" || s == "d" || s == "e");
 }}}

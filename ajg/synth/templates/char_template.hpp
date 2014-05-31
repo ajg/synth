@@ -43,20 +43,37 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
 
   public:
 
-    inline char_template(buffer_type const& buffer, options_type const& options = options_type()) : buffer_(buffer) {
+    inline char_template(buffer_type const& buffer) : buffer_(buffer) {
+        this->reset(this->buffer_.first, this->buffer_.first + this->buffer_.second);
+    }
+
+    inline char_template(char_type const* data, size_type const size) : buffer_(data, size) {
+        this->reset(data, data + size);
+    }
+
+    inline char_template(char_type const* data) : buffer_(data, get_size(data)) {
+        this->reset(data, data + this->buffer_.second);
+    }
+
+    template <size_type N>
+    inline char_template(char_type const (&data)[N]): buffer_(data, N) {
+        this->reset(data, data + N);
+    }
+
+    inline char_template(buffer_type const& buffer, options_type const& options) : buffer_(buffer) {
         this->reset(this->buffer_.first, this->buffer_.first + this->buffer_.second, options);
     }
 
-    inline char_template(char_type const* data, size_type const size, options_type const& options = options_type()) : buffer_(data, size) {
+    inline char_template(char_type const* data, size_type const size, options_type const& options) : buffer_(data, size) {
         this->reset(data, data + size, options);
     }
 
-    inline char_template(char_type const* data, options_type const& options = options_type()) : buffer_(data, get_size(data)) {
+    inline char_template(char_type const* data, options_type const& options) : buffer_(data, get_size(data)) {
         this->reset(data, data + this->buffer_.second, options);
     }
 
     template <size_type N>
-    inline char_template(char_type const (&data)[N], options_type const& options = options_type()): buffer_(data, N) {
+    inline char_template(char_type const (&data)[N], options_type const& options): buffer_(data, N) {
         this->reset(data, data + N, options);
     }
 

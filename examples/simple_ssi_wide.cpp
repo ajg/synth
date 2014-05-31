@@ -16,7 +16,7 @@ int wmain() {
     c[L"user"] = L"Dolph Lundgren";
 
     // Render to different destinations:
-    t.render_to_stream(std::wcout);
+    t.render_to_stream(std::wcout, c);
     t.render_to_path(L"greeting.txt", c);
     std::wcout << t.render_to_string(c);
     return 0;

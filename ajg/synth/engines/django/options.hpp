@@ -149,7 +149,58 @@ struct options : base_options<Value> {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef std::map<string_type, value_type>                                   context_type;     // TODO: value_type keys.
+    struct context_type : std::map<string_type, value_type> { // TODO: value_type keys.
+      public:
+
+        context_type() : autoescape_(true), blocks_(0) {}
+
+      private:
+
+        typedef size_type                                                           marker_type; // FIXME: pair<filename, size_type>
+        typedef std::map<string_type, string_type>                                  blocks_type;
+        typedef std::map<marker_type, size_type>                                    cycles_type;
+        typedef std::map<marker_type, value_type>                                   changes_type;
+
+      private:
+
+        inline boolean_type top_level() const {
+            return this->blocks_ == 0;
+        }
+
+        inline optional<string_type> get_block(string_type const& name) const {
+            if (this->top_level()) {
+                AJG_SYNTH_THROW(std::invalid_argument("not in a derived template"));
+            }
+            return detail::find(name, *this->blocks_);
+        }
+
+        inline string_type get_base_block() const {
+            if (this->base_block_.empty()) {
+                AJG_SYNTH_THROW(std::invalid_argument("not in a derived block"));
+            }
+            else if (optional<string_type> const& block = this->get_block(this->base_block_)) {
+                return *block;
+            }
+            else {
+                AJG_SYNTH_THROW(std::logic_error("invalid block"));
+            }
+        }
+
+      private:
+
+        template <class T, class O> friend struct django::engine;
+        template <class K> friend struct django::builtin_tags;
+        template <class K> friend struct django::builtin_filters;
+        template <class E> friend struct django::loader;
+
+      private:
+
+        boolean_type  autoescape_;
+        blocks_type*  blocks_;
+        cycles_type   cycles_;
+        changes_type  changes_;
+        string_type   base_block_;
+    };
 
     typedef std::pair<sequence_type, mapping_type>                              arguments_type;
     typedef std::map<string_type, string_type>                                  formats_type;
@@ -164,7 +215,7 @@ struct options : base_options<Value> {
 
     // TODO: Move a lot of this crap to `state`.
 
-    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, options_type&, void const*);
+    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, void const*);
     typedef boost::function<renderer_fn_type>                                   renderer_type;
 
     typedef std::pair<std::vector<string_type>, renderer_type>                  segment_type;
@@ -172,7 +223,7 @@ struct options : base_options<Value> {
 
     // TODO: Unify w.r.t. builtin_tags::tag_type and builtin_filters::filter_type.
     typedef renderer_type (tag_fn_type)(/*arguments_type const&,*/ segments_type const&);
-    typedef value_type (filter_fn_type)(value_type const&, arguments_type const&, context_type&, options_type&);
+    typedef value_type (filter_fn_type)(value_type const&, arguments_type const&, context_type&);
 
     typedef std::pair<boost::function<tag_fn_type>, symbols_type>               tag_type;
     typedef boost::function<filter_fn_type>                                     filter_type;
@@ -197,10 +248,6 @@ struct options : base_options<Value> {
 
   private:
 
-    typedef size_type                                                           marker_type; // FIXME: pair<filename, size_type>
-    typedef std::map<string_type, string_type>                                  blocks_type;
-    typedef std::map<marker_type, size_type>                                    cycles_type;
-    typedef std::map<marker_type, value_type>                                   changes_type;
     typedef detail::text<string_type>                                           text;
 
   private:
@@ -212,8 +259,7 @@ struct options : base_options<Value> {
 
   public:
 
-    options( boolean_type     const  autoescape    = true
-           , value_type       const& default_value = string_type()
+    options( value_type       const& default_value = string_type()
            , formats_type     const& formats       = formats_type()
            , boolean_type     const  debug         = boolean_type(false)
            , paths_type       const& directories   = paths_type()
@@ -221,18 +267,14 @@ struct options : base_options<Value> {
            , loaders_type     const& loaders       = loaders_type()
            , resolvers_type   const& resolvers     = resolvers_type()
            )
-        : autoescape(autoescape)
-        , nonbreaking_space(text::literal("&nbsp;"))
+        : nonbreaking_space(text::literal("&nbsp;"))
         , default_value(default_value)
         , formats(merge_default_formats(formats))
         , debug(debug)
         , directories(directories)
         , libraries(libraries)
         , loaders(loaders)
-        , resolvers(resolvers)
-        , blocks_(0)
-        , cycles_()
-        , changes_() {}
+        , resolvers(resolvers) {}
 
   public:
 
@@ -259,7 +301,6 @@ struct options : base_options<Value> {
 
   public:
 
-    boolean_type      autoescape;
     string_type       nonbreaking_space;
     value_type        default_value;
     formats_type      formats;
@@ -268,36 +309,6 @@ struct options : base_options<Value> {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
-
-    inline boolean_type top_level() const {
-        return this->blocks_ == 0;
-    }
-
-    inline optional<string_type> get_block(string_type const& name) const {
-        if (this->top_level()) {
-            AJG_SYNTH_THROW(std::invalid_argument("not in a derived template"));
-        }
-        return detail::find(name, *this->blocks_);
-    }
-
-    inline string_type get_base_block() const {
-        if (this->base_block_.empty()) {
-            AJG_SYNTH_THROW(std::invalid_argument("not in a derived block"));
-        }
-        else if (optional<string_type> const& block = this->get_block(this->base_block_)) {
-            return *block;
-        }
-        else {
-            AJG_SYNTH_THROW(std::logic_error("invalid block"));
-        }
-    }
-
-  private:
-
-    blocks_type*  blocks_;
-    cycles_type   cycles_;
-    changes_type  changes_;
-    string_type   base_block_;
 };
 
 }}}} // namespace ajg::synth::engines::django

@@ -43,12 +43,10 @@ struct binding : bindings::base_binding<Traits, templates::stream_template> {
     template <class Source>
     binding( Source&             source
            , string_type  const& engine_name
-           , boolean_type const  autoescape
            , string_type  const& default_value
            , paths_type   const& paths
            ) : base_type( source
                         , engine_name
-                        , autoescape
                         , default_value
                         , formats_type()
                         , boolean_type(false)
@@ -60,33 +58,25 @@ struct binding : bindings::base_binding<Traits, templates::stream_template> {
 
   public:
 
-    void render_to_stream( ostream_type&        ostream
-                         , context_type  const& context = context_type()
-                      // , options_type  const& options = options_type()
-                         ) const {
+    void render_to_stream(ostream_type& ostream, context_type& context) const {
         return base_type::template render_to_stream<binding>(ostream, context);
     }
 
-    string_type render_to_string( context_type const& context = context_type()
-                             // , options_type const& options = options_type()
-                                ) const {
+    string_type render_to_string(context_type& context) const {
         return base_type::template render_to_string<binding>(context);
     }
 
-    void render_to_path( string_type  const& path
-                       , context_type const& context = context_type()
-                    // , options_type const& options = options_type()
-                       ) const {
+    void render_to_path(string_type const& path, context_type& context) const {
         return base_type::template render_to_path<binding>(path, context);
     }
 
   public: // TODO[c++11]: Replace with protected + `friend base_binding;`
 
     template <class Context>
-    inline static Context adapt_context(context_type const& parent) {
+    inline static Context adapt_context(context_type& parent) {
         Context context;
 
-        BOOST_FOREACH(typename context_type::value_type const& child, parent) {
+        BOOST_FOREACH(typename context_type::value_type& child, parent) {
             context[child.first] = child.second;
         }
 

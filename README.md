@@ -64,7 +64,7 @@ int main() {
     c["user"] = "Dolph Lundgren";
 
     // Render to different destinations:
-    t.render_to_stream(std::cout);
+    t.render_to_stream(std::cout, c);
     t.render_to_path("greeting.txt", c);
     std::cout << t.render_to_string(c);
     return 0;
@@ -82,7 +82,6 @@ Reference
       -v,      --version           print library version
       -c file, --context=file      contextual data             *.{ini,json,xml}
       -e name, --engine=name       template engine             {django,ssi,tmpl}
-      -a,      --autoescape[=bool] automatically escape values (default: 'true')
       -d path, --directory=path    template location(s)        (default: '.')
       -r text, --replacement=text  replaces missing values     (default: '')
 
@@ -384,7 +383,6 @@ Django Engine
 
 ### Options
 
- - `django::options::autoescape`
  - `django::options::nonbreaking_space`
  - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
  - `django::options::formats` (for `TIME_FORMAT`, `DATE_FORMAT`, etc.)

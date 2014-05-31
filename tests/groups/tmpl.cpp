@@ -35,13 +35,11 @@ AJG_SYNTH_TEST_GROUP_WITH_DATA("tmpl", data_type);
 
 unit_test(sanity check) {
     string_template_type const t("");
-    ensure_equals(t.render_to_string(), "");
     ensure_equals(t.render_to_string(context), "");
 }}}
 
 unit_test(plain text) {
     string_template_type const t("ABC");
-    ensure_equals(t.render_to_string(), "ABC");
     ensure_equals(t.render_to_string(context), "ABC");
 }}}
 
@@ -108,7 +106,7 @@ unit_test(simple if tag) {
 
 unit_test(invalid if tag) {
     string_template_type t("<TMPL_IF>Bad</TMPL_IF>");
-    ensure_throws(std::logic_error, t.render_to_string());
+    ensure_throws(std::logic_error, t.render_to_string(context));
 }}}
 
 unit_test(compound if tag) {

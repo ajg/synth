@@ -56,6 +56,7 @@ struct null_state {
 
     template <class Options>
     inline explicit null_state(Options const&) {}
+    inline explicit null_state() {}
 };
 
 template <class Options>
@@ -110,21 +111,37 @@ struct base_engine<Options>::kernel : boost::noncopyable {
     typedef x::match_results<string_iterator_type>                              string_match_type;
     typedef detail::text<string_type>                                           text;
 
-    struct parse_result {
+    // TODO: Fold this into base_template.
+    struct parse_result /* TODO: : boost::noncopyable */ {
       public:
 
-        parse_result(options_type const& options) : state_(options) {}
+        parse_result() {}
+        parse_result(range_type const& range, options_type const& options) { this->reset(range, options); }
 
       private:
 
         friend struct base_engine;
 
+      public:
+
+        inline void reset(range_type const& range, options_type const& options) {
+            this->range_   = range;
+            this->options_ = &options;
+            this->state_   = state_type(*this->options_);
+        }
+
+        inline options_type const& options() const { BOOST_ASSERT(this->options_); return *this->options_; }
+
+        range_type const& range() const { return this->range_; }
+        string_type       str()   const { return string_type(this->range_.first, this->range_.second); }
+
       private:
 
-        match_type    match_;
-        state_type    state_;
-        // range_type    range_;
-        // iterator_type iterator_;
+        range_type          range_;
+        match_type          match_;
+        state_type          state_;
+        options_type const* options_;
+        // iterator_type furthest_;
     };
 
     typedef parse_result                                                        result_type;
@@ -214,7 +231,7 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
   public:
 
-    inline void parse(range_type const& range, result_type& result, options_type const& options) const {
+    inline void parse(range_type const& range, result_type& result) const {
         range_type r = range;
         iterator_type it = r.first;
 

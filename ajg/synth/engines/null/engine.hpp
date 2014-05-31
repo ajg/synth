@@ -33,7 +33,7 @@ struct engine : base_engine<Options> {
     typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::options_type                                  options_type;
 
-    typedef std::map<string_type, value_type>                                   context_type; // TODO: Move to options.
+    typedef typename options_type::context_type                                 context_type;
 
     template <class Iterator>
     struct kernel;
@@ -58,8 +58,8 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
   public:
 
-    void parse(range_type const&, result_type&, options_type const&) const {}
-    void render(ostream_type&, result_type const&, context_type const&, options_type const&) const {}
+    void parse(range_type const&, result_type&) const {}
+    void render(ostream_type&, result_type const&, context_type const&) const {}
 
 }; // kernel
 

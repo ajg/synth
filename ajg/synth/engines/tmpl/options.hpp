@@ -5,7 +5,12 @@
 #ifndef AJG_SYNTH_ENGINES_TMPL_OPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_TMPL_OPTIONS_HPP_INCLUDED
 
+#include <map>
+#include <functional>
+
+#include <ajg/synth/detail/if_c.hpp>
 #include <ajg/synth/engines/base_options.hpp>
+#include <ajg/synth/engines/tmpl/insensitive_less.hpp>
 
 namespace ajg {
 namespace synth {
@@ -27,6 +32,7 @@ struct options : base_options<Value> {
 
     typedef typename value_type::traits_type                                    traits_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
   public:
@@ -36,6 +42,14 @@ struct options : base_options<Value> {
     BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = true);
     BOOST_STATIC_CONSTANT(boolean_type,   global_variables = false);
     BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = loose); // TODO: Implement.
+
+  public:
+
+    typedef typename detail::if_c< options_type::case_sensitive
+                                 , std::less<string_type>
+                                 , insensitive_less<string_type>
+                                 >::type                                        less_type;
+    typedef std::map<string_type, value_type, less_type>                        context_type;
 
   public:
 

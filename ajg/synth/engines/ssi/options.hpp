@@ -5,6 +5,7 @@
 #ifndef AJG_SYNTH_ENGINES_SSI_OPTIONS_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_SSI_OPTIONS_HPP_INCLUDED
 
+#include <map>
 #include <vector>
 
 #include <ajg/synth/detail/text.hpp>
@@ -27,6 +28,8 @@ struct options : base_options<Value> {
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::paths_type                                    paths_type;
+
+    typedef std::map<string_type, value_type>                                   context_type;
 
   private:
 

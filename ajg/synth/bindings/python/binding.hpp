@@ -58,12 +58,11 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename base_type::loaders_type                                    loaders_type;
     typedef typename base_type::resolver_type                                   resolver_type;
     typedef typename base_type::resolvers_type                                  resolvers_type;
-    typedef py::dict                                                            context_type;
+    typedef py::object /* py::dict */                                           context_type;
     typedef py::init< py::object
                     , string_type
                     , py::optional
-                        < boolean_type
-                        , string_type
+                        < string_type
                         , py::dict
                         , boolean_type
                         , py::list
@@ -80,7 +79,6 @@ struct binding : private boost::base_from_member<PyObject*>
     //       perhaps using a passed-in "overrides" library.
     binding( py::object   const& src
            , string_type  const& engine_name
-           , boolean_type const  autoescape    = true
            , string_type  const& default_value = string_type()
            // TODO: Rename abbreviated parameters and expose them as kwargs.
            , py::dict     const& fmts          = py::dict()
@@ -93,7 +91,6 @@ struct binding : private boost::base_from_member<PyObject*>
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
         , base_type( get_source(boost::base_from_member<PyObject*>::member)
                    , engine_name
-                   , autoescape
                    , default_value
                    , get_formats(fmts)
                    , debug
@@ -105,8 +102,8 @@ struct binding : private boost::base_from_member<PyObject*>
 
     ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
-    void render_to_file(py::object const& file, py::dict const& dictionary) const {
-        file.attr("write")(base_type::template render_to_string<binding>(dictionary));
+    void render_to_file(py::object const& file, py::object const& context /* py::dict const& dictionary */) const {
+        file.attr("write")(base_type::template render_to_string<binding>(context));
         // XXX: Automatically call flush()?
 
         /* TODO: Be more intelligent and use something like:
@@ -121,13 +118,13 @@ struct binding : private boost::base_from_member<PyObject*>
         */
     }
 
-    void render_to_path(py::str const& path, py::dict const& dictionary) const {
+    void render_to_path(py::str const& path, py::object const& context /* py::dict const& dictionary */) const {
         string_type const s = py::extract<string_type>(path);
-        return base_type::template render_to_path<binding>(s, dictionary);
+        return base_type::template render_to_path<binding>(s, context);
     }
 
-    string_type render_to_string(py::dict const& dictionary) const {
-        return base_type::template render_to_string<binding>(dictionary);
+    string_type render_to_string(py::object const& context /* py::dict const& dictionary */) const {
+        return base_type::template render_to_string<binding>(context);
     }
 
   private:
@@ -209,9 +206,9 @@ struct binding : private boost::base_from_member<PyObject*>
   public: // TODO[c++11]: Replace with protected + `friend base_binding;`
 
     template <class Context>
-    inline static Context adapt_context(context_type const& dictionary) {
+    inline static Context adapt_context(context_type const& ctx) {
         Context context;
-        py::list const items = dictionary.items();
+        py::list const items = py::dict(ctx).items();
 
         // TODO: Replace with stl_input_iterator version.
         for (std::size_t i = 0, n = len(items); i < n; ++i) {

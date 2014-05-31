@@ -5,7 +5,7 @@
 directory = 'tests/templates/django/'
 
 def get():
-    return (context, golden, source, 'django', (True, 'INVALID_VALUE', {}, False, [directory]))
+    return (context, golden, source, 'django', ('INVALID_VALUE', {}, False, [directory]))
 
 class User:
     def __init__(self):

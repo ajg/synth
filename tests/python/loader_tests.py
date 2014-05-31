@@ -6,7 +6,7 @@ import sys
 from functools import partial
 
 def get():
-    return (context, golden, source, 'django', (True, '', {}, False, [], {}, [library_loader], []))
+    return (context, golden, source, 'django', ('', {}, False, [], {}, [library_loader], []))
 
 class Library(object):
     def __init__(self, tags={}, filters={}):

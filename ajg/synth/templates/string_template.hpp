@@ -23,12 +23,21 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
 
   public:
 
-    string_template(string_type const& string, options_type const& options = options_type()) : string_(string) {
+    string_template(string_type const& string) : string_(string) {
+        this->reset(this->string_.begin(), this->string_.end());
+    }
+
+    string_template(string_type const& string, options_type const& options) : string_(string) {
         this->reset(this->string_.begin(), this->string_.end(), options);
     }
 
     template <class I>
-    string_template(I const& begin, I const& end, options_type const& options = options_type()) : string_(begin, end) {
+    string_template(I const& begin, I const& end) : string_(begin, end) {
+        this->reset(this->string_.begin(), this->string_.end());
+    }
+
+    template <class I>
+    string_template(I const& begin, I const& end, options_type const& options) : string_(begin, end) {
         this->reset(this->string_.begin(), this->string_.end(), options);
     }
 

@@ -813,9 +813,9 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            SHOW(match.str());
-            SHOW(match.regex_id());
-            SHOW(match.nested_results().size());
+            // SHOW(match.str());
+            // SHOW(match.regex_id());
+            // SHOW(match.nested_results().size());
 
 
             /*{ match_type const& nested = match; // kernel.unnest(match);

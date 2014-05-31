@@ -16,7 +16,7 @@ class Library(object):
 def dump(n, x): print n, '=', x; return x
 
 def render_block(segments, match, index=0):
-    print '### render_block(', segments, match, ')'
+    # print '### render_block(', segments, match, ')'
     return segments[index][1](match)
 
 def bind_segments(segments, match):
@@ -36,7 +36,7 @@ dummy_tag = (None, ())
 dummy_filter = None
 
 def library_loader(name):
-    if name in ('empty_library'):
+    if name == 'empty_library':
         return Library()
 
     elif name == 'dummy.tags.and.filters':

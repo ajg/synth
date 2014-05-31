@@ -80,7 +80,6 @@ struct base_binding : boost::noncopyable {
     template <class Source>
     base_binding( Source         const& source
                 , string_type    const& engine_name
-                , boolean_type   const  autoescape
                 , string_type    const& default_value
                 , formats_type   const& formats
              // , markers_type   const& markers
@@ -90,14 +89,18 @@ struct base_binding : boost::noncopyable {
                 , loaders_type   const& loaders
                 , resolvers_type const& resolvers
                 )
-        : django_template_(engine_name == text::literal("django") ? new django_template_type(source) : 0)
-        , ssi_template_   (engine_name == text::literal("ssi")    ? new ssi_template_type   (source) : 0)
-        , tmpl_template_  (engine_name == text::literal("tmpl")   ? new tmpl_template_type  (source) : 0)
-        , django_options_(autoescape, default_value, formats, debug, paths, libraries, loaders, resolvers)
-        , ssi_options_(default_value, paths) // TODO: size_format, time_format, formats, debug, error_message, ...
-        , tmpl_options_() {                  // TODO: paths, debug, ...
+            : django_options_(default_value, formats, debug, paths, libraries, loaders, resolvers)
+            , ssi_options_(default_value, paths) // TODO: size_format, time_format, formats, debug, error_message, ...
+            , tmpl_options_()                    // TODO: paths, debug, ...
+            , django_template_(engine_name == text::literal("django") ? new django_template_type(source, django_options_) : 0)
+            , ssi_template_   (engine_name == text::literal("ssi")    ? new ssi_template_type   (source, ssi_options_)    : 0)
+            , tmpl_template_  (engine_name == text::literal("tmpl")   ? new tmpl_template_type  (source, tmpl_options_)   : 0)
+            {
 
-        if (!django_template_ && !ssi_template_ && !tmpl_template_) {
+        if (!django_template_
+         && !ssi_template_
+         && !tmpl_template_
+            ) {
             AJG_SYNTH_THROW(std::invalid_argument("engine_name"));
         }
     }
@@ -108,26 +111,26 @@ struct base_binding : boost::noncopyable {
     //       e.g. Options const& options = {django_options_, ssi_options_, tmpl_options_}
 
     template <class X, class Context>
-    void render_to_stream(ostream_type& ostream, Context const& context) const {
-             if (django_template_) return django_template_->render_to_stream(ostream, X::template adapt_context<django_context_type>(context), django_options_);
-        else if (ssi_template_)    return ssi_template_->render_to_stream(ostream, X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        else if (tmpl_template_)   return tmpl_template_->render_to_stream(ostream, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+    void render_to_stream(ostream_type& ostream, Context& context) const {
+             if (django_template_) return django_template_->render_to_stream(ostream, X::template adapt_context<django_context_type>(context));
+        else if (ssi_template_)    return ssi_template_->render_to_stream(ostream, X::template adapt_context<ssi_context_type>(context));
+        else if (tmpl_template_)   return tmpl_template_->render_to_stream(ostream, X::template adapt_context<tmpl_context_type>(context));
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
-    string_type render_to_string(Context const& context) const {
-             if (django_template_) return django_template_->render_to_string(X::template adapt_context<django_context_type>(context), django_options_);
-        else if (ssi_template_)    return ssi_template_->render_to_string(X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        else if (tmpl_template_)   return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+    string_type render_to_string(Context& context) const {
+             if (django_template_) return django_template_->render_to_string(X::template adapt_context<django_context_type>(context));
+        else if (ssi_template_)    return ssi_template_->render_to_string(X::template adapt_context<ssi_context_type>(context));
+        else if (tmpl_template_)   return tmpl_template_->render_to_string(X::template adapt_context<tmpl_context_type>(context));
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     template <class X, class Context>
-    void render_to_path(string_type const& path, Context const& context) const {
-             if (django_template_) return django_template_->render_to_path(path, X::template adapt_context<django_context_type>(context), django_options_);
-        else if (ssi_template_)    return ssi_template_->render_to_path(path, X::template adapt_context<ssi_context_type>(context), ssi_options_);
-        else if (tmpl_template_)   return tmpl_template_->render_to_path(path, X::template adapt_context<tmpl_context_type>(context), tmpl_options_);
+    void render_to_path(string_type const& path, Context& context) const {
+             if (django_template_) return django_template_->render_to_path(path, X::template adapt_context<django_context_type>(context));
+        else if (ssi_template_)    return ssi_template_->render_to_path(path, X::template adapt_context<ssi_context_type>(context));
+        else if (tmpl_template_)   return tmpl_template_->render_to_path(path, X::template adapt_context<tmpl_context_type>(context));
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 

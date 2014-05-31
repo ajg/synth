@@ -11,8 +11,9 @@
 #include <vector>
 #include <stdexcept>
 
-#include <boost/scoped_ptr.hpp>
+#include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
 
 #include <ajg/synth/engines.hpp>
 #include <ajg/synth/adapters.hpp>
@@ -88,19 +89,20 @@ struct base_binding : boost::noncopyable {
                 , libraries_type const& libraries
                 , loaders_type   const& loaders
                 , resolvers_type const& resolvers
-                )
-            : django_options_(default_value, formats, debug, paths, libraries, loaders, resolvers)
-            , ssi_options_(default_value, paths) // TODO: size_format, time_format, formats, debug, error_message, ...
-            , tmpl_options_()                    // TODO: paths, debug, ...
-            , django_template_(engine_name == text::literal("django") ? new django_template_type(source, django_options_) : 0)
-            , ssi_template_   (engine_name == text::literal("ssi")    ? new ssi_template_type   (source, ssi_options_)    : 0)
-            , tmpl_template_  (engine_name == text::literal("tmpl")   ? new tmpl_template_type  (source, tmpl_options_)   : 0)
-            {
-
-        if (!django_template_
-         && !ssi_template_
-         && !tmpl_template_
-            ) {
+                ) {
+        if (engine_name == text::literal("django")) {
+            this->django_options_  = boost::in_place<django_options_type>(default_value, formats, debug, paths, libraries, loaders, resolvers);
+            this->django_template_ = boost::in_place<django_template_type>(source, *this->django_options_);
+        }
+        else if (engine_name == text::literal("ssi")) {
+            this->ssi_options_  = boost::in_place<ssi_options_type>(default_value, paths); // TODO: size_format, time_format, formats, debug, error_message, ...
+            this->ssi_template_ = boost::in_place<ssi_template_type>(source, *this->ssi_options_);
+        }
+        else if (engine_name == text::literal("tmpl")) {
+            this->tmpl_options_  = boost::in_place<tmpl_options_type>(); // TODO: paths, debug, ...
+            this->tmpl_template_ = boost::in_place<tmpl_template_type>(source, *this->tmpl_options_);
+        }
+        else {
             AJG_SYNTH_THROW(std::invalid_argument("engine_name"));
         }
     }
@@ -136,14 +138,15 @@ struct base_binding : boost::noncopyable {
 
   private:
 
-    django_options_type django_options_;
-    ssi_options_type    ssi_options_;
-    tmpl_options_type   tmpl_options_;
+    // TODO: Consider using a variant instead.
+    boost::optional<django_options_type>  django_options_;
+    boost::optional<ssi_options_type>     ssi_options_;
+    boost::optional<tmpl_options_type>    tmpl_options_;
 
-    // TODO: Consider using a variant to avoid the additional heap allocation.
-    boost::scoped_ptr<django_template_type> django_template_;
-    boost::scoped_ptr<ssi_template_type>    ssi_template_;
-    boost::scoped_ptr<tmpl_template_type>   tmpl_template_;
+    // TODO: Consider using a variant instead.
+    boost::optional<django_template_type> django_template_;
+    boost::optional<ssi_template_type>    ssi_template_;
+    boost::optional<tmpl_template_type>   tmpl_template_;
 };
 
 }}} // namespace ajg::synth::bindings

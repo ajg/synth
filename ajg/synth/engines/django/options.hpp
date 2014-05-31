@@ -152,12 +152,11 @@ struct options : base_options<Value> {
     typedef std::vector<loader_type>                                            loaders_type;
     typedef std::vector<resolver_type>                                          resolvers_type;
 
-    // typedef std::pair<size_type, tag_type>                                      entry_type;
     typedef struct {
         size_type     position;
         tag_type      tag;
         segments_type segments;
-     // boolean_type  continue;
+     // boolean_type  proceed;
 
     } entry_type;
     typedef std::stack<entry_type>                                              entries_type;
@@ -231,27 +230,6 @@ template <class Value>
 struct options<Value>::abstract_library {
   public:
 
-    typedef abstract_library                                                    abstract_library_type;
-    typedef options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::names_type                                   names_type;
-    typedef typename options_type::arguments_type                               arguments_type;
-
-    typedef typename options_type::tag_type                                     tag_type;
-    typedef typename options_type::tags_type                                    tags_type;
-    typedef typename options_type::filter_type                                  filter_type;
-    typedef typename options_type::filters_type                                 filters_type;
-    typedef typename options_type::library_type                                 library_type;
-    typedef typename options_type::libraries_type                               libraries_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::string_type                                   string_type;
-
-  public:
-
     virtual boolean_type has_tag(string_type const& name) const    = 0;
     virtual boolean_type has_filter(string_type const& name) const = 0;
     virtual names_type   list_tags() const                         = 0;
@@ -266,17 +244,6 @@ template <class Value>
 struct options<Value>::abstract_loader {
   public:
 
-    typedef abstract_loader                                                     abstract_loader_type;
-    typedef options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::library_type                                 library_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::string_type                                   string_type;
-
-  public:
-
     virtual library_type load_library(string_type const& name) = 0;
 
     virtual ~abstract_loader() {}
@@ -284,19 +251,6 @@ struct options<Value>::abstract_loader {
 
 template <class Value>
 struct options<Value>::abstract_resolver {
-  public:
-
-    typedef abstract_resolver                                                   abstract_resolver_type;
-    typedef options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::arguments_type                               arguments_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::string_type                                   string_type;
-
   public:
 
     virtual optional<string_type> resolve( string_type  const& path

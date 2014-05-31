@@ -18,7 +18,7 @@ namespace python {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Options>
-struct resolver : Options::abstract_resolver_type {
+struct resolver : Options::abstract_resolver {
   public:
 
     typedef Options                                                             options_type;

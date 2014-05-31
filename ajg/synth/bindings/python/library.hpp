@@ -22,7 +22,7 @@ namespace python {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Options>
-struct library : Options::abstract_library_type {
+struct library : Options::abstract_library {
     typedef Options                                                             options_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::renderer_type                                renderer_type;

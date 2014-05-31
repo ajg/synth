@@ -18,7 +18,7 @@ namespace python {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Options>
-struct loader : Options::abstract_loader_type {
+struct loader : Options::abstract_loader {
     typedef Options                                                             options_type;
     typedef typename options_type::library_type                                 library_type;
     typedef typename options_type::traits_type                                  traits_type;

@@ -806,10 +806,10 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            size_type const position = match.position(1);
-            string_type const& name  = match(kernel.unreserved_name)[id].str();
-            match_type  const& args  = match; // (kernel.arguments);
-            arguments_type arguments = kernel.evaluate_arguments(result, args, context);
+         // string_type    const& name      = match(kernel.unreserved_name)[id].str();
+            size_type      const  position  = match.position(1);
+            match_type     const& args      = match; // (kernel.arguments);
+            arguments_type const  arguments = kernel.evaluate_arguments(result, args, context);
 
             if (boost::optional<renderer_type> const& renderer = kernel.get_state(result).get_renderer(position)) {
                 BOOST_ASSERT(!renderer->empty());

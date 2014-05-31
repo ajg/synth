@@ -27,92 +27,6 @@ namespace django {
 
 using boost::optional;
 
-
-template <class Options>
-struct abstract_loader {
-  public:
-
-    typedef abstract_loader                                                     abstract_loader_type;
-    typedef Options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::library_type                                 library_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::string_type                                   string_type;
-
-  public:
-
-    virtual library_type load_library(string_type const& name) = 0;
-
-    virtual ~abstract_loader() {}
-};
-
-template <class Options>
-struct abstract_resolver {
-  public:
-
-    typedef abstract_resolver                                                   abstract_resolver_type;
-    typedef Options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::arguments_type                               arguments_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::string_type                                   string_type;
-
-  public:
-
-    virtual optional<string_type> resolve( string_type  const& path
-                                         , context_type const& context
-                                         , options_type const& options
-                                         ) = 0;
-    virtual optional<string_type> reverse( string_type    const& name
-                                         , arguments_type const& arguments
-                                         , context_type   const& context
-                                         , options_type   const& options
-                                         ) = 0;
-
-    virtual ~abstract_resolver() {}
-};
-
-template <class Options>
-struct abstract_library {
-  public:
-
-    typedef abstract_library                                                    abstract_library_type;
-    typedef Options                                                             options_type;
-
-    typedef typename options_type::value_type                                   value_type;
-    typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::names_type                                   names_type;
-    typedef typename options_type::arguments_type                               arguments_type;
-
-    typedef typename options_type::tag_type                                     tag_type;
-    typedef typename options_type::tags_type                                    tags_type;
-    typedef typename options_type::filter_type                                  filter_type;
-    typedef typename options_type::filters_type                                 filters_type;
-    typedef typename options_type::library_type                                 library_type;
-    typedef typename options_type::libraries_type                               libraries_type;
-
-    typedef typename value_type::traits_type                                    traits_type;
-    typedef typename traits_type::boolean_type                                  boolean_type;
-    typedef typename traits_type::string_type                                   string_type;
-
-  public:
-
-    virtual boolean_type has_tag(string_type const& name) const    = 0;
-    virtual boolean_type has_filter(string_type const& name) const = 0;
-    virtual names_type   list_tags() const                         = 0;
-    virtual names_type   list_filters() const                      = 0;
-    virtual tag_type     get_tag(string_type const& name)          = 0;
-    virtual filter_type  get_filter(string_type const& name)       = 0;
-
-    virtual ~abstract_library() {}
-};
-
 template <class T, class O> struct engine;
 template <class K> struct builtin_tags;
 template <class K> struct builtin_filters;
@@ -205,13 +119,15 @@ struct options : base_options<Value> {
     typedef std::pair<sequence_type, mapping_type>                              arguments_type;
     typedef std::map<string_type, string_type>                                  formats_type;
 
-    typedef abstract_library<options_type>                                      abstract_library_type;
-    typedef abstract_loader<options_type>                                       abstract_loader_type;
-    typedef abstract_resolver<options_type>                                     abstract_resolver_type;
+    struct abstract_library;
+    struct abstract_loader;
+    struct abstract_resolver;
 
-    typedef boost::shared_ptr<abstract_library_type>                            library_type;  // TODO[c++11]: Use unique_ptr?
-    typedef boost::shared_ptr<abstract_loader_type>                             loader_type;   // TODO[c++11]: Use unique_ptr?
-    typedef boost::shared_ptr<abstract_resolver_type>                           resolver_type; // TODO[c++11]: Use unique_ptr?
+    // TODO: Use scoped_ptr
+    // TODO[c++11]: Use unique_ptr?
+    typedef boost::shared_ptr<abstract_library>                                 library_type;
+    typedef boost::shared_ptr<abstract_loader>                                  loader_type;
+    typedef boost::shared_ptr<abstract_resolver>                                resolver_type;
 
     // TODO: Move a lot of this crap to `state`.
 
@@ -309,6 +225,91 @@ struct options : base_options<Value> {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
+};
+
+template <class Value>
+struct options<Value>::abstract_library {
+  public:
+
+    typedef abstract_library                                                    abstract_library_type;
+    typedef options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::names_type                                   names_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+
+    typedef typename options_type::tag_type                                     tag_type;
+    typedef typename options_type::tags_type                                    tags_type;
+    typedef typename options_type::filter_type                                  filter_type;
+    typedef typename options_type::filters_type                                 filters_type;
+    typedef typename options_type::library_type                                 library_type;
+    typedef typename options_type::libraries_type                               libraries_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
+
+    virtual boolean_type has_tag(string_type const& name) const    = 0;
+    virtual boolean_type has_filter(string_type const& name) const = 0;
+    virtual names_type   list_tags() const                         = 0;
+    virtual names_type   list_filters() const                      = 0;
+    virtual tag_type     get_tag(string_type const& name)          = 0;
+    virtual filter_type  get_filter(string_type const& name)       = 0;
+
+    virtual ~abstract_library() {}
+};
+
+template <class Value>
+struct options<Value>::abstract_loader {
+  public:
+
+    typedef abstract_loader                                                     abstract_loader_type;
+    typedef options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::library_type                                 library_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
+
+    virtual library_type load_library(string_type const& name) = 0;
+
+    virtual ~abstract_loader() {}
+};
+
+template <class Value>
+struct options<Value>::abstract_resolver {
+  public:
+
+    typedef abstract_resolver                                                   abstract_resolver_type;
+    typedef options                                                             options_type;
+
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::arguments_type                               arguments_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::string_type                                   string_type;
+
+  public:
+
+    virtual optional<string_type> resolve( string_type  const& path
+                                         , context_type const& context
+                                         , options_type const& options
+                                         ) = 0;
+    virtual optional<string_type> reverse( string_type    const& name
+                                         , arguments_type const& arguments
+                                         , context_type   const& context
+                                         , options_type   const& options
+                                         ) = 0;
+
+    virtual ~abstract_resolver() {}
 };
 
 }}}} // namespace ajg::synth::engines::django

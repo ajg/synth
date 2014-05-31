@@ -123,7 +123,6 @@ struct options : base_options<Value> {
     struct abstract_loader;
     struct abstract_resolver;
 
-    // TODO: Use scoped_ptr
     // TODO[c++11]: Use unique_ptr?
     typedef boost::shared_ptr<abstract_library>                                 library_type;
     typedef boost::shared_ptr<abstract_loader>                                  loader_type;

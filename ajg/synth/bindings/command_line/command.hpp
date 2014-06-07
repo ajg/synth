@@ -43,7 +43,7 @@ struct command {
     typedef command                                                             command_type;
     typedef Binding                                                             binding_type;
 
-    typedef typename binding_type::context_type                                 context_type;
+    typedef typename binding_type::ptree_type                                   ptree_type;
     typedef typename binding_type::traits_type                                  traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -125,7 +125,7 @@ struct command {
             , directories
             );
 
-        context_type context;
+        ptree_type ptree;
         if (option_type const* const option = options[context_option].last()) {
             std::string const narrow_path = option->arg;
             std::basic_ifstream<char_type> file;
@@ -137,13 +137,13 @@ struct command {
                 AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
             }
 
-                 if (text::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, context);
-            else if (text::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, context);
-            else if (text::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, context);
+                 if (text::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, ptree);
+            else if (text::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, ptree);
+            else if (text::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, ptree);
             else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
         }
 
-        binding.render_to_stream(output, context);
+        binding.render_to_stream(output, ptree);
     }
 
   private:

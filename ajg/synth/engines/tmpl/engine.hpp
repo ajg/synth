@@ -21,8 +21,6 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
-#include <ajg/synth/engines/tmpl/value.hpp>
-#include <ajg/synth/engines/tmpl/options.hpp>
 #include <ajg/synth/engines/tmpl/builtin_tags.hpp>
 
 namespace ajg {
@@ -30,8 +28,8 @@ namespace synth {
 namespace engines {
 namespace tmpl {
 
-template <class Traits, class Options = options<value<Traits> > >
-struct engine : base_engine<Options> {
+template <class Traits>
+struct engine : base_engine<Traits> {
   public:
 
     typedef engine                                                              engine_type;
@@ -68,15 +66,21 @@ struct engine : base_engine<Options> {
 
 }; // engine
 
-template <class Traits, class Options>
+enum tag_mode
+    { xml
+    , html
+    , loose
+    };
+
+template <class Traits>
 template <class Iterator>
-struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator>{
+struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
     typedef engine                                                              engine_type;
-    typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::state_type                                    state_type;
 
   protected:
 
@@ -85,6 +89,14 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     typedef typename kernel_type::regex_type                                    regex_type;
     typedef typename kernel_type::match_type                                    match_type;
     typedef detail::text<string_type>                                           text;
+
+  public:
+
+    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = false);
+    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = true);
+    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = true);
+    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = false);
+    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = loose); // TODO: Implement.
 
   private:
 
@@ -123,7 +135,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         regex_type const tag_attribute_equals
             = x::icase(tag_attribute) >> *_s >> '=' >> *_s
             ;
-        options_type::shortcut_syntax
+        shortcut_syntax
             ? name_attribute = !tag_attribute_equals >> attribute
             : name_attribute = tag_attribute_equals >> attribute
             ;
@@ -153,7 +165,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
   private:
 
-    using kernel_type::base_type::is;
+    using kernel_type::base_kernel_type::is;
 
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
@@ -193,7 +205,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
                                  ) const {
         string_type const name = extract_attribute(attr);
 
-        if (optional<value_type> const& variable = detail::find(name, context)) {
+        if (optional<value_type> const& variable = context.get(name)) {
             return *variable;
         }
         else {
@@ -209,11 +221,17 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         return evaluate_attribute(attr, context, options);
     }
 
+    inline static void initialize_state(state_type& state) {
+        state.options.default_value = string_type();
+    }
+
     void render( ostream_type&       ostream
-               , result_type  const& result
-               , context_type const& context
+               , options_type const& options
+               , state_type   const& state
+               , context_type&       context
                ) const {
-        this->render_block(ostream, this->get_match(result), context, result.options());
+        context.case_sensitive = case_sensitive;
+        this->render_block(ostream, state.match, context, options);
     }
 
     void render_path( ostream_type&       ostream

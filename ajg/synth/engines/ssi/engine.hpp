@@ -25,8 +25,6 @@
 #include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/detail/standard_environment.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
-#include <ajg/synth/engines/ssi/value.hpp>
-#include <ajg/synth/engines/ssi/options.hpp>
 #include <ajg/synth/engines/ssi/builtin_tags.hpp>
 
 namespace ajg {
@@ -34,8 +32,8 @@ namespace synth {
 namespace engines {
 namespace ssi {
 
-template <class Traits, class Options = options<value<Traits> > >
-struct engine : base_engine<Options> {
+template <class Traits>
+struct engine : base_engine<Traits> {
   public:
 
     typedef engine                                                              engine_type;
@@ -53,11 +51,13 @@ struct engine : base_engine<Options> {
 
     typedef typename options_type::context_type                                 context_type;
 
-    typedef typename value_type::behavior_type                                  behavior_type;
-
     typedef detail::standard_environment                                        environment_type;
     typedef std::vector<string_type>                                            whitelist_type;
 
+  public:
+
+    BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = false);
+    BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = 9);
 
   private:
 
@@ -70,15 +70,15 @@ struct engine : base_engine<Options> {
 
 }; // engine
 
-template <class Traits, class Options>
+template <class Traits>
 template <class Iterator>
-struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
     typedef engine                                                              engine_type;
-    typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::state_type                                    state_type;
 
   protected:
 
@@ -99,8 +99,9 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         kernel_type   const& kernel;
         match_type    const& match;
         context_type&        context;
-        options_type&        options;
         ostream_type&        ostream;
+        options_type&        options;
+     // mutable options_type options; // Copy.
     };
 
   public:
@@ -185,10 +186,19 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
   private:
 
-    using kernel_type::base_type::is;
-    using kernel_type::base_type::is_;
+    using kernel_type::base_kernel_type::is;
+    using kernel_type::base_kernel_type::is_;
 
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
+
+    inline static void initialize_state(state_type& state) {
+        state.options.default_value = text::literal("(none)");
+        state.options.error_value   = text::literal("[an error occurred while processing this directive]");
+
+        // Note: insert will not replace existing values.
+        state.options.formats.insert(std::make_pair(text::literal("sizefmt"), text::literal("bytes")));
+        state.options.formats.insert(std::make_pair(text::literal("timefmt"), text::literal("%A, %d-%b-%Y %H:%M:%S %Z")));
+    }
 
     std::pair<string_type, string_type> parse_attribute( match_type   const& attr
                                                        , args_type    const& args
@@ -209,12 +219,14 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         return string.substr(1, string.length() - 2);
     }
 
-    string_type lookup_variable( context_type const& context
+    string_type lookup_variable( context_type&       context
                                , options_type const& options
                                , string_type  const& name
                                ) const {
+        string_type const time_format = options.format(text::literal("timefmt"));
+
         // First, check the context.
-        if (optional<value_type> const value = detail::find(name, context)) {
+        if (boost::optional<value_type> const value = context.get(name)) {
             return string_type(value->to_string());
         }
         // Second, check for magic variables.
@@ -225,36 +237,37 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
             AJG_SYNTH_THROW(not_implemented("DOCUMENT_URI"));
         }
         else if (name == text::literal("DATE_LOCAL")) {
-            return traits_type::format_datetime(options.time_format, traits_type::local_datetime());
+            return traits_type::format_datetime(time_format, traits_type::local_datetime());
         }
         else if (name == text::literal("DATE_GMT")) {
-            return traits_type::format_time(options.time_format, traits_type::utc_time());
-            // OR: return traits_type::format_datetime(options.time_format, traits_type::utc_datetime());
+            return traits_type::format_time(time_format, traits_type::utc_time());
+            // OR: return traits_type::format_datetime(time_format, traits_type::utc_datetime());
         }
         else if (name == text::literal("LAST_MODIFIED")) {
             AJG_SYNTH_THROW(not_implemented("LAST_MODIFIED"));
         }
         // Third, check the environment.
-        else if (optional<typename environment_type::mapped_type> const variable =
+        else if (boost::optional<typename environment_type::mapped_type> const variable =
                     detail::find(text::narrow(name), this->environment)) {
             return text::widen(*variable);
         }
         // Otherwise, use the undefined echo message.
         else {
-            return options.echo_message;
+            return options.default_value.to_string();
         }
     }
 
     void render( ostream_type&       ostream
-               , result_type  const& result
-               , context_type const& context
+               , options_type const& options
+               , state_type   const& state
+               , context_type&       context
                ) const {
-        this->render_block(ostream, this->get_match(result), context, result.options());
+        this->render_block(ostream, state.match, context, options);
     }
 
     void render_path( ostream_type&       ostream
                     , path_type    const& path
-                    , context_type const& context
+                    , context_type&       context
                     , options_type const& options
                     ) const {
         templates::path_template<engine_type> const t(path, options.directories, options);
@@ -263,7 +276,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     void render_plain( ostream_type&       ostream
                      , match_type   const& plain
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
         ostream << plain.str();
@@ -271,7 +284,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     void render_block( ostream_type&       ostream
                      , match_type   const& block
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
@@ -281,7 +294,7 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
     void render_tag( ostream_type&       ostream
                    , match_type   const& match
-                   , context_type const& context
+                   , context_type&       context
                    , options_type const& options
                    ) const
     try {
@@ -292,9 +305,9 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
             args_type const args =
                 { *this
                 , match_
-                , const_cast<context_type&>(context)
-                , const_cast<options_type&>(options)
-                , const_cast<ostream_type&>(ostream)
+                , context
+                , ostream
+                , const_cast<options_type&>(options) // FIXME
                 };
             tag(args);
         }
@@ -303,18 +316,18 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         }
     }
     catch (std::exception const&) {
-        if (options_type::throw_on_errors) throw;
+        if (throw_on_errors) throw;
         /* XXX: It's unclear whether this is helpful or even allowed; plus it's distracting in unit tests.
         else {
             std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
         }*/
 
-        ostream << options.error_message;
+        ostream << options.error_value;
     }
 
     void render_match( ostream_type&       ostream
                      , match_type   const& match
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
              if (is(match, this->plain)) this->render_plain(ostream, match, context, options);
@@ -336,10 +349,10 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
         string_type       const left    = parse_string(args, str);
         string_type       const right   = regex[s1].str();
         string_regex_type const pattern = string_regex_type::compile(right);
-        size_type         const n       = options_type::max_regex_captures;
+        size_type         const n       = max_regex_captures;
 
         for (std::size_t i = 0; i <= n; ++i) {
-            args.context.erase(behavior_type::to_string(i));
+            args.context.unset(text::stringize(i));
         }
 
         string_match_type match;
@@ -347,8 +360,8 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
             std::size_t const limit = (std::min)(match.size(), n);
 
             for (std::size_t i = 0; i <= limit; ++i) {
-                string_type const key = behavior_type::to_string(i);
-                args.context.insert(std::make_pair(key, match[i].str()));
+                string_type const key = text::stringize(i);
+                args.context.set(key, match[i].str());
             }
         }
 
@@ -430,7 +443,6 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
     string_type const tag_end;
 
     environment_type const environment;
-    options_type     const default_options;
 
   private:
 

@@ -20,19 +20,27 @@ namespace ajg {
 namespace synth {
 namespace adapters {
 
-#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type) \
-    template <class Behavior> \
-    struct adapter<Behavior, type> : numeric_adapter<Behavior, type> { \
-        adapter(type const value)  : numeric_adapter<Behavior, type>(value) {} \
+#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(type, flags) \
+    template <class Value> \
+    struct adapter<Value, type>   : numeric_adapter<Value, type, type_flags(flags)> { \
+        adapter(type const value) : numeric_adapter<Value, type, type_flags(flags)>(value) {} \
     } \
+
+#define AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(type) \
+        AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(type, unspecified)
 
 //
 // Integral specializations
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(char);
-AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(char signed);
-AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(char unsigned);
+// XXX: These should probably be adapted as character/textual rather than numerically.
+AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(char,          textual | character);
+AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(char signed,   textual | character);
+AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(char unsigned, textual | character);
+
+#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
+AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER_(wchar_t, textual | character);
+#endif
 
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(short);
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(short unsigned);
@@ -42,10 +50,6 @@ AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(int unsigned);
 
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long);
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long unsigned);
-
-#ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
-AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(wchar_t);
-#endif
 
 #ifndef AJG_SYNTH_CONFIG_NO_LONG_LONG
 AJG_SYNTH_SPECIALIZE_NUMERIC_ADAPTER(long long);

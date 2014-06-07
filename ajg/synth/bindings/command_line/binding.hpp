@@ -26,61 +26,50 @@ struct binding : bindings::base_binding<Traits, templates::stream_template> {
     typedef Traits                                                              traits_type;
     typedef typename binding::base_binding_type                                 base_type;
 
-    typedef typename base_type::formats_type                                    formats_type;
-    typedef typename base_type::libraries_type                                  libraries_type;
-    typedef typename base_type::loaders_type                                    loaders_type;
-    typedef typename base_type::resolvers_type                                  resolvers_type;
+    typedef typename base_type::context_type                                    context_type;
+    typedef typename base_type::options_type                                    options_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
-    typedef typename pt::basic_ptree<string_type, string_type>                  context_type; // TODO: basic_ptree<string_type, value_type>
+    typedef typename pt::basic_ptree<string_type, string_type>                  ptree_type; // TODO: basic_ptree<string_type, value_type>
 
   public:
 
     template <class Source>
     binding( Source&             source
-           , string_type  const& engine_name
-           , string_type  const& default_value
-           , paths_type   const& paths
-           ) : base_type( source
-                        , engine_name
-                        , default_value
-                        , formats_type()
-                        , boolean_type(false)
-                        , paths
-                        , libraries_type()
-                        , loaders_type()
-                        , resolvers_type()
-                        ) {}
+           , string_type  const& engine
+           , string_type  const& replacement
+           , paths_type   const& directories
+           ) : base_type(source, engine, get_options(replacement, directories)) {}
+
+  private:
+
+    inline static options_type get_options(string_type const& replacement, paths_type const& directories) {
+        options_type options;
+        options.default_value = replacement;
+        options.debug         = false; // TODO: Turn into a flag.
+        options.directories   = directories;
+        return options;
+    }
 
   public:
 
-    void render_to_stream(ostream_type& ostream, context_type& context) const {
-        return base_type::template render_to_stream<binding>(ostream, context);
+    void render_to_stream(ostream_type& ostream, ptree_type const& ptree) const {
+        context_type context((ptree));
+        return base_type::render_to_stream(ostream, context);
     }
 
-    string_type render_to_string(context_type& context) const {
-        return base_type::template render_to_string<binding>(context);
+    string_type render_to_string(ptree_type const& ptree) const {
+        context_type context((ptree));
+        return base_type::render_to_string(context);
     }
 
-    void render_to_path(string_type const& path, context_type& context) const {
-        return base_type::template render_to_path<binding>(path, context);
-    }
-
-  public: // TODO[c++11]: Replace with protected + `friend base_binding;`
-
-    template <class Context>
-    inline static Context adapt_context(context_type& parent) {
-        Context context;
-
-        BOOST_FOREACH(typename context_type::value_type& child, parent) {
-            context[child.first] = child.second;
-        }
-
-        return context;
+    void render_to_path(string_type const& path, ptree_type const& ptree) const {
+        context_type context((ptree));
+        return base_type::render_to_path(path, context);
     }
 };
 

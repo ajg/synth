@@ -16,16 +16,13 @@ namespace adapters {
 // specialization for native pointers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, T*>  : forwarding_adapter<Behavior, T, T*> {
-    adapter(T* const adapted) : forwarding_adapter<Behavior, T, T*>(adapted) {}
+template <class Value, class T>
+struct adapter<Value, T*>  : forwarding_adapter<Value, T, T*> {
+    adapter(T* const adapted) : forwarding_adapter<Value, T, T*>(adapted) {}
 
-    template <class A> A forward() const { return A(boost::ref(*this->adapted())); }
-    typename Behavior::boolean_type valid() const { return this->adapted() != 0; }
-
- // template <class Adapter> optional<Adapter> forward() const {
- //     return this->adapted() ? Adapter(boost::ref(*adapted_)) : boost::none;
- // }
+    template <class A> A forward() { return A(boost::ref(*this->adapted())); }
+    template <class A> A forward() const { return A(boost::cref(*this->adapted())); }
+    bool                 valid() const { return this->adapted() != 0; }
 };
 
 }}} // namespace ajg::synth::adapters

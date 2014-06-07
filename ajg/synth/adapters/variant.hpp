@@ -17,22 +17,10 @@ namespace adapters {
 // specialization for boost::variant
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, BOOST_VARIANT_ENUM_PARAMS(class T)>
-struct adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > :
-concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > {
-    adapter(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& adapted) : concrete_adapter<Behavior, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >(adapted) {}
-
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    // FIXME: These should be forwarded to an adapter for the real value.
-    floating_type to_floating() const { return this->adapted().which(); }
-    boolean_type  to_boolean()  const { return true; }
-
-    // TODO: These rely on T0 ... TN all having these operators available, which obviously isn't the
-    //       general case. So it might be better to switch to using one of our own individual
-    //       adapters for this purpose (probably through a static_visitor.)
-    void input (istream_type& in)        { AJG_SYNTH_THROW(not_implemented("input")); } // in >> this->adapted(); }
-    void output(ostream_type& out) const { out << this->adapted(); }
+// TODO: Use forwarding_adapter or forward the actual value elsehow.
+template <class Value, BOOST_VARIANT_ENUM_PARAMS(class T)>
+struct adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > : concrete_adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, container> {
+    adapter(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& adapted) : concrete_adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, container>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

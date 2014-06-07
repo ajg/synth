@@ -17,9 +17,9 @@ namespace adapters {
 // specialization for std::stack
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::stack<T> >  : container_adapter<Behavior, std::stack<T> > {
-    adapter(std::stack<T> const& adapted) : container_adapter<Behavior, std::stack<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, std::stack<T> >  : container_adapter<Value, std::stack<T>, sequential> {
+    adapter(std::stack<T> const& adapted) : container_adapter<Value, std::stack<T>, sequential>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

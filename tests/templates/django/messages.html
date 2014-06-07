@@ -1,4 +1,4 @@
-{% regroup messages by tags as type_list %}
+{% regroup messages by category as type_list %}
 
 {% for type in type_list %}
 <ul class="{{ type.grouper }} messages">
@@ -6,7 +6,6 @@
   <li>{{ message|safe }}</li>
 {% endfor %}
 </ul>
-
 {% endfor %}
 
 {% for message in messages %}

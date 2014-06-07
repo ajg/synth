@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <functional>
 
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
 #include <ajg/synth/exceptions.hpp>
@@ -23,41 +22,63 @@ namespace ajg {
 namespace synth {
 namespace adapters {
 
-using boost::optional;
+// TODO[c++11]: ensure the underlying type is wide enough.
+enum type_flags
+    { unspecified
+    , unit          = 1 << 0
+    , boolean       = 1 << 1
+    , textual       = 1 << 2
+    ,   character   = 1 << 3
+    , numeric       = 1 << 4
+    ,   floating    = 1 << 5
+    ,   integral    = 1 << 6
+ // ,   signed      = 1 << 7
+ // ,   unsigned    = 1 << 8
+    , chronologic   = 1 << 9
+    , sequential    = 1 << 10
+    , associative   = 1 << 11
+    , container     = 1 << 12
+    };
 
-template <class Behavior, class Adapted>
+template <class Value, class Adapted>
 struct adapter;
 
-template <class Behavior, class T, class Adapted, class Specialized>
+template <class Value, class T, class Adapted, class Specialized>
 struct forwarding_adapter;
+
+using boost::optional;
 
 //
 // base_adapter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior>
+template <class Value>
 struct base_adapter {
   public:
 
-    typedef Behavior                                                            behavior_type;
+    typedef Value                                                               value_type;
     typedef base_adapter                                                        base_type;
-    typedef typename behavior_type::traits_type                                 traits_type;
-    typedef typename behavior_type::value_type                                  value_type;
-    typedef typename behavior_type::adapter_type                                adapter_type;
+
+    typedef typename value_type::iterator                                       iterator;
+    typedef typename value_type::const_iterator                                 const_iterator;
+    typedef typename value_type::range_type                                     range_type;
+    typedef typename value_type::attribute_type                                 attribute_type;
+    typedef typename value_type::attributes_type                                attributes_type;
+    typedef typename value_type::adapter_type                                   adapter_type;
+    typedef typename value_type::traits_type                                    traits_type;
 
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::floating_type                                 floating_type;
+    typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef typename value_type::iterator                                       iterator;
-    typedef typename value_type::const_iterator                                 const_iterator;
-    typedef typename value_type::range_type                                     range_type;
 
   public:
 
@@ -66,34 +87,35 @@ struct base_adapter {
 
   public:
 
-    // TODO: Instead of throwing invalid_method here, defer default behavior to Traits.
+    virtual std::type_info const& type()  const = 0;
+    virtual type_flags            flags() const = 0;
 
-    virtual std::type_info const& type() const = 0;
+    virtual optional<boolean_type>  get_boolean()  const = 0;
+    virtual optional<number_type>   get_number()   const = 0;
+    virtual optional<datetime_type> get_datetime() const = 0;
+    virtual optional<string_type>   get_string()   const = 0;
+    virtual optional<range_type>    get_range()    const = 0;
 
-    virtual boolean_type  is_numeric()  const { return false; }
+    virtual boolean_type input (istream_type& istream) const = 0;
+    virtual boolean_type output(ostream_type& ostream) const = 0;
 
-    virtual floating_type to_floating() const { AJG_SYNTH_THROW(invalid_method("to_floating")); }
-    virtual boolean_type  to_boolean()  const { AJG_SYNTH_THROW(invalid_method("to_boolean")); }
-    virtual datetime_type to_datetime() const { AJG_SYNTH_THROW(invalid_method("to_datetime")); }
-    virtual string_type   to_string()   const { AJG_SYNTH_THROW(invalid_method("to_string")); }
-    virtual range_type    to_range()    const { AJG_SYNTH_THROW(invalid_method("to_range")); }
+    virtual attribute_type  attribute(value_type const& key)                                  const = 0;
+    virtual void            attribute(value_type const& key, attribute_type const& attribute) const = 0;
+    virtual attributes_type attributes()                                                      const = 0;
 
-    // TODO: Rename parameters istream and ostream.
-    virtual void input (istream_type& in)        { AJG_SYNTH_THROW(invalid_method("input")); }
-    virtual void output(ostream_type& out) const { AJG_SYNTH_THROW(invalid_method("output")); }
-
-    virtual const_iterator       find(value_type const& value) const { AJG_SYNTH_THROW(invalid_method("find")); }
-    virtual optional<value_type> index(value_type const& what) const { AJG_SYNTH_THROW(invalid_method("index")); }
+    virtual const_iterator find(value_type const& value) const = 0;
 
     virtual boolean_type equal_adapted(adapter_type const& that) const = 0;
     virtual boolean_type less_adapted (adapter_type const& that) const = 0;
 
+    // TODO: Move this to concrete_adapter.
+
     template <class T> // TODO: Deal with forwarding_adapters.
-    inline T const& get_adapted() const {
-        typedef adapters::adapter<Behavior, T> specialized_type;
+    inline T& get_adapted() const {
+        typedef adapters::adapter<Value, T> specialized_type;
         specialized_type const* const specialization = this->template get<specialized_type>();
         BOOST_ASSERT(specialization);
-        return specialization->adapted_;
+        return specialization->adapted();
     }
 
   protected:

@@ -15,8 +15,6 @@ namespace synth {
 namespace engines {
 namespace null {
 
-using boost::optional;
-
 template <class Options>
 struct resolver : Options::abstract_resolver {
   public:
@@ -27,6 +25,7 @@ struct resolver : Options::abstract_resolver {
     typedef typename options_type::string_type                                  string_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::context_type                                 context_type;
+    typedef typename options_type::url_type                                     url_type;
     typedef typename options_type::arguments_type                               arguments_type;
     typedef std::map<string_type, string_type>                                  patterns_type;
 
@@ -36,22 +35,22 @@ struct resolver : Options::abstract_resolver {
 
   public:
 
-    virtual optional<string_type> resolve( string_type  const& path
-                                         , context_type const& context
-                                         , options_type const& options
-                                         ) {
-        return boost::none;
+    virtual url_type resolve( string_type  const& path
+                            , context_type const& context
+                            , options_type const& options
+                            ) {
+        return url_type();
     }
 
-    virtual optional<string_type> reverse( string_type    const& name
-                                         , arguments_type const& arguments
-                                         , context_type   const& context
-                                         , options_type   const& options
-                                         ) {
+    virtual url_type reverse( string_type    const& name
+                            , arguments_type const& arguments
+                            , context_type   const& context
+                            , options_type   const& options
+                            ) {
         // NOTE: This resolver is only meant to be used in tests, as it does no escaping.
         typename patterns_type::const_iterator it = patterns_.find(name);
         if (it == patterns_.end()) {
-            return boost::none;
+            return url_type();
         }
 
         string_type path, query;
@@ -63,7 +62,7 @@ struct resolver : Options::abstract_resolver {
             query += i++ ? text::literal("&") : text::literal("?");
             query += karg.first + text::literal("=") + karg.second.to_string();
         }
-        return it->second + path + query;
+        return url_type(it->second + path + query);
     }
 
     explicit resolver(patterns_type patterns) : patterns_(patterns) {}

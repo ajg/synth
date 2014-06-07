@@ -18,7 +18,7 @@ BOOST = 'auto' # TODO: Implement `local` and `system`.
 if BOOST not in ('auto', 'local', 'system'):
     sys.exit('Option `boost` must be `auto`, `local` or `system`')
 
-def get_boost_path():
+def find_boost_path():
     if BOOST in ('auto', 'local'):
         return 'external/boost'
     elif BOOST == 'system':
@@ -158,12 +158,14 @@ def get_extra_compile_args(compiler):
     else:
         # TODO: Some of this is repeated in SConstruct.
         return [
+            '-ferror-limit=1',
+            # '-ftemplate-backtrace-limit=0',
             # '-Wno-unsequenced',
             '-Wno-unused-value',
         ]
 
 def get_include_dirs():
-    return ['.', get_boost_path()]
+    return ['.', find_boost_path()]
 
 def get_library_dirs():
     return []
@@ -211,7 +213,7 @@ def get_sources():
     sources += ['ajg/synth/bindings/python/module.cpp']
 
     if BOOST != 'system':
-        boost_path = get_boost_path() + '/'
+        boost_path = find_boost_path() + '/'
         sources += [boost_path + source for source in boost_python_sources]
 
     return sources

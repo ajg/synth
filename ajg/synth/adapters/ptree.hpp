@@ -21,41 +21,36 @@ namespace adapters {
 //     TODO: Factor out a common associative_adapter and share it with map/multimap.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class K, class V>
-struct adapter<Behavior, boost::property_tree::basic_ptree<K, V> >  : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> > {
-    adapter(boost::property_tree::basic_ptree<K, V> const& adapted) : concrete_adapter<Behavior, boost::property_tree::basic_ptree<K, V> >(adapted) {}
+template <class Value, class K, class V>
+struct adapter<Value, boost::property_tree::basic_ptree<K, V> >  : container_adapter<Value, boost::property_tree::basic_ptree<K, V>, type_flags(sequential | associative)> {
+    adapter(boost::property_tree::basic_ptree<K, V> const& adapted) : container_adapter<Value, boost::property_tree::basic_ptree<K, V>, type_flags(sequential | associative)>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-    boolean_type to_boolean() const {
-        if (this->adapted().empty()) {
-            return boolean_type(value_type(this->adapted().data()));
-        }
-        else {
-            return true;
-        }
+    virtual optional<boolean_type> get_boolean() const {
+        return !this->adapted().empty() || boolean_type(value_type(this->adapted().data()));
     }
 
-    range_type to_range() const {
-        return range_type(this->adapted().begin(), this->adapted().end());
-    }
-
-    void output(ostream_type& out) const {
-        if (this->adapted().empty()) {
-            out << value_type(this->adapted().data());
-        }
-        else {
-            behavior_type::delimited(out, this->to_range());
-        }
-    }
-
-    optional<value_type> index(value_type const& what) const {
-        K const key = behavior_type::template to<K>(what);
-        typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted().find(key);
+    virtual attribute_type attribute(value_type const& key) const {
+        K const k = key.template to<K>();
+        typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted().find(k);
         if (it == this->adapted().not_found()) {
             return boost::none;
         }
         return value_type(it->second);
+    }
+
+    // TODO: attribute(k, v)
+    // TODO: attributes()
+
+    virtual boolean_type output(ostream_type& ostream) const {
+        if (this->adapted().empty()) {
+            ostream << value_type(this->adapted().data());
+        }
+        else {
+            value_type::delimited(ostream, range_type(this->adapted().begin(), this->adapted().end()));
+        }
+        return true;
     }
 };
 
@@ -71,6 +66,14 @@ inline bool operator <( basic_ptree<K, V> const& a
     return a.data() < b.data() && std::lexicographical_compare( a.ordered_begin(), a.not_found()
                                                               , b.ordered_begin(), b.not_found()
                                                               );
+}
+
+// Needed by the command_line binding.
+template <class Char, class K, class V>
+inline bool operator <<( std::basic_ostream<Char>& ostream
+                       , basic_ptree<K, V> const&
+                       ) {
+    return ostream << "TODO";
 }
 
 }} // namespace boost::property_tree

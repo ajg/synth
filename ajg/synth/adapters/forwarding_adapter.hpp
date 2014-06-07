@@ -13,20 +13,29 @@ namespace ajg {
 namespace synth {
 namespace adapters {
 
-template <class Behavior, class T, class Adapted, class Specialized = adapter<Behavior, Adapted> >
-struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
-    forwarding_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted, Specialized>(adapted) {}
+template <class Value, class T, class Adapted, class Specialized = adapter<Value, Adapted> >
+struct forwarding_adapter : concrete_adapter<Value, Adapted, unspecified, Specialized> {
+    forwarding_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, unspecified, Specialized>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-    std::type_info const& type() const { return forward().type(); }
+    virtual std::type_info const& type()  const { return this->valid() ? this->forward().type()  : typeid(void); }
+    virtual type_flags            flags() const { return this->valid() ? this->forward().flags() : unspecified; }
 
-    floating_type to_floating() const { return valid() ? forward().to_floating() : floating_type(0); }
-    boolean_type  to_boolean()  const { return valid() ? forward().to_boolean() : boolean_type(false); }
-    range_type    to_range()    const { return valid() ? forward().to_range() : range_type(); }
+    virtual optional<boolean_type>  get_boolean()  const { return this->valid() ? this->forward().get_boolean()  : boost::none; }
+    virtual optional<number_type>   get_number()   const { return this->valid() ? this->forward().get_number()   : boost::none; }
+    virtual optional<datetime_type> get_datetime() const { return this->valid() ? this->forward().get_datetime() : boost::none; }
+    virtual optional<string_type>   get_string()   const { return this->valid() ? this->forward().get_string()   : boost::none; }
+    virtual optional<range_type>    get_range()    const { return this->valid() ? this->forward().get_range()    : boost::none; }
 
-    void input (istream_type& in)        { if (valid()) forward().input(in); }
-    void output(ostream_type& out) const { if (valid()) forward().output(out); }
+    virtual attribute_type  attribute(value_type const& key) const { return this->valid() ? this->forward().attribute(key) : attribute_type(); }
+    virtual void            attribute(value_type const& key, attribute_type const& attribute) const { if (this->valid()) this->forward().attribute(key, attribute); }
+    virtual attributes_type attributes() const { return this->valid() ? this->forward().attributes() : attributes_type(); }
+
+    virtual const_iterator find(value_type const& value) const { return this->valid() ? this->forward().find(value) : const_iterator(); }
+
+    virtual boolean_type input (istream_type& istream) const { return this->valid() ? this->forward().input(istream) : false; }
+    virtual boolean_type output(ostream_type& ostream) const { return this->valid() ? this->forward().output(ostream) : false; }
 
   protected:
 
@@ -34,25 +43,23 @@ struct forwarding_adapter : concrete_adapter<Behavior, Adapted, Specialized> {
         // TODO: Check all cases:
         //     a. type(*that) == type(*this)
         //     b. type(that->adapted) == type(this->adapted)
-        return forward().template equal_as<adapter<Behavior, T> >(that);
+        return this->forward().template equal_as<adapter<Value, T> >(that);
     }
 
     virtual boolean_type less_adapted(adapter_type const& that) const {
-        return forward().template less_as<adapter<Behavior, T> >(that);
+        return this->forward().template less_as<adapter<Value, T> >(that);
     }
 
   private:
 
-    typedef typename boost::remove_reference<T>::type                           bare_type;
-    typedef adapter<Behavior, boost::reference_wrapper<T> >                     ref_type;
-    typedef adapter<Behavior, boost::reference_wrapper<bare_type const> >       cref_type;
+    typedef typename boost::remove_reference<T>::type                        bare_type;
+    typedef adapter<Value, boost::reference_wrapper<T> >                     ref_type;
+    typedef adapter<Value, boost::reference_wrapper<bare_type const> >       cref_type;
 
   private:
 
-    inline cref_type forward() const {
-        return static_cast<Specialized const*>(this)->template forward<cref_type>();
-    }
-
+    inline ref_type forward() { return static_cast<Specialized*>(this)->template forward<ref_type>(); }
+    inline cref_type forward() const { return static_cast<Specialized const*>(this)->template forward<cref_type>(); }
     inline boolean_type valid() const { return static_cast<Specialized const*>(this)->valid(); }
 };
 

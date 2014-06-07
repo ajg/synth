@@ -3,7 +3,6 @@
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 import sys
-from functools import partial
 
 def get():
     return (context, golden, source, 'django', ('', {}, False, [], {}, [library_loader], []))
@@ -15,22 +14,19 @@ class Library(object):
 
 def dump(n, x): print n, '=', x; return x
 
-def render_block(segments, match, index=0):
+def render_block(segments, context, match, index=0):
     # print '### render_block(', segments, match, ')'
-    return segments[index][1](match)
-
-def bind_segments(segments, match):
-    # print '### bind_segments(', segments, match, ')'
-    return [(pieces, partial(renderer, match)) for pieces, renderer in segments]
+    renderer = segments[index][1]
+    return renderer(context, match)
 
 def simple_tag(fn):
-    return (lambda segments: (lambda match, *args, **kwargs: str(fn(*args, **kwargs))), ())
+    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(*args, **kwargs))), ())
 
 def block_tag(name, fn):
-    return (lambda segments: (lambda match, *args, **kwargs: str(fn(render_block(segments, match), *args, **kwargs))), ('end' + name,))
+    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(context, render_block(segments, context, match), *args, **kwargs))), ('end' + name,))
 
 def variadic_tag(name, fn, expected):
-    return (lambda segments: (lambda match, *args, **kwargs: str(fn(bind_segments(segments, match), *args, **kwargs))), expected + ('end' + name,))
+    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(context, match, segments, *args, **kwargs))), expected + ('end' + name,))
 
 dummy_tag = (None, ())
 dummy_filter = None
@@ -84,18 +80,18 @@ def ackermann(m, n):
 def add(*args):
     return sum(args)
 
-def encode(s, arg):
-    # print '### encode(', repr(s), repr(arg), ')'
-    return s.encode(arg)
+def encode(context, rendered_block, arg):
+    # print '### encode(', repr(rendered_block), repr(arg), ')'
+    return rendered_block.encode(arg)
 
-def decode(s, arg):
-    # print '### decode(', repr(s), repr(arg), ')'
-    return s.decode(arg)
+def decode(context, rendered_block, arg):
+    # print '### decode(', repr(rendered_block), repr(arg), ')'
+    return rendered_block.decode(arg)
 
-def unless(segments, arg):
-    # print '### unless(', repr(segments), repr(arg), ')'
+def unless(context, match, segments, arg):
+    # print '### unless(', match, repr(segments), repr(arg), ')'
     pieces, renderer = segments[1 if arg else 0]
-    return renderer()
+    return renderer(context, match)
 
 
 context = {'motto': 'May the Force be with you.'}

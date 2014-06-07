@@ -17,44 +17,74 @@ namespace synth {
 namespace adapters {
 namespace {
 namespace py = ::boost::python;
-
-using bindings::python::get_string;
-using bindings::python::get_datetime;
+namespace bp = bindings::python;
 } // namespace
 
 //
 // specialization for boost::python::object
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior>
-struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
-    adapter(py::object const& adapted) : concrete_adapter<Behavior, py::object>(adapted) {}
+template <class Value>
+struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::object> {
+    adapter(py::object const& adapted) : concrete_adapter_without_io<Value, py::object>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
- // virtual void input (istream_type& in)        { in >> this->adapted(); }
- // virtual void output(ostream_type& out) const { out << this->adapted(); }
-    virtual void output(ostream_type& out) const { out << get_string<traits_type>(this->adapted()); }
+    virtual boolean_type input (istream_type& istream) const { return false; }
+    virtual boolean_type output(ostream_type& ostream) const { return false; }
 
-    virtual boolean_type  to_boolean()  const { return boolean_type(this->adapted()); }
-    virtual datetime_type to_datetime() const { return get_datetime<traits_type>(this->adapted()); }
-    virtual range_type    to_range()    const {
+    virtual type_flags flags() const {
+        PyObject* const o = this->adapted().ptr();
+        type_flags flags  = unspecified;
+
+        if (Py_None == o)              flags = type_flags(flags | unit);
+        if (PyBool_Check(o))           flags = type_flags(flags | boolean);
+        // FIXME: This PyNumber_Check seems to return true for all instances of "classic" Python classes.
+        if (PyNumber_Check(o)) {
+            if (PyInt_Check(o) ||
+                PyLong_Check(o))       flags = type_flags(flags | numeric | integral);
+            else if (PyFloat_Check(o)) flags = type_flags(flags | numeric | floating);
+            else                       flags = type_flags(flags | numeric);
+        }
+        if (PyString_Check(o)) {
+            if (PyString_Size(o) == 1) flags = type_flags(flags | textual | character);
+            else                       flags = type_flags(flags | textual);
+        }
+        if (PySequence_Check(o))       flags = type_flags(flags | container | sequential);
+        if (PyMapping_Check(o))        flags = type_flags(flags | container | associative);
+        return flags;
+    }
+
+    virtual optional<boolean_type>  get_boolean()    const { return bp::get_boolean<traits_type>(this->adapted()); }
+    virtual optional<number_type>   get_number()     const { return bp::get_number<traits_type>(this->adapted()); }
+    virtual optional<datetime_type> get_datetime()   const { return bp::get_datetime<traits_type>(this->adapted()); }
+    virtual optional<string_type>   get_string()     const { return bp::get_string<traits_type>(this->adapted()); }
+    virtual optional<range_type>    get_range()      const { // TODO: bp::get_range<traits_type>
         return range_type( begin<const_iterator>(this->adapted())
                          , end<const_iterator>(this->adapted())
                          );
     }
 
-    virtual boolean_type is_boolean() const { return PyBool_Check(this->adapted().ptr()); }
-    virtual boolean_type is_string()  const { return PyString_Check(this->adapted().ptr()); }
-    virtual boolean_type is_numeric() const { return PyNumber_Check(this->adapted().ptr()); }
+    virtual attributes_type attributes() const {
+        attributes_type attributes;
+        py::list const keys = py::dict(this->adapted()).keys();
 
-    boost::optional<value_type> index(value_type const& what) const {
+        // TODO: Replace with stl_input_iterator version.
+        for (std::size_t i = 0, n = len(keys); i < n; ++i) {
+            py::object const key = keys[i];
+            attributes.insert(value_type(key));
+        }
+
+        return attributes;
+    }
+
+    virtual attribute_type attribute(value_type const& key) const {
         // Per https://docs.djangoproject.com/en/dev/topics/templates/#variables
         // TODO: Move this to django::engine.
         // TODO: Support arbitrary values as keys for non-django general case.
 
         PyObject   *const o = this->adapted().ptr();
-        std::string const k = text::narrow(what.to_string());
+        std::string const k = text::narrow(key.to_string());
 
         // 1. Dictionary lookup
         if (PyMapping_Check(o)) {
@@ -65,7 +95,7 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
         }
 
         // 2. Attribute lookup
-        // TODO: If value is a py::object, use PyObject_HasAttr(o, <value>.ptr()) and attr(...)
+        // TODO: If key is a py::object, use PyObject_HasAttr(o, <value>.ptr()) and attr(...)
         if (PyObject_HasAttrString(o, k.c_str())) {
             py::object obj = this->adapted().attr(py::str(k));
 
@@ -79,15 +109,57 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
 
         // 4. List-index lookup
         if (PySequence_Check(o)) {
-            Py_ssize_t n = static_cast<Py_ssize_t>(what.to_floating());
+            Py_ssize_t n = 0;
+
+            try {
+                n = static_cast<Py_ssize_t>(key.to_number());
+            }
+            catch (conversion_error const&) {
+                return attribute_type();
+            }
 
             if (n < PySequence_Size(o)) {
                 return value_type(py::object(this->adapted()[py::long_(n)]));
             }
         }
 
-        return boost::none;
+        return attribute_type();
     }
+
+    virtual void attribute(value_type const& key, attribute_type const& attribute) const {
+        // TODO: Support arbitrary values as keys for non-django general case.
+
+        PyObject   *const o = this->adapted().ptr();
+        std::string const k = text::narrow(key.to_string());
+
+        if (PyMapping_Check(o)) {
+            // TODO: If key is a py::object, use PyMapping_HasKey, etc.
+            if (attribute) {
+                PyMapping_SetItemString(o, const_cast<char*>(k.c_str()), bp::from_value(*attribute).ptr());
+            }
+            else {
+                if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
+                    PyMapping_DelItemString(o, const_cast<char*>(k.c_str()));
+                }
+            }
+        }
+
+        /* TODO:
+        if (PySequence_Check(o)) {
+            Py_ssize_t n = static_cast<Py_ssize_t>(key.to_number());
+
+            if (n < PySequence_Size(o)) {
+                this->adapted()[py::long_(n)] = ...;
+            }
+        }
+
+        // TODO: If value is a py::object, use PyObject_HasAttr(o, <value>.ptr()) and attr(...)
+        if (PyObject_HasAttrString(o, k.c_str())) {
+            this->adapted().attr(py::str(k), ...);
+        }
+        */
+    }
+
 
   private:
 
@@ -117,8 +189,32 @@ struct adapter<Behavior, py::object> : concrete_adapter<Behavior, py::object> {
     }
 
     inline static string_type class_name(py::object const& obj) {
-        return get_string<traits_type>(obj.attr("__class__").attr("__name__"));
+        return bp::get_string<traits_type>(obj.attr("__class__").attr("__name__"));
     }
+};
+
+//
+// specializations for boost::python::{tuple, list, dict, str}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Value>
+struct adapter<Value, py::tuple> : adapter<Value, py::object> {
+    adapter(py::tuple const& adapted) : adapter<Value, py::object>(adapted) {}
+};
+
+template <class Value>
+struct adapter<Value, py::list> : adapter<Value, py::object> {
+    adapter(py::list const& adapted) : adapter<Value, py::object>(adapted) {}
+};
+
+template <class Value>
+struct adapter<Value, py::dict> : adapter<Value, py::object> {
+    adapter(py::dict const& adapted) : adapter<Value, py::object>(adapted) {}
+};
+
+template <class Value>
+struct adapter<Value, py::str> : adapter<Value, py::object> {
+    adapter(py::str const& adapted) : adapter<Value, py::object>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

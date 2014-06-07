@@ -10,6 +10,7 @@
 
 #include <boost/array.hpp>
 #include <boost/function.hpp>
+#include <boost/assign/list_of.hpp>
 
 #include <ajg/synth/detail/text.hpp>
 
@@ -37,6 +38,7 @@ struct formatter {
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::floating_type                                 floating_type;
+    typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::date_type                                     date_type;
     typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
@@ -44,7 +46,6 @@ struct formatter {
     typedef typename traits_type::timezone_type                                 timezone_type;
     typedef typename traits_type::string_type                                   string_type;
 
-    typedef typename value_type::behavior_type                                  behavior_type;
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
 
@@ -460,7 +461,7 @@ struct formatter {
   private:
 
     /*inline static string_type nonbreaking(string_type const& s) {
-        return text::replace(s, text::literal(" "), options.nonbreaking_space);
+        return text::replace(s, text::literal(" "), options.format(text::literal("SPACE_FORMAT")));
     }*/
 
     inline static string_type pluralize_unit( size_type    const  n
@@ -468,7 +469,7 @@ struct formatter {
                                             , options_type const& options
                                             ) {
         string_type const suffix = n == 1 ? string_type() : text::literal("s");
-        return text::stringize(n) + options.nonbreaking_space + s + suffix;
+        return text::stringize(n) + options.format(text::literal("SPACE_FORMAT")) + s + suffix;
     }
 };
 

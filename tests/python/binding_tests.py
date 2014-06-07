@@ -51,7 +51,7 @@ dict_abc: {{ dict_abc }}; {% if dict_abc %}Good{% else %}Bad{% endif %}
 {% for k, v in list_empty %}Bad{% empty %}Good{% endfor %}
 {% for k, v in dict_empty %}Bad{% empty %}Good{% endfor %}
 
-"test": {% for v in "test" %}{{ v }}{% endfor %}
+"literal": {% for v in "literal" %}{{ v }}{% endfor %}
 str_test: {% for v in str_test %}{{ v }}{% endfor %}
 list_12345: {% for v in list_12345 %}{{ v }}{% endfor %}
 dict_abc: {% for v in dict_abc %}{{ v }}{% endfor %}
@@ -111,7 +111,7 @@ Good
 Good
 Good
 
-"test": test
+"literal": literal
 str_test: test
 list_12345: 12345
 dict_abc: acb

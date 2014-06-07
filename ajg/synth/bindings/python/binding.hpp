@@ -15,7 +15,6 @@
 #include <boost/utility/base_from_member.hpp>
 
 #include <ajg/synth/exceptions.hpp>
-#include <ajg/synth/engines/django/options.hpp>
 #include <ajg/synth/bindings/base_binding.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
 #include <ajg/synth/bindings/python/loader.hpp>
@@ -49,20 +48,21 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
-    typedef typename base_type::arguments_type                                  arguments_type;
-    typedef typename base_type::formats_type                                    formats_type;
     typedef typename base_type::options_type                                    options_type;
-    typedef typename base_type::library_type                                    library_type;
-    typedef typename base_type::libraries_type                                  libraries_type;
-    typedef typename base_type::loader_type                                     loader_type;
-    typedef typename base_type::loaders_type                                    loaders_type;
-    typedef typename base_type::resolver_type                                   resolver_type;
-    typedef typename base_type::resolvers_type                                  resolvers_type;
-    typedef py::object /* py::dict */                                           context_type;
+    typedef typename base_type::context_type                                    context_type;
+
+    typedef typename options_type::arguments_type                               arguments_type;
+    typedef typename options_type::formats_type                                 formats_type;
+    typedef typename options_type::library_type                                 library_type;
+    typedef typename options_type::libraries_type                               libraries_type;
+    typedef typename options_type::loader_type                                  loader_type;
+    typedef typename options_type::loaders_type                                 loaders_type;
+    typedef typename options_type::resolver_type                                resolver_type;
+    typedef typename options_type::resolvers_type                               resolvers_type;
     typedef py::init< py::object
-                    , string_type
+                    , py::str
                     , py::optional
-                        < string_type
+                        < py::object
                         , py::dict
                         , boolean_type
                         , py::list
@@ -78,32 +78,50 @@ struct binding : private boost::base_from_member<PyObject*>
     // TODO: Override filters like pprint with Python's own pprint.pprint,
     //       perhaps using a passed-in "overrides" library.
     binding( py::object   const& src
-           , string_type  const& engine_name
-           , string_type  const& default_value = string_type()
+           , py::str      const& engine
            // TODO: Rename abbreviated parameters and expose them as kwargs.
-           , py::dict     const& fmts          = py::dict()
-           , boolean_type const  debug         = false
-           , py::list     const& dirs          = py::list()
-           , py::dict     const& libs          = py::dict()
-           , py::list     const& ldrs          = py::list()
-           , py::list     const& rslvrs        = py::list()
+           , py::object   const& replacement = py::str()
+           , py::dict     const& fmts        = py::dict()
+           , boolean_type const  debug       = false
+           , py::list     const& dirs        = py::list()
+           , py::dict     const& libs        = py::dict()
+           , py::list     const& ldrs        = py::list()
+           , py::list     const& rslvrs      = py::list()
            )
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
         , base_type( get_source(boost::base_from_member<PyObject*>::member)
-                   , engine_name
-                   , default_value
-                   , get_formats(fmts)
-                   , debug
-                   , get_directories(dirs)
-                   , get_libraries(libs)
-                   , get_loaders(ldrs)
-                   , get_resolvers(rslvrs)
+                   , get_string<traits_type>(engine)
+                   , get_options(replacement, fmts, debug, dirs, libs, ldrs, rslvrs)
                    ) {}
 
     ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
-    void render_to_file(py::object const& file, py::object const& context /* py::dict const& dictionary */) const {
-        file.attr("write")(base_type::template render_to_string<binding>(context));
+  private:
+
+    inline static options_type get_options( py::object   const& replacement
+                                          , py::dict     const& fmts
+                                          , boolean_type const  debug
+                                          , py::list     const& dirs
+                                          , py::dict     const& libs
+                                          , py::list     const& ldrs
+                                          , py::list     const& rslvrs
+                                          ) {
+        options_type options;
+        options.default_value = replacement;
+        options.formats       = get_formats(fmts);
+        options.debug         = debug;
+        options.directories   = get_directories(dirs);
+        options.libraries     = get_libraries(libs);
+        options.loaders       = get_loaders(ldrs);
+        options.resolvers     = get_resolvers(rslvrs);
+        return options;
+    }
+
+  public:
+
+    void render_to_file(py::object const& file, py::object const& object) const {
+        context_type context((object));
+        file.attr("write")(base_type::render_to_string(context));
         // XXX: Automatically call flush()?
 
         /* TODO: Be more intelligent and use something like:
@@ -118,13 +136,14 @@ struct binding : private boost::base_from_member<PyObject*>
         */
     }
 
-    void render_to_path(py::str const& path, py::object const& context /* py::dict const& dictionary */) const {
-        string_type const s = py::extract<string_type>(path);
-        return base_type::template render_to_path<binding>(s, context);
+    void render_to_path(py::str const& path, py::object const& object) const {
+        context_type context((object));
+        return base_type::render_to_path(get_string<traits_type>(path), context);
     }
 
-    string_type render_to_string(py::object const& context /* py::dict const& dictionary */) const {
-        return base_type::template render_to_string<binding>(context);
+    string_type render_to_string(py::object const& object) const {
+        context_type context((object));
+        return base_type::render_to_string(context);
     }
 
   private:
@@ -153,8 +172,8 @@ struct binding : private boost::base_from_member<PyObject*>
         formats_type formats;
 
         BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
-            string_type const& key = py::extract<string_type>(py::str(item[0]));
-            string_type const& fmt = py::extract<string_type>(py::str(item[1]));
+            string_type const& key = get_string<traits_type>(item[0]);
+            string_type const& fmt = get_string<traits_type>(item[1]);
             typedef typename formats_type::value_type pair_type;
             formats.insert(pair_type(key, fmt));
         }
@@ -172,7 +191,7 @@ struct binding : private boost::base_from_member<PyObject*>
         libraries_type libraries;
 
         BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
-            string_type const& key = py::extract<string_type>(py::str(item[0]));
+            string_type const& key = get_string<traits_type>(item[0]);
             py::object  const& lib = item[1];
             typedef typename libraries_type::value_type pair_type;
             libraries.insert(pair_type(key, library_type(new library<options_type>(lib))));
@@ -201,28 +220,6 @@ struct binding : private boost::base_from_member<PyObject*>
         }
 
         return resolvers;
-    }
-
-  public: // TODO[c++11]: Replace with protected + `friend base_binding;`
-
-    template <class Context>
-    inline static Context adapt_context(context_type const& ctx) {
-        Context context;
-        py::list const items = py::dict(ctx).items();
-
-        // TODO: Replace with stl_input_iterator version.
-        for (std::size_t i = 0, n = len(items); i < n; ++i) {
-            py::tuple const item = py::extract<py::tuple>(items[i]);
-            // py::extract<string_type> key((py::str(item[0])));
-            py::extract<string_type> key(item[0]); // TODO: Support non-string keys.
-            py::object value(item[1]);
-
-            if (key.check()) {
-                context[string_type(key)] = value;
-            }
-        }
-
-        return context;
     }
 };
 

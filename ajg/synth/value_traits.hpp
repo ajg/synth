@@ -18,6 +18,7 @@
 #include <boost/none_t.hpp>
 #include <boost/foreach.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/optional.hpp>
 
 // TODO: BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG for nanosecond ptime resolution.
 
@@ -31,22 +32,39 @@
 //
 // TODO: Construct a consistent taxonomy--
 //
-//        specific | general
-//       ----------+----------
-//        void     | unit?
-//        none_t   | none/nil/nullary/nothing?
-//        bool     | boolean
-//        char     | character
-//        number   | numeric
-//        string   | text/textual?
-//        datetime | chronological
-//        array    | sequential+homogenous+fixed?
-//        vector   | sequential+homogenous+dynamic?
-//        tuple    | sequential+heterogenous+fixed?
-//        list     | sequential+heterogenous+dynamic?
-//        set      | mapping/indexed/associative+simple?
-//        map      | mapping/indexed/associative+pair?
-//
+//  C++                | Python          | Python concepts  | C++ concepts
+// --------------------+-----------------+------------------+----------------------
+//  void               | None            |                  | unit
+//  NULL/nullptr       | None            |                  | unit
+//  none_t             | None            |                  | unit
+//  bool               | True/False      |                  | boolean
+//  char               | -               |                  | character,textual?
+//  wchar_t            | -               |                  | character,textual?
+//  int                | long            |                  | numeric,integral,signed
+//  unsigned int       | long            |                  | numeric,integral,unsigned
+//  float              | float           |                  | numeric,floating,signed
+//  double             | float           |                  | numeric,floating,signed
+//  complex            | complex         |                  | numeric?
+//  string             | str             | String           | textual,sequential
+//  wstring?           | unicode         | ?                | textual,sequential
+//  gregorian::date    | date            |                  | chronologic
+//  ptime              | time            |                  | chronologic
+//  local_date_time    | datetime        |                  | chronologic
+//  array              | tuple           | Sequence         | sequential,homogenous,fixed
+//  vector             | list            | Sequence         | sequential,homogenous,dynamic
+//  tuple              | tuple           | Sequence         | sequential,heterogenous,fixed
+//  list               | list            | Sequence         | sequential,heterogenous,dynamic
+//  set                | set             | Mapping          | associative,sorted,unique,simple
+//  map                | dict            | Mapping          | associative,sorted,unique,pair
+//  multiset           |                 |                  | associative,sorted,multiple,simple
+//  multimap           |                 |                  | associative,sorted,multiple,pair
+//  unordered_set      |                 |                  | associative,unique,simple
+//  unordered_map      |                 |                  | associative,unique,pair
+//  unordered_multiset |                 |                  | associative,multiple,simple
+//  unordered_multimap |                 |                  | associative,multiple,pair
+// --------------------+-----------------+------------------+----------------------
+//  sequence_type      |                 |                  | sequential
+//  association_type   |                 |                  | associative
 
 namespace ajg {
 namespace synth {
@@ -69,6 +87,7 @@ struct default_traits {
  // typedef boost::uintmax_t                                                    natural_type;
     typedef boost::intmax_t                                                     integer_type;
     typedef /* TODO? long */ double                                             floating_type;
+    typedef floating_type                                                       number_type;
 
     // XXX: Consider using something else for time_type because ptime (a) needs a date and (b) has no timezone.
     typedef boost::gregorian::date                                              date_type;
@@ -84,6 +103,8 @@ struct default_traits {
     typedef string_type                                                         path_type;
     typedef std::vector<path_type>                                              paths_type;
 
+    typedef boost::optional<string_type>                                        url_type;
+
     typedef std::set<string_type>                                               symbols_type; // TODO[c++11]: unordered?
     typedef std::vector<string_type>                                            names_type;   // TODO: scope_type? namespace_type?
 
@@ -96,7 +117,7 @@ struct default_traits {
 
   public:
 
-// TODO: Move everything below to value_behavior.
+// TODO: Move everything below to base_value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///
@@ -246,7 +267,7 @@ struct default_traits {
     inline static time_type     empty_time()     { return time_type()/*to_time()*/; }
     inline static duration_type empty_duration() { return to_duration(); }
     inline static timezone_type empty_timezone() { return timezone_type(); }
- // inline static datetime_type empty_datetime() { return to_datetime(); }
+    inline static datetime_type empty_datetime() { return to_datetime(); }
 
 ///
 /// is_empty:
@@ -298,9 +319,9 @@ struct default_traits {
         return datetime_type(time, empty_timezone());
     }
 
-    inline static datetime_type to_datetime( date_type     const& date     = empty_date()
-                                           , time_type     const& time     = empty_time()
-                                           , timezone_type const& timezone = empty_timezone()
+    inline static datetime_type to_datetime( date_type     const& date     // = empty_date()
+                                           , time_type     const& time     // = empty_time()
+                                           , timezone_type const& timezone // = empty_timezone()
                                            ) {
         return datetime_type(to_time(date, to_duration(time)), timezone);
     }

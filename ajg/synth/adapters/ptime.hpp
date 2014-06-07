@@ -17,15 +17,12 @@ namespace adapters {
 // specialization for boost::posix_time::ptime
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior>
-struct adapter<Behavior, boost::posix_time::ptime>   : concrete_adapter<Behavior, boost::posix_time::ptime> {
-    adapter(boost::posix_time::ptime const& adapted) : concrete_adapter<Behavior, boost::posix_time::ptime>(adapted) {}
+template <class Value>
+struct adapter<Value, boost::posix_time::ptime>   : concrete_adapter<Value, boost::posix_time::ptime, chronologic> {
+    adapter(boost::posix_time::ptime const& adapted) : concrete_adapter<Value, boost::posix_time::ptime, chronologic>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    boolean_type  to_boolean()  const { return !this->adapted().is_not_a_date_time(); }
-    datetime_type to_datetime() const { return traits_type::to_datetime(this->adapted()); }
-    void output(ostream_type& out) const { out << this->adapted(); }
+    virtual optional<typename Value::boolean_type>  get_boolean()  const { return !this->adapted().is_not_a_date_time(); }
+    virtual optional<typename Value::datetime_type> get_datetime() const { return Value::traits_type::to_datetime(this->adapted()); }
 };
 
 }}} // namespace ajg::synth::adapters

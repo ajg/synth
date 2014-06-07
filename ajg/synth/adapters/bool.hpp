@@ -15,17 +15,11 @@ namespace adapters {
 // specialization for bool
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior>
-struct adapter<Behavior, bool>   : concrete_adapter<Behavior, bool> {
-    adapter(bool const& adapted) : concrete_adapter<Behavior, bool>(adapted) {}
+template <class Value>
+struct adapter<Value, bool>      : concrete_adapter<Value, bool, boolean> {
+    adapter(bool const& adapted) : concrete_adapter<Value, bool, boolean>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    floating_type to_floating()  const { return this->adapted() ? 1 : 0; }
-    boolean_type to_boolean() const { return this->adapted(); }
-
-    void input (istream_type& in)        { in >> this->adapted(); }
-    void output(ostream_type& out) const { out << (this->adapted() ? "True" : "False"); } // TODO: Configure via Traits.
+    virtual optional<typename Value::boolean_type> get_boolean() const { return this->adapted(); }
 };
 
 }}} // namespace ajg::synth::adapters

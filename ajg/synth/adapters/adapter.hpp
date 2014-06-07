@@ -15,37 +15,38 @@ namespace adapters {
 // Shortcut macros
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define AJG_SYNTH_ADAPTER_TYPEDEFS(behavior) \
+#define AJG_SYNTH_ADAPTER_TYPEDEFS(value) \
   public: \
-    typedef behavior                                behavior_type; \
-    typedef typename behavior_type::value_type      value_type; \
-    typedef typename behavior_type::traits_type     traits_type; \
-    typedef typename behavior_type::adapter_type    adapter_type; \
+    typedef value                                   value_type; \
+    typedef typename value_type::iterator           iterator; \
+    typedef typename value_type::const_iterator     const_iterator; \
+    typedef typename value_type::range_type         range_type; \
+    typedef typename value_type::attribute_type     attribute_type; \
+    typedef typename value_type::attributes_type    attributes_type; \
+    typedef typename value_type::adapter_type       adapter_type; \
+    typedef typename value_type::traits_type        traits_type; \
     \
     typedef typename traits_type::boolean_type      boolean_type; \
     typedef typename traits_type::char_type         char_type; \
     typedef typename traits_type::size_type         size_type; \
     typedef typename traits_type::integer_type      integer_type; \
     typedef typename traits_type::floating_type     floating_type; \
+    typedef typename traits_type::number_type       number_type; \
     typedef typename traits_type::string_type       string_type; \
     typedef typename traits_type::datetime_type     datetime_type; \
     typedef typename traits_type::duration_type     duration_type; \
     typedef typename traits_type::istream_type      istream_type; \
-    typedef typename traits_type::ostream_type      ostream_type; \
-    \
-    typedef typename value_type::iterator           iterator; \
-    typedef typename value_type::const_iterator     const_iterator; \
-    typedef typename value_type::range_type         range_type
+    typedef typename traits_type::ostream_type      ostream_type
 
 //
 // adapter (unspecialized)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class Adapted>
+template <class Value, class Adapted>
 struct adapter;
 
-template <class Behavior>
-struct adapter<Behavior, base_adapter<Behavior> >; // Left undefined.
+template <class Value>
+struct adapter<Value, base_adapter<Value> >; // Left undefined.
 
 }}} // namespace ajg::synth::adapters
 

@@ -21,18 +21,19 @@ namespace adapters {
 // specialization for boost::scoped_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
-struct adapter<Behavior, boost::scoped_ptr<T> >  : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > > {
-    adapter(boost::scoped_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, boost::scoped_ptr<T> const*, adapter<Behavior, boost::scoped_ptr<T> > >(&adapted) {}
+template <class Value, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
+struct adapter<Value, boost::scoped_ptr<T> >  : forwarding_adapter<Value, T, boost::scoped_ptr<T> const*, adapter<Value, boost::scoped_ptr<T> > > {
+    adapter(boost::scoped_ptr<T> const& adapted) : forwarding_adapter<Value, T, boost::scoped_ptr<T> const*, adapter<Value, boost::scoped_ptr<T> > >(&adapted) {}
 
+    template <class A> A forward() { return A(boost::ref(*this->adapted()->get())); }
     template <class A> A forward() const { return A(boost::cref(*this->adapted()->get())); }
-    typename Behavior::boolean_type valid() const { return this->adapted()->get() != 0; }
+    bool                 valid() const { return this->adapted()->get() != 0; }
 };
 
 /*
-template <class Behavior, class T>
-struct adapter<Behavior, boost::scoped_ptr<T> > : adapter<Behavior, T*> {
-    adapter(boost::scoped_ptr<T> const& adapted) : adapter<Behavior, T*>(adapted.get()) {}
+template <class Value, class T>
+struct adapter<Value, boost::scoped_ptr<T> > : adapter<Value, T*> {
+    adapter(boost::scoped_ptr<T> const& adapted) : adapter<Value, T*>(adapted.get()) {}
 };
 */
 

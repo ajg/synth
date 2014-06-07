@@ -7,6 +7,7 @@
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/engines/ssi.hpp>
+#include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/detail/filesystem.hpp>
 
 #include <tests/data/kitchen_sink.hpp>
@@ -31,8 +32,6 @@ typedef traits_type::string_type                                                
 struct data_type : tests::data::kitchen_sink<engine_type> {};
 
 AJG_SYNTH_TEST_GROUP_WITH_DATA("ssi", data_type);
-
-options_type const default_options;
 
 } // namespace
 
@@ -67,7 +66,7 @@ unit_test(environment variable) {
 unit_test(non-extant variable) {
     ensure(std::getenv("non_extant_var") == 0);
     string_template_type const t("<!--#echo var='non_extant_var' -->");
-    ensure_equals(t.render_to_string(context), default_options.echo_message);
+    ensure_equals(t.render_to_string(context), t.options().default_value.to_string());
 }}}
 
 unit_test(print environment) {
@@ -200,12 +199,12 @@ unit_test(if_elif_else_tag) {
 
 unit_test(invalid if_tag: no expr) {
     string_template_type const t("<!--#if -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(context), default_options.error_message);
+    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 unit_test(invalid if_tag: multiple expr) {
     string_template_type const t("<!--#if expr='1' expr='1' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(context), default_options.error_message);
+    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 
@@ -226,13 +225,13 @@ unit_test(malformed tag) {
 }}}
 
 unit_test(invalid config_tag) {
-    string_template_type const t("<!--#config foo='bar' -->", default_options);
-    ensure_equals(t.render_to_string(context), default_options.error_message);
+    string_template_type const t("<!--#config foo='bar' -->");
+    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 unit_test(invalid config_tag sizefmt) {
-    string_template_type const t("<!--#config sizefmt='foo' -->", default_options);
-    ensure_equals(t.render_to_string(context), default_options.error_message);
+    string_template_type const t("<!--#config sizefmt='foo' -->");
+    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 unit_test(fsize_tag bytes) {
@@ -248,9 +247,9 @@ unit_test(fsize_tag abbrev) {
 }}}
 
 unit_test(flastmod_tag) {
-    string_template_type const t(
-        "<!--#flastmod file='tests/templates/ssi/example.shtml' -->", default_options);
-    ensure_equals(t.render_to_string(context), traits_type::format_time(default_options.time_format,
+    string_template_type const t("<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
+    string_type const time_format = t.options().format(text::literal("timefmt"));
+    ensure_equals(t.render_to_string(context), traits_type::format_time(time_format,
         traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
@@ -264,8 +263,8 @@ unit_test(flastmod_tag custom) {
 }}}
 
 unit_test(tag with error) {
-    string_template_type const t("<!--#fsize file='non-extant' -->", default_options);
-    ensure_equals(t.render_to_string(context), default_options.error_message);
+    string_template_type const t("<!--#fsize file='non-extant' -->");
+    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 unit_test(file template) {

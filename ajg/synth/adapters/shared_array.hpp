@@ -21,9 +21,9 @@ namespace adapters {
 // specialization for boost::shared_array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, boost::shared_array<T> > : adapter<Behavior, T[]> {
-    adapter(boost::shared_array<T> const& adapted, std::size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
+template <class Value, class T>
+struct adapter<Value, boost::shared_array<T> > : adapter<Value, T[]> {
+    adapter(boost::shared_array<T> const& adapted, std::size_t const length) : adapter<Value, T[]>(adapted.get(), length) {}
 };
 
 }}} // namespace ajg::synth::adapters

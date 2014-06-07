@@ -45,13 +45,13 @@ struct kitchen_sink {
 
   public:
 
-    kitchen_sink() {
-        context[text::literal("foo")] = "A";
-        context[text::literal("bar")] = "B";
-        context[text::literal("qux")] = "C";
+    kitchen_sink() : context(std::map<string_type, value_type>()) {
+        context.set(text::literal("foo"), "A");
+        context.set(text::literal("bar"), "B");
+        context.set(text::literal("qux"), "C");
 
-        context["true_var"] = true;
-        context["false_var"] = false;
+        context.set(text::literal("true_var"), true);
+        context.set(text::literal("false_var"), false);
 
         std::map<string_type, string_type> joe, bob, lou;
         joe[text::literal("name")] = "joe";
@@ -64,15 +64,15 @@ struct kitchen_sink {
         friends[1] = bob;
         friends[2] = lou;
 
-        context["friends"] = friends;
+        context.set("friends", friends);
 
         time_type const past(traits_type::to_date(2002, 1, 10), traits_type::to_duration(1, 2, 3));
         time_type const future(traits_type::to_date(2202, 2, 11), traits_type::to_duration(3, 2, 1));
 
-        context[text::literal("past")]        = past;
-        context[text::literal("before_past")] = past - traits_type::to_duration(36, 0, 0);
-        context[text::literal("after_past")]  = past + traits_type::to_duration(1200, 20, 0);
-        context[text::literal("future")]      = future;
+        context.set(text::literal("past"),        past);
+        context.set(text::literal("before_past"), past - traits_type::to_duration(36, 0, 0));
+        context.set(text::literal("after_past"),  past + traits_type::to_duration(1200, 20, 0));
+        context.set(text::literal("future"),      future);
 
         std::map<string_type, string_type> mumbai, calcutta, nyc, chicago, tokyo;
         mumbai[text::literal("name")]       = "Mumbai";
@@ -96,24 +96,21 @@ struct kitchen_sink {
         cities[2] = nyc;
         cities[3] = chicago;
         cities[4] = tokyo;
-        context[text::literal("cities")] = cities;
+        context.set(text::literal("cities"), cities);
 
         std::deque<value_type> const list1 = list_of<value_type>(text::literal("Lawrence"))(text::literal("Topeka"));
         std::deque<value_type> const list2 = list_of<value_type>(text::literal("Kansas"))(list1)(text::literal("Illinois1"))(text::literal("Illinois2"));
         std::deque<value_type> const list3 = list_of<value_type>(text::literal("States"))(list2);
         std::deque<value_type> const list4 = list_of<value_type>(text::literal("Parent"))(list3);
-        context[text::literal("places")] = list4;
-
-        context[text::literal("csrf_token")] = "ABCDEF123456";
-
-        context[text::literal("xml_var")] = "<foo><bar><qux /></bar></foo>";
-
-        context[text::literal("haiku")] = "Haikus are easy,\nBut sometimes they don't make sense.\nRefrigerator.\n";
+        context.set(text::literal("places"), list4);
+        context.set(text::literal("csrf_token"), "ABCDEF123456");
+        context.set(text::literal("xml_var"), "<foo><bar><qux /></bar></foo>");
+        context.set(text::literal("haiku"), "Haikus are easy,\nBut sometimes they don't make sense.\nRefrigerator.\n");
 
         states[text::literal("CA")] = text::literal("California");
         states[text::literal("FL")] = text::literal("Florida");
         states[text::literal("NY")] = text::literal("New York");
-        context[text::literal("states")] = states;
+        context.set(text::literal("states"), states);
 
         numbers.push_back(1);
         numbers.push_back(2);
@@ -124,18 +121,18 @@ struct kitchen_sink {
         numbers.push_back(7);
         numbers.push_back(8);
         numbers.push_back(9);
-        context[text::literal("numbers")] = numbers;
+        context.set(text::literal("numbers"), numbers);
 
         heterogenous.push_back(42);
         heterogenous.push_back(42);
         heterogenous.push_back(text::literal("foo"));
         heterogenous.push_back(text::literal("foo"));
-        context[text::literal("heterogenous")] = heterogenous;
+        context.set(text::literal("heterogenous"), heterogenous);
 
         tags.push_front("<Z>");
         tags.push_front("<Y>");
         tags.push_front("<X>");
-        context[text::literal("tags")] = tags;
+        context.set(text::literal("tags"), tags);
     }
 
     context_type                        context;

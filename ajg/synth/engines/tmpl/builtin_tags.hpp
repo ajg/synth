@@ -47,7 +47,9 @@ struct builtin_tags {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::floating_type                                 floating_type;
+    typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::path_type                                     path_type;
@@ -183,33 +185,33 @@ struct builtin_tags {
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
-            match_type const& attr    = match(kernel.name_attribute);
-            match_type const& body    = match(kernel.block);
-            value_type const  value   = kernel.evaluate(attr, context, options);
-            size_type  const  size    = value.size();
-            context_type context_copy = options_type::global_variables ? context : context_type();
-            size_type    index        = 1;
+            match_type const& attr     = match(kernel.name_attribute);
+            match_type const& body     = match(kernel.block);
+            value_type const  value    = kernel.evaluate(attr, context, options);
+            size_type  const  size     = value.size();
+            size_type         index    = 1;
 
+            stage<context_type> stage(const_cast<context_type&>(context), kernel_type::global_variables);
             BOOST_FOREACH(value_type const& item, value) {
-                if (options_type::loop_variables) {
-                    context_copy[text::literal("__SIZE__")]    = size;
-                    context_copy[text::literal("__TOTAL__")]   = size;
-                    context_copy[text::literal("__FIRST__")]   = to_int(index == 1);
-                    context_copy[text::literal("__LAST__")]    = to_int(index == size);
-                    context_copy[text::literal("__INNER__")]   = to_int(index != 1 && index != size);
-                    context_copy[text::literal("__OUTER__")]   = to_int(index == 1 || index == size);
-                    context_copy[text::literal("__ODD__")]     = to_int(index % 2 == 1);
-                    context_copy[text::literal("__EVEN__")]    = to_int(index % 2 == 0);
-                    context_copy[text::literal("__COUNTER__")] = index++;
+                if (kernel_type::loop_variables) {
+                    stage.set(text::literal("__SIZE__"),    size);
+                    stage.set(text::literal("__TOTAL__"),   size);
+                    stage.set(text::literal("__FIRST__"),   to_int(index == 1));
+                    stage.set(text::literal("__LAST__"),    to_int(index == size));
+                    stage.set(text::literal("__INNER__"),   to_int(index != 1 && index != size));
+                    stage.set(text::literal("__OUTER__"),   to_int(index == 1 || index == size));
+                    stage.set(text::literal("__ODD__"),     to_int(index % 2 == 1));
+                    stage.set(text::literal("__EVEN__"),    to_int(index % 2 == 0));
+                    stage.set(text::literal("__COUNTER__"), index++);
                 }
 
                 BOOST_FOREACH(value_type const& pair, item) {
                     string_type const k = pair[0].to_string();
                     value_type  const v = pair[1];
-                    context_copy[k] = v;
+                    stage.set(k, v);
                 }
 
-                kernel.render_block(ostream, body, context_copy, options);
+                kernel.render_block(ostream, body, context, options);
             }
         }
 
@@ -261,7 +263,7 @@ struct builtin_tags {
             value_type result;
             typename engine_type::attributes const attrs = kernel.parse_attributes(match);
 
-            if (optional<value_type> const& variable = detail::find(attrs.name, context)) {
+            if (optional<value_type> const& variable = context.get(attrs.name)) {
                 result = *variable;
             }
             else if (attrs.fallback) {

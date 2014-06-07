@@ -17,9 +17,9 @@ namespace adapters {
 // specialization for std::deque
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::deque<T> >  : container_adapter<Behavior, std::deque<T> > {
-    adapter(std::deque<T> const& adapted) : container_adapter<Behavior, std::deque<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, std::deque<T> >  : container_adapter<Value, std::deque<T>, sequential> {
+    adapter(std::deque<T> const& adapted) : container_adapter<Value, std::deque<T>, sequential>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

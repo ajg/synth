@@ -38,16 +38,16 @@ struct value_iterator
     value_iterator(ForwardIterator const& iterator)
         : iterator_(new polymorphic_iterator<ForwardIterator>(iterator)) {}
 
-    /*template <class Value_>
-    value_iterator(value_iterator<Value_> const& other) : iterator_(new ...) {}
+    /*template <class V>
+    value_iterator(value_iterator<V> const& other) : iterator_(new ...) {}
 */
 
 
 
   // private:
 
-    template <class Value_>
-    bool equal(value_iterator<Value_> const& that) const {
+    template <class V>
+    bool equal(value_iterator<V> const& that) const {
         bool const a = this->iterator_, b = that.iterator_;
         return (!a && !b) || (a && b && this->iterator_->equal(*that.iterator_));
     }

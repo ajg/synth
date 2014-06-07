@@ -7,8 +7,6 @@
 
 #include <map>
 
-#include <ajg/synth/engines/null/value.hpp>
-#include <ajg/synth/engines/null/options.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 
 namespace ajg {
@@ -16,8 +14,8 @@ namespace synth {
 namespace engines {
 namespace null {
 
-template <class Traits, class Options = options<value<Traits> > >
-struct engine : base_engine<Options> {
+template <class Traits>
+struct engine : base_engine<Traits> {
   public:
 
     typedef engine                                                              engine_type;
@@ -41,15 +39,15 @@ struct engine : base_engine<Options> {
 }; // engine
 
 
-template <class Traits, class Options>
+template <class Traits>
 template <class Iterator>
-struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLATE kernel<Iterator> {
+struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_kernel<Iterator> {
   public:
 
     typedef kernel                                                              kernel_type;
     typedef Iterator                                                            iterator_type;
     typedef engine                                                              engine_type;
-    typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::state_type                                    state_type;
     typedef typename kernel_type::range_type                                    range_type;
 
   public:
@@ -58,8 +56,9 @@ struct engine<Traits, Options>::kernel : base_engine<Options>::AJG_SYNTH_TEMPLAT
 
   public:
 
-    void parse(range_type const&, result_type&) const {}
-    void render(ostream_type&, result_type const&, context_type const&) const {}
+    inline void parse(state_type&) const {}
+    inline void render(ostream_type&, options_type const&, state_type const&, context_type&) const {}
+    inline static void initialize_state(state_type& state) {}
 
 }; // kernel
 

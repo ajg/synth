@@ -17,9 +17,9 @@ namespace adapters {
 // specialization for std::list
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::list<T> >  : container_adapter<Behavior, std::list<T> > {
-    adapter(std::list<T> const& adapted) : container_adapter<Behavior, std::list<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, std::list<T> >  : container_adapter<Value, std::list<T>, sequential> {
+    adapter(std::list<T> const& adapted) : container_adapter<Value, std::list<T>, sequential>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

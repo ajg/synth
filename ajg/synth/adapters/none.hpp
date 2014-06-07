@@ -17,17 +17,9 @@ namespace adapters {
 // specialization for boost::none_t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior>
-struct adapter<Behavior, boost::none_t>   : concrete_adapter<Behavior, boost::none_t> {
-    adapter(boost::none_t const& adapted) : concrete_adapter<Behavior, boost::none_t>(adapted) {}
-
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    floating_type to_floating() const { return 0; }
-    boolean_type to_boolean() const { return false; }
-
- // void input (istream_type& in)        { in >> this->adapted(); }
-    void output(ostream_type& out) const { out << "None"; } // TODO: Configure via Traits.
+template <class Value>
+struct adapter<Value, boost::none_t>      : concrete_adapter<Value, boost::none_t, unit> {
+    adapter(boost::none_t const& adapted) : concrete_adapter<Value, boost::none_t, unit>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

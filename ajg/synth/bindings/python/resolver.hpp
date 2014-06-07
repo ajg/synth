@@ -28,35 +28,36 @@ struct resolver : Options::abstract_resolver {
     typedef typename options_type::arguments_type                               arguments_type;
 
     typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::url_type                                      url_type;
 
   public:
 
-    virtual optional<string_type> resolve( string_type  const& path
-                                         , context_type const& context
-                                         , options_type const& options
-                                         ) {
+    virtual url_type resolve( string_type  const& path
+                            , context_type const& context
+                            , options_type const& options
+                            ) {
         try {
             py::object const& result = object_.attr("resolve")(path);
-            return get_string<traits_type>(result);
+            return url_type(get_string<traits_type>(result));
         }
         catch (...) { // TODO: Catch only Resolver404?
-            return boost::none;
+            return url_type();
         }
     }
 
 
-    virtual optional<string_type> reverse( string_type    const& name
-                                         , arguments_type const& arguments
-                                         , context_type   const& context
-                                         , options_type   const& options
-                                         ) {
+    virtual url_type reverse( string_type    const& name
+                            , arguments_type const& arguments
+                            , context_type   const& context
+                            , options_type   const& options
+                            ) {
         try {
             std::pair<py::tuple, py::dict> const args = from_arguments(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
-            return get_string<traits_type>(result);
+            return url_type(get_string<traits_type>(result));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
-            return boost::none;
+            return url_type();
         }
     }
 

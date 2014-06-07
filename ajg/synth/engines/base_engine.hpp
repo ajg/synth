@@ -31,6 +31,10 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/detail/container.hpp>
+#include <ajg/synth/engines/base_state.hpp>
+#include <ajg/synth/engines/base_value.hpp>
+#include <ajg/synth/engines/base_context.hpp>
+#include <ajg/synth/engines/base_options.hpp>
 
 namespace ajg {
 namespace synth {
@@ -49,23 +53,14 @@ using boost::xpressive::s2;
 
 namespace x = boost::xpressive;
 
-// template <class Options>
-struct null_state {
-    // typedef Options                                                             options_type;
-    // inline explicit null_state(options_type const&) {}
-
-    template <class Options>
-    inline explicit null_state(Options const&) {}
-    inline explicit null_state() {}
-};
-
-template <class Options>
+template <class Traits>
 struct base_engine {
 
+    typedef Traits                                                              traits_type;
     typedef base_engine                                                         engine_type;
-    typedef Options                                                             options_type;
-    typedef typename options_type::traits_type                                  traits_type;
-    typedef typename options_type::value_type                                   value_type;
+    typedef base_value<traits_type>                                             value_type;
+    typedef base_context<value_type>                                            context_type;
+    typedef base_options<context_type>                                          options_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -77,8 +72,8 @@ struct base_engine {
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
 
-    template <class Iterator, class State = null_state>
-    struct kernel;
+    template <class Iterator>
+    struct base_kernel;
 
   private:
 
@@ -86,19 +81,17 @@ struct base_engine {
 
 }; // base_engine
 
-template <class Options>
-template <class Iterator, class State>
-struct base_engine<Options>::kernel : boost::noncopyable {
+template <class Traits>
+template <class Iterator>
+struct base_engine<Traits>::base_kernel : boost::noncopyable {
   public:
 
-    typedef kernel                                                              kernel_type;
+    typedef base_kernel                                                         base_kernel_type;
     typedef Iterator                                                            iterator_type;
-    typedef State                                                               state_type;
     typedef std::pair<iterator_type, iterator_type>                             range_type;
 
   protected:
 
-    typedef kernel_type                                                         base_type;
     typedef x::regex_id_type                                                    id_type;
     typedef x::basic_regex<iterator_type>                                       regex_type;
     typedef x::match_results<iterator_type>                                     match_type;
@@ -111,40 +104,9 @@ struct base_engine<Options>::kernel : boost::noncopyable {
     typedef x::match_results<string_iterator_type>                              string_match_type;
     typedef detail::text<string_type>                                           text;
 
-    // TODO: Fold this into base_template.
-    struct parse_result /* TODO: : boost::noncopyable */ {
-      public:
+  public:
 
-        parse_result() {}
-        parse_result(range_type const& range, options_type const& options) { this->reset(range, options); }
-
-      private:
-
-        friend struct base_engine;
-
-      public:
-
-        inline void reset(range_type const& range, options_type const& options) {
-            this->range_   = range;
-            this->options_ = &options;
-            this->state_   = state_type(*this->options_);
-        }
-
-        inline options_type const& options() const { BOOST_ASSERT(this->options_); return *this->options_; }
-
-        range_type const& range() const { return this->range_; }
-        string_type       str()   const { return string_type(this->range_.first, this->range_.second); }
-
-      private:
-
-        range_type          range_;
-        match_type          match_;
-        state_type          state_;
-        options_type const* options_;
-        // iterator_type furthest_;
-    };
-
-    typedef parse_result                                                        result_type;
+    typedef base_state<match_type, range_type, options_type>                    state_type;
 
   public:
 
@@ -152,7 +114,7 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
   protected:
 
-    kernel() : nothing(as_xpr('\0')) {} // Xpressive barfs when default-constructed.
+    base_kernel() : nothing(as_xpr('\0')) {} // Xpressive barfs when default-constructed.
 
   protected:
 
@@ -169,9 +131,6 @@ struct base_engine<Options>::kernel : boost::noncopyable {
             | x::ref(this->plain) [set_furthest(this->_iterator, _)]
             );
     }
-
-    inline static match_type const& get_match(result_type const& result) { return result.match_; }
-    inline static state_type const& get_state(result_type const& result) { return result.state_; }
 
 //
 // is
@@ -231,16 +190,14 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
   public:
 
-    inline void parse(range_type const& range, result_type& result) const {
-        range_type r = range;
+    inline void parse(state_type& state) const {
+        range_type     r = state.range;
         iterator_type it = r.first;
 
-        result.match_.let(this->_state    = result.state_);
-        result.match_.let(this->_result   = result);
-        result.match_.let(this->_range    = r);
-        result.match_.let(this->_iterator = it);
+        state.match.let(this->_state    = state);
+        state.match.let(this->_iterator = it);
 
-        if (x::regex_match(r.first, r.second, result.match_, this->block)) {
+        if (x::regex_match(r.first, r.second, state.match, this->block)) {
             // On success, all input should have been consumed.
             BOOST_ASSERT(it == r.second);
             return;
@@ -264,11 +221,8 @@ struct base_engine<Options>::kernel : boost::noncopyable {
 
   public: // TODO: protected
 
-    x::placeholder<state_type>          _state;
-    x::placeholder<result_type>         _result;
-     // TODO: Consider folding these into something like base_state.
-    x::placeholder<range_type>          _range;
-    x::placeholder<iterator_type>       _iterator;
+    x::placeholder<state_type>    _state;
+    x::placeholder<iterator_type> _iterator;
 
   private:
 
@@ -285,7 +239,7 @@ struct base_engine<Options>::kernel : boost::noncopyable {
         }
     };
 
-}; // kernel
+};
 
 }}} // namespace ajg::synth::engines
 

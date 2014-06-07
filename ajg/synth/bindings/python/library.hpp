@@ -74,12 +74,14 @@ struct library : Options::abstract_library {
     virtual filter_type  get_filter(string_type const& name) { return this->filters_[name]; }
 
     static string_type call_native_renderer( renderer_type const& renderer
-                                           , context_type&        context
-                                           , intptr_t             data
+                                        // , context_type&        context
+                                           , py::object const&    context_source
+                                           , intptr_t             match
                                            ) {
+        context_type context(context_source);
         std::basic_ostringstream<char_type> ss;
         BOOST_ASSERT(!renderer.empty());
-        renderer(arguments_type(), ss, context, reinterpret_cast<void const*>(data));
+        renderer(arguments_type(), ss, context, reinterpret_cast<void const*>(match));
         BOOST_ASSERT(ss);
         return ss.str();
     }
@@ -88,30 +90,31 @@ struct library : Options::abstract_library {
                                     , arguments_type const& arguments
                                     , ostream_type&         ostream
                                     , context_type&         context
-                                    , void const*           data
+                                    , void const*           match
                                     ) {
-        // std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::object(data), arguments);
-        std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::long_(reinterpret_cast<intptr_t>(data)), arguments);
-        ostream << get_string<traits_type>(r(*args.first, **args.second/*TODO: context*/));
+        // std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::object(match), arguments);
+        // std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::long_(reinterpret_cast<intptr_t>(match)), arguments);
+
+        /*
+        std::pair<py::tuple, py::dict> const args = from_arguments_with(
+            context.value(), reinterpret_cast<intptr_t>(match), arguments);
+        */
+        std::pair<py::tuple, py::dict> const args = from_arguments_with_objects(
+            from_value(context.value()),
+            py::long_(reinterpret_cast<intptr_t>(match)),
+            arguments);
+        ostream << get_string<traits_type>(r(*args.first, **args.second));
     }
 
     static renderer_type call_tag( py::object    const& tag
                                  , segments_type const& segments
                                  ) {
 
-        typedef boost::mpl::vector<string_type, intptr_t> signature_type;
+        typedef boost::mpl::vector<string_type, py::object, intptr_t> signature_type;
         py::list l;
 
-        static context_type dummy_context;
-
         BOOST_FOREACH(segment_type const& segment, segments) {
-            boost::function<string_type(intptr_t)> f(boost::bind(call_native_renderer, segment.second
-                // TODO: Use the context that the renderer is called with.
-                // , boost::ref(context)
-                // , _1
-                , boost::ref(dummy_context)
-                , _1
-            ));
+            boost::function<string_type(py::object, intptr_t)> f(boost::bind(call_native_renderer, segment.second, _1, _2));
 
             py::list ms;
             BOOST_FOREACH(string_type const& match, segment.first) {

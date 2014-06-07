@@ -11,16 +11,27 @@ namespace ajg {
 namespace synth {
 namespace adapters {
 
-template <class Behavior, class Adapted>
-struct container_adapter : concrete_adapter<Behavior, Adapted> {
-    container_adapter(Adapted const& adapted) : concrete_adapter<Behavior, Adapted>(adapted) {}
+// TODO: Move to own file.
+template <class Value, class Adapted, class Specialized, class Iterator, type_flags Flags>
+struct range_adapter : concrete_adapter<Value, Adapted, Flags, Specialized> {
+    range_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, Flags, Specialized>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    virtual optional<typename Value::range_type> get_range() const { return typename Value::range_type(this->begin(), this->end()); } // TODO[c++11]: Use std::begin & std::end.
 
-    boolean_type to_boolean() const { return !this->adapted().empty(); }
-    range_type   to_range()   const { return range_type(this->adapted().begin(), this->adapted().end()); } // TODO[c++11]: Use std::begin & std::end.
+  protected:
 
-    void output(ostream_type& out) const { return behavior_type::delimited(out, this->to_range()); }
+    // TODO: Use CRTP to eliminate virtual call.
+    // TODO[c++11]: Use std::begin & std::end instead.
+    virtual Iterator begin() const = 0;
+    virtual Iterator end()   const = 0;
+};
+
+// TODO: Use range_adapter.
+template <class Value, class Adapted, type_flags Flags>
+struct container_adapter : concrete_adapter<Value, Adapted, type_flags(Flags | container)> {
+    container_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, type_flags(Flags | container)>(adapted) {}
+
+    virtual optional<typename Value::range_type> get_range() const { return typename Value::range_type(this->adapted().begin(), this->adapted().end()); } // TODO[c++11]: Use std::begin & std::end.
 };
 
 }}} // namespace ajg::synth::adapters

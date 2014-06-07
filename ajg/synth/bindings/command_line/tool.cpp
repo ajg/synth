@@ -21,18 +21,6 @@ typedef s::bindings::command_line::command<binding_type>                        
 
 } // namespace
 
-
-namespace boost {
-namespace property_tree {
-
-binding_type::ostream_type& operator <<( binding_type::ostream_type&       ostream
-                                       , binding_type::context_type const& context
-                                       ) {
-    return ostream << "[context]";
-}
-
-}} // namespace boost::property_tree
-
 int main(int const argc, char const* argv[])
 try {
     command_type::run(argc - 1, argv + 1);

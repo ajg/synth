@@ -1,21 +1,27 @@
 
+#include <map>
+#include <string>
 #include <iostream>
 #include <ajg/synth.hpp>
 
-namespace synth = ajg::synth;
-
-typedef synth::default_traits<char>                         traits_type;
-typedef synth::engines::ssi::engine<traits_type>            engine_type;
-typedef synth::templates::string_template<engine_type>      template_type;
+typedef ajg::synth::default_traits<char>                    traits_type;
+typedef ajg::synth::engines::ssi::engine<traits_type>       engine_type;
+typedef ajg::synth::templates::string_template<engine_type> template_type;
 
 int main() {
-    template_type const t("Howdy, <!--#echo var=\"user\" -->!");
-    template_type::context_type c;
-    c["user"] = "Dolph Lundgren";
+    // Parse the template.
+    template_type const t(
+        "Howdy, <!--#echo var='user' -->! "
+        "Your balance is <!--#echo var='points' -->.");
+
+    // Create some data.
+    std::map<std::string, engine_type::value_type> m;
+    m["user"] = "Dolph Lundgren";
+    m["points"] = 42;
 
     // Render to different destinations:
-    t.render_to_stream(std::cout, c);
-    t.render_to_path("greeting.txt", c);
-    std::cout << t.render_to_string(c);
+    t.render_to_stream(std::cout, m);
+    t.render_to_path("greeting.txt", m);
+    std::cout << t.render_to_string(m);
     return 0;
 }

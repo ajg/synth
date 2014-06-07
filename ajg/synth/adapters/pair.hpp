@@ -20,21 +20,20 @@ namespace adapters {
 // specialization for std::pair
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class First, class Second>
-struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior, std::pair<First, Second> > {
-    adapter(std::pair<First, Second> const& adapted) : concrete_adapter<Behavior, std::pair<First, Second> >(adapted) {}
+template <class Value, class First, class Second>
+struct adapter<Value, std::pair<First, Second> >  : concrete_adapter<Value, std::pair<First, Second>, type_flags(container | sequential)> {
+    adapter(std::pair<First, Second> const& adapted) : concrete_adapter<Value, std::pair<First, Second>, type_flags(container | sequential)>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+    AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-    // TODO: to_complex()
-    boolean_type to_boolean() const { return true; }
-    range_type   to_range()   const {
+    // virtual boolean_type to_boolean() const { return true; }
+    virtual optional<range_type> get_range() const {
         return range_type( const_pair_iterator(this->adapted(), first)
                          , const_pair_iterator(this->adapted(), past)
                          );
     }
 
-    void output(ostream_type& out) const { out << this->adapted().first << ": " << this->adapted().second; }
+    virtual boolean_type output(ostream_type& ostream) const { return (ostream << this->adapted().first << ": " << this->adapted().second), true; }
 
   private:
 
@@ -43,11 +42,11 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
 
     enum position { first, second, past };
 
-    template <class Value>
-    struct pair_iterator : boost::iterator_facade< pair_iterator<Value>
-                                                 , /* XXX: Value */variant_type
+    template <class V>
+    struct pair_iterator : boost::iterator_facade< pair_iterator<V>
+                                                 , /* XXX: V */variant_type
                                                  , boost::forward_traversal_tag
-                                                 , /* XXX: Value */variant_type
+                                                 , /* XXX: V */variant_type
                                                  > {
      public:
         pair_iterator( pair_type const& pair
@@ -55,12 +54,12 @@ struct adapter<Behavior, std::pair<First, Second> >  : concrete_adapter<Behavior
                      )
             : pair_(pair), position_(position) {}
 
-        template <class Value_>
-        pair_iterator(pair_iterator<Value_> const& other)
+        template <class T>
+        pair_iterator(pair_iterator<T> const& other)
             : pair_(other.pair_), position_(other.position_) {}
 
-        template <class Value_>
-        bool equal(pair_iterator<Value_> const& that) const {
+        template <class T>
+        bool equal(pair_iterator<T> const& that) const {
             return this->pair_     == that.pair_
                 && this->position_ == that.position_;
         }

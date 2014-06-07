@@ -27,21 +27,13 @@ namespace adapters {
 //       initializer list ranges from difficult to impossible in C++03.
 // TODO[c++11]: Store array by value.
 
-template <class Behavior, class T, std::size_t N>
-struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adapter<Behavior, T[N]> > {
-    adapter(T const (&adapted)[N]) : concrete_adapter<Behavior, T const (&)[N], adapter<Behavior, T[N]> >(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
+template <class Value, class T, std::size_t N>
+struct adapter<Value, T[N]>        : range_adapter<Value, T const (&)[N], adapter<Value, T[N]>, T const*, sequential> {
+    adapter(T const (&adapted)[N]) : range_adapter<Value, T const (&)[N], adapter<Value, T[N]>, T const*, sequential>(adapted) {}
 
-    floating_type to_floating() const { return N; }
-    boolean_type  to_boolean()  const { return N != 0; }
-    range_type    to_range()    const {
-        return range_type( static_cast<T const*>(this->adapted())
-                         , static_cast<T const*>(this->adapted()) + N
-                         );
-    }
-
-    void output(ostream_type& out) const { behavior_type::delimited(out, this->to_range()); }
+    virtual T const* begin() const { return static_cast<T const*>(this->adapted()); }
+    virtual T const* end()   const { return static_cast<T const*>(this->adapted()) + N; }
 };
 
 //
@@ -49,33 +41,12 @@ struct adapter<Behavior, T[N]> : concrete_adapter<Behavior, T const (&)[N], adap
 //     TODO[c++14]: Remove support for this nastiness and defer to std::dynarray.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Behavior, T[]> > {
-    adapter(T* const adapted, std::size_t const length) : concrete_adapter<Behavior, T* const, adapter<Behavior, T[]> >(adapted), length_(length) {}
+template <class Value, class T>
+struct adapter<Value, T[]>                              : range_adapter<Value, T* const, adapter<Value, T[]>, T const*, sequential> {
+    adapter(T* const adapted, std::size_t const length) : range_adapter<Value, T* const, adapter<Value, T[]>, T const*, sequential>(adapted), length_(length) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    std::type_info const& type() const { return typeid(T*); } // XXX: return typeid(T[]);
-
-    floating_type to_floating() const { return this->length_; }
-    boolean_type  to_boolean()  const { return this->length_ != 0; }
-    range_type    to_range()    const {
-        return range_type( static_cast<T const*>(this->adapted())
-                         , static_cast<T const*>(this->adapted()) + this->length_
-                         );
-    }
-
-    void output(ostream_type& out) const { behavior_type::delimited(out, this->to_range()); }
-
-  protected:
-
-    virtual boolean_type equal_adapted(adapter_type const& that) const {
-        return this->template equal_as<adapter>(that);
-    }
-
-    virtual boolean_type less_adapted(adapter_type const& that) const {
-        return this->template less_as<adapter>(that);
-    }
+    virtual T const* begin() const { return static_cast<T const*>(this->adapted()); }
+    virtual T const* end()   const { return static_cast<T const*>(this->adapted()) + this->length_; }
 
   private:
 
@@ -86,9 +57,9 @@ struct adapter<Behavior, T[]> : concrete_adapter<Behavior, T* const, adapter<Beh
 // specialization for boost::array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T, std::size_t N>
-struct adapter<Behavior, boost::array<T, N> >  : container_adapter<Behavior, boost::array<T, N> > {
-    adapter(boost::array<T, N> const& adapted) : container_adapter<Behavior, boost::array<T, N> >(adapted) {}
+template <class Value, class T, std::size_t N>
+struct adapter<Value, boost::array<T, N> >  : container_adapter<Value, boost::array<T, N>, sequential> {
+    adapter(boost::array<T, N> const& adapted) : container_adapter<Value, boost::array<T, N>, sequential>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

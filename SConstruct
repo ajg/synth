@@ -47,6 +47,18 @@ def create_targets(env):
         source = ['ajg/synth/bindings/command_line/tool.cpp'],
     )
 
+    # Note: For development only; normally use setup.py instead.
+    from distutils import sysconfig
+    python_module = env.Clone()
+    python_module.LoadableModule(
+        target    = 'tests/synth.so',
+        source    = ['ajg/synth/bindings/python/module.cpp'] + find_boost_sources(),
+        CPPPATH   = ['.', sysconfig.get_python_inc()],
+        LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
+        LIBPREFIX = '',
+        LIBS      = ['python' + sysconfig.get_config_var('VERSION')],
+    )
+
     return [harness, examples, tool]
 
 def find_test_sources():
@@ -55,6 +67,11 @@ def find_test_sources():
     else:
         return Glob('tests/groups/*.cpp')
 
+def find_boost_sources():
+    boost_path = find_boost_path()
+    return (Glob(boost_path + '/libs/python/src/*.cpp')
+          + Glob(boost_path + '/libs/python/src/*/*.cpp'))
+
 def find_cxx_version(cxx):
     try:
         # NOTE: '--version' alone doesn't always work with g++
@@ -62,16 +79,21 @@ def find_cxx_version(cxx):
     except OSError as e:
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)
 
+def find_boost_path():
+    # TODO: For auto, use system if available, otherwise local
+    if BOOST in ('auto', 'local'):
+        return 'external/boost'
+    elif BOOST == 'system':
+        return None
+    else:
+        sys.exit('Unknown value for option `boost`')
+
 def get_cpp_path():
     cpp_path = ['.']
+    boost_path = find_boost_path()
 
-    if BOOST == 'local':
-        cpp_path += ['external/boost']
-    elif BOOST == 'auto':
-        # TODO: Use system if available, otherwise local?
-        cpp_path += ['external/boost']
-    elif BOOST == 'system':
-        pass
+    if boost_path:
+        cpp_path += [boost_path]
 
     return cpp_path
 
@@ -103,7 +125,7 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-Wuninitialized']
         cpp_flags += ['-Wc++11-narrowing']
         cpp_flags += ['-ferror-limit=1']
-        cpp_flags += ['-ftemplate-backtrace-limit=1']
+        # cpp_flags += ['-ftemplate-backtrace-limit=1']
 
         # TODO: Only version 3.3+:
         cpp_flags += ['-ftemplate-depth=' + template_depth]

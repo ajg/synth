@@ -17,18 +17,18 @@ namespace adapters {
 // specialization for std::set
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::set<T> >  : container_adapter<Behavior, std::set<T> > {
-    adapter(std::set<T> const& adapted) : container_adapter<Behavior, std::set<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, std::set<T> >  : container_adapter<Value, std::set<T>, associative> {
+    adapter(std::set<T> const& adapted) : container_adapter<Value, std::set<T>, associative>(adapted) {}
 };
 
 //
 // specialization for std::multiset
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::multiset<T> >  : container_adapter<Behavior, std::multiset<T> > {
-    adapter(std::multiset<T> const& adapted) : container_adapter<Behavior, std::multiset<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, std::multiset<T> >  : container_adapter<Value, std::multiset<T>, associative> {
+    adapter(std::multiset<T> const& adapted) : container_adapter<Value, std::multiset<T>, associative>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters

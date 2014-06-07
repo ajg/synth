@@ -15,17 +15,17 @@ namespace synth {
 namespace detail {
 
 //
-// is_integer:
-//     Determines whether a floating-point number is an integer.
+// has_fraction:
+//     Determines whether a floating-point number has a fractional part ("decimals").
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class T>
-inline typename boost::enable_if<boost::is_integral<T>, bool>::type is_integer(T const) { return true; }
+inline typename boost::enable_if<boost::is_integral<T>, bool>::type has_fraction(T const) { return false; }
 
 template <class T>
-inline typename boost::disable_if<boost::is_integral<T>, bool>::type is_integer(T const t) {
+inline typename boost::disable_if<boost::is_integral<T>, bool>::type has_fraction(T const t) {
     T integral_part;
-    return (std::modf)(t, &integral_part) == static_cast<T>(0.0);
+    return (std::modf)(t, &integral_part) != static_cast<T>(0.0);
 }
 
 }}} // namespace ajg::synth::detail

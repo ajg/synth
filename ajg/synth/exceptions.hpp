@@ -68,8 +68,8 @@ struct conversion_error : public exception, public std::runtime_error {
 
     conversion_error(std::type_info const& from, std::type_info const& to)
         : std::runtime_error("could not convert value from `" +
-              std::string(from.name()) + "` to `" + // TODO: Unmangle.
-              std::string(to.name()) + "`")         // TODO: Unmangle.
+              debug::unmangle(from.name()) + "` to `" +
+              debug::unmangle(to.name()) + "`")
         , from(from)
         , to(to) {}
     ~conversion_error() throw () {}

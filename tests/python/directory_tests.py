@@ -7,10 +7,18 @@ directory = 'tests/templates/django/'
 def get():
     return (context, golden, source, 'django', ('INVALID_VALUE', {}, False, [directory]))
 
-class User:
+class User(object):
     def __init__(self):
         self.is_staff = False
         self.is_authenticated = True
+
+class Message(object):
+    def __init__(self, category, message):
+        self.category = category
+        self.message = message
+
+    def __str__(self):
+        return self.message
 
 context = {
     'request': {
@@ -18,7 +26,7 @@ context = {
     },
     'STATIC_URL': '/static/',
     'title': 'Default Title',
-    'messages': ["Foo", "Bar", "Qux"],
+    'messages': [Message('category-a', 'Foo'), Message('category-b', 'Bar'), Message('category-c', 'Qux')],
 }
 source = open(directory + 'layout.html').read()
 golden = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -65,26 +73,23 @@ golden = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www
               <div id="messages">
 
 
-<ul class="F messages">
+<ul class="category-a messages">
 
   <li>Foo</li>
 
 </ul>
 
-
-<ul class="B messages">
+<ul class="category-b messages">
 
   <li>Bar</li>
 
 </ul>
 
-
-<ul class="Q messages">
+<ul class="category-c messages">
 
   <li>Qux</li>
 
 </ul>
-
 
 
 

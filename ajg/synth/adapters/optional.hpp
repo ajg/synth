@@ -17,12 +17,13 @@ namespace adapters {
 // specialization for boost::optional
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, boost::optional<T> > : forwarding_adapter<Behavior, T, boost::optional<T> > {
-    adapter(boost::optional<T> const& adapted) : forwarding_adapter<Behavior, T, boost::optional<T> >(adapted) {}
+template <class Value, class T>
+struct adapter<Value, boost::optional<T> > : forwarding_adapter<Value, T, boost::optional<T> > {
+    adapter(boost::optional<T> const& adapted) : forwarding_adapter<Value, T, boost::optional<T> >(adapted) {}
 
-    typename Behavior::boolean_type valid() const { return this->adapted(); }
-    template <class A> A forward() const { return A(boost::ref(*this->adapted())); }
+    template <class A> A forward() { return A(boost::ref(*this->adapted())); }
+    template <class A> A forward() const { return A(boost::cref(*this->adapted())); }
+    bool                 valid() const { return this->adapted(); }
 };
 
 }}} // namespace ajg::synth::adapters

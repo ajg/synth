@@ -21,9 +21,9 @@ namespace adapters {
 // specialization for boost::scoped_array
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, boost::scoped_array<T> > : adapter<Behavior, T[]> {
-    adapter(boost::scoped_array<T> const& adapted, std::size_t const length) : adapter<Behavior, T[]>(adapted.get(), length) {}
+template <class Value, class T>
+struct adapter<Value, boost::scoped_array<T> > : adapter<Value, T[]> {
+    adapter(boost::scoped_array<T> const& adapted, std::size_t const length) : adapter<Value, T[]>(adapted.get(), length) {}
 };
 
 }}} // namespace ajg::synth::adapters

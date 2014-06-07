@@ -20,8 +20,6 @@ namespace synth {
 namespace engines {
 namespace ssi {
 
-using boost::optional;
-
 template <class Kernel>
 struct builtin_tags {
   private:
@@ -44,7 +42,9 @@ struct builtin_tags {
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::integer_type                                  integer_type;
     typedef typename traits_type::floating_type                                 floating_type;
+    typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::string_type                                   string_type;
@@ -144,11 +144,11 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("sizefmt")) {
                     validate_attribute("sizefmt", value, "bytes", "abbrev");
-                    args.options.size_format = value;
+                    args.options.format(text::literal("sizefmt"), value);
                 }
-                else if (name == text::literal("timefmt")) args.options.time_format = value;
-                else if (name == text::literal("echomsg")) args.options.echo_message = value;
-                else if (name == text::literal("errmsg"))  args.options.error_message = value;
+                else if (name == text::literal("timefmt")) args.options.format(text::literal("timefmt"), value);
+                else if (name == text::literal("echomsg")) args.options.default_value = value;
+                else if (name == text::literal("errmsg"))  args.options.error_value   = value;
             );
         }
     };
@@ -221,8 +221,9 @@ enum { interpolated = true, raw = false };
                     AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
                 else if (name == text::literal("file")) {
+                    string_type const time_format = args.options.format(text::literal("timefmt"));
                     std::time_t const stamp = detail::stat_file(text::narrow(value)).st_mtime;
-                    args.ostream << traits_type::format_time(args.options.time_format, traits_type::to_time(stamp));
+                    args.ostream << traits_type::format_time(time_format, traits_type::to_time(stamp));
                 }
             );
         }
@@ -238,8 +239,9 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            boolean_type const abbreviate = args.options.size_format == text::literal("abbrev");
-            validate_attribute("size_format", args.options.size_format, "bytes", "abbrev");
+            string_type  const size_format = args.options.format(text::literal("sizefmt"));
+            boolean_type const abbreviate  = size_format == text::literal("abbrev");
+            validate_attribute("size_format", size_format, "bytes", "abbrev");
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("virtual")) {
@@ -363,8 +365,8 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            optional<string_type> name_;
-            optional<value_type>  value_;
+            boost::optional<string_type> name_;
+            boost::optional<value_type>  value_;
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("var")) {
@@ -380,7 +382,7 @@ enum { interpolated = true, raw = false };
             if (!name_)  AJG_SYNTH_THROW(missing_attribute("name"));
             if (!value_) AJG_SYNTH_THROW(missing_attribute("value"));
 
-            args.context[*name_] = *value_;
+            args.context.set(*name_, *value_);
         }
     };
 

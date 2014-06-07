@@ -38,7 +38,7 @@ struct base_template : boost::noncopyable {
   public:
 
     typedef typename kernel_type::range_type                                    range_type;
-    typedef typename kernel_type::result_type                                   result_type;
+    typedef typename kernel_type::state_type                                    state_type;
 
     typedef typename engine_type::value_type                                    value_type;
     typedef typename engine_type::context_type                                  context_type;
@@ -60,17 +60,14 @@ struct base_template : boost::noncopyable {
 
   protected:
 
-    base_template()
-        : kernel_(&shared_kernel()) {/* this->reset(); */}
+    inline base_template(options_type const& options = options_type())
+        { this->reset(options); }
 
-    base_template(options_type const& options)
-        : kernel_(&shared_kernel()) { this->reset(options); }
+    inline base_template(range_type const& range, options_type const& options = options_type())
+        { this->reset(range, options); }
 
-    base_template(range_type const& range, options_type const& options)
-        : kernel_(&shared_kernel()) { this->reset(range, options); }
-
-    base_template(iterator_type const& begin, iterator_type const& end, options_type const& options)
-        : kernel_(&shared_kernel()) { this->reset(begin, end, options); }
+    inline base_template(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type())
+        { this->reset(begin, end, options); }
 
   public:
 
@@ -78,21 +75,35 @@ struct base_template : boost::noncopyable {
 // render_to_stream
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void render_to_stream(ostream_type& ostream, context_type const& context) const { // FIXME: unconst
-        this->kernel_->render(ostream, this->result_, const_cast<context_type&>(context));
+    inline void render_to_stream(ostream_type& ostream, context_type& context) const {
+        this->kernel().render(ostream, this->state_.options, this->state_, context);
+    }
+
+    inline void render_to_stream(ostream_type& ostream, value_type const value) const {
+        context_type context((value));
+        this->render_to_stream(ostream, context);
     }
 
 //
-// Convenience methods
+// render_to_string
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    string_type render_to_string(context_type const& context) const { // FIXME: unconst
+    inline string_type render_to_string(context_type& context) const {
         std::basic_ostringstream<char_type> ostream;
-        this->kernel_->render(ostream, this->result_, const_cast<context_type&>(context));
+        this->kernel().render(ostream, this->state_.options, this->state_, context);
         return ostream.str();
     }
 
-    void render_to_path(path_type const& path, context_type const& context) const { // FIXME: unconst
+    inline string_type render_to_string(value_type const value) const {
+        context_type context((value));
+        return this->render_to_string(context);
+    }
+
+//
+// render_to_path
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline void render_to_path(path_type const& path, context_type& context) const {
         std::string const narrow_path = text::narrow(path);
         std::basic_ofstream<char_type> file;
 
@@ -103,58 +114,43 @@ struct base_template : boost::noncopyable {
             AJG_SYNTH_THROW(write_error(narrow_path, e.what()));
         }
 
-        this->kernel_->render(file, this->result_, const_cast<context_type&>(context));
+        this->kernel().render(file, this->state_.options, this->state_, context);
     }
 
-    range_type const& range() const { return this->result_.range(); }
-    string_type       str()   const { return this->result_.str(); }
+    inline void render_to_path(path_type const& path, value_type const value) const {
+        context_type context((value));
+        this->render_to_path(path, context);
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    inline string_type         str()     const { return string_type(this->range().first, this->range().second); }
+    inline range_type   const& range()   const { return this->state_.range; }
+    inline options_type const& options() const { return this->state_.options; }
+
+  protected:
+
+    inline void reset(options_type const& options = options_type()) {
+        this->state_ = state_type(range_type(), options);
+        // NOTE: Don't parse in this case.
+    }
+
+    inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) {
+        this->state_ = state_type(range_type(begin, end), options);
+        this->kernel().initialize_state(this->state_);
+        this->kernel().parse(this->state_);
+    }
 
   private:
 
-    inline static kernel_type const& shared_kernel() {
+    inline static kernel_type const& kernel() {
         static kernel_type const kernel;
         return kernel;
     }
 
-    /*
-    void mutate_locally() {
-        if (!local_kernel_) {
-            local_kernel_.reset(new kernel_type(shared_kernel()));
-            std::swap(kernel_, local_kernel_.get());
-        }
-    }
-    */
-
-  protected:
-
-
-    inline void reset() {
-        static options_type const default_options;
-        this->result_.reset(range_type(), default_options);
-        // NOTE: Don't parse in this case.
-    }
-
-    inline void reset(options_type const& options) {
-        this->result_.reset(range_type(), options);
-        // NOTE: Don't parse in this case.
-    }
-
-    inline void reset(iterator_type const& begin, iterator_type const& end) {
-        static options_type const default_options;
-        this->result_.reset(range_type(begin, end), default_options);
-        kernel_->parse(this->result_.range(), this->result_);
-    }
-
-    inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options) {
-        this->result_.reset(range_type(begin, end), options);
-        kernel_->parse(this->result_.range(), this->result_);
-    }
-
   private:
 
-    local_kernel_type   local_kernel_;
-    kernel_type const*  kernel_;
-    result_type         result_;
+    state_type state_;
 };
 
 }}} // namespace ajg::synth::templates

@@ -17,12 +17,13 @@ namespace adapters {
 // specialization for std::auto_ptr
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
-struct adapter<Behavior, std::auto_ptr<T> >  : forwarding_adapter<Behavior, T, std::auto_ptr<T> const*, adapter<Behavior, std::auto_ptr<T> > > {
-    adapter(std::auto_ptr<T> const& adapted) : forwarding_adapter<Behavior, T, std::auto_ptr<T> const*, adapter<Behavior, std::auto_ptr<T> > >(&adapted) {}
+template <class Value, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
+struct adapter<Value, std::auto_ptr<T> >     : forwarding_adapter<Value, T, std::auto_ptr<T> const*, adapter<Value, std::auto_ptr<T> > > {
+    adapter(std::auto_ptr<T> const& adapted) : forwarding_adapter<Value, T, std::auto_ptr<T> const*, adapter<Value, std::auto_ptr<T> > >(&adapted) {}
 
+    template <class A> A forward() { return A(boost::ref(*this->adapted()->get())); }
     template <class A> A forward() const { return A(boost::cref(*this->adapted()->get())); }
-    typename Behavior::boolean_type valid() const { return this->adapted()->get() != 0; }
+    bool                 valid() const { return this->adapted()->get() != 0; }
 };
 
 }}} // namespace ajg::synth::adapters

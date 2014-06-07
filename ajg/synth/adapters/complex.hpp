@@ -19,16 +19,11 @@ namespace adapters {
 //     TODO: Use numeric_adapter as base?
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <class Behavior, class T>
-struct adapter<Behavior, std::complex<T> >  : concrete_adapter<Behavior, std::complex<T> > {
-    adapter(std::complex<T> const& adapted) : concrete_adapter<Behavior, std::complex<T> >(adapted) {}
+template <class Value, class T> // TODO: Set floating, integral etc. flags based on T.
+struct adapter<Value, std::complex<T> >     : concrete_adapter<Value, std::complex<T>, numeric> {
+    adapter(std::complex<T> const& adapted) : concrete_adapter<Value, std::complex<T>, numeric>(adapted) {}
 
-    AJG_SYNTH_ADAPTER_TYPEDEFS(Behavior);
-
-    floating_type to_floating() const { return static_cast<floating_type>(this->adapted().real()); }
-    boolean_type to_boolean() const { return this->adapted() != T(0); }
-    void input (istream_type& in)        { in >> this->adapted(); }
-    void output(ostream_type& out) const { out << this->adapted(); }
+    virtual optional<typename Value::number_type> get_number() const { return static_cast<typename Value::number_type>(this->adapted().real()); }
 };
 
 }}} // namespace ajg::synth::adapters

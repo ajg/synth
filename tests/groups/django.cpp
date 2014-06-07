@@ -36,7 +36,6 @@ typedef engine_type::value_type                                                 
 typedef traits_type::char_type                                                  char_type;
 typedef traits_type::string_type                                                string_type;
 
-typedef value_type::behavior_type                                               behavior_type;
 typedef s::engines::null::resolver<options_type>                                null_resolver_type;
 typedef s::detail::text<string_type>                                            text;
 
@@ -304,7 +303,7 @@ unit_test(now_tag) {
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure_equals(s, behavior_type::to_string(std::localtime(&time)->tm_year % 100));
+    ensure_equals(s, text::stringize(std::localtime(&time)->tm_year % 100));
 }}}
 
 unit_test(now_tag) {
@@ -312,7 +311,7 @@ unit_test(now_tag) {
 
     std::time_t time = std::time(0);
     string_type s = t.render_to_string(context);
-    ensure_equals(s, behavior_type::to_string(std::localtime(&time)->tm_year + 1900));
+    ensure_equals(s, text::stringize(std::localtime(&time)->tm_year + 1900));
 }}}
 
 DJANGO_TEST(regroup_tag,

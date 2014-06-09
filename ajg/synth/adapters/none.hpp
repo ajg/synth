@@ -18,30 +18,11 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct adapter<Value, boost::none_t>      : concrete_adapter<Value, boost::none_t, unit> {
-    adapter(boost::none_t const& adapted) : concrete_adapter<Value, boost::none_t, unit>(adapted) {}
+struct adapter<Value, boost::none_t>      : concrete_adapter_without_operators<Value, boost::none_t, unit> {
+    adapter(boost::none_t const& adapted) : concrete_adapter_without_operators<Value, boost::none_t, unit>(adapted) {}
 };
 
 }}} // namespace ajg::synth::adapters
-
-namespace std {
-
-template <>
-struct less<boost::none_t> {
-    bool operator()(boost::none_t const&, boost::none_t const&) const {
-        return false;
-    }
-};
-
-} // namespace std
-
-/*
-namespace boost {
-
-inline bool operator <(none_t const&, none_t const&) { return false; }
-
-} // namespace boost
-*/
 
 #endif // AJG_SYNTH_ADAPTERS_NONE_HPP_INCLUDED
 

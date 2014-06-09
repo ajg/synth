@@ -20,6 +20,7 @@ struct forwarding_adapter                      : concrete_adapter<Value, Adapted
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
     virtual std::type_info const& type()  const { return this->valid() ? this->forward().type()  : typeid(void); }
+    virtual void*                 data()  const { return this->valid() ? this->forward().data()  : 0; }
     virtual type_flags            flags() const { return this->valid() ? this->forward().flags() : unspecified; }
 
     virtual optional<boolean_type>  get_boolean()  const { return this->valid() ? this->forward().get_boolean()  : boost::none; }
@@ -34,21 +35,11 @@ struct forwarding_adapter                      : concrete_adapter<Value, Adapted
 
     virtual const_iterator find(value_type const& value) const { return this->valid() ? this->forward().find(value) : const_iterator(); }
 
-    virtual boolean_type input (istream_type& istream) const { return this->valid() ? this->forward().input(istream) : false; }
+    virtual boolean_type input (istream_type& istream) const { return this->valid() ? this->forward().input(istream)  : false; }
     virtual boolean_type output(ostream_type& ostream) const { return this->valid() ? this->forward().output(ostream) : false; }
 
-  protected:
-
-    virtual boolean_type equal_adapted(adapter_type const& that) const {
-        // TODO: Check all cases:
-        //     a. type(*that) == type(*this)
-        //     b. type(that->adapted) == type(this->adapted)
-        return this->forward().template equal_as<adapter<Value, T> >(that);
-    }
-
-    virtual boolean_type less_adapted(adapter_type const& that) const {
-        return this->forward().template less_as<adapter<Value, T> >(that);
-    }
+    virtual boolean_type equal_to(value_type const& that) const { return this->valid() ? this->forward().equal_to(that) : false; }
+    virtual boolean_type less    (value_type const& that) const { return this->valid() ? this->forward().less(that)     : false; }
 
   private:
 

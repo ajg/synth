@@ -163,11 +163,11 @@ struct conversions {
         // DSHOW(value.is_associative());
         // DSHOW(value);
 
-             if (value.template is<py::object>()) return value.template as<py::object>();
-        // else if (value.template is<py::tuple>())  return value.template as<py::tuple>();
-        // else if (value.template is<py::dict>())   return value.template as<py::dict>();
-        // else if (value.template is<py::list>())   return value.template as<py::list>();
-        // else if (value.template is<py::str>())    return value.template as<py::str>();
+             if (value.template is<py::object>())  return value.template as<py::object>();
+        else if (value.template is<py::tuple>())   return value.template as<py::tuple>();
+        else if (value.template is<py::dict>())    return value.template as<py::dict>();
+        else if (value.template is<py::list>())    return value.template as<py::list>();
+        else if (value.template is<py::str>())     return value.template as<py::str>();
         else if (value.template is<PyObject*>())   return py::object(py::handle<>(value.template as<PyObject*>()));
         else if (value.template is<void*>())       return py::long_(reinterpret_cast<intptr_t>(value.template as<void*>()));
         else if (value.template is<void const*>()) return py::long_(reinterpret_cast<intptr_t>(value.template as<void const*>()));

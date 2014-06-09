@@ -43,21 +43,12 @@ struct adapter<Value, boost::reference_wrapper<T> > : base_adapter<Value> { // T
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-  protected:
-
     typedef adapter<Value, typename boost::remove_const<T>::type> wrapped_adapter_type;
-
-    virtual boolean_type equal_adapted(adapter_type const& that) const {
-        return this->adapted_.template equal_as<wrapped_adapter_type>(that);
-    }
-
-    virtual boolean_type less_adapted(adapter_type const& that) const {
-        return this->adapted_.template less_as<wrapped_adapter_type>(that);
-    }
 
   public:
 
     virtual std::type_info const& type()  const { return typeid(T); } // XXX: this->adapted_.type(); ?
+    virtual void*                 data()  const { return this->adapted_.data(); }
     virtual type_flags            flags() const { return this->adapted_.flags(); }
 
     virtual optional<boolean_type>  get_boolean()  const { return this->adapted_.get_boolean(); }
@@ -68,6 +59,9 @@ struct adapter<Value, boost::reference_wrapper<T> > : base_adapter<Value> { // T
 
     virtual boolean_type input (istream_type& istream) const { return this->adapted_.input(istream); }
     virtual boolean_type output(ostream_type& ostream) const { return this->adapted_.output(ostream); }
+
+    virtual boolean_type equal_to(value_type const& that) const { return this->adapted_.equal_to(that); }
+    virtual boolean_type less    (value_type const& that) const { return this->adapted_.less(that); }
 
     virtual attribute_type  attribute(value_type const& key) const { return this->adapted_.attribute(key); }
     virtual void            attribute(value_type const& key, attribute_type const& attribute) const { this->adapted_.attribute(key, attribute); }

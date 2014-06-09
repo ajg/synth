@@ -24,15 +24,20 @@ namespace py = ::boost::python;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::object> {
-    adapter(py::object const& adapted) : concrete_adapter_without_io<Value, py::object>(adapted) {}
+struct adapter<Value, py::object>      : concrete_adapter_without_operators<Value, py::object> {
+    adapter(py::object const& adapted) : concrete_adapter_without_operators<Value, py::object>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
     typedef ajg::synth::bindings::python::conversions<value_type>               c;
 
+/* TODO: Pickle/unpickle or repr.
     virtual boolean_type input (istream_type& istream) const { return false; }
     virtual boolean_type output(ostream_type& ostream) const { return false; }
+*/
+
+    virtual boolean_type equal_to(value_type const& that) const { return this->adapted() == that.template as<py::object>(); }
+    virtual boolean_type less    (value_type const& that) const { return this->adapted() < that.template as<py::object>(); }
 
     virtual type_flags flags() const {
         PyObject* const o = this->adapted().ptr();

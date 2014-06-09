@@ -117,18 +117,13 @@ struct base_value {
     inline std::type_info const& type()      const { return this->adapter()->type(); }
     inline string_type    const& type_name() const { return text::widen(detail::unmangle(this->type().name())); }
 
-    // TODO: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves or using adapter().as<...> != 0
-    inline boolean_type typed_like (value_type const& that) const { return this->type() == that.type(); }
-    inline boolean_type typed_equal(value_type const& that) const { return this->adapter()->equal_adapted(that.adapter()); }
-    inline boolean_type typed_less (value_type const& that) const { return this->adapter()->less_adapted(that.adapter()); }
-
     // NOTE:
     //     is<T>: whether exactly T (modulo const/volatile)
     //     as<T>: cast to exactly T& (modulo const/volatile)
     //     to<T>: convert to T (i.e. a copy)
 
-    template <class T> inline T const& as() const { BOOST_ASSERT(this->template is<T>()); return this->adapter()->template get_adapted<T>(); }
-    template <class T> inline T&       as()       { BOOST_ASSERT(this->template is<T>()); return this->adapter()->template get_adapted<T>(); }
+    template <class T> inline T const& as() const { BOOST_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); BOOST_ASSERT(t); return *t; }
+    template <class T> inline T&       as()       { BOOST_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); BOOST_ASSERT(t); return *t; }
 
     template <class T> inline boolean_type is() const { return this->type() == typeid(T); }
 
@@ -299,24 +294,22 @@ struct base_value {
     }
 
     inline boolean_type equal(value_type const& that) const {
-        // TODO: Defer to adapter even in non-same_as cases:
-        //       if (...) return this->adapter()->equal(*that.adapter());
-        if (this->typed_like(that))                               return this->typed_equal(that);
+        if (this->type() == that.type())                          return this->adapter()->equal_to(that); // Exact.
         else if (this->is_boolean()     && that.is_boolean())     return this->to_boolean()  == that.to_boolean();
         else if (this->is_numeric()     && that.is_numeric())     return this->to_number()   == that.to_number();
         else if (this->is_chronologic() && that.is_chronologic()) return this->to_datetime() == that.to_datetime();
         else if (this->is_textual()     && that.is_textual())     return this->to_string()   == that.to_string();
-        // TODO: Containers, etc.
+        // TODO: Sequences, mappings, etc.?
         else return false;
     }
 
     inline boolean_type less(value_type const& that) const {
-        if (this->typed_like(that))                               return this->typed_less(that);
+        if (this->type() == that.type())                          return this->adapter()->less(that); // Exact.
         else if (this->is_boolean()     && that.is_boolean())     return this->to_boolean()  < that.to_boolean();
         else if (this->is_numeric()     && that.is_numeric())     return this->to_number()   < that.to_number();
         else if (this->is_chronologic() && that.is_chronologic()) return this->to_datetime() < that.to_datetime();
         else if (this->is_textual()     && that.is_textual())     return this->to_string()   < that.to_string();
-        // TODO: Containers, etc.
+        // TODO: Sequences, mappings, etc.?
         else return false;
     }
 
@@ -338,7 +331,7 @@ struct base_value {
     inline value_type back()  const { return *this->at(-1); }
 
     // TODO: Defer to adapter first.
-    inline const_iterator at   (value_type const& index) const { return detail::at(*this, index.to_integer()); } // TODO: Defer to adapter.
+    inline const_iterator at   (value_type const& index) const { return detail::at(*this, index.to_integer()); }
     inline const_iterator find (value_type const& value) const { return this->adapter()->find(value); }
 
     // TODO: Fold into `at`?

@@ -54,7 +54,7 @@ def create_targets(env):
         target    = 'tests/synth.so',
         source    = ['ajg/synth/bindings/python/module.cpp'] + find_boost_sources(),
         CPPPATH   = ['.', sysconfig.get_python_inc()],
-        LIBPATH   = [sysconfig.get_config_var('LIBDIR')],
+        LIBPATH   = [sysconfig.get_config_var('LIBDIR')] + find_boost_dirs(),
         LIBPREFIX = '',
         LIBS      = ['python' + sysconfig.get_config_var('VERSION')],
     )
@@ -88,13 +88,13 @@ def find_boost_path():
     else:
         sys.exit('Unknown value for option `boost`')
 
+def find_boost_dirs():
+    boost_path = find_boost_path()
+    return [boost_path] if boost_path else []
+
 def get_cpp_path():
     cpp_path = ['.']
-    boost_path = find_boost_path()
-
-    if boost_path:
-        cpp_path += [boost_path]
-
+    cpp_path += find_boost_dirs()
     return cpp_path
 
 def get_cpp_flags(cxx):

@@ -158,7 +158,7 @@ def get_extra_compile_args(compiler):
     else:
         # TODO: Some of this is repeated in SConstruct.
         return [
-            '-ferror-limit=1',
+            # '-ferror-limit=1',
             # '-ftemplate-backtrace-limit=0',
             # '-Wno-unsequenced',
             '-Wno-unused-value',

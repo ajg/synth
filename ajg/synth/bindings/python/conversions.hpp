@@ -168,14 +168,14 @@ struct conversions {
         // else if (value.template is<py::dict>())   return value.template as<py::dict>();
         // else if (value.template is<py::list>())   return value.template as<py::list>();
         // else if (value.template is<py::str>())    return value.template as<py::str>();
-        // TODO: py::handle<>(value.template as<PyObject*>());
-        else if (value.template is<PyObject*>())  return py::object(py::handle<>(value.template as<PyObject*>()));
-        else if (value.template is<void*>())      return py::long_(reinterpret_cast<intptr_t>(value.template as<void*>()));
-        else if (value.is_unit())                 return py::object(); // == None
-        else if (value.is_boolean())              return py::object(value.to_boolean());
-        else if (value.is_chronologic())          AJG_SYNTH_THROW(not_implemented("make_object::chronologic"));
-        else if (value.is_textual())              return py::object(value.to_string());
-        else if (value.is_numeric())              return py::object(value.to_number()); // Must come after textual due to C++ chars being both numeric and textual.
+        else if (value.template is<PyObject*>())   return py::object(py::handle<>(value.template as<PyObject*>()));
+        else if (value.template is<void*>())       return py::long_(reinterpret_cast<intptr_t>(value.template as<void*>()));
+        else if (value.template is<void const*>()) return py::long_(reinterpret_cast<intptr_t>(value.template as<void const*>()));
+        else if (value.is_unit())                  return py::object(); // == None
+        else if (value.is_boolean())               return py::object(value.to_boolean());
+        else if (value.is_chronologic())           AJG_SYNTH_THROW(not_implemented("make_object(chronologic)"));
+        else if (value.is_textual())               return py::object(value.to_string());
+        else if (value.is_numeric())               return py::object(value.to_number()); // Must come after textual due to C++ chars being both numeric and textual.
         else if (value.is_sequential()) {
             py::list list;
             BOOST_FOREACH(value_type const& element, value) {
@@ -193,7 +193,7 @@ struct conversions {
             return dict;
         }
         else {
-            AJG_SYNTH_THROW(not_implemented("make_object<" + text::narrow(value.type_name()) + ">"));
+            AJG_SYNTH_THROW(not_implemented("make_object(" + text::narrow(value.type_name()) + ")"));
         }
     }
 

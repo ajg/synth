@@ -199,22 +199,22 @@ struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct adapter<Value, py::tuple> : adapter<Value, py::object> {
+struct adapter<Value, py::tuple>      : adapter<Value, py::object> {
     adapter(py::tuple const& adapted) : adapter<Value, py::object>(adapted) {}
 };
 
 template <class Value>
-struct adapter<Value, py::list> : adapter<Value, py::object> {
+struct adapter<Value, py::list>      : adapter<Value, py::object> {
     adapter(py::list const& adapted) : adapter<Value, py::object>(adapted) {}
 };
 
 template <class Value>
-struct adapter<Value, py::dict> : adapter<Value, py::object> {
+struct adapter<Value, py::dict>      : adapter<Value, py::object> {
     adapter(py::dict const& adapted) : adapter<Value, py::object>(adapted) {}
 };
 
 template <class Value>
-struct adapter<Value, py::str> : adapter<Value, py::object> {
+struct adapter<Value, py::str>      : adapter<Value, py::object> {
     adapter(py::str const& adapted) : adapter<Value, py::object>(adapted) {}
 };
 

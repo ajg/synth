@@ -25,7 +25,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline std::string unmangle(std::string const& mangled) {
-#if !AJG_SYNTH_HAS_CXXABI_H
+#if AJG_SYNTH_HAS_CXXABI_H
 
     // TODO[c++11]: unique_ptr.
     int status = 0;

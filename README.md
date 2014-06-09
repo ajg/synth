@@ -179,8 +179,8 @@ Components
 ### Adapters
 
  - `array`
-   * `[N]` (Native static array.)
-   * `[]` (Native dynamic array.)
+   * `T[N]`
+   * `T[]`
    * `boost::array`
  - `bool`
    * `bool`
@@ -230,7 +230,8 @@ Components
  - `ptree`
    * `boost::property_tree::ptree`
  - `pointer`
-   * `*` (Native pointer.)
+   * `void*`
+   * `T*`
  - `ref`
    * `boost::reference_wrapper`
  - `smart_ptr`
@@ -312,6 +313,7 @@ Django Engine
  - `django::builtin_tags::include_tag`
  - `django::builtin_tags::include_with_tag`
  - `django::builtin_tags::include_with_only_tag`
+ - `django::builtin_tags::library_tag`
  - `django::builtin_tags::load_tag`
  - `django::builtin_tags::load_from_tag`
  - `django::builtin_tags::now_tag`
@@ -325,7 +327,6 @@ Django Engine
  - `django::builtin_tags::verbatim_tag`
  - `django::builtin_tags::widthratio_tag`
  - `django::builtin_tags::with_tag`
- - `django::builtin_tags::library_tag`
 
 ### Filters
 
@@ -388,16 +389,25 @@ Django Engine
  - `django::builtin_filters::wordwrap_filter`
  - `django::builtin_filters::yesno_filter`
 
-### Options
+### Relevant Options
 
- - `django::options::default_value` (for `TEMPLATE_STRING_IF_INVALID`)
- - `django::options::error_value`
- - `django::options::debug` (for `TEMPLATE_DEBUG`)
- - `django::options::directories` (for `TEMPLATE_DIRS`)
- - `django::options::libraries` (for external tags & filters)
- - `django::options::loaders` (for dynamically loading libraries)
- - `django::options::formats` (for `TIME_FORMAT`, `DATE_FORMAT`, etc.)
+ - `base_options::default_value` (akin to `TEMPLATE_STRING_IF_INVALID`; default: `""`)
+ - `base_options::debug`         (akin to `TEMPLATE_DEBUG`;             default: `false`)
+ - `base_options::directories`   (akin to `TEMPLATE_DIRS`;              default: `"."`)
+ - `base_options::libraries`     (for external tags & filters)
+ - `base_options::loaders`       (for dynamically loading libraries)
+ - `base_options::formats`
 
+#### Relevant Formats
+
+ - `"DATE_FORMAT"`            (default: `"N j, Y"`)
+ - `"DATETIME_FORMAT"`        (default: `"N j, Y, P"`)
+ - `"MONTH_DAY_FORMAT"`       (default: `"F j"`)
+ - `"SHORT_DATE_FORMAT"`      (default: `"m/d/Y"`)
+ - `"SHORT_DATETIME_FORMAT"`  (default: `"m/d/Y P"`)
+ - `"TIME_FORMAT"`            (default: `"P"`)
+ - `"YEAR_MONTH_FORMAT"`      (default: `"F Y"`)
+ - `"SPACE_FORMAT"`           (default: `"&nbsp;"`)
 
 SSI Engine
 ----------
@@ -414,13 +424,17 @@ SSI Engine
  - `ssi::builtin_tags::printenv_tag`
  - `ssi::builtin_tags::set_tag`
 
-### Options
+### Relevant Options
 
- - `ssi::options::echo_message`
- - `ssi::options::directories`
- - `ssi::options::size_format`
- - `ssi::options::time_format`
- - `ssi::options::error_message`
+ - `base_options::default_value` (akin to `echo_message`;  default: `"(none)"`)
+ - `base_options::error_value`   (akin to `error_message`; default: `"[an error occurred while processing this directive]"`)
+ - `base_options::directories`
+ - `base_options::formats`
+
+#### Relevant Formats
+
+ - `sizefmt` (default: `"bytes"`)
+ - `timefmt` (default: `"%A, %d-%b-%Y %H:%M:%S %Z"`)
 
 TMPL Engine
 -----------
@@ -433,6 +447,10 @@ TMPL Engine
  - `tmpl::builtin_tags::loop_tag`
  - `tmpl::builtin_tags::unless_tag`
  - `tmpl::builtin_tags::variable_tag`
+
+### Relevant Options
+
+ - `base_options::default_value` (default: `""`)
 
 Future Work
 -----------

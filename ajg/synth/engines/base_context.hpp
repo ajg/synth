@@ -66,7 +66,8 @@ struct base_context /*: boost::noncopyable*/ {
 
   public:
 
-    inline base_context(value_type const& value) : value_(value), autoescape_(true), blocks_(0) {}
+    inline base_context(value_type const& value)
+        : case_sensitive(true), value_(value), autoescape_(true), blocks_(0) {}
 
   public:
 

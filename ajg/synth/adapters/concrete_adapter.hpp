@@ -5,6 +5,9 @@
 #ifndef AJG_SYNTH_ADAPTERS_CONCRETE_ADAPTER_HPP_INCLUDED
 #define AJG_SYNTH_ADAPTERS_CONCRETE_ADAPTER_HPP_INCLUDED
 
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_array.hpp>
+#include <boost/type_traits/is_pointer.hpp>
 #include <boost/type_traits/has_left_shift.hpp>
 #include <boost/type_traits/has_right_shift.hpp>
 #include <boost/type_traits/remove_reference.hpp>

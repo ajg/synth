@@ -379,7 +379,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         state.options.default_value = string_type();
 
         // Note: insert will not replace existing values.
-        state.options.formats.insert(std::make_pair(text::literal("SPACE_FORMAT"),          text::literal("&nbsp;")));
         state.options.formats.insert(std::make_pair(text::literal("DATE_FORMAT"),           text::literal("N j, Y")));
         state.options.formats.insert(std::make_pair(text::literal("DATETIME_FORMAT"),       text::literal("N j, Y, P")));
         state.options.formats.insert(std::make_pair(text::literal("MONTH_DAY_FORMAT"),      text::literal("F j")));
@@ -387,6 +386,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         state.options.formats.insert(std::make_pair(text::literal("SHORT_DATETIME_FORMAT"), text::literal("m/d/Y P")));
         state.options.formats.insert(std::make_pair(text::literal("TIME_FORMAT"),           text::literal("P")));
         state.options.formats.insert(std::make_pair(text::literal("YEAR_MONTH_FORMAT"),     text::literal("F Y")));
+        state.options.formats.insert(std::make_pair(text::literal("SPACE_FORMAT"),          text::literal("&nbsp;")));
     }
 
     void render( ostream_type&       ostream

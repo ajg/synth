@@ -12,6 +12,8 @@
 #include <stdexcept>
 #include <exception>
 
+#include <ajg/synth/detail/unmangle.hpp>
+
 namespace ajg {
 namespace synth {
 
@@ -68,8 +70,8 @@ struct conversion_error : public exception, public std::runtime_error {
 
     conversion_error(std::type_info const& from, std::type_info const& to)
         : std::runtime_error("could not convert value from `" +
-              debug::unmangle(from.name()) + "` to `" +
-              debug::unmangle(to.name()) + "`")
+              detail::unmangle(from.name()) + "` to `" +
+              detail::unmangle(to.name()) + "`")
         , from(from)
         , to(to) {}
     ~conversion_error() throw () {}

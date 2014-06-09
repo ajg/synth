@@ -132,9 +132,9 @@ inline py::object from_value(Value const& value) {
     typedef Value value_type;
     BOOST_ASSERT(value.initialized());
 
-    // SHOW(debug::unmangle(typeid(value_type).name()));
-    // SHOW(debug::unmangle(value.type().name()));
-    // SHOW(value);
+    // DSHOW(detail::unmangle(typeid(value_type).name()));
+    // DSHOW(detail::unmangle(value.type().name()));
+    // DSHOW(value);
 
          if (value.template is<py::object>()) return value.template as<py::object>();
          /*
@@ -147,15 +147,15 @@ inline py::object from_value(Value const& value) {
     else if (value.template is<PyObject*>())  AJG_SYNTH_THROW(not_implemented("from_value::PyObject*"));
     else {
         /*
-        SHOW(debug::unmangle(value.type().name()));
-        SHOW(value.is_unit());
-        SHOW(value.is_boolean());
-        SHOW(value.is_numeric());
-        SHOW(value.is_chronologic());
-        SHOW(value.is_textual());
-        SHOW(value.is_sequential());
-        SHOW(value.is_associative());
-        SHOW(value);
+        DSHOW(detail::unmangle(value.type().name()));
+        DSHOW(value.is_unit());
+        DSHOW(value.is_boolean());
+        DSHOW(value.is_numeric());
+        DSHOW(value.is_chronologic());
+        DSHOW(value.is_textual());
+        DSHOW(value.is_sequential());
+        DSHOW(value.is_associative());
+        DSHOW(value);
         */
 
              if (value.is_unit())        return py::object(); // == None
@@ -180,7 +180,7 @@ inline py::object from_value(Value const& value) {
             return dict;
         }
         else {
-            AJG_SYNTH_THROW(not_implemented("from_value::" + debug::unmangle(value.type().name())));
+            AJG_SYNTH_THROW(not_implemented("from_value::" + detail::unmangle(value.type().name())));
         }
 
         /*

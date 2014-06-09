@@ -24,9 +24,6 @@
 #include <sstream>
 #include <string>
 
-#if AJG_SYNTH_HAS_CXXABI_H
-#include <cxxabi.h>
-#endif
 #if AJG_SYNTH_HAS_EXECINFO_H
 #include <execinfo.h>
 #endif
@@ -36,6 +33,7 @@
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 
+#include <ajg/synth/detail/unmangle.hpp>
 #include <ajg/synth/detail/mutable_atomic_singleton.hpp>
 
 // TODO: In all these functions, minimize dynamic allocations & minimize potential runtime failures.
@@ -51,12 +49,12 @@ namespace debug {
 #define AJG_SYNTH_DEBUG_LOG() (::ajg::synth::debug::log(__FUNCTION__, __FILE__, __LINE__))
 
 ///
-/// SHOW, LOG, TRACE
+/// DSHOW, DPRINT, DTRACE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define SHOW(e) (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
-#define LOG(e)  (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
-#define TRACE   ::ajg::synth::debug::tracer const _tracer_(__FUNCTION__, __FILE__, __LINE__)
+#define DSHOW(e)  (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
+#define DPRINT(e) (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
+#define DTRACE    ::ajg::synth::debug::tracer const _tracer_(__FUNCTION__, __FILE__, __LINE__)
 
 ///
 /// count, level, quiet
@@ -154,24 +152,6 @@ inline std::string abbreviate(char const* s) {
     return result;
 }
 
-// TODO: Make this usable outside of debugging.
-inline std::string unmangle(std::string const& mangled) {
-
-#if AJG_SYNTH_HAS_CXXABI_H
-
-    // TODO[c++11]: unique_ptr.
-    int status = 0;
-    boost::shared_ptr<char> unmangled(abi::__cxa_demangle(mangled.c_str(), 0, 0, &status), std::free);
-    return unmangled && status == 0 ? abbreviate(unmangled.get()) : mangled;
-
-#else
-
-    return mangled;
-
-#endif
-
-}
-
 // TODO: Reimplement using static regexes.
 // FIXME: Some return types aren't matching properly (e.g. _object* or std::__1::basic_string<...>.
 static boost::xpressive::sregex const signature = boost::xpressive::sregex::compile(
@@ -198,11 +178,11 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
                 break;
             }
             else {
-                std::string entry = unmangle(mangled);
+                std::string entry = detail::unmangle(mangled);
                 boost::xpressive::smatch match;
 
                 if (boost::xpressive::regex_match(entry, match, signature)) {
-                    entry = match[2] + "(" + match[1] + ")";
+                    entry = abbreviate(match[2].str().c_str()) + "(" + abbreviate(match[1].str().c_str()) + ")";
                 }
 
                 fprintf(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
@@ -251,7 +231,7 @@ template <class Exception>
 BOOST_ATTRIBUTE_NORETURN
 inline void throw_exception(Exception const& e) {
     if (!quiet::get()) {
-        std::string const name = unmangle(typeid(Exception).name());
+        std::string const name = detail::unmangle(typeid(Exception).name());
         fprintf(stderr, "Exception of type `%s` about to be thrown\n", name.c_str());
         fprint_backtrace(stderr, 1);
     }

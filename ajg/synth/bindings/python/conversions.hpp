@@ -169,32 +169,31 @@ struct conversions {
         // else if (value.template is<py::list>())   return value.template as<py::list>();
         // else if (value.template is<py::str>())    return value.template as<py::str>();
         // TODO: py::handle<>(value.template as<PyObject*>());
-        else if (value.template is<PyObject*>())  AJG_SYNTH_THROW(not_implemented("make_object::PyObject*"));
+        else if (value.template is<PyObject*>())  return py::object(py::handle<>(value.template as<PyObject*>()));
+        else if (value.template is<void*>())      return py::long_(reinterpret_cast<intptr_t>(value.template as<void*>()));
+        else if (value.is_unit())                 return py::object(); // == None
+        else if (value.is_boolean())              return py::object(value.to_boolean());
+        else if (value.is_chronologic())          AJG_SYNTH_THROW(not_implemented("make_object::chronologic"));
+        else if (value.is_textual())              return py::object(value.to_string());
+        else if (value.is_numeric())              return py::object(value.to_number()); // Must come after textual due to C++ chars being both numeric and textual.
+        else if (value.is_sequential()) {
+            py::list list;
+            BOOST_FOREACH(value_type const& element, value) {
+                list.append(make_object(element));
+            }
+            return list;
+        }
+        else if (value.is_associative()) {
+            py::dict dict;
+            BOOST_FOREACH(value_type const& key, value.attributes()) {
+                if (typename value_type::attribute_type const attribute = value.attribute(key)) {
+                    dict[make_object(key)] = make_object(*attribute);
+                }
+            }
+            return dict;
+        }
         else {
-                 if (value.is_unit())        return py::object(); // == None
-                 if (value.is_boolean())     return py::object(value.to_boolean());
-            else if (value.is_chronologic()) AJG_SYNTH_THROW(not_implemented("make_object::chronologic"));
-            else if (value.is_textual())     return py::object(value.to_string());
-            else if (value.is_numeric())     return py::object(value.to_number()); // Must come after textual due to C++ chars being both numeric and textual.
-            else if (value.is_sequential()) {
-                py::list list;
-                BOOST_FOREACH(value_type const& element, value) {
-                    list.append(make_object(element));
-                }
-                return list;
-            }
-            else if (value.is_associative()) {
-                py::dict dict;
-                BOOST_FOREACH(value_type const& key, value.attributes()) {
-                    if (typename value_type::attribute_type const attribute = value.attribute(key)) {
-                        dict[make_object(key)] = make_object(*attribute);
-                    }
-                }
-                return dict;
-            }
-            else {
-                AJG_SYNTH_THROW(not_implemented("make_object<" + text::narrow(value.type_name()) + ">"));
-            }
+            AJG_SYNTH_THROW(not_implemented("make_object<" + text::narrow(value.type_name()) + ">"));
         }
     }
 
@@ -217,24 +216,25 @@ struct conversions {
     }
 
     inline static std::pair<py::tuple, py::dict> make_args_with(value_type const& v0, arguments_type arguments) {
+        arguments.first.reserve(arguments.first.size() + 1);
         arguments.first.insert(arguments.first.begin(), 1, v0);
         return make_args(arguments);
     }
 
-    /*
     inline static std::pair<py::tuple, py::dict> make_args_with(value_type const& v0, value_type const& v1, arguments_type arguments) {
+        arguments.first.reserve(arguments.first.size() + 2);
         arguments.first.insert(arguments.first.begin(), 1, v1);
         arguments.first.insert(arguments.first.begin(), 1, v0);
         return make_args(arguments);
     }
 
+    /*
     inline static std::pair<py::tuple, py::dict> make_args_with_object(py::object const& obj, arguments_type arguments) {
         py::list list;
         py::dict dict;
         list.append(obj);
         return make_args(arguments, list, dict);
     }
-    */
 
     inline static std::pair<py::tuple, py::dict> make_args_with_objects(py::object const& o1, py::object const& o2, arguments_type const& arguments) {
         py::list list;
@@ -243,6 +243,7 @@ struct conversions {
         list.append(o2);
         return make_args(arguments, list, dict);
     }
+    */
 };
 
 }}}} // namespace ajg::synth::bindings::python

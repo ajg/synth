@@ -96,22 +96,12 @@ struct library : Options::abstract_library {
     }
 
     static void call_python_renderer( py::object     const& r
-                                    , arguments_type const& arguments
+                                    , arguments_type const& rest
                                     , ostream_type&         ostream
                                     , context_type&         context
                                     , void const*           match
                                     ) {
-        // std::pair<py::tuple, py::dict> const args = c::make_args_with_object(py::object(match), arguments);
-        // std::pair<py::tuple, py::dict> const args = c::make_args_with_object(py::long_(reinterpret_cast<intptr_t>(match)), arguments);
-
-        /*
-        std::pair<py::tuple, py::dict> const args = c::make_args_with(
-            context.value(), reinterpret_cast<intptr_t>(match), arguments);
-        */
-        std::pair<py::tuple, py::dict> const args = c::make_args_with_objects(
-            c::make_object(context.value()),
-            py::long_(reinterpret_cast<intptr_t>(match)),
-            arguments);
+        std::pair<py::tuple, py::dict> const args = c::make_args_with(context.value(), match, rest);
         ostream << c::make_string(r(*args.first, **args.second));
     }
 
@@ -139,10 +129,10 @@ struct library : Options::abstract_library {
 
     static value_type call_filter( py::object            filter
                                  , value_type     const& value
-                                 , arguments_type const& arguments
+                                 , arguments_type const& rest
                                  , context_type&
                                  ) {
-        std::pair<py::tuple, py::dict> const args = c::make_args_with(value, arguments);
+        std::pair<py::tuple, py::dict> const args = c::make_args_with(value, rest);
         return filter(*args.first, **args.second);
     }
 

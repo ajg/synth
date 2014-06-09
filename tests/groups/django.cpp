@@ -192,6 +192,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    states = CA: California, FL: Florida, NY: New York<br />\n"
     "    tags = &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;<br />\n"
     "    true_var = True<br />\n"
+    "    variable_path = tests/templates/django/variables.tpl<br />\n"
     "    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
 
 DJANGO_TEST(firstof_tag, "{% firstof true_var %}", "True")
@@ -235,12 +236,15 @@ DJANGO_TEST(ifnotequal_tag, "{% ifnotequal 'hello' 'hello' %}Bad{% else %}Good{%
 
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/empty.tpl' %}", "")
 DJANGO_TEST(include_tag, "{% include 'tests/templates/django/variables.tpl' %}", "foo: A\nbar: B\nqux: C\n")
+DJANGO_TEST(include_tag, "{% include variable_path %}", "foo: A\nbar: B\nqux: C\n")
 
 DJANGO_TEST(include_with_tag, "{% include 'tests/templates/django/empty.tpl' with foo=42 %}", "")
 DJANGO_TEST(include_with_tag, "{% include 'tests/templates/django/variables.tpl' with foo=42 %}", "foo: 42\nbar: B\nqux: C\n")
+DJANGO_TEST(include_with_tag, "{% include variable_path with foo=42 %}", "foo: 42\nbar: B\nqux: C\n")
 
 DJANGO_TEST(include_with_only_tag, "{% include 'tests/templates/django/empty.tpl' with foo=42 only %}", "")
 DJANGO_TEST(include_with_only_tag, "{% include 'tests/templates/django/variables.tpl' with foo=42 only %}", "foo: 42\nbar: \nqux: \n")
+DJANGO_TEST(include_with_only_tag, "{% include variable_path with foo=42 only %}", "foo: 42\nbar: \nqux: \n")
 
 DJANGO_TEST(filter_tag, "{% filter escape %}<foo />{% endfilter %}", "<foo />")
 DJANGO_TEST(filter_tag, "{% filter force_escape %}<foo />{% endfilter %}", "&lt;foo /&gt;")

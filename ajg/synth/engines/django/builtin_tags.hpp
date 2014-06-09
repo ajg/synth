@@ -401,9 +401,7 @@ struct builtin_tags {
 
     struct extends_tag {
         static regex_type syntax(kernel_type& kernel) {
-            // TODO: Handle non-string literals bases, which should be treated not as paths but as
-            //       template objects.
-            return TAG(kernel.reserved("extends") >> kernel.string_literal) >> kernel.block;
+            return TAG(kernel.reserved("extends") >> kernel.value) >> kernel.block;
         }
 
         static void render( kernel_type  const& kernel
@@ -413,8 +411,10 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            match_type const& body = match(kernel.block);
-            path_type  const  path = kernel.extract_path(match(kernel.string_literal));
+
+            value_type  const value = kernel.evaluate(options, state, match(kernel.value), context);
+            string_type const path  = value.to_string(); // TODO: Handle values that are templates.
+            match_type  const& body = match(kernel.block);
 
             ostream_type null_stream(0);
             blocks_type blocks;
@@ -742,7 +742,7 @@ struct builtin_tags {
 
     struct include_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return TAG(kernel.reserved("include") >> kernel.string_literal >> *_s >>
+            return TAG(kernel.reserved("include") >> kernel.value >> *_s >>
                 !(kernel.keyword("with") >> kernel.arguments >> !(s1 = kernel.keyword("only"))));
         }
 
@@ -753,8 +753,9 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            path_type  const  path = kernel.extract_path(match(kernel.string_literal));
-            match_type const& args = match(kernel.arguments);
+            value_type  const  value = kernel.evaluate(options, state, match(kernel.value), context);
+            string_type const  path  = value.to_string();
+            match_type  const& args  = match(kernel.arguments);
 
             if (!args) {
                 kernel.render_path(ostream, options, state, path, context);

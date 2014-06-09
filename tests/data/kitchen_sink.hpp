@@ -133,6 +133,8 @@ struct kitchen_sink {
         tags.push_front("<Y>");
         tags.push_front("<X>");
         context.set(text::literal("tags"), tags);
+
+        context.set(text::literal("variable_path"), text::literal("tests/templates/django/variables.tpl"));
     }
 
     context_type                        context;

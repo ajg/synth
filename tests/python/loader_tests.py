@@ -20,13 +20,24 @@ def render_block(segments, context, match, index=0):
     return renderer(context, match)
 
 def simple_tag(fn):
-    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(*args, **kwargs))), ())
+    return (lambda segments:
+                (lambda context, match, *args, **kwargs:
+                    str(fn(*args, **kwargs))), ())
+
+def context_tag(fn):
+    return (lambda segments:
+                (lambda context, match, *args, **kwargs:
+                    str(fn(context, segments[0][0], *args, **kwargs))), ())
 
 def block_tag(name, fn):
-    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(context, render_block(segments, context, match), *args, **kwargs))), ('end' + name,))
+    return (lambda segments:
+                (lambda context, match, *args, **kwargs:
+                    str(fn(context, render_block(segments, context, match), *args, **kwargs))), ('end' + name,))
 
 def variadic_tag(name, fn, expected):
-    return (lambda segments: (lambda context, match, *args, **kwargs: str(fn(context, match, segments, *args, **kwargs))), expected + ('end' + name,))
+    return (lambda segments:
+                (lambda context, match, *args, **kwargs:
+                    str(fn(context, match, segments, *args, **kwargs))), expected + ('end' + name,))
 
 dummy_tag = (None, ())
 dummy_filter = None
@@ -49,9 +60,12 @@ def library_loader(name):
             'ackermann':      simple_tag(ackermann),      # binary
             'add':            simple_tag(add),            # n-ary
             # Polyadic tags:
-            'encode':        block_tag('encode', encode),                    # dyadic
-            'decode':        block_tag('decode', decode),                    # dyadic
-            'unless':        variadic_tag('unless', unless, ('otherwise',)), # variadic (dyadic or triadic)
+            'encode':         block_tag('encode', encode),                    # dyadic
+            'decode':         block_tag('decode', decode),                    # dyadic
+            'unless':         variadic_tag('unless', unless, ('otherwise',)), # variadic (dyadic or triadic)
+            # More esoteric tags:
+            'set':            context_tag(set),
+            'unset':          context_tag(unset),
         })
 
     elif name == 'test_filters':
@@ -93,6 +107,18 @@ def unless(context, match, segments, arg):
     pieces, renderer = segments[1 if arg else 0]
     return renderer(context, match)
 
+def set(context, pieces, *args, **kwargs):
+    # print '### set(', pieces, args, kwargs, context, ')'
+    name  = pieces[2]
+    value = pieces[3]
+    context[name] = value
+    return ''
+
+def unset(context, pieces, *args, **kwargs):
+    # print '### unset(', pieces, args, kwargs, context, ')'
+    name = pieces[2]
+    del context[name]
+    return ''
 
 context = {'motto': 'May the Force be with you.'}
 source = """\
@@ -105,7 +131,9 @@ source = """\
 {% load identity from test_tags %}
 {% load answer_to_life from test_tags %}
 {% load add from test_tags %}
-{% load encode decode unless from test_tags %}
+{% load encode decode from test_tags %}
+{% load unless from test_tags %}
+{% load set unset from test_tags %}
 ({% answer_to_life %})
 ({% identity 'wow' %})
 ({% ackermann 3 4 %})
@@ -120,6 +148,8 @@ source = """\
 ({% encode 'rot13' %}|{% encode 'rot13' %}Hello Kitty{% endencode %}|{% endencode %})
 ({% unless True%}A{% otherwise %}B{% endunless %})
 ({% unless False%}A{% otherwise %}B{% endunless %})
+{% set foo bar %}({{ foo }})
+{% unset foo bar %}({{ foo }})
 """
 golden = """\
 
@@ -127,6 +157,8 @@ golden = """\
 
 May the Force be with you.
 mAY THE fORCE BE WITH YOU.
+
+
 
 
 
@@ -146,6 +178,8 @@ mAY THE fORCE BE WITH YOU.
 (|Hello Kitty|)
 (B)
 (A)
+(bar)
+()
 """
 
 

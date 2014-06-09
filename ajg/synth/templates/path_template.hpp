@@ -49,9 +49,8 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
   public:
 
-    // TODO: Get directories from options (when available, otherwise the default, paths_type())
-    path_template(path_type const& path, paths_type const& directories = paths_type(), options_type const& options = options_type())
-            : info_(locate_file(path, directories)) {
+    path_template(path_type const& path, options_type const& options = options_type())
+            : info_(locate_file(path, options.directories)) {
         if (this->info_.second == 0) { // Empty file.
             this->reset(options);
         }

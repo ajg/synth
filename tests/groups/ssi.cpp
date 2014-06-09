@@ -268,7 +268,7 @@ unit_test(tag with error) {
 }}}
 
 unit_test(file template) {
-    path_template_type const t("tests/templates/ssi/variables.shtml", options.directories, options);
+    path_template_type const t("tests/templates/ssi/variables.shtml", options);
     ensure_equals(t.render_to_string(context), "foo: A\nbar: B\nqux: C\n");
 }}}
 

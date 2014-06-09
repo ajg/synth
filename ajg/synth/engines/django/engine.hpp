@@ -403,7 +403,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                     , path_type    const& path
                     , context_type&       context
                     ) const {
-        templates::path_template<engine_type> const t(path, options.directories, options);
+        templates::path_template<engine_type> const t(path, options);
         return t.render_to_stream(ostream, context);
     }
 

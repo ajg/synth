@@ -18,7 +18,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, std::deque<T> >  : container_adapter<Value, std::deque<T>, sequential> {
+struct adapter<Value, std::deque<T> >     : container_adapter<Value, std::deque<T>, sequential> {
     adapter(std::deque<T> const& adapted) : container_adapter<Value, std::deque<T>, sequential>(adapted) {}
 };
 

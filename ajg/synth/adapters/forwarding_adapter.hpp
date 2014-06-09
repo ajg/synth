@@ -14,7 +14,7 @@ namespace synth {
 namespace adapters {
 
 template <class Value, class T, class Adapted, class Specialized = adapter<Value, Adapted> >
-struct forwarding_adapter : concrete_adapter<Value, Adapted, unspecified, Specialized> {
+struct forwarding_adapter                      : concrete_adapter<Value, Adapted, unspecified, Specialized> {
     forwarding_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, unspecified, Specialized>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);

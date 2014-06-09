@@ -22,7 +22,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, boost::scoped_array<T> > : adapter<Value, T[]> {
+struct adapter<Value, boost::scoped_array<T> >                               : adapter<Value, T[]> {
     adapter(boost::scoped_array<T> const& adapted, std::size_t const length) : adapter<Value, T[]>(adapted.get(), length) {}
 };
 

@@ -58,7 +58,7 @@ struct adapter<Value, T[]>                              : range_adapter<Value, T
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T, std::size_t N>
-struct adapter<Value, boost::array<T, N> >  : container_adapter<Value, boost::array<T, N>, sequential> {
+struct adapter<Value, boost::array<T, N> >     : container_adapter<Value, boost::array<T, N>, sequential> {
     adapter(boost::array<T, N> const& adapted) : container_adapter<Value, boost::array<T, N>, sequential>(adapted) {}
 };
 

@@ -22,7 +22,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T> // NOTE: Adapted as a const reference since scoped_ptr is noncopyable.
-struct adapter<Value, boost::scoped_ptr<T> >  : forwarding_adapter<Value, T, boost::scoped_ptr<T> const*, adapter<Value, boost::scoped_ptr<T> > > {
+struct adapter<Value, boost::scoped_ptr<T> >     : forwarding_adapter<Value, T, boost::scoped_ptr<T> const*, adapter<Value, boost::scoped_ptr<T> > > {
     adapter(boost::scoped_ptr<T> const& adapted) : forwarding_adapter<Value, T, boost::scoped_ptr<T> const*, adapter<Value, boost::scoped_ptr<T> > >(&adapted) {}
 
     template <class A> A forward() { return A(boost::ref(*this->adapted()->get())); }
@@ -32,7 +32,7 @@ struct adapter<Value, boost::scoped_ptr<T> >  : forwarding_adapter<Value, T, boo
 
 /*
 template <class Value, class T>
-struct adapter<Value, boost::scoped_ptr<T> > : adapter<Value, T*> {
+struct adapter<Value, boost::scoped_ptr<T> >     : adapter<Value, T*> {
     adapter(boost::scoped_ptr<T> const& adapted) : adapter<Value, T*>(adapted.get()) {}
 };
 */

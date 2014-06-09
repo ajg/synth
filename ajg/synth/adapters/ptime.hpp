@@ -18,7 +18,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct adapter<Value, boost::posix_time::ptime>   : concrete_adapter<Value, boost::posix_time::ptime, chronologic> {
+struct adapter<Value, boost::posix_time::ptime>      : concrete_adapter<Value, boost::posix_time::ptime, chronologic> {
     adapter(boost::posix_time::ptime const& adapted) : concrete_adapter<Value, boost::posix_time::ptime, chronologic>(adapted) {}
 
     virtual optional<typename Value::boolean_type>  get_boolean()  const { return !this->adapted().is_not_a_date_time(); }

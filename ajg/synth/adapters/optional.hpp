@@ -18,7 +18,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, boost::optional<T> > : forwarding_adapter<Value, T, boost::optional<T> > {
+struct adapter<Value, boost::optional<T> >     : forwarding_adapter<Value, T, boost::optional<T> > {
     adapter(boost::optional<T> const& adapted) : forwarding_adapter<Value, T, boost::optional<T> >(adapted) {}
 
     template <class A> A forward() { return A(boost::ref(*this->adapted())); }

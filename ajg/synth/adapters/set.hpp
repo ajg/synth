@@ -18,7 +18,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, std::set<T> >  : container_adapter<Value, std::set<T>, associative> {
+struct adapter<Value, std::set<T> >     : container_adapter<Value, std::set<T>, associative> {
     adapter(std::set<T> const& adapted) : container_adapter<Value, std::set<T>, associative>(adapted) {}
 };
 
@@ -27,7 +27,7 @@ struct adapter<Value, std::set<T> >  : container_adapter<Value, std::set<T>, ass
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, std::multiset<T> >  : container_adapter<Value, std::multiset<T>, associative> {
+struct adapter<Value, std::multiset<T> >     : container_adapter<Value, std::multiset<T>, associative> {
     adapter(std::multiset<T> const& adapted) : container_adapter<Value, std::multiset<T>, associative>(adapted) {}
 };
 

@@ -59,7 +59,7 @@ struct adapter<Value, std::map<K, V> >     : container_adapter<Value, std::map<K
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class K, class V>
-struct adapter<Value, std::multimap<K, V> >  : container_adapter<Value, std::multimap<K, V>, associative> {
+struct adapter<Value, std::multimap<K, V> >     : container_adapter<Value, std::multimap<K, V>, associative> {
     adapter(std::multimap<K, V> const& adapted) : container_adapter<Value, std::multimap<K, V>, associative>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);

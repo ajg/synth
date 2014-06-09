@@ -19,7 +19,7 @@ namespace adapters {
 
 // TODO: Use forwarding_adapter or forward the actual value elsehow.
 template <class Value, BOOST_VARIANT_ENUM_PARAMS(class T)>
-struct adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> > : concrete_adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, container> {
+struct adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >     : concrete_adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, container> {
     adapter(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& adapted) : concrete_adapter<Value, boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, container>(adapted) {}
 };
 

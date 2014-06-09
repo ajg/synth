@@ -21,7 +21,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class T>
-struct adapter<Value, boost::shared_ptr<T> >  : forwarding_adapter<Value, T, boost::shared_ptr<T> > {
+struct adapter<Value, boost::shared_ptr<T> >     : forwarding_adapter<Value, T, boost::shared_ptr<T> > {
     adapter(boost::shared_ptr<T> const& adapted) : forwarding_adapter<Value, T, boost::shared_ptr<T> >(adapted) {}
 
     template <class A> A forward() { return A(boost::ref(*this->adapted())); }

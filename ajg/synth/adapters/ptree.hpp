@@ -22,7 +22,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class K, class V>
-struct adapter<Value, boost::property_tree::basic_ptree<K, V> >  : container_adapter<Value, boost::property_tree::basic_ptree<K, V>, type_flags(sequential | associative)> {
+struct adapter<Value, boost::property_tree::basic_ptree<K, V> >     : container_adapter<Value, boost::property_tree::basic_ptree<K, V>, type_flags(sequential | associative)> {
     adapter(boost::property_tree::basic_ptree<K, V> const& adapted) : container_adapter<Value, boost::property_tree::basic_ptree<K, V>, type_flags(sequential | associative)>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);

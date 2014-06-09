@@ -21,7 +21,7 @@ namespace adapters {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value, class First, class Second>
-struct adapter<Value, std::pair<First, Second> >  : concrete_adapter<Value, std::pair<First, Second>, type_flags(container | sequential)> {
+struct adapter<Value, std::pair<First, Second> >     : concrete_adapter<Value, std::pair<First, Second>, type_flags(container | sequential)> {
     adapter(std::pair<First, Second> const& adapted) : concrete_adapter<Value, std::pair<First, Second>, type_flags(container | sequential)>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);

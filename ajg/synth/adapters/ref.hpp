@@ -22,7 +22,7 @@ namespace adapters {
 /*
 TODO:
 template <class Value, class T>
-struct adapter<Value, boost::reference_wrapper<T> >  : forwarding_adapter<Value, T, boost::reference_wrapper<T> > {
+struct adapter<Value, boost::reference_wrapper<T> >     : forwarding_adapter<Value, T, boost::reference_wrapper<T> > {
     adapter(boost::reference_wrapper<T> const& adapted) : forwarding_adapter<Value, T, boost::reference_wrapper<T> >(adapted) {}
     template <class A> A forward() const { ? }
     boolean_type valid() const { return true; }

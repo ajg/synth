@@ -17,7 +17,6 @@ namespace synth {
 namespace adapters {
 namespace {
 namespace py = ::boost::python;
-namespace bp = bindings::python;
 } // namespace
 
 //
@@ -29,6 +28,8 @@ struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::
     adapter(py::object const& adapted) : concrete_adapter_without_io<Value, py::object>(adapted) {}
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
+
+    typedef ajg::synth::bindings::python::conversions<value_type>               c;
 
     virtual boolean_type input (istream_type& istream) const { return false; }
     virtual boolean_type output(ostream_type& ostream) const { return false; }
@@ -55,11 +56,11 @@ struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::
         return flags;
     }
 
-    virtual optional<boolean_type>  get_boolean()    const { return bp::get_boolean<traits_type>(this->adapted()); }
-    virtual optional<number_type>   get_number()     const { return bp::get_number<traits_type>(this->adapted()); }
-    virtual optional<datetime_type> get_datetime()   const { return bp::get_datetime<traits_type>(this->adapted()); }
-    virtual optional<string_type>   get_string()     const { return bp::get_string<traits_type>(this->adapted()); }
-    virtual optional<range_type>    get_range()      const { // TODO: bp::get_range<traits_type>
+    virtual optional<boolean_type>  get_boolean()    const { return c::make_boolean(this->adapted()); }
+    virtual optional<number_type>   get_number()     const { return c::make_number(this->adapted()); }
+    virtual optional<datetime_type> get_datetime()   const { return c::make_datetime(this->adapted()); }
+    virtual optional<string_type>   get_string()     const { return c::make_string(this->adapted()); }
+    virtual optional<range_type>    get_range()      const { // TODO: c::make_range
         return range_type( begin<const_iterator>(this->adapted())
                          , end<const_iterator>(this->adapted())
                          );
@@ -135,7 +136,7 @@ struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::
         if (PyMapping_Check(o)) {
             // TODO: If key is a py::object, use PyMapping_HasKey, etc.
             if (attribute) {
-                PyMapping_SetItemString(o, const_cast<char*>(k.c_str()), bp::from_value(*attribute).ptr());
+                PyMapping_SetItemString(o, const_cast<char*>(k.c_str()), c::make_object(*attribute).ptr());
             }
             else {
                 if (PyMapping_HasKeyString(o, const_cast<char*>(k.c_str()))) {
@@ -189,7 +190,7 @@ struct adapter<Value, py::object>      : concrete_adapter_without_io<Value, py::
     }
 
     inline static string_type class_name(py::object const& obj) {
-        return bp::get_string<traits_type>(obj.attr("__class__").attr("__name__"));
+        return c::make_string(obj.attr("__class__").attr("__name__"));
     }
 };
 

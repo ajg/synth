@@ -23,12 +23,18 @@ struct resolver : Options::abstract_resolver {
 
     typedef Options                                                             options_type;
 
-    typedef typename options_type::traits_type                                  traits_type;
+    typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::arguments_type                               arguments_type;
+    typedef typename options_type::traits_type                                  traits_type;
+
+    typedef typename value_type::arguments_type                                 arguments_type;
 
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::url_type                                      url_type;
+
+  private:
+
+    typedef conversions<value_type>                                             c;
 
   public:
 
@@ -38,7 +44,7 @@ struct resolver : Options::abstract_resolver {
                             ) {
         try {
             py::object const& result = object_.attr("resolve")(path);
-            return url_type(get_string<traits_type>(result));
+            return url_type(c::make_string(result));
         }
         catch (...) { // TODO: Catch only Resolver404?
             return url_type();
@@ -52,9 +58,9 @@ struct resolver : Options::abstract_resolver {
                             , options_type   const& options
                             ) {
         try {
-            std::pair<py::tuple, py::dict> const args = from_arguments(arguments);
+            std::pair<py::tuple, py::dict> const args = c::make_args(arguments);
             py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
-            return url_type(get_string<traits_type>(result));
+            return url_type(c::make_string(result));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return url_type();

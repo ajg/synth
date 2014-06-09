@@ -33,6 +33,7 @@ struct base_options {
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
     typedef typename value_type::association_type                               association_type;
+    typedef typename value_type::arguments_type                                 arguments_type;
     typedef typename value_type::traits_type                                    traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -52,7 +53,6 @@ struct base_options {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef std::pair<sequence_type, association_type>                          arguments_type;
     typedef std::map<string_type, string_type>                                  formats_type;
 
     struct abstract_library;

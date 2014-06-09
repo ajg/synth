@@ -79,7 +79,7 @@ struct default_traits {
 
     typedef default_traits                                                      traits_type;
     typedef boost::none_t                                                       none_type;
-    typedef bool                                                                boolean_type;
+    typedef bool                                                                boolean_type; // TODO: Rename bool_type.
     typedef Char                                                                char_type;
 
     // TODO: Consider using arbitrary-precision types for integer_type and natural_type.
@@ -96,7 +96,7 @@ struct default_traits {
     typedef boost::posix_time::time_duration                                    duration_type;
     typedef boost::local_time::local_date_time                                  datetime_type;
  // typedef boost::local_time::local_time_period                                period_type;
-    typedef boost::local_time::time_zone_ptr                                    timezone_type;
+    typedef boost::local_time::time_zone_ptr                                    timezone_type; // TODO: Rename zone_type?
 
     typedef std::basic_string<char_type>                                        string_type;
 

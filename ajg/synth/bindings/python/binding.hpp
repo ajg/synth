@@ -49,9 +49,9 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename traits_type::paths_type                                    paths_type;
 
     typedef typename base_type::options_type                                    options_type;
-    typedef typename base_type::context_type                                    context_type;
 
-    typedef typename options_type::arguments_type                               arguments_type;
+    typedef typename options_type::value_type                                   value_type;
+    typedef typename options_type::context_type                                 context_type;
     typedef typename options_type::formats_type                                 formats_type;
     typedef typename options_type::library_type                                 library_type;
     typedef typename options_type::libraries_type                               libraries_type;
@@ -72,6 +72,12 @@ struct binding : private boost::base_from_member<PyObject*>
                         >
                     >                                                           constructor_type;
 
+    typedef typename value_type::arguments_type                                 arguments_type;
+
+  private:
+
+    typedef conversions<value_type>                                             c;
+
   public:
 
     // TODO: Support passing either a string or a file-like object.
@@ -90,7 +96,7 @@ struct binding : private boost::base_from_member<PyObject*>
            )
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
         , base_type( get_source(boost::base_from_member<PyObject*>::member)
-                   , get_string<traits_type>(engine)
+                   , c::make_string(engine)
                    , get_options(replacement, fmts, debug, dirs, libs, ldrs, rslvrs)
                    ) {}
 
@@ -138,7 +144,7 @@ struct binding : private boost::base_from_member<PyObject*>
 
     void render_to_path(py::str const& path, py::object const& object) const {
         context_type context((object));
-        return base_type::render_to_path(get_string<traits_type>(path), context);
+        return base_type::render_to_path(c::make_string(path), context);
     }
 
     string_type render_to_string(py::object const& object) const {
@@ -172,8 +178,8 @@ struct binding : private boost::base_from_member<PyObject*>
         formats_type formats;
 
         BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
-            string_type const& key = get_string<traits_type>(item[0]);
-            string_type const& fmt = get_string<traits_type>(item[1]);
+            string_type const& key = c::make_string(item[0]);
+            string_type const& fmt = c::make_string(item[1]);
             typedef typename formats_type::value_type pair_type;
             formats.insert(pair_type(key, fmt));
         }
@@ -191,7 +197,7 @@ struct binding : private boost::base_from_member<PyObject*>
         libraries_type libraries;
 
         BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
-            string_type const& key = get_string<traits_type>(item[0]);
+            string_type const& key = c::make_string(item[0]);
             py::object  const& lib = item[1];
             typedef typename libraries_type::value_type pair_type;
             libraries.insert(pair_type(key, library_type(new library<options_type>(lib))));

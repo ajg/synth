@@ -23,10 +23,11 @@ namespace python {
 
 template <class Options>
 struct library : Options::abstract_library {
+  public:
+
     typedef Options                                                             options_type;
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::renderer_type                                renderer_type;
-    typedef typename options_type::arguments_type                               arguments_type;
     typedef typename options_type::tag_type                                     tag_type;
     typedef typename options_type::filter_type                                  filter_type;
     typedef typename options_type::context_type                                 context_type;
@@ -34,7 +35,9 @@ struct library : Options::abstract_library {
     typedef typename options_type::filters_type                                 filters_type;
     typedef typename options_type::segment_type                                 segment_type;
     typedef typename options_type::segments_type                                segments_type;
-    typedef typename options_type::traits_type                                  traits_type;
+
+    typedef typename value_type::traits_type                                    traits_type;
+    typedef typename value_type::arguments_type                                 arguments_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
@@ -42,6 +45,12 @@ struct library : Options::abstract_library {
     typedef typename traits_type::names_type                                    names_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
+
+  private:
+
+    typedef conversions<value_type>                                             c;
+
+  public:
 
     explicit library(py::object const& lib) {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {
@@ -92,18 +101,18 @@ struct library : Options::abstract_library {
                                     , context_type&         context
                                     , void const*           match
                                     ) {
-        // std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::object(match), arguments);
-        // std::pair<py::tuple, py::dict> const args = from_arguments_with_object(py::long_(reinterpret_cast<intptr_t>(match)), arguments);
+        // std::pair<py::tuple, py::dict> const args = c::make_args_with_object(py::object(match), arguments);
+        // std::pair<py::tuple, py::dict> const args = c::make_args_with_object(py::long_(reinterpret_cast<intptr_t>(match)), arguments);
 
         /*
-        std::pair<py::tuple, py::dict> const args = from_arguments_with(
+        std::pair<py::tuple, py::dict> const args = c::make_args_with(
             context.value(), reinterpret_cast<intptr_t>(match), arguments);
         */
-        std::pair<py::tuple, py::dict> const args = from_arguments_with_objects(
-            from_value(context.value()),
+        std::pair<py::tuple, py::dict> const args = c::make_args_with_objects(
+            c::make_object(context.value()),
             py::long_(reinterpret_cast<intptr_t>(match)),
             arguments);
-        ostream << get_string<traits_type>(r(*args.first, **args.second));
+        ostream << c::make_string(r(*args.first, **args.second));
     }
 
     static renderer_type call_tag( py::object    const& tag
@@ -133,7 +142,7 @@ struct library : Options::abstract_library {
                                  , arguments_type const& arguments
                                  , context_type&
                                  ) {
-        std::pair<py::tuple, py::dict> const args = from_arguments_with(value, arguments);
+        std::pair<py::tuple, py::dict> const args = c::make_args_with(value, arguments);
         return filter(*args.first, **args.second);
     }
 

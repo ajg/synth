@@ -62,18 +62,21 @@ struct base_value {
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
+    typedef typename traits_type::date_type                                     date_type;
+    typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::timezone_type                                 timezone_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
- // typedef typename value_type::const_iterator                                 const_iterator;
-    typedef value_iterator<value_type const>                                    iterator;
+    typedef value_iterator<value_type>                                          iterator;
     typedef value_iterator<value_type const>                                    const_iterator;
     typedef std::pair<const_iterator, const_iterator>                           range_type;
 
     typedef std::vector<value_type>                                             sequence_type;
     typedef std::map<string_type, value_type>                                   association_type;
+    typedef std::pair<sequence_type, association_type>                          arguments_type;
 
     typedef boost::optional<integer_type>                                       index_type;
 
@@ -88,8 +91,8 @@ struct base_value {
 
   public:
 
-    // An uninitialized value
-    base_value() : safe_(false), adapter_() {} // ::ajg::synth::debug::fprint_backtrace(stderr);
+    // An uninitialized value; in general to be avoided except where there's no better solution.
+    base_value() : safe_(false), adapter_() {}
 
     template <class T>
     base_value(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)

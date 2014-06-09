@@ -37,6 +37,7 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/unmangle.hpp>
 #include <ajg/synth/detail/container.hpp>
 #include <ajg/synth/detail/has_fraction.hpp>
 
@@ -109,8 +110,9 @@ struct base_value {
 
   public: // TODO: Should only be visible to {default_}value_traits.
 
-    inline std::type_info const& type()  const { return this->adapter()->type(); }
-    inline adapters::type_flags  flags() const { return this->adapter()->flags(); }
+    inline adapters::type_flags  flags()     const { return this->adapter()->flags(); }
+    inline std::type_info const& type()      const { return this->adapter()->type(); }
+    inline string_type    const& type_name() const { return text::widen(detail::unmangle(this->type().name())); }
 
     // TODO: Figure out if type comparisons are reliable, otherwise defer to the adapters themselves or using adapter().as<...> != 0
     inline boolean_type typed_like (value_type const& that) const { return this->type() == that.type(); }

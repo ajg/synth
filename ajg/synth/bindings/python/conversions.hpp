@@ -132,32 +132,24 @@ inline py::object from_value(Value const& value) {
     typedef Value value_type;
     BOOST_ASSERT(value.initialized());
 
-    // DSHOW(detail::unmangle(typeid(value_type).name()));
-    // DSHOW(detail::unmangle(value.type().name()));
+    // DSHOW(value.type_name());
+    // DSHOW(value.is_unit());
+    // DSHOW(value.is_boolean());
+    // DSHOW(value.is_numeric());
+    // DSHOW(value.is_chronologic());
+    // DSHOW(value.is_textual());
+    // DSHOW(value.is_sequential());
+    // DSHOW(value.is_associative());
     // DSHOW(value);
 
          if (value.template is<py::object>()) return value.template as<py::object>();
-         /*
-    else if (value.template is<py::tuple>())  return value.template as<py::tuple>();
-    else if (value.template is<py::dict>())   return value.template as<py::dict>();
-    else if (value.template is<py::list>())   return value.template as<py::list>();
-    else if (value.template is<py::str>())    return value.template as<py::str>();
-    */
+    // else if (value.template is<py::tuple>())  return value.template as<py::tuple>();
+    // else if (value.template is<py::dict>())   return value.template as<py::dict>();
+    // else if (value.template is<py::list>())   return value.template as<py::list>();
+    // else if (value.template is<py::str>())    return value.template as<py::str>();
     // TODO: py::handle<>(value.template as<PyObject*>());
     else if (value.template is<PyObject*>())  AJG_SYNTH_THROW(not_implemented("from_value::PyObject*"));
     else {
-        /*
-        DSHOW(detail::unmangle(value.type().name()));
-        DSHOW(value.is_unit());
-        DSHOW(value.is_boolean());
-        DSHOW(value.is_numeric());
-        DSHOW(value.is_chronologic());
-        DSHOW(value.is_textual());
-        DSHOW(value.is_sequential());
-        DSHOW(value.is_associative());
-        DSHOW(value);
-        */
-
              if (value.is_unit())        return py::object(); // == None
              if (value.is_boolean())     return py::object(value.to_boolean());
         else if (value.is_chronologic()) AJG_SYNTH_THROW(not_implemented("from_value::chronologic"));
@@ -180,19 +172,8 @@ inline py::object from_value(Value const& value) {
             return dict;
         }
         else {
-            AJG_SYNTH_THROW(not_implemented("from_value::" + detail::unmangle(value.type().name())));
+            AJG_SYNTH_THROW(not_implemented("from_value::" + text::narrow(value.type_name())));
         }
-
-        /*
-        try {
-
-            return value.template to_<py::object>();
-
-        }
-        catch (not_implemented const&) {
-            return
-
-        }*/
     }
 }
 

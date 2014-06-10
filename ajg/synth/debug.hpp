@@ -52,9 +52,10 @@ namespace debug {
 /// DSHOW, DPRINT, DTRACE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define DSHOW(e)  (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
-#define DPRINT(e) (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
-#define DTRACE    ::ajg::synth::debug::tracer const _tracer_(__FUNCTION__, __FILE__, __LINE__)
+#define DSHOW(e)   (AJG_SYNTH_DEBUG_LOG() << #e << " = `" << (e) << "`" << std::endl)
+#define DPRINT(e)  (AJG_SYNTH_DEBUG_LOG() << (e) << std::endl)
+#define DTRACE     ::ajg::synth::debug::tracer const _tracer_(__FUNCTION__, __FILE__, __LINE__)
+#define DBACKTRACE (::ajg::synth::debug::fprint_backtrace(stderr, 1))
 
 ///
 /// count, level, quiet
@@ -182,10 +183,10 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
                 boost::xpressive::smatch match;
 
                 if (boost::xpressive::regex_match(entry, match, signature)) {
-                    entry = abbreviate(match[2].str().c_str()) + "(" + abbreviate(match[1].str().c_str()) + ")";
+                    entry = match[2].str() + "(" + match[1].str() + ")";
                 }
 
-                fprintf(file, "%3d\t%s\t%s\n", index, module.c_str(), entry.c_str());
+                fprintf(file, "%3d\t%s\t%s\n", index, module.c_str(), abbreviate(entry.c_str()).c_str());
             }
         }
     }

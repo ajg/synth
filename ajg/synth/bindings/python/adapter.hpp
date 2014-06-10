@@ -114,15 +114,8 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
         }
 
         // 4. List-index lookup
-        if (PySequence_Check(o)) {
-            Py_ssize_t n = 0;
-
-            try {
-                n = static_cast<Py_ssize_t>(key.to_number());
-            }
-            catch (conversion_error const&) {
-                return attribute_type();
-            }
+        if (PySequence_Check(o) && key.is_integral()) {
+            Py_ssize_t const n = static_cast<Py_ssize_t>(key.to_integer());
 
             if (n < PySequence_Size(o)) {
                 return value_type(py::object(this->adapted()[py::long_(n)]));
@@ -151,8 +144,8 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
         }
 
         /* TODO:
-        if (PySequence_Check(o)) {
-            Py_ssize_t n = static_cast<Py_ssize_t>(key.to_number());
+        if (PySequence_Check(o) && key.is_integral()) {
+            Py_ssize_t n = static_cast<Py_ssize_t>(key.to_integer());
 
             if (n < PySequence_Size(o)) {
                 this->adapted()[py::long_(n)] = ...;

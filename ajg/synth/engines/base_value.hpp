@@ -26,7 +26,6 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/io/ios_state.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_integral.hpp>
@@ -386,35 +385,21 @@ struct base_value {
     template <class V> friend
     typename boost::enable_if<boost::is_same<value_type, V>, ostream_type&>::type
     operator <<(ostream_type& ostream, V const& value) {
+        // TODO: Move non-output behavior to traits.
         if (value.is_unit()) {
-            return ostream << "None"; // TODO: Move this to traits.
+            return ostream << "None";
         }
         else if (value.is_boolean()) {
             boolean_type const b = value.adapter()->get_boolean().get_value_or(boolean_type(false));
-            return ostream << (b ? "True" : "False"); // TODO: Move this to traits.
+            return ostream << (b ? "True" : "False");
         }
-        else if (value.is_numeric()) {
-            // boost::io::basic_ios_all_saver<char_type> saver(ostream);
-            // ostream << std::fixed
-            // ostream << std::noshowpoint;
-            // ostream << std::hexfloat;
-            // if (ostream.flags() & ostream.hex) ...
-
-            if (!value.is_integral()) { // XXX: value.is_floating() ?
-                number_type const n = value.to_number();
-                if (!detail::has_fraction(n) && n != -0.0) {
-                    return ostream << value.to_integer();
-                }
-            }
-        }
-
-        if (value.adapter()->output(ostream)) {
+        else if (value.adapter()->output(ostream)) {
             return ostream;
         }
         else if (boost::optional<string_type> const s = value.adapter()->get_string()) {
             return ostream << *s;
         }
-        // else if (value.is_iterable()) { // else if (value.is_sequential() || value.is_associative()) {
+        // else if (value.is_iterable()) {
         else if (boost::optional<range_type> const r = value.adapter()->get_range()) {
             return delimited(ostream, *r), ostream;
         }

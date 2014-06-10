@@ -557,8 +557,15 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             }
         }
         else if (is(literal, this->number_literal)) {
-            double const d = (std::atof)(text::narrow(string).c_str());
-            return value_type(number_type(d)).token(token);
+            if (string.find(char_type('.')) == string_type::npos) {
+                // TODO[c++11]: atoll (long long)
+                long const l = (std::atol)(text::narrow(string).c_str());
+                return value_type(integer_type(l)).token(token);
+            }
+            else {
+                double const d = (std::atof)(text::narrow(string).c_str());
+                return value_type(floating_type(d)).token(token);
+            }
         }
         else if (is(literal, this->string_literal)) {
             return value_type(extract_string(literal)).token(token);

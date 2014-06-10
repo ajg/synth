@@ -116,16 +116,6 @@ struct base_context /*: boost::noncopyable*/ {
 
   public: // TODO: private, friends-only.
 
-    /*
-    inline block_type get_super_block() const {
-        if (block_type const super = this->get_block(this->current_name())) {
-            DSHOW(super);
-            return super;
-        }
-        AJG_SYNTH_THROW(std::invalid_argument("no super block"));
-    }
-    */
-
     inline string_type current_name() const {
         // DSHOW(this->current_name_);
 

@@ -184,14 +184,14 @@ struct builtin_tags {
                           ) {
             string_type const& setting  = match(kernel.name)[id].str();
             match_type  const& block    = match(kernel.block);
-            boolean_type const previous = context.autoescape_;
+            boolean_type const previous = context.autoescape;
 
-                 if (setting == text::literal("on"))  context.autoescape_ = true;
-            else if (setting == text::literal("off")) context.autoescape_ = false;
+                 if (setting == text::literal("on"))  context.autoescape = true;
+            else if (setting == text::literal("off")) context.autoescape = false;
             else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
             kernel.render_block(ostream, options, state, block, context);
-            context.autoescape_ = previous;
+            context.autoescape = previous;
         }
     };
 
@@ -222,23 +222,20 @@ struct builtin_tags {
                 AJG_SYNTH_THROW(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
-            if (context.top_level()) { // The block is being rendered directly.
-                kernel.render_block(ostream, options, state, block, context);
-                return;
-            } // Else, the block is being derived from instead:
+            context.push_block(name, &block);
+            if (ostream.rdbuf() == 0) return; // Coming from an extends_tag; no need to render.
 
-            if (boost::optional<string_type> const& derived = context.get_block(name)) {
-                ostream << *derived; // The base template is being rendered with derived blocks.
+            string_type const previous_name = context.current_name(name);
+
+            if (void const* const b = context.pop_block(name)) {
+                match_type const& body = *reinterpret_cast<match_type const*>(b);
+                kernel.render_block(ostream, options, state, body, context);
+            }
+            else {
+                return kernel.render_block(ostream, options, state, block, context);
             }
 
-            string_stream_type ss;
-            { // TODO: Either make a context copy or make this strongly exception safe:
-                string_type const previous_block = context.base_block_;
-                context.base_block_ = name;
-                kernel.render_block(ss, options, state, block, context);
-                context.base_block_ = previous_block;
-            }
-            (*context.blocks_)[name] = ss.str();
+            context.current_name(previous_name);
         }
     };
 
@@ -411,34 +408,13 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
+            value_type  const  value = kernel.evaluate(options, state, match(kernel.value), context);
+            string_type const  path  = value.to_string(); // TODO: Handle values that are templates.
+            match_type  const& body  = match(kernel.block);
 
-            value_type  const value = kernel.evaluate(options, state, match(kernel.value), context);
-            string_type const path  = value.to_string(); // TODO: Handle values that are templates.
-            match_type  const& body = match(kernel.block);
-
-            ostream_type null_stream(0);
-            blocks_type blocks;
-            context.blocks_ = &blocks;
-
-            // First, render the base template as if it were stand-alone, so that block.super is
-            // available to the derived template; non-block content is discarded.
-            kernel.render_path(null_stream, options, state, path, context/*_copy*/);
-
-            // context_copy = context; // Discard non-block modifications.
-            // context_copy.blocks_ = &blocks;
-
-            // Second, render any blocks in the derived template, while making the base template's
-            // versions available to the derivee as block.super; non-block content is discarded.
-            kernel.render_block(null_stream, options, state, body, context/*_copy*/);
-
-            // context_copy = context; // Discard non-block modifications.
-            // context_copy.blocks_ = &blocks;
-
-            // Third, render the base template again with any (possibly) overridden blocks.
-            // TODO: Parse and generate the result once and reuse it or have render_path do caching.
-            kernel.render_path(ostream, options, state, path, context/*_copy*/);
-
-            context.blocks_ = 0;
+            ostream_type null_stream(0); // Note: blocks_tag uses the fact that rdbuf == 0 here.
+            kernel.render_block(null_stream, options, state, body, context);
+            kernel.render_path(ostream, options, state, path, context);
         }
     };
 
@@ -552,13 +528,13 @@ struct builtin_tags {
 
             for (; it != end; ++it) {
                 if (n == 1) { // e.g. for x in ...
-                    stage.set(variables[0], /* XXX: boost::ref */(*it));
+                    stage.set(variables[0], *it);
                 }
                 else {
                     size_type i = 0;
                     BOOST_FOREACH(value_type const& var, *it) { // e.g. for x, y, z in ...
                         if (i >= n) break;
-                        stage.set(variables[i++], /* XXX: boost::ref */(var));
+                        stage.set(variables[i++], var);
                     }
 
                     while (i < n) { // Overwrite the remaining vars in the context.
@@ -1273,7 +1249,8 @@ struct builtin_tags {
 
     struct variable_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return kernel.variable_open >> *_s >> kernel.value >> kernel.variable_close;
+            return kernel.variable_open >> *_s >> ((kernel.word("block.super") >> *_s) | kernel.value) >>
+                   kernel.variable_close;
         }
 
         static void render( kernel_type  const& kernel
@@ -1283,9 +1260,21 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            value_type const& value = kernel.evaluate(options, state, match(kernel.value), context);
-            boolean_type const safe = !context.autoescape_ || value.safe();
-            safe ? ostream << value : ostream << value.escape();
+            if (match_type const& v = match(kernel.value)) { // Regular value.
+                value_type const& value = kernel.evaluate(options, state, v, context);
+                boolean_type const safe = !context.autoescape || value.safe();
+                safe ? ostream << value : ostream << value.escape();
+            }
+            else { // Literal block.super.
+                if (void const* const block = context.pop_block(context.current_name())) {
+                    match_type const& body = *reinterpret_cast<match_type const*>(block);
+                    kernel.render_block(ostream, options, state, body, context);
+                    context.push_block(context.current_name(), block);
+                }
+                else {
+                    AJG_SYNTH_THROW(std::runtime_error("block.super at top level"));
+                }
+            }
         }
     };
 

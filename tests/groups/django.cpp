@@ -130,11 +130,14 @@ DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:'-'}}",  "<X>-<Y>-<
 
 DJANGO_TEST(inheritance, "{% include 'tests/templates/django/base.tpl' %}",
     "Base template\nBase header\nBase content\nBase footer\n")
-
 DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
     "Base template\nBase header\nBase content + 1, 2, 3, 4, 5, 6, 7, 8, 9\nBase footer\n")
 
-// TODO: Test multiple levels of inheritance.
+DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/A.tpl' %}", "'A'\n")
+DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/B.tpl' %}", "'AB'\n")
+DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/C.tpl' %}", "'ABC'\n")
+DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/D.tpl' %}", "'ABCD'\n")
+DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/X.tpl' %}", "'X'\n")
 
 ///
 /// Tag tests

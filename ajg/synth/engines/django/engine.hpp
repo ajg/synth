@@ -62,6 +62,8 @@ struct engine : base_engine<Traits> {
     typedef typename options_type::names_type                                   names_type;
     typedef typename options_type::arguments_type                               arguments_type;
 
+    typedef typename context_type::renderer_type                                renderer_type;
+
     typedef typename value_type::sequence_type                                  sequence_type;
 
   private:
@@ -167,9 +169,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = '"'  >> *~as_xpr('"')  >> '"'
             | '\'' >> *~as_xpr('\'') >> '\''
             ;
-        super_literal
-            = word("block.super")
-            ;
         variable_literal
             = restricted_identifier
             ;
@@ -178,7 +177,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             | boolean_literal
             | number_literal
             | string_literal
-            | super_literal
             | variable_literal
             ;
         attribute_link
@@ -530,6 +528,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         return arguments;
     }
 
+    // TODO: Allow traits_type or value_type to produce the actual values, so that e.g. the Python
+    //       binding can generate true Python bools, numbers, strings, etc. from literals.
     value_type evaluate_literal( options_type  const& options
                                , state_type    const& state
                                , match_type    const& match
@@ -569,9 +569,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         }
         else if (is(literal, this->string_literal)) {
             return value_type(extract_string(literal)).token(token);
-        }
-        else if (is(literal, this->super_literal)) {
-            return context.get_base_block();
         }
         else if (is(literal, this->variable_literal)) {
             if (boost::optional<value_type> const& variable = context.get(string)) {
@@ -790,7 +787,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     regex_type boolean_literal;
     regex_type number_literal;
     regex_type string_literal;
-    regex_type super_literal;
     regex_type variable_literal;
     regex_type literal;
     regex_type polyadic_tag; // monadic_tag, dyadic_tag; // library_tag;

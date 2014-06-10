@@ -29,6 +29,7 @@ struct base_options {
     typedef base_options                                                        options_type;
 
     typedef typename context_type::value_type                                   value_type;
+    typedef typename context_type::renderer_type                                renderer_type;
 
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
@@ -63,9 +64,6 @@ struct base_options {
     typedef boost::shared_ptr<abstract_library>                                 library_type;
     typedef boost::shared_ptr<abstract_loader>                                  loader_type;
     typedef boost::shared_ptr<abstract_resolver>                                resolver_type;
-
-    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, void const*);
-    typedef boost::function<renderer_fn_type>                                   renderer_type;
 
     typedef std::pair<std::vector<string_type>, renderer_type>                  segment_type;
     typedef std::vector<segment_type>                                           segments_type;

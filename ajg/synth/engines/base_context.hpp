@@ -6,8 +6,10 @@
 #define AJG_SYNTH_ENGINES_BASE_CONTEXT_HPP_INCLUDED
 
 #include <map>
+#include <deque>
 #include <utility>
 
+#include <boost/function.hpp>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -28,11 +30,12 @@ struct base_context /*: boost::noncopyable*/ {
 
     typedef Value                                                               key_type;
     typedef Value                                                               value_type;
-    typedef base_context                                                        base_context_type;
+    typedef base_context                                                        context_type;
 
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
     typedef typename value_type::association_type                               association_type;
+    typedef typename value_type::arguments_type                                 arguments_type;
     typedef typename value_type::attribute_type                                 attribute_type;
     typedef typename value_type::attributes_type                                attributes_type;
     typedef typename value_type::traits_type                                    traits_type;
@@ -53,10 +56,19 @@ struct base_context /*: boost::noncopyable*/ {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
+    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, void const*);
+    typedef boost::function<renderer_fn_type>                                   renderer_type;
+
   public: // TODO: private:
 
+    // FIXME: Treating blocks as opaque pointers only works if all the kernels involved are the same
+    //        and won't work when mixing iterators (e.g. a string template that inherits from a path
+    //        template.)
+
     typedef size_type                                                           marker_type; // FIXME: pair<filename, size_type>
-    typedef std::map<string_type, string_type>                                  blocks_type;
+    typedef void const*                                                         block_type;
+    typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
+ // typedef std::map<string_type, renderer_type>                                renderers_type;
     typedef std::map<marker_type, size_type>                                    cycles_type;
     typedef std::map<marker_type, value_type>                                   changes_type;
 
@@ -67,7 +79,7 @@ struct base_context /*: boost::noncopyable*/ {
   public:
 
     inline base_context(value_type const& value)
-        : case_sensitive(true), value_(value), autoescape_(true), blocks_(0) {}
+        : case_sensitive(true), autoescape(true), value_(value) {}
 
   public:
 
@@ -102,43 +114,66 @@ struct base_context /*: boost::noncopyable*/ {
         return original;
     }
 
-  public: // TODO: private:
+  public: // TODO: private, friends-only.
 
-    inline boolean_type top_level() const {
-        return this->blocks_ == 0;
+    /*
+    inline block_type get_super_block() const {
+        if (block_type const super = this->get_block(this->current_name())) {
+            DSHOW(super);
+            return super;
+        }
+        AJG_SYNTH_THROW(std::invalid_argument("no super block"));
+    }
+    */
+
+    inline string_type current_name() const {
+        // DSHOW(this->current_name_);
+
+        if (this->current_name_.empty()) {
+            AJG_SYNTH_THROW(std::invalid_argument("no current block"));
+        }
+        return this->current_name_;
     }
 
-    inline boost::optional<string_type> get_block(string_type const& name) const {
-        if (this->top_level()) {
-            AJG_SYNTH_THROW(std::invalid_argument("not in a derived template"));
-        }
-        return detail::find(name, *this->blocks_);
+    inline string_type current_name(string_type name) {
+        std::swap(name, this->current_name_);
+        return name;
     }
 
-    inline string_type get_base_block() const {
-        if (this->base_block_.empty()) {
-            AJG_SYNTH_THROW(std::invalid_argument("not in a derived block"));
+    inline block_type get_block(string_type const& name) const {
+        // DSHOW(name);
+        if (boost::optional<std::deque<block_type> > const s = detail::find(name, this->blocks_)) {
+            return s->empty() ? 0 : s->front();
         }
-        else if (boost::optional<string_type> const& block = this->get_block(this->base_block_)) {
-            return *block;
+        return 0;
+    }
+
+    inline block_type pop_block(string_type const& name) {
+        if (block_type const b = this->get_block(name)) {
+            this->blocks_[name].pop_front();
+            return b;
         }
-        else {
-            AJG_SYNTH_THROW(std::logic_error("invalid block"));
-        }
+        return 0;
+    }
+
+    inline void push_block(string_type const& name, block_type block) {
+        this->blocks_[name].push_back(block);
     }
 
   public:
 
     boolean_type  case_sensitive;
+    boolean_type  autoescape;
 
   public: // private:
 
     value_type    value_;
-    boolean_type  autoescape_;
-    blocks_type*  blocks_;
     cycles_type   cycles_;
     changes_type  changes_;
-    string_type   base_block_;
+
+    string_type   current_name_;
+    blocks_type   blocks_;
+ // renderers_type renderers_;
 };
 
 template <class Context>

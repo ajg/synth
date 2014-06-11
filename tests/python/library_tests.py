@@ -73,8 +73,7 @@ def library_loader(name):
             'encode':         dyadic_tag(encode, 'encode', 'endencode'),
             'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
             'unless':         triadic_tag(unless, 'unless', 'otherwise', 'endunless'),
-            'f1':             variadic_tag(fml, 'f1', ('m1', 'm2'), ('l1', 'l2', 'l3',)),
-            # TODO: 'fml':    ...
+            'f':              variadic_tag(fml, 'f', ('m1', 'm2'), ('l1', 'l2', 'l3',)),
         })
 
     elif name == 'test_filters':
@@ -152,7 +151,7 @@ source = """\
 {% load set unset from test_tags %}
 {% load encode decode from test_tags %}
 {% load unless from test_tags %}
-{% load f1 from test_tags %}
+{% load f from test_tags %}
 ({% answer_to_life %})
 ({% identity 'wow' %})
 ({% ackermann 3 4 %})
@@ -172,28 +171,28 @@ source = """\
 ({% if False %}{% encode 'rot13' %}Hello Kitty{% endencode %}{% endif %})
 ({% unless True%}A{% otherwise %}B{% endunless %})
 ({% unless False%}A{% otherwise %}B{% endunless %})
-({% f1 %}1{% l1 %})
-({% f1 %}1{% l2 %})
-({% f1 %}1{% l3 %})
-({% f1 %}2{% m1 %}2{% l1 %})
-({% f1 %}2{% m1 %}2{% l2 %})
-({% f1 %}2{% m1 %}2{% l3 %})
-({% f1 %}2{% m2 %}2{% l1 %})
-({% f1 %}2{% m2 %}2{% l2 %})
-({% f1 %}2{% m2 %}2{% l3 %})
-({% f1 %}3{% m1 %}3{% m1 %}3{% l1 %})
-({% f1 %}3{% m1 %}3{% m1 %}3{% l2 %})
-({% f1 %}3{% m1 %}3{% m1 %}3{% l3 %})
-({% f1 %}3{% m1 %}3{% m2 %}3{% l1 %})
-({% f1 %}3{% m1 %}3{% m2 %}3{% l2 %})
-({% f1 %}3{% m1 %}3{% m2 %}3{% l3 %})
-({% f1 %}3{% m2 %}3{% m1 %}3{% l1 %})
-({% f1 %}3{% m2 %}3{% m1 %}3{% l2 %})
-({% f1 %}3{% m2 %}3{% m1 %}3{% l3 %})
-({% f1 %}3{% m2 %}3{% m2 %}3{% l1 %})
-({% f1 %}3{% m2 %}3{% m2 %}3{% l2 %})
-({% f1 %}3{% m2 %}3{% m2 %}3{% l3 %})
-({% f1 %}4{% m1 %}4{% m1 %}4{% m1 %}4{% l1 %})
+({% f %}1{% l1 %})
+({% f %}1{% l2 %})
+({% f %}1{% l3 %})
+({% f %}2{% m1 %}2{% l1 %})
+({% f %}2{% m1 %}2{% l2 %})
+({% f %}2{% m1 %}2{% l3 %})
+({% f %}2{% m2 %}2{% l1 %})
+({% f %}2{% m2 %}2{% l2 %})
+({% f %}2{% m2 %}2{% l3 %})
+({% f %}3{% m1 %}3{% m1 %}3{% l1 %})
+({% f %}3{% m1 %}3{% m1 %}3{% l2 %})
+({% f %}3{% m1 %}3{% m1 %}3{% l3 %})
+({% f %}3{% m1 %}3{% m2 %}3{% l1 %})
+({% f %}3{% m1 %}3{% m2 %}3{% l2 %})
+({% f %}3{% m1 %}3{% m2 %}3{% l3 %})
+({% f %}3{% m2 %}3{% m1 %}3{% l1 %})
+({% f %}3{% m2 %}3{% m1 %}3{% l2 %})
+({% f %}3{% m2 %}3{% m1 %}3{% l3 %})
+({% f %}3{% m2 %}3{% m2 %}3{% l1 %})
+({% f %}3{% m2 %}3{% m2 %}3{% l2 %})
+({% f %}3{% m2 %}3{% m2 %}3{% l3 %})
+({% f %}4{% m1 %}4{% m1 %}4{% m1 %}4{% l1 %})
 """
 golden = """\
 

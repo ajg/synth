@@ -27,9 +27,9 @@ namespace bindings {
 // TODO[c++11]: Make variadic.
 template < class Traits
          , template <class E> class Template
-         , template <class T> class Django = engines::null::engine
-         , template <class T> class SSI    = engines::null::engine
-         , template <class T> class TMPL   = engines::null::engine
+         , template <class T> class Engine0 = engines::null::engine
+         , template <class T> class Engine1 = engines::null::engine
+         , template <class T> class Engine2 = engines::null::engine
          >
 struct base_binding : boost::noncopyable {
   public:
@@ -38,13 +38,18 @@ struct base_binding : boost::noncopyable {
     typedef Traits                                                              traits_type;
 
     typedef engines::base_engine<traits_type>                                   base_engine_type;
-    typedef Django<traits_type>                                                 django_engine_type;
-    typedef SSI<traits_type>                                                    ssi_engine_type;
-    typedef TMPL<traits_type>                                                   tmpl_engine_type;
+    typedef Engine0<traits_type>                                                engine0_type;
+    typedef Engine1<traits_type>                                                engine1_type;
+    typedef Engine2<traits_type>                                                engine2_type;
 
-    typedef Template<django_engine_type>                                        django_template_type;
-    typedef Template<ssi_engine_type>                                           ssi_template_type;
-    typedef Template<tmpl_engine_type>                                          tmpl_template_type;
+    typedef boost::mpl::c_str<typename engine0_type::name>                      name0;
+    typedef boost::mpl::c_str<typename engine1_type::name>                      name1;
+    typedef boost::mpl::c_str<typename engine2_type::name>                      name2;
+
+    // TODO: Consider using a variant instead.
+    typedef boost::optional<Template<engine0_type> >                            template0_type;
+    typedef boost::optional<Template<engine1_type> >                            template1_type;
+    typedef boost::optional<Template<engine2_type> >                            template2_type;
 
     typedef typename base_engine_type::context_type                             context_type;
     typedef typename base_engine_type::options_type                             options_type;
@@ -64,50 +69,40 @@ struct base_binding : boost::noncopyable {
     template <class Source>
     base_binding(Source const& source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
-
-        if (name == boost::mpl::c_str<typename django_engine_type::name>::value) {
-            this->django_template_ = boost::in_place(source, options);
-        }
-        else if (name == boost::mpl::c_str<typename ssi_engine_type::name>::value) {
-            this->ssi_template_ = boost::in_place(source, options);
-        }
-        else if (name == boost::mpl::c_str<typename tmpl_engine_type::name>::value) {
-            this->tmpl_template_ = boost::in_place(source, options);
-        }
-        else {
-            AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
-        }
+             if (name == name0::value) this->template0_ = boost::in_place(source, options);
+        else if (name == name1::value) this->template1_ = boost::in_place(source, options);
+        else if (name == name2::value) this->template2_ = boost::in_place(source, options);
+        else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
   protected:
 
     void render_to_stream(ostream_type& ostream, context_type& context) const {
-             if (django_template_) return django_template_->render_to_stream(ostream, context);
-        else if (ssi_template_)    return ssi_template_->render_to_stream(ostream, context);
-        else if (tmpl_template_)   return tmpl_template_->render_to_stream(ostream, context);
+             if (template0_) return template0_->render_to_stream(ostream, context);
+        else if (template1_) return template1_->render_to_stream(ostream, context);
+        else if (template2_) return template2_->render_to_stream(ostream, context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     string_type render_to_string(context_type& context) const {
-             if (django_template_) return django_template_->render_to_string(context);
-        else if (ssi_template_)    return ssi_template_->render_to_string(context);
-        else if (tmpl_template_)   return tmpl_template_->render_to_string(context);
+             if (template0_) return template0_->render_to_string(context);
+        else if (template1_) return template1_->render_to_string(context);
+        else if (template2_) return template2_->render_to_string(context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
     void render_to_path(string_type const& path, context_type& context) const {
-             if (django_template_) return django_template_->render_to_path(path, context);
-        else if (ssi_template_)    return ssi_template_->render_to_path(path, context);
-        else if (tmpl_template_)   return tmpl_template_->render_to_path(path, context);
+             if (template0_) return template0_->render_to_path(path, context);
+        else if (template1_) return template1_->render_to_path(path, context);
+        else if (template2_) return template2_->render_to_path(path, context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
   private:
 
-    // TODO: Consider using a variant instead.
-    boost::optional<django_template_type> django_template_;
-    boost::optional<ssi_template_type>    ssi_template_;
-    boost::optional<tmpl_template_type>   tmpl_template_;
+    template0_type template0_;
+    template1_type template1_;
+    template2_type template2_;
 };
 
 }}} // namespace ajg::synth::bindings

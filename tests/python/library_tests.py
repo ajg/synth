@@ -20,32 +20,33 @@ def render_block(segments, context, match, index=0):
     return renderer(context, match)
 
 def dummy_tag():
-    return ((lambda segments: ''), (), ())
+    return ((lambda segments: ''), None, None)
 
-def simple_tag(fn):
-    return (lambda segments:
-                (lambda context, match, *args, **kwargs:
-                    str(fn(*args, **kwargs))), (), ())
+def monadic_tag(fn, plain=False):
+    return variadic_tag(fn, None, None, None, plain=plain)
 
-def context_tag(fn):
-    return (lambda segments:
-                (lambda context, match, *args, **kwargs:
-                    str(fn(context, segments[0][0], *args, **kwargs))), (), ())
+def dyadic_tag(fn, first, last, plain=False):
+    return variadic_tag(fn, first, None, (last,), plain=plain)
 
-def block_tag(name, fn):
-    return (lambda segments:
-                (lambda context, match, *args, **kwargs:
-                    str(fn(context, render_block(segments, context, match), *args, **kwargs))), (), ('end' + name,))
+def triadic_tag(fn, first, middle, last, plain=False):
+    return variadic_tag(fn, first, (middle,), (last,), plain=plain)
 
-def variadic_tag(name, fn, expected):
-    return (lambda segments:
-                (lambda context, match, *args, **kwargs:
-                    str(fn(context, match, segments, *args, **kwargs))), expected, ('end' + name,))
+def variadic_tag(fn, first, middles, lasts, plain=False):
+    if plain:
+        return (lambda segments:
+                    (lambda context, match, *args, **kwargs:
+                        str(fn(*args, **kwargs))), middles, lasts)
+    else:
+        return (lambda segments:
+                    (lambda context, match, *args, **kwargs:
+                        str(fn(context, match, segments, *args, **kwargs))), middles, lasts)
+
+
 
 def dummy_filter():
     return None
 
-def simple_filter(fn):
+def value_filter(fn):
     return fn
 
 
@@ -62,21 +63,21 @@ def library_loader(name):
     elif name == 'test_tags':
         return Library(tags={
             # Monadic ('simple') tags:
-            'answer_to_life': simple_tag(answer_to_life), # nullary
-            'identity':       simple_tag(identity),       # unary
-            'ackermann':      simple_tag(ackermann),      # binary
-            'add':            simple_tag(add),            # n-ary
-            # Polyadic tags:
-            'encode':         block_tag('encode', encode),                    # dyadic
-            'decode':         block_tag('decode', decode),                    # dyadic
-            'unless':         variadic_tag('unless', unless, ('otherwise',)), # variadic (dyadic or triadic)
-            # More esoteric tags:
-            'set':            context_tag(set),
-            'unset':          context_tag(unset),
+            'answer_to_life': monadic_tag(answer_to_life, plain=True), # Nullary
+            'identity':       monadic_tag(identity,       plain=True), # Unary
+            'ackermann':      monadic_tag(ackermann,      plain=True), # Binary
+            'add':            monadic_tag(add,            plain=True), # N-ary
+            'set':            monadic_tag(set_variable),
+            'unset':          monadic_tag(unset_variable),
+            # Polyadic ('block') tags:
+            'encode':         dyadic_tag(encode, 'encode', 'endencode'),
+            'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
+            'unless':         triadic_tag(unless, 'unless', 'otherwise', 'endunless'),
+            ### 'TODO': variadic_tag(foobarqux, 'foo', ('bar',), ('qux',)),
         })
 
     elif name == 'test_filters':
-        return Library(filters={'flip': simple_filter(flip)})
+        return Library(filters={'flip': value_filter(flip)})
 
     else:
         raise Exception('Library not found')
@@ -101,28 +102,32 @@ def ackermann(m, n):
 def add(*args):
     return sum(args)
 
-def encode(context, rendered_block, arg):
-    # print '### encode(', repr(rendered_block), repr(arg), ')'
-    return rendered_block.encode(arg)
+def encode(context, match, segments, arg):
+    # print '### encode(', arg, ')'
+    s = render_block(segments, context, match)
+    return s.encode(arg)
 
-def decode(context, rendered_block, arg):
-    # print '### decode(', repr(rendered_block), repr(arg), ')'
-    return rendered_block.decode(arg)
+def decode(context, match, segments, arg):
+    # print '### decode(', arg, ')'
+    s = render_block(segments, context, match)
+    return s.decode(arg)
 
 def unless(context, match, segments, arg):
     # print '### unless(', match, repr(segments), repr(arg), ')'
     pieces, renderer = segments[1 if arg else 0]
     return renderer(context, match)
 
-def set(context, pieces, *args, **kwargs):
-    # print '### set(', pieces, args, kwargs, context, ')'
+def set_variable(context, match, segments, *args, **kwargs):
+    # print '### set(', args, kwargs, ')'
+    pieces = segments[0][0]
     name  = pieces[2]
     value = pieces[3]
     context[name] = value
     return ''
 
-def unset(context, pieces, *args, **kwargs):
-    # print '### unset(', pieces, args, kwargs, context, ')'
+def unset_variable(context, match, segments, *args, **kwargs):
+    # print '### unset(', args, kwargs, ')'
+    pieces = segments[0][0]
     name = pieces[2]
     del context[name]
     return ''

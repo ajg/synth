@@ -18,6 +18,7 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/mpl/string.hpp>
 
 #include <boost/iterator/filter_iterator.hpp>
 

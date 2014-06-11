@@ -25,7 +25,7 @@ namespace engines {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct base_context /*: boost::noncopyable*/ {
+struct base_context : boost::noncopyable {
   public:
 
     typedef Value                                                               key_type;
@@ -56,16 +56,14 @@ struct base_context /*: boost::noncopyable*/ {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-  public: // TODO: private:
-
     typedef void const*                                                         location_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
-    typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
-    typedef std::map<location_type, size_type>                                  cycles_type;
-    typedef std::map<location_type, value_type>                                 changes_type;
 
   private:
 
+    typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
+    typedef std::map<location_type, size_type>                                  cycles_type;
+    typedef std::map<location_type, value_type>                                 changes_type;
     typedef detail::text<string_type>                                           text;
 
   public:

@@ -20,6 +20,7 @@ struct engine : base_engine<Traits> {
 
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
+    typedef boost::mpl::string<'n', 'u', 'l', 'l'>                              name;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;

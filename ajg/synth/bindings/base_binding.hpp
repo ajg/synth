@@ -52,19 +52,6 @@ struct base_binding : boost::noncopyable {
     typedef typename base_engine_type::context_type                             context_type;
     typedef typename base_engine_type::options_type                             options_type;
 
-/*
-    typedef django_options_type                                                 options_type;
-    typedef typename django_options_type::arguments_type                        arguments_type;
-    typedef typename django_options_type::formats_type                          formats_type;
- // typedef typename django_options_type::markers_type                          markers_type;
-    typedef typename django_options_type::library_type                          library_type;
-    typedef typename django_options_type::libraries_type                        libraries_type;
-    typedef typename django_options_type::loader_type                           loader_type;
-    typedef typename django_options_type::loaders_type                          loaders_type;
-    typedef typename django_options_type::resolver_type                         resolver_type;
-    typedef typename django_options_type::resolvers_type                        resolvers_type;
-*/
-
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::string_type                                   string_type;
@@ -79,17 +66,19 @@ struct base_binding : boost::noncopyable {
 
     template <class Source>
     base_binding(Source const& source, string_type const& engine, options_type const& options) {
-        if (engine == text::literal("django")) {
-            this->django_template_ = boost::in_place/*<django_template_type>*/(source, options);
+        std::string const name = text::narrow(engine);
+
+        if (name == boost::mpl::c_str<typename django_engine_type::name>::value) {
+            this->django_template_ = boost::in_place(source, options);
         }
-        else if (engine == text::literal("ssi")) {
-            this->ssi_template_ = boost::in_place/*<ssi_template_type>*/(source, options);
+        else if (name == boost::mpl::c_str<typename ssi_engine_type::name>::value) {
+            this->ssi_template_ = boost::in_place(source, options);
         }
-        else if (engine == text::literal("tmpl")) {
-            this->tmpl_template_ = boost::in_place/*<tmpl_template_type>*/(source, options);
+        else if (name == boost::mpl::c_str<typename tmpl_engine_type::name>::value) {
+            this->tmpl_template_ = boost::in_place(source, options);
         }
         else {
-            AJG_SYNTH_THROW(std::invalid_argument("engine"));
+            AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
         }
     }
 

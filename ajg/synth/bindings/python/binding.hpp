@@ -14,6 +14,7 @@
 #include <boost/optional.hpp>
 #include <boost/utility/base_from_member.hpp>
 
+#include <ajg/synth/engines.hpp>
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/bindings/base_binding.hpp>
 #include <ajg/synth/bindings/python/adapter.hpp>
@@ -36,7 +37,12 @@ inline char const* version() {
 
 template <class Traits>
 struct binding : private boost::base_from_member<PyObject*>
-               , bindings::base_binding<Traits, templates::char_template> {
+               , bindings::base_binding< Traits
+                                       , templates::char_template
+                                       , engines::django::engine
+                                       , engines::ssi::engine
+                                       , engines::tmpl::engine
+                                       > {
   public:
 
     typedef binding                                                             binding_type;

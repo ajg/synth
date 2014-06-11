@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <ajg/synth/engines.hpp>
 #include <ajg/synth/bindings/base_binding.hpp>
 #include <ajg/synth/templates/stream_template.hpp>
 
@@ -19,7 +20,12 @@ namespace command_line {
 namespace pt = boost::property_tree;
 
 template <class Traits>
-struct binding : bindings::base_binding<Traits, templates::stream_template> {
+struct binding : bindings::base_binding< Traits
+                                       , templates::stream_template
+                                       , engines::django::engine
+                                       , engines::ssi::engine
+                                       , engines::tmpl::engine
+                                       > {
   public:
 
     typedef binding                                                             binding_type;

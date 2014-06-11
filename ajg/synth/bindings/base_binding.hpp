@@ -15,7 +15,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
-#include <ajg/synth/engines.hpp>
+#include <ajg/synth/engines/null/engine.hpp>
 #include <ajg/synth/adapters.hpp>
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
@@ -24,15 +24,12 @@ namespace ajg {
 namespace synth {
 namespace bindings {
 
-namespace django = ::ajg::synth::engines::django;
-namespace ssi    = ::ajg::synth::engines::ssi;
-namespace tmpl   = ::ajg::synth::engines::tmpl;
-
+// TODO[c++11]: Make variadic.
 template < class Traits
          , template <class E> class Template
-         , template <class T> class Django = django::engine
-         , template <class T> class SSI    = ssi::engine
-         , template <class T> class TMPL   = tmpl::engine
+         , template <class T> class Django = engines::null::engine
+         , template <class T> class SSI    = engines::null::engine
+         , template <class T> class TMPL   = engines::null::engine
          >
 struct base_binding : boost::noncopyable {
   public:

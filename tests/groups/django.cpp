@@ -139,6 +139,10 @@ DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/C.tpl' %}", 
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/D.tpl' %}", "'ABCD'\n")
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/X.tpl' %}", "'X'\n")
 
+DJANGO_TEST(nested inheritance with crossing iterators,
+    "{% extends 'tests/templates/django/A.tpl' %}\n"
+    "{% block x %}Y{% endblock x %}", "'Y'\n")
+
 ///
 /// Tag tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////

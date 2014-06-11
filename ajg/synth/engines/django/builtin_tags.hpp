@@ -91,7 +91,9 @@ struct builtin_tags {
     typedef std::map<id_type, tag_type>                                         tags_type;
     typedef std::basic_ostringstream<char_type>                                 string_stream_type;
     typedef formatter<options_type>                                             formatter_type;
-    typedef typename context_type::blocks_type                                  blocks_type;
+
+    typedef typename context_type::block_type                                   block_type;
+
     typedef typename options_type::renderer_type                                renderer_type;
     typedef typename options_type::renderers_type                               renderers_type;
     typedef typename options_type::entry_type                                   entry_type;
@@ -99,6 +101,7 @@ struct builtin_tags {
     typedef typename options_type::segment_type                                 segment_type;
     typedef typename options_type::segments_type                                segments_type;
     typedef typename options_type::arguments_type                               arguments_type;
+
     typedef typename arguments_type::second_type::value_type                    named_argument_type;
 
   public:
@@ -222,14 +225,14 @@ struct builtin_tags {
                 AJG_SYNTH_THROW(std::invalid_argument("mismatched endblock tag for " + original));
             }
 
-            context.push_block(name, &block);
+            context.push_block(name, boost::bind(&kernel_type::render_block, &kernel,
+                _1, boost::ref(options), boost::ref(state), boost::ref(block), _2));
             if (ostream.rdbuf() == 0) return; // Coming from an extends_tag; no need to render.
 
             string_type const previous_name = context.current_name(name);
 
-            if (void const* const b = context.pop_block(name)) {
-                match_type const& body = *reinterpret_cast<match_type const*>(b);
-                kernel.render_block(ostream, options, state, body, context);
+            if (block_type const& b = context.pop_block(name)) {
+                b(ostream, context);
             }
             else {
                 return kernel.render_block(ostream, options, state, block, context);
@@ -1266,10 +1269,9 @@ struct builtin_tags {
                 safe ? ostream << value : ostream << value.escape();
             }
             else { // Literal block.super.
-                if (void const* const block = context.pop_block(context.current_name())) {
-                    match_type const& body = *reinterpret_cast<match_type const*>(block);
-                    kernel.render_block(ostream, options, state, body, context);
-                    context.push_block(context.current_name(), block);
+                if (block_type const& b = context.pop_block(context.current_name())) {
+                    b(ostream, context);
+                    context.push_block(context.current_name(), b);
                 }
                 else {
                     AJG_SYNTH_THROW(std::runtime_error("block.super at top level"));

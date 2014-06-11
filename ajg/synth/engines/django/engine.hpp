@@ -61,8 +61,7 @@ struct engine : base_engine<Traits> {
     typedef typename options_type::context_type                                 context_type;
     typedef typename options_type::names_type                                   names_type;
     typedef typename options_type::arguments_type                               arguments_type;
-
-    typedef typename context_type::renderer_type                                renderer_type;
+    typedef typename options_type::renderer_type                                renderer_type;
 
     typedef typename value_type::sequence_type                                  sequence_type;
 

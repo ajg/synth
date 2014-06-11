@@ -56,21 +56,14 @@ struct base_context /*: boost::noncopyable*/ {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef void (renderer_fn_type)(arguments_type const&, ostream_type&, context_type&, void const*);
-    typedef boost::function<renderer_fn_type>                                   renderer_type;
-
   public: // TODO: private:
 
-    // FIXME: Treating blocks as opaque pointers only works if all the kernels involved are the same
-    //        and won't work when mixing iterators (e.g. a string template that inherits from a path
-    //        template.)
-
-    typedef size_type                                                           marker_type; // FIXME: pair<filename, size_type>
-    typedef void const*                                                         block_type;
+    // FIXME: location should be either e.g. pair<filename, size_type> or a void*.
+    typedef size_type                                                           location_type;
+    typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
     typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
- // typedef std::map<string_type, renderer_type>                                renderers_type;
-    typedef std::map<marker_type, size_type>                                    cycles_type;
-    typedef std::map<marker_type, value_type>                                   changes_type;
+    typedef std::map<location_type, size_type>                                  cycles_type;
+    typedef std::map<location_type, value_type>                                 changes_type;
 
   private:
 
@@ -114,11 +107,9 @@ struct base_context /*: boost::noncopyable*/ {
         return original;
     }
 
-  public: // TODO: private, friends-only.
+  public:
 
     inline string_type current_name() const {
-        // DSHOW(this->current_name_);
-
         if (this->current_name_.empty()) {
             AJG_SYNTH_THROW(std::invalid_argument("no current block"));
         }
@@ -131,11 +122,8 @@ struct base_context /*: boost::noncopyable*/ {
     }
 
     inline block_type get_block(string_type const& name) const {
-        // DSHOW(name);
-        if (boost::optional<std::deque<block_type> > const s = detail::find(name, this->blocks_)) {
-            return s->empty() ? 0 : s->front();
-        }
-        return 0;
+        typename blocks_type::const_iterator const it = this->blocks_.find(name);
+        return (it == this->blocks_.end() || it->second.empty()) ? block_type() : it->second.front();
     }
 
     inline block_type pop_block(string_type const& name) {
@@ -143,10 +131,10 @@ struct base_context /*: boost::noncopyable*/ {
             this->blocks_[name].pop_front();
             return b;
         }
-        return 0;
+        return block_type();
     }
 
-    inline void push_block(string_type const& name, block_type block) {
+    inline void push_block(string_type const& name, block_type const& block) {
         this->blocks_[name].push_back(block);
     }
 
@@ -155,15 +143,16 @@ struct base_context /*: boost::noncopyable*/ {
     boolean_type  case_sensitive;
     boolean_type  autoescape;
 
-  public: // private:
+  public: // TODO: private, and add cycle() and change() methods.
 
-    value_type    value_;
     cycles_type   cycles_;
     changes_type  changes_;
 
+  private:
+
+    value_type    value_;
     string_type   current_name_;
     blocks_type   blocks_;
- // renderers_type renderers_;
 };
 
 template <class Context>

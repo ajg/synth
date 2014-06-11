@@ -46,12 +46,6 @@ struct base_binding : boost::noncopyable {
     typedef Engine3<traits_type>                                                engine3_type;
     typedef Engine4<traits_type>                                                engine4_type;
 
-    typedef boost::mpl::c_str<typename engine0_type::name>                      name0;
-    typedef boost::mpl::c_str<typename engine1_type::name>                      name1;
-    typedef boost::mpl::c_str<typename engine2_type::name>                      name2;
-    typedef boost::mpl::c_str<typename engine3_type::name>                      name3;
-    typedef boost::mpl::c_str<typename engine4_type::name>                      name4;
-
     // Note: A boost::variant won't work here because it doesn't seem to support in-place construction.
     typedef boost::optional<Template<engine0_type> >                            template0_type;
     typedef boost::optional<Template<engine1_type> >                            template1_type;
@@ -77,11 +71,11 @@ struct base_binding : boost::noncopyable {
     template <class Source>
     base_binding(Source const& source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
-             if (name == name0::value) this->template0_ = boost::in_place(source, options);
-        else if (name == name1::value) this->template1_ = boost::in_place(source, options);
-        else if (name == name2::value) this->template2_ = boost::in_place(source, options);
-        else if (name == name3::value) this->template3_ = boost::in_place(source, options);
-        else if (name == name4::value) this->template4_ = boost::in_place(source, options);
+             if (name == engine0_type::name()) this->template0_ = boost::in_place(source, options);
+        else if (name == engine1_type::name()) this->template1_ = boost::in_place(source, options);
+        else if (name == engine2_type::name()) this->template2_ = boost::in_place(source, options);
+        else if (name == engine3_type::name()) this->template3_ = boost::in_place(source, options);
+        else if (name == engine4_type::name()) this->template4_ = boost::in_place(source, options);
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 

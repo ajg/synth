@@ -38,7 +38,6 @@ struct engine : base_engine<Traits> {
 
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
-    typedef boost::mpl::string<'s', 's', 'i'>                                   name;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
@@ -60,14 +59,18 @@ struct engine : base_engine<Traits> {
     BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = false);
     BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = 9);
 
-  private:
-
-    template <class K> friend struct ssi::builtin_tags;
-
   public:
 
     template <class Iterator>
     struct kernel;
+
+  public:
+
+    inline static char const* name() { return "ssi"; }
+
+  private:
+
+    template <class K> friend struct ssi::builtin_tags;
 
 }; // engine
 

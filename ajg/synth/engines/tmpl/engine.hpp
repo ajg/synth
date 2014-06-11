@@ -34,7 +34,6 @@ struct engine : base_engine<Traits> {
 
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
-    typedef boost::mpl::string<'t', 'm', 'p', 'l'>                              name;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
@@ -64,6 +63,10 @@ struct engine : base_engine<Traits> {
 
     template <class Iterator>
     struct kernel;
+
+  public:
+
+    inline static char const* name() { return "tmpl"; }
 
 }; // engine
 

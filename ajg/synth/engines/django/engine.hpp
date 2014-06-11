@@ -39,7 +39,6 @@ struct engine : base_engine<Traits> {
 
     typedef engine                                                              engine_type;
     typedef Traits                                                              traits_type;
-    typedef boost::mpl::string<'d', 'j', 'a', 'n', 'g', 'o'>                    name;
 
     typedef typename traits_type::none_type                                     none_type;
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -66,15 +65,19 @@ struct engine : base_engine<Traits> {
 
     typedef typename value_type::sequence_type                                  sequence_type;
 
-  private:
-
-    template <class K> friend struct django::builtin_tags;
-    template <class K> friend struct django::builtin_filters;
-
   public:
 
     template <class Iterator>
     struct kernel;
+
+  public:
+
+    inline static char const* name() { return "django"; }
+
+  private:
+
+    template <class K> friend struct django::builtin_tags;
+    template <class K> friend struct django::builtin_filters;
 
 }; // engine
 

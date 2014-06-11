@@ -317,11 +317,10 @@ struct builtin_tags {
             match_type  const& as       = match(kernel.name);
             size_type   const  position = match.position();
             size_type   const  total    = vals.nested_results().size();
-            size_type   const  current  = detail::find(position, context.cycles_).get_value_or(0);
+            size_type   const  current  = context.cycle(position, total);
 
-            match_type const& val   = *detail::advance_to(vals.nested_results().begin(), current);
-            value_type const  value = kernel.evaluate(options, state, val, context);
-            context.cycles_[position] = (current + 1) % total;
+            match_type const& v     = *detail::advance_to(vals.nested_results().begin(), current);
+            value_type const  value = kernel.evaluate(options, state, v, context);
 
             if (!as) { // e.g. cycle foo
                 ostream << value;

@@ -58,12 +58,12 @@ struct base_context /*: boost::noncopyable*/ {
 
   public: // TODO: private:
 
-    // FIXME: location should be either e.g. pair<filename, size_type> or a void*.
-    typedef size_type                                                           location_type;
+    // FIXME: position should be either e.g. pair<filename, size_type> or a void*.
+    typedef size_type                                                           position_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
     typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
-    typedef std::map<location_type, size_type>                                  cycles_type;
-    typedef std::map<location_type, value_type>                                 changes_type;
+    typedef std::map<position_type, size_type>                                  cycles_type;
+    typedef std::map<position_type, value_type>                                 changes_type;
 
   private:
 
@@ -86,32 +86,13 @@ struct base_context /*: boost::noncopyable*/ {
 
     inline attributes_type keys() const { return this->value_.attributes(); }
 
-  // protected:
-
     inline value_type const& value() const { return this->value_; }
-
-  private:
-
-    inline key_type cased(key_type const& original) const {
-        if (this->case_sensitive) {
-            return original;
-        }
-        string_type const lowercased = text::lower(original.to_string());
-
-        BOOST_FOREACH(key_type const& key, this->keys()) {
-            if (text::lower(key.to_string()) == lowercased) {
-                return key;
-            }
-        }
-
-        return original;
-    }
 
   public:
 
     inline string_type current_name() const {
         if (this->current_name_.empty()) {
-            AJG_SYNTH_THROW(std::invalid_argument("no current block"));
+            AJG_SYNTH_THROW(std::invalid_argument("not in a block"));
         }
         return this->current_name_;
     }
@@ -138,14 +119,36 @@ struct base_context /*: boost::noncopyable*/ {
         this->blocks_[name].push_back(block);
     }
 
+    inline size_type cycle(position_type const position, size_type const total) {
+        size_type const current = detail::find(position, this->cycles_).get_value_or(0);
+        this->cycles_[position] = (current + 1) % total;
+        return current;
+    }
+
+  private:
+
+    inline key_type cased(key_type const& original) const {
+        if (this->case_sensitive) {
+            return original;
+        }
+        string_type const lowercased = text::lower(original.to_string());
+
+        BOOST_FOREACH(key_type const& key, this->keys()) {
+            if (text::lower(key.to_string()) == lowercased) {
+                return key;
+            }
+        }
+
+        return original;
+    }
+
   public:
 
     boolean_type  case_sensitive;
     boolean_type  autoescape;
 
-  public: // TODO: private, and add cycle() and change() methods.
+  public: // TODO: private, and add change() methods.
 
-    cycles_type   cycles_;
     changes_type  changes_;
 
   private:
@@ -153,6 +156,7 @@ struct base_context /*: boost::noncopyable*/ {
     value_type    value_;
     string_type   current_name_;
     blocks_type   blocks_;
+    cycles_type   cycles_;
 };
 
 template <class Context>

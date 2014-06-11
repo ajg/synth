@@ -129,7 +129,7 @@ struct base_state {
                 filter_type const& filter = library->get_filter(name);
 
                 if (!tag && !filter) {
-                    AJG_SYNTH_THROW(missing_key(text::narrow(name)));
+                    AJG_SYNTH_THROW(missing_tag_or_filter(text::narrow(name)));
                 }
                 if (tag) {
                     this->loaded_tags_[name] = tag;

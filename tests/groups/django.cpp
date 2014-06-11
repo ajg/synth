@@ -148,8 +148,9 @@ DJANGO_TEST(nested inheritance with crossing iterators,
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unit_test(missing tag) {
-    ensure_throws(s::parsing_error, string_template_type("{% xyz 42 %}", options));
-    // ensure_throws(s::missing_tag, string_template_type("{% xyz 42 %}"));
+    // ensure_throws(s::parsing_error, string_template_type("{% xyz 42 %}", options));
+    // XXX: The following might not work in the general case (e.g. with interplay between complex polyadic tags):
+    ensure_throws(s::missing_tag, string_template_type("{% xyz 42 %}"));
 }}}
 
 DJANGO_TEST(block_tag, "foo|{% block a_block %}This is a block{% endblock %}|bar",         "foo|This is a block|bar")

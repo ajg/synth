@@ -902,8 +902,7 @@ struct builtin_tags {
                     return true;
                 }
                 else {
-                    return false;
-                    // AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
+                    AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
                 }
             };
         };

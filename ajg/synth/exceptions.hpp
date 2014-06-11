@@ -120,14 +120,14 @@ struct missing_library : public exception, public std::invalid_argument {
 };
 
 //
-// missing_key
+// missing_tag_or_filter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct missing_key : public exception, public std::invalid_argument {
+struct missing_tag_or_filter : public exception, public std::invalid_argument {
     std::string const name;
 
-    missing_key(std::string const& name) : std::invalid_argument("missing key `" + name + "`"), name(name) {}
-    ~missing_key() throw () {}
+    missing_tag_or_filter(std::string const& name) : std::invalid_argument("missing tag or filter `" + name + "`"), name(name) {}
+    ~missing_tag_or_filter() throw () {}
 };
 
 //

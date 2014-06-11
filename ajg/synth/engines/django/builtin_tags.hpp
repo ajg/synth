@@ -93,6 +93,7 @@ struct builtin_tags {
     typedef formatter<options_type>                                             formatter_type;
 
     typedef typename context_type::block_type                                   block_type;
+ // typedef typename context_type::location_type                                location_type;
 
     typedef typename options_type::renderer_type                                renderer_type;
     typedef typename options_type::renderers_type                               renderers_type;
@@ -315,9 +316,8 @@ struct builtin_tags {
             match_type  const& vals     = match(kernel.values);
             match_type  const& block    = match(kernel.block);
             match_type  const& as       = match(kernel.name);
-            size_type   const  position = match.position();
             size_type   const  total    = vals.nested_results().size();
-            size_type   const  current  = context.cycle(position, total);
+            size_type   const  current  = context.cycle(&match, total);
 
             match_type const& v     = *detail::advance_to(vals.nested_results().begin(), current);
             value_type const  value = kernel.evaluate(options, state, v, context);
@@ -613,8 +613,7 @@ struct builtin_tags {
             match_type const& if_   = match(kernel.block, 0);
             match_type const& else_ = match(kernel.block, 1);
 
-            size_type const position = match.position();
-            boost::optional<value_type> const value = context.change(position);
+            boost::optional<value_type> const value = context.change(&match);
 
             if (match_type const& vals = match(kernel.values)) { // Compare variables.
                 // NOTE: The key is a string (rather than e.g. an int) presumably in case variables are repeated.
@@ -631,7 +630,7 @@ struct builtin_tags {
                     }
                 }
                 else {
-                    context.change(position, values);
+                    context.change(&match, values);
                     kernel.render_block(ostream, options, state, if_, context);
                 }
             }
@@ -646,7 +645,7 @@ struct builtin_tags {
                     }
                 }
                 else {
-                    context.change(position, s);
+                    context.change(&match, s);
                     ostream << s;
                 }
             }

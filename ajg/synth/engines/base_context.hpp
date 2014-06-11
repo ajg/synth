@@ -58,12 +58,11 @@ struct base_context /*: boost::noncopyable*/ {
 
   public: // TODO: private:
 
-    // FIXME: position should be either e.g. pair<filename, size_type> or a void*.
-    typedef size_type                                                           position_type;
+    typedef void const*                                                         location_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
     typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
-    typedef std::map<position_type, size_type>                                  cycles_type;
-    typedef std::map<position_type, value_type>                                 changes_type;
+    typedef std::map<location_type, size_type>                                  cycles_type;
+    typedef std::map<location_type, value_type>                                 changes_type;
 
   private:
 
@@ -135,18 +134,18 @@ struct base_context /*: boost::noncopyable*/ {
         this->blocks_[name].push_back(block);
     }
 
-    inline size_type cycle(position_type const position, size_type const total) {
-        size_type const current = detail::find(position, this->cycles_).get_value_or(0);
-        this->cycles_[position] = (current + 1) % total;
+    inline size_type cycle(location_type const location, size_type const total) {
+        size_type const current = detail::find(location, this->cycles_).get_value_or(0);
+        this->cycles_[location] = (current + 1) % total;
         return current;
     }
 
-    inline boost::optional<value_type> change(position_type const position) const {
-        return detail::find(position, this->changes_);
+    inline boost::optional<value_type> change(location_type const location) const {
+        return detail::find(location, this->changes_);
     }
 
-    inline void change(position_type const position, value_type const& value) {
-        this->changes_[position] = value;
+    inline void change(location_type const location, value_type const& value) {
+        this->changes_[location] = value;
     }
 
   private:

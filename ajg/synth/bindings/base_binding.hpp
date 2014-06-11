@@ -30,6 +30,8 @@ template < class Traits
          , template <class T> class Engine0 = engines::null::engine
          , template <class T> class Engine1 = engines::null::engine
          , template <class T> class Engine2 = engines::null::engine
+         , template <class T> class Engine3 = engines::null::engine
+         , template <class T> class Engine4 = engines::null::engine
          >
 struct base_binding : boost::noncopyable {
   public:
@@ -41,15 +43,21 @@ struct base_binding : boost::noncopyable {
     typedef Engine0<traits_type>                                                engine0_type;
     typedef Engine1<traits_type>                                                engine1_type;
     typedef Engine2<traits_type>                                                engine2_type;
+    typedef Engine3<traits_type>                                                engine3_type;
+    typedef Engine4<traits_type>                                                engine4_type;
 
     typedef boost::mpl::c_str<typename engine0_type::name>                      name0;
     typedef boost::mpl::c_str<typename engine1_type::name>                      name1;
     typedef boost::mpl::c_str<typename engine2_type::name>                      name2;
+    typedef boost::mpl::c_str<typename engine3_type::name>                      name3;
+    typedef boost::mpl::c_str<typename engine4_type::name>                      name4;
 
     // TODO: Consider using a variant instead.
     typedef boost::optional<Template<engine0_type> >                            template0_type;
     typedef boost::optional<Template<engine1_type> >                            template1_type;
     typedef boost::optional<Template<engine2_type> >                            template2_type;
+    typedef boost::optional<Template<engine3_type> >                            template3_type;
+    typedef boost::optional<Template<engine4_type> >                            template4_type;
 
     typedef typename base_engine_type::context_type                             context_type;
     typedef typename base_engine_type::options_type                             options_type;
@@ -72,6 +80,8 @@ struct base_binding : boost::noncopyable {
              if (name == name0::value) this->template0_ = boost::in_place(source, options);
         else if (name == name1::value) this->template1_ = boost::in_place(source, options);
         else if (name == name2::value) this->template2_ = boost::in_place(source, options);
+        else if (name == name3::value) this->template3_ = boost::in_place(source, options);
+        else if (name == name4::value) this->template4_ = boost::in_place(source, options);
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
@@ -81,6 +91,8 @@ struct base_binding : boost::noncopyable {
              if (template0_) return template0_->render_to_stream(ostream, context);
         else if (template1_) return template1_->render_to_stream(ostream, context);
         else if (template2_) return template2_->render_to_stream(ostream, context);
+        else if (template3_) return template3_->render_to_stream(ostream, context);
+        else if (template4_) return template4_->render_to_stream(ostream, context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
@@ -88,6 +100,8 @@ struct base_binding : boost::noncopyable {
              if (template0_) return template0_->render_to_string(context);
         else if (template1_) return template1_->render_to_string(context);
         else if (template2_) return template2_->render_to_string(context);
+        else if (template3_) return template3_->render_to_string(context);
+        else if (template4_) return template4_->render_to_string(context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
@@ -95,6 +109,8 @@ struct base_binding : boost::noncopyable {
              if (template0_) return template0_->render_to_path(path, context);
         else if (template1_) return template1_->render_to_path(path, context);
         else if (template2_) return template2_->render_to_path(path, context);
+        else if (template3_) return template3_->render_to_path(path, context);
+        else if (template4_) return template4_->render_to_path(path, context);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
@@ -103,6 +119,8 @@ struct base_binding : boost::noncopyable {
     template0_type template0_;
     template1_type template1_;
     template2_type template2_;
+    template3_type template3_;
+    template4_type template4_;
 };
 
 }}} // namespace ajg::synth::bindings

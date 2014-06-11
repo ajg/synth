@@ -72,9 +72,27 @@ struct base_context /*: boost::noncopyable*/ {
   public:
 
     inline base_context(value_type const& value)
-        : case_sensitive(true), autoescape(true), value_(value) {}
+        : caseless_(false), autoescape_(true), value_(value) {}
 
   public:
+
+    inline boolean_type caseless() const {
+        return this->caseless_;
+    }
+
+    inline boolean_type caseless(boolean_type caseless) {
+        std::swap(caseless, this->caseless_);
+        return caseless;
+    }
+
+    inline boolean_type autoescape() const {
+        return this->autoescape_;
+    }
+
+    inline boolean_type autoescape(boolean_type autoescape) {
+        std::swap(autoescape, this->autoescape_);
+        return autoescape;
+    }
 
     inline void set(key_type const& key, value_type const& value) { this->value_.attribute(this->cased(key), value); }
 
@@ -88,17 +106,15 @@ struct base_context /*: boost::noncopyable*/ {
 
     inline value_type const& value() const { return this->value_; }
 
-  public:
-
-    inline string_type current_name() const {
-        if (this->current_name_.empty()) {
+    inline string_type current() const {
+        if (this->current_.empty()) {
             AJG_SYNTH_THROW(std::invalid_argument("not in a block"));
         }
-        return this->current_name_;
+        return this->current_;
     }
 
-    inline string_type current_name(string_type name) {
-        std::swap(name, this->current_name_);
+    inline string_type current(string_type name) {
+        std::swap(name, this->current_);
         return name;
     }
 
@@ -136,7 +152,7 @@ struct base_context /*: boost::noncopyable*/ {
   private:
 
     inline key_type cased(key_type const& original) const {
-        if (this->case_sensitive) {
+        if (!this->caseless()) {
             return original;
         }
         string_type const lowercased = text::lower(original.to_string());
@@ -150,15 +166,12 @@ struct base_context /*: boost::noncopyable*/ {
         return original;
     }
 
-  public:
-
-    boolean_type  case_sensitive;
-    boolean_type  autoescape;
-
   private:
 
+    boolean_type  caseless_;
+    boolean_type  autoescape_;
     value_type    value_;
-    string_type   current_name_;
+    string_type   current_;
     blocks_type   blocks_;
     cycles_type   cycles_;
     changes_type  changes_;

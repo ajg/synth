@@ -230,7 +230,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                , state_type   const& state
                , context_type&       context
                ) const {
-        context.case_sensitive = case_sensitive;
+        context.caseless(!case_sensitive);
         this->render_block(ostream, state.match, context, options);
     }
 

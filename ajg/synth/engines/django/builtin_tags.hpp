@@ -187,14 +187,14 @@ struct builtin_tags {
                           ) {
             string_type const& setting  = match(kernel.name)[id].str();
             match_type  const& block    = match(kernel.block);
-            boolean_type const previous = context.autoescape;
+            boolean_type const previous = context.autoescape();
 
-                 if (setting == text::literal("on"))  context.autoescape = true;
-            else if (setting == text::literal("off")) context.autoescape = false;
+                 if (setting == text::literal("on"))  context.autoescape(true);
+            else if (setting == text::literal("off")) context.autoescape(false);
             else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
             kernel.render_block(ostream, options, state, block, context);
-            context.autoescape = previous;
+            context.autoescape(previous);
         }
     };
 
@@ -229,7 +229,7 @@ struct builtin_tags {
                 _1, boost::ref(options), boost::ref(state), boost::ref(block), _2));
             if (ostream.rdbuf() == 0) return; // Coming from an extends_tag; no need to render.
 
-            string_type const previous_name = context.current_name(name);
+            string_type const previous = context.current(name);
 
             if (block_type const& b = context.pop_block(name)) {
                 b(ostream, context);
@@ -238,7 +238,7 @@ struct builtin_tags {
                 return kernel.render_block(ostream, options, state, block, context);
             }
 
-            context.current_name(previous_name);
+            context.current(previous);
         }
     };
 
@@ -1264,13 +1264,13 @@ struct builtin_tags {
                           ) {
             if (match_type const& v = match(kernel.value)) { // Regular value.
                 value_type const& value = kernel.evaluate(options, state, v, context);
-                boolean_type const safe = !context.autoescape || value.safe();
+                boolean_type const safe = !context.autoescape() || value.safe();
                 safe ? ostream << value : ostream << value.escape();
             }
             else { // Literal block.super.
-                if (block_type const& b = context.pop_block(context.current_name())) {
+                if (block_type const& b = context.pop_block(context.current())) {
                     b(ostream, context);
-                    context.push_block(context.current_name(), b);
+                    context.push_block(context.current(), b);
                 }
                 else {
                     AJG_SYNTH_THROW(std::runtime_error("block.super at top level"));

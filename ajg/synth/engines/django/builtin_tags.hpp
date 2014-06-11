@@ -614,7 +614,7 @@ struct builtin_tags {
             match_type const& else_ = match(kernel.block, 1);
 
             size_type const position = match.position();
-            boost::optional<value_type> const value = detail::find(position, context.changes_);
+            boost::optional<value_type> const value = context.change(position);
 
             if (match_type const& vals = match(kernel.values)) { // Compare variables.
                 // NOTE: The key is a string (rather than e.g. an int) presumably in case variables are repeated.
@@ -631,7 +631,7 @@ struct builtin_tags {
                     }
                 }
                 else {
-                    context.changes_[position] = values;
+                    context.change(position, values);
                     kernel.render_block(ostream, options, state, if_, context);
                 }
             }
@@ -646,7 +646,7 @@ struct builtin_tags {
                     }
                 }
                 else {
-                    context.changes_[position] = s;
+                    context.change(position, s);
                     ostream << s;
                 }
             }

@@ -125,6 +125,14 @@ struct base_context /*: boost::noncopyable*/ {
         return current;
     }
 
+    inline boost::optional<value_type> change(position_type const position) const {
+        return detail::find(position, this->changes_);
+    }
+
+    inline void change(position_type const position, value_type const& value) {
+        this->changes_[position] = value;
+    }
+
   private:
 
     inline key_type cased(key_type const& original) const {
@@ -147,16 +155,13 @@ struct base_context /*: boost::noncopyable*/ {
     boolean_type  case_sensitive;
     boolean_type  autoescape;
 
-  public: // TODO: private, and add change() methods.
-
-    changes_type  changes_;
-
   private:
 
     value_type    value_;
     string_type   current_name_;
     blocks_type   blocks_;
     cycles_type   cycles_;
+    changes_type  changes_;
 };
 
 template <class Context>

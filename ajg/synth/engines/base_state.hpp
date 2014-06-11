@@ -128,10 +128,10 @@ struct base_state {
                 tag_type    const& tag    = library->get_tag(name);
                 filter_type const& filter = library->get_filter(name);
 
-                if (!tag.first && !filter) {
+                if (!tag && !filter) {
                     AJG_SYNTH_THROW(missing_key(text::narrow(name)));
                 }
-                if (tag.first) {
+                if (tag) {
                     this->loaded_tags_[name] = tag;
                 }
                 if (filter) {
@@ -141,8 +141,7 @@ struct base_state {
         }
         else {
             BOOST_FOREACH(string_type const& name, library->list_tags()) {
-                // if (tag_type const& tag = library->get_tag(name)) {
-                tag_type const& tag = library->get_tag(name); if (tag.first) {
+                if (tag_type const& tag = library->get_tag(name)) {
                     this->loaded_tags_[name] = tag;
                 }
                 else {

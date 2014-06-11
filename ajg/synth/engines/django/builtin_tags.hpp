@@ -869,7 +869,9 @@ struct builtin_tags {
                 state.library_tag_args_.clear();
 
 
-                if (!state.library_tag_entries_.empty() && detail::contains(name, state.library_tag_entries_.top().tag.second)) {
+                if (!state.library_tag_entries_.empty() && (
+                        detail::contains(name, state.library_tag_entries_.top().tag.middle_names) ||
+                        detail::contains(name, state.library_tag_entries_.top().tag.last_names))) {
                     return false;
                 }
                 else if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
@@ -884,8 +886,8 @@ struct builtin_tags {
                     renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(state), _1, _2, _3, _4);
                     segments_type segments(1, segment_type(pieces, renderer));
 
-                    if (tag->second.empty()) {
-                        state.set_renderer(position, tag->first(segments));
+                    if (tag->middle_names.empty() && tag->last_names.empty()) {
+                        state.set_renderer(position, tag->function(segments));
                         state.library_tag_continue_ = false;
                     }
                     else {
@@ -918,9 +920,11 @@ struct builtin_tags {
                 BOOST_ASSERT(!state.library_tag_entries_.empty());
                 entry_type& entry = state.library_tag_entries_.top();
                 size_type const position = entry.position;
-                BOOST_ASSERT(!entry.tag.second.empty());
+                BOOST_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
+                boolean_type const is_middle = detail::contains(name, entry.tag.middle_names);
+                boolean_type const is_last   = detail::contains(name, entry.tag.last_names);
 
-                if (!detail::contains(name, entry.tag.second)) {
+                if (!is_middle && !is_last) {
                     return false;
                 }
 
@@ -934,8 +938,8 @@ struct builtin_tags {
                 renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(state), _1, _2, _3, _4);
                 entry.segments.push_back(segment_type(pieces, renderer));
 
-                if (text::begins_with(name, text::literal("end"))) {
-                    state.set_renderer(position, entry.tag.first(entry.segments));
+                if (is_last) {
+                    state.set_renderer(position, entry.tag.function(entry.segments));
                     state.library_tag_continue_ = false;
                     state.library_tag_entries_.pop();
                 }

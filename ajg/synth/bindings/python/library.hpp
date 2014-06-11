@@ -59,8 +59,18 @@ struct library : Options::abstract_library {
 
             BOOST_FOREACH(string_type const& name, tag_names_) {
                 py::tuple t(tags[name]);
-                py::stl_input_iterator<string_type> begin(t[1]), end;
-                this->tags_[name] = tag_type(boost::bind(call_tag, t[0], _1), symbols_type(begin, end));
+                py::object const& fn = t[0];
+                py::object const& mn = t[1];
+                py::object const& ln = t[2];
+
+                if (!fn) {
+                    AJG_SYNTH_THROW(std::invalid_argument("tag function"));
+                }
+                tag_type tag;
+                tag.function = boost::bind(call_tag, fn, _1);
+                if (mn) tag.middle_names.insert(py::stl_input_iterator<string_type>(mn), end);
+                if (ln) tag.last_names.insert(py::stl_input_iterator<string_type>(ln), end);
+                this->tags_[name] = tag;
             }
         }
 

@@ -15,12 +15,12 @@ print('Loaded synth; version: ' + synth.version())
 def main():
     import python.binding_tests   as binding_tests
     import python.directory_tests as directory_tests
-    import python.loader_tests    as loader_tests
+    import python.library_tests   as library_tests
 
     print 'Running test harness...'
     run_test('binding_tests',   *binding_tests.get())
     run_test('directory_tests', *directory_tests.get())
-    run_test('loader_tests',    *loader_tests.get())
+    run_test('library_tests',   *library_tests.get())
 
     if failures != 0:
         raise Exception('One or more tests failed')

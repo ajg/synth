@@ -19,28 +19,35 @@ def render_block(segments, context, match, index=0):
     renderer = segments[index][1]
     return renderer(context, match)
 
+def dummy_tag():
+    return ((lambda segments: ''), (), ())
+
 def simple_tag(fn):
     return (lambda segments:
                 (lambda context, match, *args, **kwargs:
-                    str(fn(*args, **kwargs))), ())
+                    str(fn(*args, **kwargs))), (), ())
 
 def context_tag(fn):
     return (lambda segments:
                 (lambda context, match, *args, **kwargs:
-                    str(fn(context, segments[0][0], *args, **kwargs))), ())
+                    str(fn(context, segments[0][0], *args, **kwargs))), (), ())
 
 def block_tag(name, fn):
     return (lambda segments:
                 (lambda context, match, *args, **kwargs:
-                    str(fn(context, render_block(segments, context, match), *args, **kwargs))), ('end' + name,))
+                    str(fn(context, render_block(segments, context, match), *args, **kwargs))), (), ('end' + name,))
 
 def variadic_tag(name, fn, expected):
     return (lambda segments:
                 (lambda context, match, *args, **kwargs:
-                    str(fn(context, match, segments, *args, **kwargs))), expected + ('end' + name,))
+                    str(fn(context, match, segments, *args, **kwargs))), expected, ('end' + name,))
 
-dummy_tag = (None, ())
-dummy_filter = None
+def dummy_filter():
+    return None
+
+def simple_filter(fn):
+    return fn
+
 
 def library_loader(name):
     if name == 'empty_library':
@@ -48,8 +55,8 @@ def library_loader(name):
 
     elif name == 'dummy.tags.and.filters':
         return Library(
-            tags={'a': dummy_tag, 'b': dummy_tag, 'c': dummy_tag},
-            filters={'x': dummy_filter, 'y': dummy_filter, 'z': dummy_filter},
+            tags={'a': dummy_tag(), 'b': dummy_tag(), 'c': dummy_tag()},
+            filters={'x': dummy_filter(), 'y': dummy_filter(), 'z': dummy_filter()},
         )
 
     elif name == 'test_tags':
@@ -69,7 +76,7 @@ def library_loader(name):
         })
 
     elif name == 'test_filters':
-        return Library(filters={'flip': flip})
+        return Library(filters={'flip': simple_filter(flip)})
 
     else:
         raise Exception('Library not found')

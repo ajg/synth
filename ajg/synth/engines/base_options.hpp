@@ -64,12 +64,18 @@ struct base_options {
     typedef boost::shared_ptr<abstract_loader>                                  loader_type;
     typedef boost::shared_ptr<abstract_resolver>                                resolver_type;
 
-    typedef boost::function<void(arguments_type const&, ostream_type&, context_type&, void const*)> renderer_type;
-    typedef std::pair<std::vector<string_type>, renderer_type>                                      segment_type;
-    typedef std::vector<segment_type>                                                               segments_type;
-    typedef std::pair<boost::function<renderer_type(segments_type const&)>, symbols_type>           tag_type;
-    typedef boost::function<value_type(value_type const&, arguments_type const&, context_type&)>    filter_type;
-    // TODO: Unify tag_type/filter_type w.r.t. builtin_tags::tag_type/builtin_filters::filter_type.
+    // TODO: Rename builtin_tags::tag_type/builtin_filters::filter_type to make less ambiguous.
+    typedef boost::function<void(arguments_type const&, ostream_type&, context_type&, void const*)>        renderer_type;
+    typedef std::pair<std::vector<string_type>, renderer_type>                                             segment_type;
+    typedef std::vector<segment_type>                                                                      segments_type;
+    typedef boost::function<value_type(value_type const&, arguments_type const&, context_type&)>           filter_type;
+    typedef struct {
+        boost::function<renderer_type(segments_type const&)> function;
+        symbols_type                                         middle_names;
+        symbols_type                                         last_names;
+
+        inline operator boolean_type() const { return this->function; }
+    }                                                                           tag_type;
 
     typedef std::map<string_type, tag_type>                                     tags_type;
     typedef std::map<string_type, filter_type>                                  filters_type;

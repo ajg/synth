@@ -73,7 +73,8 @@ def library_loader(name):
             'encode':         dyadic_tag(encode, 'encode', 'endencode'),
             'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
             'unless':         triadic_tag(unless, 'unless', 'otherwise', 'endunless'),
-            ### 'TODO': variadic_tag(foobarqux, 'foo', ('bar',), ('qux',)),
+            'f1':             variadic_tag(fml, 'f1', ('m1', 'm2'), ('l1', 'l2', 'l3',)),
+            # TODO: 'fml':    ...
         })
 
     elif name == 'test_filters':
@@ -132,6 +133,11 @@ def unset_variable(context, match, segments, *args, **kwargs):
     del context[name]
     return ''
 
+def fml(context, match, segments, *args, **kwargs):
+    return str(len(segments) - 1)
+
+
+
 context = {'motto': 'May the Force be with you.'}
 source = """\
 {% load empty_library %}
@@ -143,9 +149,10 @@ source = """\
 {% load identity from test_tags %}
 {% load answer_to_life from test_tags %}
 {% load add from test_tags %}
+{% load set unset from test_tags %}
 {% load encode decode from test_tags %}
 {% load unless from test_tags %}
-{% load set unset from test_tags %}
+{% load f1 from test_tags %}
 ({% answer_to_life %})
 ({% identity 'wow' %})
 ({% ackermann 3 4 %})
@@ -153,6 +160,8 @@ source = """\
 ({% add 1.1 %})
 ({% add 1.1 2.2 %})
 ({% add 1.1 2.2 3.3 %})
+{% set foo bar %}({{ foo }})
+{% unset foo bar %}({{ foo }})
 ({% encode 'rot13' %}Hello Kitty{% endencode %})
 ({% encode 'rot13' %}{{ 'foo'|upper }}{% endencode %})
 ({% encode 'rot13' %}{% if True %}Hello Kitty{% endif %}{% endencode %})
@@ -160,8 +169,28 @@ source = """\
 ({% encode 'rot13' %}|{% encode 'rot13' %}Hello Kitty{% endencode %}|{% endencode %})
 ({% unless True%}A{% otherwise %}B{% endunless %})
 ({% unless False%}A{% otherwise %}B{% endunless %})
-{% set foo bar %}({{ foo }})
-{% unset foo bar %}({{ foo }})
+({% f1 %}1{% l1 %})
+({% f1 %}1{% l2 %})
+({% f1 %}1{% l3 %})
+({% f1 %}2{% m1 %}2{% l1 %})
+({% f1 %}2{% m1 %}2{% l2 %})
+({% f1 %}2{% m1 %}2{% l3 %})
+({% f1 %}2{% m2 %}2{% l1 %})
+({% f1 %}2{% m2 %}2{% l2 %})
+({% f1 %}2{% m2 %}2{% l3 %})
+({% f1 %}3{% m1 %}3{% m1 %}3{% l1 %})
+({% f1 %}3{% m1 %}3{% m1 %}3{% l2 %})
+({% f1 %}3{% m1 %}3{% m1 %}3{% l3 %})
+({% f1 %}3{% m1 %}3{% m2 %}3{% l1 %})
+({% f1 %}3{% m1 %}3{% m2 %}3{% l2 %})
+({% f1 %}3{% m1 %}3{% m2 %}3{% l3 %})
+({% f1 %}3{% m2 %}3{% m1 %}3{% l1 %})
+({% f1 %}3{% m2 %}3{% m1 %}3{% l2 %})
+({% f1 %}3{% m2 %}3{% m1 %}3{% l3 %})
+({% f1 %}3{% m2 %}3{% m2 %}3{% l1 %})
+({% f1 %}3{% m2 %}3{% m2 %}3{% l2 %})
+({% f1 %}3{% m2 %}3{% m2 %}3{% l3 %})
+({% f1 %}4{% m1 %}4{% m1 %}4{% m1 %}4{% l1 %})
 """
 golden = """\
 
@@ -176,6 +205,7 @@ mAY THE fORCE BE WITH YOU.
 
 
 
+
 (42)
 (wow)
 (125)
@@ -183,6 +213,8 @@ mAY THE fORCE BE WITH YOU.
 (1.1)
 (3.3)
 (6.6)
+(bar)
+()
 (Uryyb Xvggl)
 (SBB)
 (Uryyb Xvggl)
@@ -190,8 +222,28 @@ mAY THE fORCE BE WITH YOU.
 (|Hello Kitty|)
 (B)
 (A)
-(bar)
-()
+(1)
+(1)
+(1)
+(2)
+(2)
+(2)
+(2)
+(2)
+(2)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(3)
+(4)
 """
 
 

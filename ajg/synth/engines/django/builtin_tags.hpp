@@ -869,12 +869,15 @@ struct builtin_tags {
                 state.library_tag_args_.clear();
 
 
-                if (!state.library_tag_entries_.empty() && (
-                        detail::contains(name, state.library_tag_entries_.top().tag.middle_names) ||
-                        detail::contains(name, state.library_tag_entries_.top().tag.last_names))) {
-                    return false;
+                if (!state.library_tag_entries_.empty()) {
+                    entry_type const& entry = state.library_tag_entries_.top();
+                    if (detail::contains(name, entry.tag.middle_names)
+                     || detail::contains(name, entry.tag.last_names)) {
+                        return false;
+                    }
                 }
-                else if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
+
+                if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
                     size_type const position = std::distance(state.range.first, n.first);
                     std::vector<string_type> pieces;
                     pieces.push_back(contents);
@@ -921,6 +924,7 @@ struct builtin_tags {
                 entry_type& entry = state.library_tag_entries_.top();
                 size_type const position = entry.position;
                 BOOST_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
+
                 boolean_type const is_middle = detail::contains(name, entry.tag.middle_names);
                 boolean_type const is_last   = detail::contains(name, entry.tag.last_names);
 

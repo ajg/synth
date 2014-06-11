@@ -52,7 +52,7 @@ struct base_binding : boost::noncopyable {
     typedef boost::mpl::c_str<typename engine3_type::name>                      name3;
     typedef boost::mpl::c_str<typename engine4_type::name>                      name4;
 
-    // TODO: Consider using a variant instead.
+    // Note: A boost::variant won't work here because it doesn't seem to support in-place construction.
     typedef boost::optional<Template<engine0_type> >                            template0_type;
     typedef boost::optional<Template<engine1_type> >                            template1_type;
     typedef boost::optional<Template<engine2_type> >                            template2_type;

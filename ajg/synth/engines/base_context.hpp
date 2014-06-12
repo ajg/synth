@@ -56,20 +56,21 @@ struct base_context : boost::noncopyable {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef void const*                                                         location_type;
+    typedef void const*                                                         match_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
 
   private:
 
     typedef std::map<string_type, std::deque<block_type> >                      blocks_type;
-    typedef std::map<location_type, size_type>                                  cycles_type;
-    typedef std::map<location_type, value_type>                                 changes_type;
+    typedef std::stack<match_type>                                              matches_type;
+    typedef std::map<match_type, size_type>                                     cycles_type;
+    typedef std::map<match_type, value_type>                                    changes_type;
     typedef detail::text<string_type>                                           text;
 
   public:
 
-    inline base_context(value_type const& value)
-        : caseless_(false), autoescape_(true), value_(value) {}
+    inline base_context(value_type const& data)
+        : caseless_(false), autoescape_(true), data_(data) {}
 
   public:
 
@@ -91,17 +92,22 @@ struct base_context : boost::noncopyable {
         return autoescape;
     }
 
-    inline void set(key_type const& key, value_type const& value) { this->value_.attribute(this->cased(key), value); }
+    inline void set(key_type const& key, value_type const& value) { this->data_.attribute(this->cased(key), value); }
 
-    inline void unset(key_type const& key) { this->value_.attribute(this->cased(key), attribute_type()); }
+    inline void unset(key_type const& key) { this->data_.attribute(this->cased(key), attribute_type()); }
 
-    inline attribute_type get(key_type const& key) const { return this->value_.attribute(this->cased(key)); }
+    inline attribute_type get(key_type const& key) const { return this->data_.attribute(this->cased(key)); }
 
     inline boolean_type has(key_type const& key) const { return detail::contains(this->cased(key), this->keys()); }
 
-    inline attributes_type keys() const { return this->value_.attributes(); }
+    inline attributes_type keys() const { return this->data_.attributes(); }
 
-    inline value_type const& value() const { return this->value_; }
+    inline value_type const& data() const { return this->data_; }
+
+    inline value_type data(value_type data) {
+        std::swap(data, this->data_);
+        return data;
+    }
 
     inline string_type current() const {
         if (this->current_.empty()) {
@@ -132,18 +138,34 @@ struct base_context : boost::noncopyable {
         this->blocks_[name].push_back(block);
     }
 
-    inline size_type cycle(location_type const location, size_type const total) {
-        size_type const current = detail::find(location, this->cycles_).get_value_or(0);
-        this->cycles_[location] = (current + 1) % total;
+    inline match_type get_match() const {
+        BOOST_ASSERT(!this->matches_.empty());
+        match_type const match = this->matches_.top();
+        BOOST_ASSERT(match);
+        return match;
+    }
+
+    inline void pop_match() {
+        BOOST_ASSERT(!this->matches_.empty());
+        this->matches_.pop();
+    }
+
+    inline void push_match(match_type const match) {
+        this->matches_.push(match);
+    }
+
+    inline size_type cycle(match_type const match, size_type const total) {
+        size_type const current = detail::find(match, this->cycles_).get_value_or(0);
+        this->cycles_[match] = (current + 1) % total;
         return current;
     }
 
-    inline boost::optional<value_type> change(location_type const location) const {
-        return detail::find(location, this->changes_);
+    inline boost::optional<value_type> change(match_type const match) const {
+        return detail::find(match, this->changes_);
     }
 
-    inline void change(location_type const location, value_type const& value) {
-        this->changes_[location] = value;
+    inline void change(match_type const match, value_type const& value) {
+        this->changes_[match] = value;
     }
 
   private:
@@ -167,9 +189,10 @@ struct base_context : boost::noncopyable {
 
     boolean_type  caseless_;
     boolean_type  autoescape_;
-    value_type    value_;
+    value_type    data_;
     string_type   current_;
     blocks_type   blocks_;
+    matches_type  matches_;
     cycles_type   cycles_;
     changes_type  changes_;
 };

@@ -5,9 +5,9 @@
 from datetime import datetime
 
 def get():
-    return (context, golden, source, 'django')
+    return (context_data, golden, source, 'django')
 
-context = {
+context_data = {
     'bool_true':        True,
     'bool_false':       False,
     'int_0':            0,

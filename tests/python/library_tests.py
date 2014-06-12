@@ -5,7 +5,7 @@
 import sys
 
 def get():
-    return (context, golden, source, 'django', ('', {}, False, [], {}, [library_loader], []))
+    return (context_data, golden, source, 'django', ('', {}, False, [], {}, [library_loader], []))
 
 class Library(object):
     def __init__(self, tags={}, filters={}):
@@ -14,10 +14,10 @@ class Library(object):
 
 def dump(n, x): print n, '=', x; return x
 
-def render_block(segments, context, match, index=0):
-    # print '### render_block(', segments, match, ')'
+def render_block(segments, context_data, index=0):
+    # print '### render_block(', segments, ')'
     renderer = segments[index][1]
-    return renderer(context, match)
+    return renderer(context_data)
 
 def dummy_tag():
     return ((lambda segments: ''), None, None)
@@ -34,12 +34,12 @@ def triadic_tag(fn, first, middle, last, plain=False):
 def variadic_tag(fn, first, middles, lasts, plain=False):
     if plain:
         return (lambda segments:
-                    (lambda context, match, *args, **kwargs:
+                    (lambda context_data, *args, **kwargs:
                         str(fn(*args, **kwargs))), middles, lasts)
     else:
         return (lambda segments:
-                    (lambda context, match, *args, **kwargs:
-                        str(fn(context, match, segments, *args, **kwargs))), middles, lasts)
+                    (lambda context_data, *args, **kwargs:
+                        str(fn(context_data, segments, *args, **kwargs))), middles, lasts)
 
 
 
@@ -102,42 +102,42 @@ def ackermann(m, n):
 def add(*args):
     return sum(args)
 
-def encode(context, match, segments, arg):
+def encode(context_data, segments, arg):
     # print '### encode(', arg, ')'
-    s = render_block(segments, context, match)
+    s = render_block(segments, context_data)
     return s.encode(arg)
 
-def decode(context, match, segments, arg):
+def decode(context_data, segments, arg):
     # print '### decode(', arg, ')'
-    s = render_block(segments, context, match)
+    s = render_block(segments, context_data)
     return s.decode(arg)
 
-def unless(context, match, segments, arg):
-    # print '### unless(', match, repr(segments), repr(arg), ')'
+def unless(context_data, segments, arg):
+    # print '### unless(', repr(segments), repr(arg), ')'
     pieces, renderer = segments[1 if arg else 0]
-    return renderer(context, match)
+    return renderer(context_data)
 
-def set_variable(context, match, segments, *args, **kwargs):
+def set_variable(context_data, segments, *args, **kwargs):
     # print '### set(', args, kwargs, ')'
     pieces = segments[0][0]
     name  = pieces[2]
     value = pieces[3]
-    context[name] = value
+    context_data[name] = value
     return ''
 
-def unset_variable(context, match, segments, *args, **kwargs):
+def unset_variable(context_data, segments, *args, **kwargs):
     # print '### unset(', args, kwargs, ')'
     pieces = segments[0][0]
     name = pieces[2]
-    del context[name]
+    del context_data[name]
     return ''
 
-def fml(context, match, segments, *args, **kwargs):
+def fml(context_data, segments, *args, **kwargs):
     return str(len(segments) - 1)
 
 
 
-context = {'motto': 'May the Force be with you.'}
+context_data = {'motto': 'May the Force be with you.'}
 source = """\
 {% load empty_library %}
 {% load a x b y c z from dummy.tags.and.filters %}

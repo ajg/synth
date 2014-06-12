@@ -93,7 +93,6 @@ struct builtin_tags {
     typedef formatter<options_type>                                             formatter_type;
 
     typedef typename context_type::block_type                                   block_type;
- // typedef typename context_type::location_type                                location_type;
 
     typedef typename options_type::renderer_type                                renderer_type;
     typedef typename options_type::renderers_type                               renderers_type;
@@ -230,6 +229,7 @@ struct builtin_tags {
                 _1, boost::ref(options), boost::ref(state), boost::ref(block), _2));
             if (ostream.rdbuf() == 0) return; // Coming from an extends_tag; no need to render.
 
+            // TODO: Make current/previous swap exception safe.
             string_type const previous = context.current(name);
 
             if (block_type const& b = context.pop_block(name)) {
@@ -819,7 +819,10 @@ struct builtin_tags {
 
             if (boost::optional<renderer_type> const& renderer = state.get_renderer(position)) {
                 BOOST_ASSERT(!renderer->empty());
-                (*renderer)(arguments, ostream, context, &match);
+                // TODO: Make push/pop exception safe.
+                context.push_match(&match);
+                (*renderer)(arguments, ostream, context);
+                context.pop_match();
             }
             else {
                 AJG_SYNTH_THROW(std::logic_error("missing renderer"));
@@ -834,10 +837,8 @@ struct builtin_tags {
                                 , arguments_type const& arguments
                                 , ostream_type&         ostream
                                 , context_type&         context
-                                , void const*           m
                                 ) {
-            BOOST_ASSERT(m);
-            match_type const& match = *static_cast<match_type const*>(m);
+            match_type const& match = *static_cast<match_type const*>(context.get_match());
             match_type const& block = match(kernel.block, index);
             kernel.render_block(ostream, state.options, state, block, context);
         }
@@ -889,7 +890,7 @@ struct builtin_tags {
                         pieces.push_back(arg);
                     }
 
-                    renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(state), _1, _2, _3, _4);
+                    renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(state), _1, _2, _3);
                     segments_type segments(1, segment_type(pieces, renderer));
 
                     if (tag->middle_names.empty() && tag->last_names.empty()) {
@@ -941,7 +942,7 @@ struct builtin_tags {
                     pieces.push_back(arg);
                 }
 
-                renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(state), _1, _2, _3, _4);
+                renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(state), _1, _2, _3);
                 entry.segments.push_back(segment_type(pieces, renderer));
 
                 if (is_last) {

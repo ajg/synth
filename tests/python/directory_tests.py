@@ -5,7 +5,7 @@
 directory = 'tests/templates/django/'
 
 def get():
-    return (context, golden, source, 'django', ('INVALID_VALUE', {}, False, [directory]))
+    return (context_data, golden, source, 'django', ('INVALID_VALUE', {}, False, [directory]))
 
 class User(object):
     def __init__(self):
@@ -20,7 +20,7 @@ class Message(object):
     def __str__(self):
         return self.message
 
-context = {
+context_data = {
     'request': {
         'user': User(),
     },

@@ -65,10 +65,10 @@ struct base_options {
     typedef boost::shared_ptr<abstract_resolver>                                resolver_type;
 
     // TODO: Rename builtin_tags::tag_type/builtin_filters::filter_type to make less ambiguous.
-    typedef boost::function<void(arguments_type const&, ostream_type&, context_type&, void const*)>        renderer_type;
-    typedef std::pair<std::vector<string_type>, renderer_type>                                             segment_type;
-    typedef std::vector<segment_type>                                                                      segments_type;
-    typedef boost::function<value_type(value_type const&, arguments_type const&, context_type&)>           filter_type;
+    typedef boost::function<void(arguments_type const&, ostream_type&, context_type&)>           renderer_type;
+    typedef std::pair<std::vector<string_type>, renderer_type>                                   segment_type;
+    typedef std::vector<segment_type>                                                            segments_type;
+    typedef boost::function<value_type(value_type const&, arguments_type const&, context_type&)> filter_type;
     typedef struct {
         boost::function<renderer_type(segments_type const&)> function;
         symbols_type                                         middle_names;

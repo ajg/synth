@@ -111,7 +111,7 @@ struct base_adapter {
         void* data = this->data();
         BOOST_ASSERT(data);
         BOOST_ASSERT(this->type() == typeid(T));
-        return reinterpret_cast<T*>(data);
+        return static_cast<T*>(data);
     }
 };
 

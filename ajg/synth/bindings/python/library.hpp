@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_BINDINGS_PYTHON_LIBRARY_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_PYTHON_LIBRARY_HPP_INCLUDED
 
+#include <ajg/synth/support.hpp>
+
 #include <memory>
 #include <vector>
 #include <utility>
@@ -94,24 +96,32 @@ struct library : Options::abstract_library {
 
     static string_type call_native_renderer( renderer_type const& renderer
                                         // , context_type&        context
-                                           , py::object const&    context_source
-                                           , intptr_t             match
+                                           , py::object const&    data
                                            ) {
-        context_type context(context_source);
+        context_type& context = local_context();
+        // TODO: Make previous/data exception safe.
+        value_type const previous = context.data(data);
         std::basic_ostringstream<char_type> ss;
         BOOST_ASSERT(!renderer.empty());
-        renderer(arguments_type(), ss, context, reinterpret_cast<void const*>(match));
+        renderer(arguments_type(), ss, context);
+        context.data(previous);
         BOOST_ASSERT(ss);
         return ss.str();
+    }
+
+    inline static context_type& local_context(context_type* const c = 0) {
+        static AJG_SYNTH_THREAD_LOCAL context_type* context = c;
+        BOOST_ASSERT(context);
+        return c ? *(context = c) : *context;
     }
 
     static void call_python_renderer( py::object     const& r
                                     , arguments_type const& rest
                                     , ostream_type&         ostream
                                     , context_type&         context
-                                    , void const*           match
                                     ) {
-        std::pair<py::tuple, py::dict> const args = c::make_args_with(context.value(), match, rest);
+        local_context(&context);
+        std::pair<py::tuple, py::dict> const args = c::make_args_with(context.data(), rest);
         ostream << c::make_string(r(*args.first, **args.second));
     }
 
@@ -119,11 +129,11 @@ struct library : Options::abstract_library {
                                  , segments_type const& segments
                                  ) {
 
-        typedef boost::mpl::vector<string_type, py::object, intptr_t> signature_type;
+        typedef boost::mpl::vector<string_type, py::object> signature_type;
         py::list l;
 
         BOOST_FOREACH(segment_type const& segment, segments) {
-            boost::function<string_type(py::object, intptr_t)> f(boost::bind(call_native_renderer, segment.second, _1, _2));
+            boost::function<string_type(py::object)> f(boost::bind(call_native_renderer, segment.second, _1));
 
             py::list ms;
             BOOST_FOREACH(string_type const& match, segment.first) {
@@ -134,7 +144,7 @@ struct library : Options::abstract_library {
             l.append(py::make_tuple(ms, o));
         }
 
-        return boost::bind(call_python_renderer, tag(l), _1, _2, _3, _4);
+        return boost::bind(call_python_renderer, tag(l), _1, _2, _3);
     }
 
     static value_type call_filter( py::object            filter

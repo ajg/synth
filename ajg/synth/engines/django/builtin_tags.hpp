@@ -868,7 +868,7 @@ struct builtin_tags {
                 //       characters wide, which may not be the case if they become configurable.
                 BOOST_ASSERT(c.length() >= 4);
                 string_type const name     = text::strip_right(n.str());
-                string_type const contents = string_type(c.str()).substr(2, c.length() - 4);
+                string_type const contents = text::strip(string_type(c.str()).substr(2, c.length() - 4));
                 std::vector<string_type> const args = state.library_tag_args_;
                 state.library_tag_args_.clear();
 

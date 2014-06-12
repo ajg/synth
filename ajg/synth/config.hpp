@@ -33,7 +33,7 @@
 
 //
 // AJG_SYNTH_CONFIG_NO_WCHAR_T
-//     FIXME: Needs boost/config.hpp is not yet available here.
+//     FIXME: Needs boost/config.hpp, which is not yet available here.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(BOOST_NO_INTRINSIC_WCHAR_T) || defined(DISABLE_WIDE_CHAR_SUPPORT)
@@ -44,7 +44,7 @@
 
 //
 // AJG_SYNTH_CONFIG_NO_LONG_LONG
-//     FIXME: Needs boost/config.hpp is not yet available here.
+//     FIXME: Needs boost/config.hpp, which is not yet available here.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(BOOST_HAS_LONG_LONG)

@@ -131,14 +131,17 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         identifier
             = ((x::alpha | '_') >> *_w >> _b)
             ;
-        restricted_identifier
+        keyword_identifier
+            = identifier[ x::check(in(keywords_)) ]
+            ;
+        nonkeyword_identifier
             = identifier[ x::check(not_in(keywords_)) ]
             ;
         unreserved_identifier
-            = restricted_identifier[ x::check(not_in(reserved_)) ]
+            = nonkeyword_identifier[ x::check(not_in(reserved_)) ]
             ;
         name
-            = (id = restricted_identifier) >> *_s
+            = (id = nonkeyword_identifier) >> *_s
             ;
         names
             = +name
@@ -147,7 +150,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = (id = unreserved_identifier) >> *_s
             ;
         package
-            = (id = (restricted_identifier >> *('.' >> identifier))) >> *_s
+            = (id = (nonkeyword_identifier >> *('.' >> identifier))) >> *_s
             ;
         packages
             = +package
@@ -173,7 +176,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             | '\'' >> *~as_xpr('\'') >> '\''
             ;
         variable_literal
-            = restricted_identifier
+            = nonkeyword_identifier
             ;
         literal
             = none_literal
@@ -242,7 +245,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             ;
         argument
             // TODO: Check whether whitespace can precede or follow '='.
-            = !(restricted_identifier >> as_xpr('=')) >> value
+            = !(nonkeyword_identifier >> as_xpr('=')) >> value
             ;
         arguments
             = *argument
@@ -276,6 +279,15 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
   private:
+
+    struct in {
+        symbols_type const& symbols;
+        explicit in(symbols_type const& symbols) : symbols(symbols) {}
+
+        boolean_type operator ()(typename match_type::value_type const& match) const {
+            return this->symbols.find(match.str()) != this->symbols.end();
+        }
+    };
 
     struct not_in {
         symbols_type const& symbols;
@@ -521,7 +533,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         arguments_type arguments;
         BOOST_FOREACH(match_type const& arg, this->select_nested(match, this->argument)) {
             value_type const& value = this->evaluate(options, state, arg(this->value), context);
-            if (match_type const& name = arg(this->restricted_identifier)) {
+            if (match_type const& name = arg(this->nonkeyword_identifier)) {
                 arguments.second[name.str()] = value; // Keyword argument.
             }
             else {
@@ -760,7 +772,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
   protected:
 
     regex_type identifier;
-    regex_type restricted_identifier;
+    regex_type keyword_identifier;
+    regex_type nonkeyword_identifier;
     regex_type unreserved_identifier;
     regex_type unreserved_name;
     regex_type name;

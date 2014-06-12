@@ -799,8 +799,8 @@ struct builtin_tags {
             typename x::function<on_polyadic1_tag_>::type const on_polyadic1_tag = {{}};
             typename x::function<on_polyadic2_tag_>::type const on_polyadic2_tag = {{}};
 
-            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_name) >> *x::keep(kernel.argument[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
-                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_name) >> *x::keep(kernel.argument[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._state, s2, _))]));
+            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_name) >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
+                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_name) >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._state, s2, _))]));
 
             return kernel.polyadic_tag;
         }
@@ -863,8 +863,11 @@ struct builtin_tags {
                                    , sub_match_type const&  n
                                    , sub_match_type const&  c
                                    ) const {
+                // TODO: These numbers assume that block_open and block_close will always be 2
+                //       characters wide, which may not be the case if they become configurable.
+                BOOST_ASSERT(c.length() >= 4);
                 string_type const name     = text::strip_right(n.str());
-                string_type const contents = text::strip_right(c.str());
+                string_type const contents = string_type(c.str()).substr(2, c.length() - 4);
                 std::vector<string_type> const args = state.library_tag_args_;
                 state.library_tag_args_.clear();
 

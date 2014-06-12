@@ -110,8 +110,7 @@ struct library : Options::abstract_library {
     }
 
     inline static context_type& local_context(context_type* const c = 0) {
-        static AJG_SYNTH_THREAD_LOCAL context_type* context = c;
-        BOOST_ASSERT(context);
+        static AJG_SYNTH_THREAD_LOCAL context_type* context = 0;
         return c ? *(context = c) : *context;
     }
 

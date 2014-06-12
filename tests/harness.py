@@ -72,8 +72,11 @@ def run_test_as(type, name, context_data, golden, source, engine, args):
             if string != file.read():
                 print('    x Rendering to file failed: mismatch')
 
-    # XXX: Windows doesn't support reading from an already open temporary file.
+    # Note: Windows doesn't support reading from an already open
+    #       temporary file and has stupid newline conventions.
     if sys.platform == 'win32':
+        string = string.replace('\r\n', '\n')
+        golden = golden.replace('\r\n', '\n')
         print('    # Rendering to path excluded on this platform')
     else:
         with tempfile.NamedTemporaryFile() as file:

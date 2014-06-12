@@ -152,8 +152,9 @@ def get_extra_compile_args(compiler):
             '/bigobj', # Prevent reaching object limit.
             '/EHsc',   # Override structured exception handling (SEH).
             '/FD',     # Allow minimal rebuild.
-            '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4180', # "qualifier applied to function type has no meaning" in list_of.hpp.
+            '/wd4273', # "inconsistent dll linkage" in pymath.h.
+            '/wd4503', # "decorated name length exceeded, name was truncated" in xpressive.
         ]
     else:
         # TODO: Some of this is repeated in SConstruct.

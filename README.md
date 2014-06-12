@@ -457,12 +457,12 @@ Future Work
 
  - Build:
    * Pre-commit script/hook
-   * Add `-fsanitize=undefined` when available (GCC 4.9+ so far)
-   * Visual Studio 2013:
-     + Add project for command-line tool
-     + Pass /W4 cleanly
-     + Pass /Wall cleanly
-   * Create Visual Studio 2012 solution & projects
+   * GCC:
+     + [4.9+] Add `-fsanitize=undefined` when available
+   * Visual Studio:
+     + [2013] Pass /W4 cleanly
+     + [2013] Pass /Wall cleanly
+     + [2012] Create solution & projects
 
  - Distribution:
    * RPM package

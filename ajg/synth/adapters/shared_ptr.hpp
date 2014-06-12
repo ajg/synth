@@ -26,7 +26,7 @@ struct adapter<Value, boost::shared_ptr<T> >     : forwarding_adapter<Value, T, 
 
     template <class A> A forward() { return A(boost::ref(*this->adapted())); }
     template <class A> A forward() const { return A(boost::cref(*this->adapted())); }
-    bool                 valid() const { return this->adapted(); }
+    bool                 valid() const { return this->adapted().get() != 0; }
 };
 
 }}} // namespace ajg::synth::adapters

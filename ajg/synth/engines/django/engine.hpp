@@ -23,6 +23,7 @@
 
 #include <ajg/synth/templates.hpp>
 #include <ajg/synth/exceptions.hpp>
+#include <ajg/synth/detail/drop.hpp>
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/engines/base_engine.hpp>
 #include <ajg/synth/engines/django/builtin_tags.hpp>
@@ -298,10 +299,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         }
     };
 
-  private:
-
-    using kernel_type::base_kernel_type::is;
-
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     inline regex_type marker  (string_type const& s, string_type const& name) { return as_xpr((this->markers[name] = s)); }
@@ -376,7 +373,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
     string_type extract_string(match_type const& match) const {
-        BOOST_ASSERT(is(match, this->string_literal));
+        BOOST_ASSERT(this->is(match, this->string_literal));
         return text::unquote(match.str());
     }
 
@@ -463,9 +460,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , match_type   const& match
                      , context_type&       context
                      ) const {
-             if (is(match, this->plain)) this->render_plain(ostream, options, state, match, context);
-        else if (is(match, this->block)) this->render_block(ostream, options, state, match, context);
-        else if (is(match, this->tag))   this->render_tag(ostream, options, state, match, context);
+             if (this->is(match, this->plain)) this->render_plain(ostream, options, state, match, context);
+        else if (this->is(match, this->block)) this->render_block(ostream, options, state, match, context);
+        else if (this->is(match, this->tag))   this->render_tag(ostream, options, state, match, context);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
@@ -478,7 +475,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         value_type v = value;
 
         BOOST_FOREACH(match_type const& filter, this->select_nested(match, this->filter)) {
-            BOOST_ASSERT(is(filter, this->filter));
+            BOOST_ASSERT(this->is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
 
@@ -550,28 +547,28 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                , match_type    const& match
                                , context_type&        context
                                ) const {
-        BOOST_ASSERT(is(match, this->literal));
+        BOOST_ASSERT(this->is(match, this->literal));
         match_type  const& literal = this->unnest(match);
         string_type const  string  = match.str();
         string_type const  token   = literal[0];
 
-        if (is(literal, this->none_literal)) {
+        if (this->is(literal, this->none_literal)) {
             return value_type(none_type()).token(token);
         }
-        else if (is(literal, this->boolean_literal)) {
+        else if (this->is(literal, this->boolean_literal)) {
             match_type const& boolean = this->unnest(literal);
 
-            if (is(boolean, this->true_literal)) {
+            if (this->is(boolean, this->true_literal)) {
                 return value_type(boolean_type(true)).token(token);
             }
-            else if (is(boolean, this->false_literal)) {
+            else if (this->is(boolean, this->false_literal)) {
                 return value_type(boolean_type(false)).token(token);
             }
             else {
                 AJG_SYNTH_THROW(std::logic_error("invalid boolean literal"));
             }
         }
-        else if (is(literal, this->number_literal)) {
+        else if (this->is(literal, this->number_literal)) {
             if (string.find(char_type('.')) == string_type::npos) {
                 // TODO[c++11]: atoll (long long)
                 long const l = (std::atol)(text::narrow(string).c_str());
@@ -582,10 +579,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                 return value_type(floating_type(d)).token(token);
             }
         }
-        else if (is(literal, this->string_literal)) {
+        else if (this->is(literal, this->string_literal)) {
             return value_type(extract_string(literal)).token(token);
         }
-        else if (is(literal, this->variable_literal)) {
+        else if (this->is(literal, this->variable_literal)) {
             if (boost::optional<value_type> const& variable = context.get(string)) {
                 return variable->metacopy().token(token);
             }
@@ -606,13 +603,13 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                   ) const {
         match_type const& expr = this->unnest(match);
 
-        if (is(expr, this->unary_expression)) {
+        if (this->is(expr, this->unary_expression)) {
             return this->evaluate_unary(options, state, expr, context);
         }
-        else if (is(expr, this->binary_expression)) {
+        else if (this->is(expr, this->binary_expression)) {
             return this->evaluate_binary(options, state, expr, context);
         }
-        else if (is(expr, this->nested_expression)) {
+        else if (this->is(expr, this->nested_expression)) {
             match_type const& nested = expr(this->expression);
             return this->evaluate_expression(options, state, nested, context);
         }
@@ -626,7 +623,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                              , match_type   const& match
                              , context_type&       context
                              ) const {
-        BOOST_ASSERT(is(match, this->unary_expression));
+        BOOST_ASSERT(this->is(match, this->unary_expression));
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
@@ -643,16 +640,16 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                               , match_type   const& match
                               , context_type&       context
                               ) const {
-        BOOST_ASSERT(is(match, this->binary_expression));
+        BOOST_ASSERT(this->is(match, this->binary_expression));
         match_type const& chain = match(this->chain);
         value_type value = this->evaluate_chain(options, state, chain, context);
         string_type op;
 
         BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
-            if (is(segment, this->binary_operator)) {
+            if (this->is(segment, this->binary_operator)) {
                 op = segment.str();
             }
-            else if (!(is(segment, this->expression))) {
+            else if (!(this->is(segment, this->expression))) {
                 AJG_SYNTH_THROW(std::logic_error("invalid binary expression"));
             }
             else if (op == text::literal("==")) {
@@ -703,10 +700,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                             ) const {
         match_type const& link = this->unnest(match);
 
-        if (is(link, this->subscript_link)) { // i.e. value[attribute]
+        if (this->is(link, this->subscript_link)) { // i.e. value[attribute]
             return this->evaluate(options, state, link(this->expression), context);
         }
-        else if (is(link, this->attribute_link)) { // i.e. value.attribute
+        else if (this->is(link, this->attribute_link)) { // i.e. value.attribute
             return string_type(link(this->identifier).str());
         }
         else {
@@ -719,7 +716,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                              , match_type   const& match
                              , context_type&       context
                              ) const {
-        BOOST_ASSERT(is(match, this->chain));
+        BOOST_ASSERT(this->is(match, this->chain));
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(options, state, lit, context);
 

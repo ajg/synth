@@ -35,7 +35,7 @@ AJG_SYNTH_TEST_GROUP("adapter");
 
 } // namespace
 
-unit_test(assignments) {
+AJG_SYNTH_TEST_UNIT(assignments) {
     using namespace std;   // TODO: Remove.
     using namespace boost; // TODO: Remove.
 

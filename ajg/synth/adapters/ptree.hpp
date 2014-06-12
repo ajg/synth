@@ -68,11 +68,12 @@ inline bool operator <( basic_ptree<K, V> const& a
                                                               );
 }
 
-// Needed by the command_line binding.
+// Seems needed by the command_line binding.
+// TODO: Determine whether it's actually used, otherwise leave it undefined.
 template <class Char, class K, class V>
-inline bool operator <<( std::basic_ostream<Char>& ostream
-                       , basic_ptree<K, V> const&
-                       ) {
+inline std::basic_ostream<Char>& operator <<(std::basic_ostream<Char>& ostream
+                                            , basic_ptree<K, V> const&
+                                            ) {
     return ostream << "TODO";
 }
 

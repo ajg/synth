@@ -5,18 +5,24 @@ VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "harness", "harness.vcxproj", "{05ADC26E-0CB4-4CCA-8A66-2A29205699EC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tool", "tool.vcxproj", "{1E8AC419-A0CD-4FBD-9CF0-2EAA3A3AF1C5}"
+EndProject
 Global
-  GlobalSection(SolutionConfigurationPlatforms) = preSolution
-    Debug|Win32 = Debug|Win32
-    Release|Win32 = Release|Win32
-  EndGlobalSection
-  GlobalSection(ProjectConfigurationPlatforms) = postSolution
-    {05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Debug|Win32.ActiveCfg = Debug|Win32
-    {05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Debug|Win32.Build.0 = Debug|Win32
-    {05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Release|Win32.ActiveCfg = Release|Win32
-    {05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Release|Win32.Build.0 = Release|Win32
-  EndGlobalSection
-  GlobalSection(SolutionProperties) = preSolution
-    HideSolutionNode = FALSE
-  EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Debug|Win32.Build.0 = Debug|Win32
+		{05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Release|Win32.ActiveCfg = Release|Win32
+		{05ADC26E-0CB4-4CCA-8A66-2A29205699EC}.Release|Win32.Build.0 = Release|Win32
+		{1E8AC419-A0CD-4FBD-9CF0-2EAA3A3AF1C5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1E8AC419-A0CD-4FBD-9CF0-2EAA3A3AF1C5}.Debug|Win32.Build.0 = Debug|Win32
+		{1E8AC419-A0CD-4FBD-9CF0-2EAA3A3AF1C5}.Release|Win32.ActiveCfg = Release|Win32
+		{1E8AC419-A0CD-4FBD-9CF0-2EAA3A3AF1C5}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 EndGlobal

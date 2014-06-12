@@ -30,6 +30,8 @@
 #include <tut/tut.hpp>
 #include <tut/tut_reporter.hpp>
 
+#include <ajg/synth/detail/text.hpp>
+
 // TODO: Wrap this into AJG_SYNTH_EXTERNAL_POP in support.hpp
 #if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic pop
@@ -53,24 +55,53 @@ struct check_test_number {
 };
 
 //
-// ensure_throws
+// MUST_THROW
 //     TODO[c++11]: Replace with function taking a lambda.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define ensure_throws(type, expr) \
+#define MUST_THROW(type, expr) \
     do { try { expr; fail("exception of type " #type " not thrown"); } \
          catch (type const&) { } \
        } while (0)
 
-//
-// wensure_equals
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define MUST(e)              ::ajg::synth::must(e)
+#define MUST_NOT(e)          ::ajg::synth::must_not(e)
+#define MUST_EQUAL(a, b)     ::ajg::synth::must_equal(a, b)
+#define MUST_NOT_EQUAL(a, b) ::ajg::synth::must_not_equal(a, b)
+
+inline void must    (bool const cond) { tut::ensure(cond); }
+inline void must_not(bool const cond) { tut::ensure_not(cond); }
+
+template <typename A, typename B> inline void must_not_equal(A const a, B const b) { tut::ensure_not(a == b); }
+template <typename A, typename B> inline void must_equal    (A const a, B const b) { tut::ensure_equals(a, b); }
+
+template <>
+inline void must_equal<std::string, std::string>(std::string const a, std::string const b) {
+    typedef detail::text<std::string> text;
+    // Cope with Windows' idiotic newline conventions.
+    std::string const x = AJG_SYNTH_IF_WINDOWS(text::replace(a, "\r\n", "\n"), a);
+    std::string const y = AJG_SYNTH_IF_WINDOWS(text::replace(b, "\r\n", "\n"), b);
+    tut::ensure_equals(text::quote(x, '"'), text::quote(y, '"'));
+}
+
+template <>
+inline void must_equal<std::string, char const*>(std::string a, char const* b) {
+    must_equal<std::string, std::string>(a, std::string(b));
+}
 
 #ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 
-inline void wensure_equals(std::wstring const& expect, std::wstring const& actual) {
-    tut::ensure_equals(actual.length(), expect.length());
-    tut::ensure(actual == expect); // XXX: tut's ensure_equals doesn't play well with wchar_t.
+template <>
+inline void must_equal<std::wstring, std::wstring>(std::wstring const a, std::wstring const b) {
+    typedef detail::text<std::string> text;
+    must_equal<std::string, std::string>(text::narrow(a), text::narrow(b));
+}
+
+template <>
+inline void must_equal<std::wstring, wchar_t const*>(std::wstring const a, wchar_t const* b) {
+    must_equal<std::wstring, std::wstring>(a, std::wstring(b));
 }
 
 #endif
@@ -83,12 +114,11 @@ inline void wensure_equals(std::wstring const& expect, std::wstring const& actua
 namespace { struct no_data {}; }
 
 //
-// unit_test
-//     TODO: Rename AJG_SYNTH_UNIT_TEST.
+// AJG_SYNTH_TEST_UNIT
 //     TODO[c++11]: Replace with function taking a lambda.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define unit_test(name) \
+#define AJG_SYNTH_TEST_UNIT(name) \
     namespace tut { template<> template<> \
     void test_group_type::object::test</**/::ajg::synth::check_test_number<__LINE__>::value>() { \
         set_test_name(#name); \
@@ -101,7 +131,7 @@ namespace { struct no_data {}; }
 
 #define AJG_SYNTH_TEST_GROUP_WITH_DATA(name, data) \
     struct test_group_type : ::ajg::synth::test_group<data> { \
-        test_group_type() : ::ajg::synth::test_group<data>(name) {} } \
+        test_group_type()  : ::ajg::synth::test_group<data>(name) {} } \
     static const group
 
 //

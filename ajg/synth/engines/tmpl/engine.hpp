@@ -167,10 +167,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         builtin_tags_.initialize(*this);
     }
 
-  private:
-
-    using kernel_type::base_kernel_type::is;
-
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     path_type extract_path(match_type const& attr) const {
@@ -178,21 +174,21 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
     string_type extract_attribute(match_type const& attr) const {
-        if (is(attr, this->attribute)) {
+        if (this->is(attr, this->attribute)) {
             match_type const& attr_ = this->unnest(attr);
             return extract_attribute(attr_);
         }
-        else if (is(attr, this->name_attribute)) {
+        else if (this->is(attr, this->name_attribute)) {
             match_type const& attr_ = attr(attribute);
             return extract_attribute(attr_);
         }
-        else if (is(attr, this->quoted_attribute)) {
+        else if (this->is(attr, this->quoted_attribute)) {
             // TODO: Escape sequences, etc.
             // Handles "string" or 'string'.
             string_type const string = attr.str();
             return string.substr(1, string.size() - 2);
         }
-        else if (is(attr, this->plain_attribute)) {
+        else if (this->is(attr, this->plain_attribute)) {
             return attr.str();
         }
         else if (!attr) {
@@ -286,9 +282,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , context_type const& context
                      , options_type const& options
                      ) const {
-             if (is(match, this->plain)) this->render_plain(ostream, match, context, options);
-        else if (is(match, this->block)) this->render_block(ostream, match, context, options);
-        else if (is(match, this->tag))   this->render_tag(ostream, match, context, options);
+             if (this->is(match, this->plain)) this->render_plain(ostream, match, context, options);
+        else if (this->is(match, this->block)) this->render_block(ostream, match, context, options);
+        else if (this->is(match, this->tag))   this->render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
@@ -302,15 +298,15 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             match_type const& attr  = this->unnest(nested);
             match_type const& value = attr(this->attribute);
 
-            if (is(attr, this->name_attribute)) {
+            if (this->is(attr, this->name_attribute)) {
                 if (name) AJG_SYNTH_THROW(std::logic_error("duplicate variable name"));
                 else name = this->extract_attribute(value);
             }
-            else if (is(attr, this->default_attribute)) {
+            else if (this->is(attr, this->default_attribute)) {
                 if (fallback) AJG_SYNTH_THROW(std::logic_error("duplicate default value"));
                 else fallback = this->extract_attribute(value);
             }
-            else if (is(attr, this->escape_attribute)) {
+            else if (this->is(attr, this->escape_attribute)) {
                 if (escape) {
                     AJG_SYNTH_THROW(std::logic_error("duplicate escape mode"));
                 }

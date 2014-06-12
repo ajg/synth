@@ -35,250 +35,251 @@ AJG_SYNTH_TEST_GROUP_WITH_DATA("ssi", data_type);
 
 } // namespace
 
-unit_test(sanity check) {
+AJG_SYNTH_TEST_UNIT(sanity check) {
     string_template_type const t("");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(plain string) {
+AJG_SYNTH_TEST_UNIT(plain string) {
     string_template_type const t("ABC");
-    ensure_equals(t.render_to_string(context), "ABC");
+    MUST_EQUAL(t.render_to_string(context), "ABC");
 }}}
 
-unit_test(html tags) {
+AJG_SYNTH_TEST_UNIT(html tags) {
     string_template_type const t("<foo>\nA foo <bar /> element.\n</foo>");
-    ensure_equals(t.render_to_string(context), t.str());
+    MUST_EQUAL(t.render_to_string(context), t.str());
 }}}
 
-unit_test(html comment) {
+AJG_SYNTH_TEST_UNIT(html comment) {
     string_template_type const t("<!-- A comment -->");
-    ensure_equals(t.render_to_string(context), t.str());
+    MUST_EQUAL(t.render_to_string(context), t.str());
 }}}
 
-unit_test(environment variable) {
-    char const *const path = std::getenv("PATH");
-    ensure("PATH environment variable is set", path != 0);
+AJG_SYNTH_TEST_UNIT(environment variable) {
+    std::string const name = AJG_SYNTH_IF_WINDOWS("Path", "PATH");
+    char const *const path = std::getenv(name.c_str());
+    MUST_NOT(path == 0);
 
-    string_template_type const t("<!--#echo var='PATH' -->");
-    ensure_equals(t.render_to_string(context), path);
+    string_template_type const t("<!--#echo var='" + name + "' -->");
+    MUST_EQUAL(t.render_to_string(context), path);
 }}}
 
-unit_test(non-extant variable) {
-    ensure(std::getenv("non_extant_var") == 0);
+AJG_SYNTH_TEST_UNIT(non-extant variable) {
+    MUST(std::getenv("non_extant_var") == 0);
     string_template_type const t("<!--#echo var='non_extant_var' -->");
-    ensure_equals(t.render_to_string(context), t.options().default_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().default_value.to_string());
 }}}
 
-unit_test(print environment) {
+AJG_SYNTH_TEST_UNIT(print environment) {
     char const *const path = std::getenv("PATH");
-    ensure("PATH environment variable is set", path != 0);
+    MUST_NOT(path == 0);
 
     string_template_type const t("<!--#printenv -->");
-    ensure(t.render_to_string(context).find(path) != string_type::npos);
+    MUST_NOT_EQUAL(t.render_to_string(context).find(path), string_type::npos);
 }}}
 
-unit_test(simple set_tag) {
+AJG_SYNTH_TEST_UNIT(simple set_tag) {
     string_template_type const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#echo var='foo' -->");
-    ensure_equals(t.render_to_string(context), "A");
+    MUST_EQUAL(t.render_to_string(context), "A");
 }}}
 
-unit_test(multiple set_tag) {
+AJG_SYNTH_TEST_UNIT(multiple set_tag) {
     string_template_type const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#set var='bar' value='B' -->"
         "<!--#set var='qux' value='C' -->"
         "<!--#echo var='foo' var='bar' var='qux' -->");
-    ensure_equals(t.render_to_string(context), "ABC");
+    MUST_EQUAL(t.render_to_string(context), "ABC");
 }}}
 
-unit_test(substitution in set_tag) {
+AJG_SYNTH_TEST_UNIT(substitution in set_tag) {
     string_template_type const t(
         "<!--#set var='foo' value='A' -->"
         "<!--#set var='bar' value='${foo}_B' -->"
         "<!--#set var='qux' value='${bar}_C' -->"
         "<!--#echo var='qux' -->");
-    ensure_equals(t.render_to_string(context), "A_B_C");
+    MUST_EQUAL(t.render_to_string(context), "A_B_C");
 }}}
 
-unit_test(escaped dollar sign) {
+AJG_SYNTH_TEST_UNIT(escaped dollar sign) {
     string_template_type const t(
         "<!--#set var='foo' value='\\$A' -->"
         "<!--#echo var='foo' -->");
-    ensure_equals(t.render_to_string(context), "$A");
+    MUST_EQUAL(t.render_to_string(context), "$A");
 }}}
 
-unit_test(if_tag: true) {
+AJG_SYNTH_TEST_UNIT(if_tag: true) {
     string_template_type t("<!--#if expr='1' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(if_tag: false) {
+AJG_SYNTH_TEST_UNIT(if_tag: false) {
     string_template_type t("<!--#if expr='``' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(boolean: unparenthesized) {
+AJG_SYNTH_TEST_UNIT(boolean: unparenthesized) {
     string_template_type t("<!--#if expr='1 && 1' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(boolean: true and true) {
+AJG_SYNTH_TEST_UNIT(boolean: true and true) {
     string_template_type t("<!--#if expr='(1 && 1)' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(boolean: missing operand) {
+AJG_SYNTH_TEST_UNIT(boolean: missing operand) {
     string_template_type t("<!--#if expr='(1 && )' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(boolean: false and true) {
+AJG_SYNTH_TEST_UNIT(boolean: false and true) {
     string_template_type t("<!--#if expr='(`` && 1)' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(boolean: false and false) {
+AJG_SYNTH_TEST_UNIT(boolean: false and false) {
     string_template_type t("<!--#if expr='(`` && ``)' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(disjunctions) {
+AJG_SYNTH_TEST_UNIT(disjunctions) {
     string_template_type t("<!--#if expr='(1 && 1 && 1)' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(conjunctions) {
+AJG_SYNTH_TEST_UNIT(conjunctions) {
     string_template_type t("<!--#if expr='(`` || `` || ``)' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(string comparison) {
+AJG_SYNTH_TEST_UNIT(string comparison) {
     string_template_type t("<!--#if expr='(`a` < `b`)' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(lexicographical string comparison) {
+AJG_SYNTH_TEST_UNIT(lexicographical string comparison) {
     string_template_type t("<!--#if expr='(`100` < `20`)' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(regex expression match) {
+AJG_SYNTH_TEST_UNIT(regex expression match) {
     string_template_type t("<!--#if expr='(`a` = /a/)' -->true<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "true");
+    MUST_EQUAL(t.render_to_string(context), "true");
 }}}
 
-unit_test(regex expression no match) {
+AJG_SYNTH_TEST_UNIT(regex expression no match) {
     string_template_type t("<!--#if expr='(`a` = /b/)' -->false<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(regex substitution) {
+AJG_SYNTH_TEST_UNIT(regex substitution) {
     string_template_type t("<!--#if expr='(`foo` = /(o+)/)' --><!--#echo var='1' --><!--#endif -->");
-    ensure_equals(t.render_to_string(context), "oo");
+    MUST_EQUAL(t.render_to_string(context), "oo");
 }}}
 
-unit_test(if_elif_tag) {
+AJG_SYNTH_TEST_UNIT(if_elif_tag) {
     string_template_type t("<!--#if expr='' -->foo"
         "<!--#elif expr='1' -->bar<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "bar");
+    MUST_EQUAL(t.render_to_string(context), "bar");
 }}}
 
-unit_test(if_else_tag) {
+AJG_SYNTH_TEST_UNIT(if_else_tag) {
     string_template_type t("<!--#if expr='' -->foo"
         "<!--#else -->bar<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "bar");
+    MUST_EQUAL(t.render_to_string(context), "bar");
 }}}
 
-unit_test(if_elif_else_tag) {
+AJG_SYNTH_TEST_UNIT(if_elif_else_tag) {
     string_template_type t("<!--#if expr='' -->foo"
         "<!--#elif expr='' -->bar<!--#else -->qux<!--#endif -->");
-    ensure_equals(t.render_to_string(context), "qux");
+    MUST_EQUAL(t.render_to_string(context), "qux");
 }}}
 
-unit_test(invalid if_tag: no expr) {
+AJG_SYNTH_TEST_UNIT(invalid if_tag: no expr) {
     string_template_type const t("<!--#if -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
-unit_test(invalid if_tag: multiple expr) {
+AJG_SYNTH_TEST_UNIT(invalid if_tag: multiple expr) {
     string_template_type const t("<!--#if expr='1' expr='1' -->foo<!--#endif -->");
-    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
 
 /* TODO:
-unit_test(magic variables) {
+AJG_SYNTH_TEST_UNIT(magic variables) {
     // std::cout << std::endl << string_template_type("<!--#echo var='DATE_LOCAL' -->").render_to_string(context) << std::endl;
 }}}*/
 
 
-unit_test(multiple config_tag attributes) {
+AJG_SYNTH_TEST_UNIT(multiple config_tag attributes) {
     string_template_type const t("<!--#config sizefmt='bytes' "
         "timefmt='%Y' echomsg='' errmsg='Error' -->");
-    ensure_equals(t.render_to_string(context), "");
+    MUST_EQUAL(t.render_to_string(context), "");
 }}}
 
-unit_test(malformed tag) {
-    ensure_throws(s::parsing_error, string_template_type("<!--#e_cho -->"));
+AJG_SYNTH_TEST_UNIT(malformed tag) {
+    MUST_THROW(s::parsing_error, string_template_type("<!--#e_cho -->"));
 }}}
 
-unit_test(invalid config_tag) {
+AJG_SYNTH_TEST_UNIT(invalid config_tag) {
     string_template_type const t("<!--#config foo='bar' -->");
-    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
-unit_test(invalid config_tag sizefmt) {
+AJG_SYNTH_TEST_UNIT(invalid config_tag sizefmt) {
     string_template_type const t("<!--#config sizefmt='foo' -->");
-    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
-unit_test(fsize_tag bytes) {
+AJG_SYNTH_TEST_UNIT(fsize_tag bytes) {
     string_template_type const t("<!--#fsize file='tests/templates/ssi/1338' -->");
-    ensure_equals(t.render_to_string(context), "1338");
+    MUST_EQUAL(t.render_to_string(context), "1338");
 }}}
 
-unit_test(fsize_tag abbrev) {
+AJG_SYNTH_TEST_UNIT(fsize_tag abbrev) {
     string_template_type const t(
         "<!--#config sizefmt='abbrev' -->"
         "<!--#fsize file='tests/templates/ssi/1338' -->");
-    ensure_equals(t.render_to_string(context), "1.3 KB");
+    MUST_EQUAL(t.render_to_string(context), "1.3 KB");
 }}}
 
-unit_test(flastmod_tag) {
+AJG_SYNTH_TEST_UNIT(flastmod_tag) {
     string_template_type const t("<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
     string_type const time_format = t.options().format(text::literal("timefmt"));
-    ensure_equals(t.render_to_string(context), traits_type::format_time(time_format,
+    MUST_EQUAL(t.render_to_string(context), traits_type::format_time(time_format,
         traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
-unit_test(flastmod_tag custom) {
+AJG_SYNTH_TEST_UNIT(flastmod_tag custom) {
     string_type const format("%H:%M:%S-%d/%m/%y");
     string_template_type const t(
         "<!--#config timefmt='" + format + "' -->"
         "<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(context), traits_type::format_time(format,
+    MUST_EQUAL(t.render_to_string(context), traits_type::format_time(format,
         traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
-unit_test(tag with error) {
+AJG_SYNTH_TEST_UNIT(tag with error) {
     string_template_type const t("<!--#fsize file='non-extant' -->");
-    ensure_equals(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
 }}}
 
-unit_test(file template) {
+AJG_SYNTH_TEST_UNIT(file template) {
     path_template_type const t("tests/templates/ssi/variables.shtml", options);
-    ensure_equals(t.render_to_string(context), "foo: A\nbar: B\nqux: C\n");
+    MUST_EQUAL(t.render_to_string(context), "foo: A\nbar: B\nqux: C\n");
 }}}
 
-unit_test(include_tag) {
+AJG_SYNTH_TEST_UNIT(include_tag) {
     string_template_type const t("<!--#include file='tests/templates/ssi/example.shtml' -->");
-    ensure_equals(t.render_to_string(context), "\n\n\n============\nfoo: A\nbar: B\nqux: C\n\n============\n");
+    MUST_EQUAL(t.render_to_string(context), "\n\n\n============\nfoo: A\nbar: B\nqux: C\n\n============\n");
 }}}
 
-unit_test(exec_tag) {
+AJG_SYNTH_TEST_UNIT(exec_tag) {
     std::string const command = AJG_SYNTH_IF_WINDOWS("dir", "ls");
     string_template_type const t("<!--#exec cmd='" + command + " \"tests/templates/ssi\"' -->");
-    ensure(t.render_to_string(context).find("example.shtml") != string_type::npos);
+    MUST_NOT_EQUAL(t.render_to_string(context).find("example.shtml"), string_type::npos);
 }}}

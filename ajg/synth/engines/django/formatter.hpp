@@ -417,13 +417,13 @@ struct formatter {
                                       ) {
         BOOST_STATIC_CONSTANT(size_type, N = 6);
 
-        static integer_type const seconds[N] = { 60 * 60 * 24 * 365
-                                               , 60 * 60 * 24 * 30
-                                               , 60 * 60 * 24 * 7
-                                               , 60 * 60 * 24
-                                               , 60 * 60
-                                               , 60
-                                               };
+        static size_type const seconds[N] = { 60 * 60 * 24 * 365
+                                            , 60 * 60 * 24 * 30
+                                            , 60 * 60 * 24 * 7
+                                            , 60 * 60 * 24
+                                            , 60 * 60
+                                            , 60
+                                            };
         static string_type const units[N] = { text::literal("year")
                                             , text::literal("month")
                                             , text::literal("week")
@@ -464,7 +464,7 @@ struct formatter {
         return text::replace(s, text::literal(" "), options.format(text::literal("SPACE_FORMAT")));
     }*/
 
-    inline static string_type pluralize_unit( size_type    const  n
+    inline static string_type pluralize_unit( integer_type const  n
                                             , string_type  const& s
                                             , options_type const& options
                                             ) {

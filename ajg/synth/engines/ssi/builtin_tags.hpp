@@ -105,7 +105,7 @@ enum { interpolated = true, raw = false };
 
 // TODO: Make `name` and `value` arguments.
 #define AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
-    BOOST_FOREACH(match_type const& attr, args.kernel.unnest(x).nested_results()) { \
+    BOOST_FOREACH(match_type const& attr, args.kernel.select_nested(x, args.kernel.attribute)) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
         if_statement else AJG_SYNTH_THROW(invalid_attribute(text::narrow(name))); \
@@ -271,8 +271,10 @@ enum { interpolated = true, raw = false };
         static void render(args_type const& args) {
             boolean_type condition = false;
 
+            // TODO: select_nested(match, ...)
             BOOST_FOREACH(match_type const& nested, args.match.nested_results()) {
-                if (kernel_type::is(nested, args.kernel.block)) {
+                // if (kernel_type::is(nested, args.kernel.block)) {
+                if (nested.regex_id() == args.kernel.block.regex_id()) {
                     if (condition) {
                         args.kernel.render_block(args.ostream, nested, args.context, args.options);
                         break;

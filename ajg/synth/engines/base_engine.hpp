@@ -30,7 +30,7 @@
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
-#include <ajg/synth/detail/container.hpp>
+#include <ajg/synth/detail/advance_to.hpp>
 #include <ajg/synth/engines/base_state.hpp>
 #include <ajg/synth/engines/base_value.hpp>
 #include <ajg/synth/engines/base_context.hpp>
@@ -171,6 +171,8 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
         return *match.nested_results().begin();
     }
 
+  public:
+
 //
 // select_nested
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,8 +189,6 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
                              , boost::make_filter_iterator(predicate, end,   end)
                              );
     }
-
-  public:
 
     inline void parse(state_type& state) const {
         range_type     r = state.range;

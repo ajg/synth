@@ -24,8 +24,9 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/utility.hpp>
 #include <ajg/synth/adapters/variant.hpp>
-#include <ajg/synth/detail/filesystem.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/advance_to.hpp>
+#include <ajg/synth/detail/filesystem.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -813,7 +814,7 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
          // string_type    const& name      = match(kernel.unreserved_name)[id].str();
-            size_type      const  position  = match.position(1);
+            size_type      const  position  = static_cast<size_type>(match.position(1));
             match_type     const& args      = match; // (kernel.arguments);
             arguments_type const  arguments = kernel.evaluate_arguments(options, state, args, context);
 

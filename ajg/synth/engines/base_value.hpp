@@ -37,7 +37,6 @@
 #include <ajg/synth/adapters/base_adapter.hpp>
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/detail/unmangle.hpp>
-#include <ajg/synth/detail/container.hpp>
 #include <ajg/synth/detail/has_fraction.hpp>
 
 namespace ajg {
@@ -126,17 +125,17 @@ struct base_value {
 
     template <class T> inline boolean_type is() const { return this->type() == typeid(T); }
 
-    inline boolean_type is_unit()        const { return this->flags() & adapters::unit; }
-    inline boolean_type is_boolean()     const { return this->flags() & adapters::boolean; }
-    inline boolean_type is_character()   const { return this->flags() & adapters::character; }
-    inline boolean_type is_textual()     const { return this->flags() & adapters::textual; }
-    inline boolean_type is_floating()    const { return this->flags() & adapters::floating; }
-    inline boolean_type is_integral()    const { return this->flags() & adapters::integral; }
-    inline boolean_type is_numeric()     const { return this->flags() & adapters::numeric; }
-    inline boolean_type is_chronologic() const { return this->flags() & adapters::chronologic; }
-    inline boolean_type is_sequential()  const { return this->flags() & adapters::sequential; }
-    inline boolean_type is_associative() const { return this->flags() & adapters::associative; }
-    inline boolean_type is_container()   const { return this->flags() & adapters::container; }
+    inline boolean_type is_unit()        const { return boolean_type(this->flags() & adapters::unit); }
+    inline boolean_type is_boolean()     const { return boolean_type(this->flags() & adapters::boolean); }
+    inline boolean_type is_character()   const { return boolean_type(this->flags() & adapters::character); }
+    inline boolean_type is_textual()     const { return boolean_type(this->flags() & adapters::textual); }
+    inline boolean_type is_floating()    const { return boolean_type(this->flags() & adapters::floating); }
+    inline boolean_type is_integral()    const { return boolean_type(this->flags() & adapters::integral); }
+    inline boolean_type is_numeric()     const { return boolean_type(this->flags() & adapters::numeric); }
+    inline boolean_type is_chronologic() const { return boolean_type(this->flags() & adapters::chronologic); }
+    inline boolean_type is_sequential()  const { return boolean_type(this->flags() & adapters::sequential); }
+    inline boolean_type is_associative() const { return boolean_type(this->flags() & adapters::associative); }
+    inline boolean_type is_container()   const { return boolean_type(this->flags() & adapters::container); }
     inline boolean_type is_iterable()    const { // TODO: Defer to adapter?
         return this->is_container() || this->is_sequential() || this->is_associative();
     }
@@ -187,13 +186,13 @@ struct base_value {
             return this->template as<boolean_type>();
         }
         else if (this->is_unit()) {
-            return false;
+            return boolean_type(false);
         }
         else if (boost::optional<boolean_type> const b = this->adapter()->get_boolean()) {
             return *b;
         }
         else if (boost::optional<number_type> const n = this->adapter()->get_number()) {
-            return *n;
+            return static_cast<boolean_type>(*n);
         }
         else if (boost::optional<range_type> const r = this->adapter()->get_range()) {
             return r->first != r->second;
@@ -319,19 +318,55 @@ struct base_value {
         }
     }
 
-    inline size_type empty()  const { return this->size() == 0; }
-    inline size_type size()   const {
-        // TODO: Defer to adapter first.
+    // TODO: Defer these to adapter first.
+    inline size_type empty() const { return this->size() == 0; }
+    inline size_type size()  const {
         range_type const r = this->to_range();
         return std::distance(r.first, r.second);
     }
 
-    inline value_type front() const { return *this->begin(); }
+    inline value_type front() const { return *this->at(0); }
     inline value_type back()  const { return *this->at(-1); }
 
-    // TODO: Defer to adapter first.
-    inline const_iterator at   (value_type const& index) const { return detail::at(*this, index.to_integer()); }
-    inline const_iterator find (value_type const& value) const { return this->adapter()->find(value); }
+    inline const_iterator find(value_type const& value) const { return this->adapter()->find(value); }
+    inline const_iterator at  (value_type const& value) const { // TODO: Defer to adapter first.
+        integer_type const index = value.to_integer();
+        range_type   const range = this->to_range();
+        size_type    const size  = std::distance(range.first, range.second);
+        const_iterator it(range.first), end(range.second);
+
+        // TODO: Once we have value_iterator::advance_to consider using return begin() + index,
+        //       to be O(1). For now, we must use this O(n) method:
+        for (integer_type i = 0; it != end; ++it, ++i) {
+            if ((index >= 0 && i == index) || i == index + size) {
+                return it;
+            }
+        }
+
+        AJG_SYNTH_THROW(std::out_of_range("index"));
+    }
+
+
+    inline range_type slice( index_type const lower = index_type()
+                           , index_type const upper = index_type()) const { // TODO: Defer to adapter first.
+        size_type const size = this->size();
+        integer_type l = lower.get_value_or(0);
+        integer_type u = upper.get_value_or(static_cast<integer_type>(size));
+        
+        // Wrap negative indices.
+        if (l < 0) l += size;
+        if (u < 0) u += size;
+
+        if (l < 0 || static_cast<size_type>(l) > size) AJG_SYNTH_THROW(std::out_of_range("lower index"));
+        if (u < 0 || static_cast<size_type>(u) > size) AJG_SYNTH_THROW(std::out_of_range("upper index"));
+        if (l > u)                                     AJG_SYNTH_THROW(std::logic_error("reversed indices"));
+
+        range_type range = this->to_range();
+        range.second = range.first;
+        std::advance(range.first, l);
+        std::advance(range.second, u);
+        return range;
+    }
 
     // TODO: Fold into `at`?
     inline attribute_type attribute(value_type const& key) const {
@@ -351,13 +386,6 @@ struct base_value {
 
     inline iterator begin() { return const_cast<base_value const*>(this)->begin(); }
     inline iterator end()   { return const_cast<base_value const*>(this)->end(); }
-
-
-    inline range_type slice( index_type const lower = index_type()
-                           , index_type const upper = index_type()
-                           ) const { // TODO: Defer to adapter first.
-        return detail::slice(*this, lower, upper);
-    }
 
     inline operator boolean_type()                          const { return this->to_boolean(); }
     inline boolean_type operator!()                         const { return !this->to_boolean(); }

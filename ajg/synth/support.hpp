@@ -31,11 +31,11 @@
 #if defined(__INTEL_COMPILER)
 #    undef  AJG_SYNTH_IS_COMPILER_INTEL
 #    define AJG_SYNTH_IS_COMPILER_INTEL 1
-#    define AJG_SYNTH_COMPILER_VERSION  __INTEL_COMPILER
+#    define AJG_SYNTH_COMPILER_VERSION  __INTEL_COMPILER // e.g. 900 == 9.0
 #elif defined(__clang__)
 #    undef  AJG_SYNTH_IS_COMPILER_CLANG
 #    define AJG_SYNTH_IS_COMPILER_CLANG 1
-#    define AJG_SYNTH_COMPILER_VERSION  // TODO
+#    define AJG_SYNTH_COMPILER_VERSION  (__clang_major__ * 100 + __clang_minor__) // e.g. 301 == 3.1
 #elif defined(__GNUC__)
 #    undef  AJG_SYNTH_IS_COMPILER_GCC
 #    define AJG_SYNTH_IS_COMPILER_GCC  1
@@ -43,10 +43,11 @@
 #elif defined(_MSC_VER)
 #    undef  AJG_SYNTH_IS_COMPILER_MSVC
 #    define AJG_SYNTH_IS_COMPILER_MSVC 1
-#    define AJG_SYNTH_COMPILER_VERSION // TODO
+#    define AJG_SYNTH_COMPILER_VERSION (_MSC_VER - 600) // e.g. 1200 == 12.0 (2013)
 #else
 #    undef  AJG_SYNTH_IS_COMPILER_UNKNOWN
 #    define AJG_SYNTH_IS_COMPILER_UNKNOWN 1
+#    define AJG_SYNTH_COMPILER_VERSION    0
 #endif
 
 //

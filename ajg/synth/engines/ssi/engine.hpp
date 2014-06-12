@@ -188,11 +188,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         builtin_tags_.initialize(*this);
     }
 
-  private:
-
-    using kernel_type::base_kernel_type::is;
-    using kernel_type::base_kernel_type::is_;
-
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
     inline static void initialize_state(state_type& state) {
@@ -334,9 +329,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , context_type&       context
                      , options_type const& options
                      ) const {
-             if (is(match, this->plain)) this->render_plain(ostream, match, context, options);
-        else if (is(match, this->block)) this->render_block(ostream, match, context, options);
-        else if (is(match, this->tag))   this->render_tag(ostream, match, context, options);
+             if (this->is(match, this->plain)) this->render_plain(ostream, match, context, options);
+        else if (this->is(match, this->block)) this->render_block(ostream, match, context, options);
+        else if (this->is(match, this->tag))   this->render_tag(ostream, match, context, options);
         else AJG_SYNTH_THROW(std::logic_error("invalid template state"));
     }
 
@@ -346,7 +341,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     regex_type make_tag(string_type const& name) const {
-        return tag_start >> *_s >> (s1 = name) >> (regex_type() = *(+_s >> attribute)) >> *_s >> tag_end;
+        return this->tag_start >> *_s >> (s1 = name) >> *(+_s >> this->attribute) >> *_s >> this->tag_end;
     }
 
     boolean_type equals_regex(args_type const& args, string_match_type const& str, string_match_type const& regex) const {

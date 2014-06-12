@@ -22,12 +22,17 @@
 //     TODO: AJG_SYNTH_IS(category, value), AJG_SYNTH_HAS(feature), AJG_SYNTH_GET(info)...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define AJG_SYNTH_IS_COMPILER_INTEL   0
 #define AJG_SYNTH_IS_COMPILER_CLANG   0
 #define AJG_SYNTH_IS_COMPILER_GCC     0
 #define AJG_SYNTH_IS_COMPILER_MSVC    0
 #define AJG_SYNTH_IS_COMPILER_UNKNOWN 0
 
-#if defined(__clang__)
+#if defined(__INTEL_COMPILER)
+#    undef  AJG_SYNTH_IS_COMPILER_INTEL
+#    define AJG_SYNTH_IS_COMPILER_INTEL 1
+#    define AJG_SYNTH_COMPILER_VERSION  __INTEL_COMPILER
+#elif defined(__clang__)
 #    undef  AJG_SYNTH_IS_COMPILER_CLANG
 #    define AJG_SYNTH_IS_COMPILER_CLANG 1
 #    define AJG_SYNTH_COMPILER_VERSION  // TODO
@@ -165,6 +170,20 @@
 #    define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e), AJG_SYNTH_UNREACHABLE)
 #else
 #    define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e))
+#endif
+
+//
+// AJG_SYNTH_THREAD_LOCAL:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
+#    define AJG_SYNTH_THREAD_LOCAL __declspec(thread)
+#elif AJG_SYNTH_IS_COMPILER_CLANG || AJG_SYNTH_IS_COMPILER_GCC || AJG_SYNTH_IS_COMPILER_INTEL
+#    define AJG_SYNTH_THREAD_LOCAL __thread
+#elif __cplusplus >= 201103L // C++11+
+#    define AJG_SYNTH_THREAD_LOCAL thread_local
+#else
+#    define AJG_SYNTH_THREAD_LOCAL // Cross your fingers and pray.
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

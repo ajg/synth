@@ -102,10 +102,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     struct args_type {
         kernel_type   const& kernel;
         match_type    const& match;
+        options_type  const& options;
         context_type&        context;
         ostream_type&        ostream;
-        options_type&        options;
-     // mutable options_type options; // Copy.
     };
 
   public:
@@ -190,15 +189,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
   public: // TODO: Make protected, and make builtin_tags/builtin_filters friends.
 
-    inline static void initialize_state(state_type& state) {
-        state.options.default_value = text::literal("(none)");
-        state.options.error_value   = text::literal("[an error occurred while processing this directive]");
-
-        // Note: insert will not replace existing values.
-        state.options.formats.insert(std::make_pair(text::literal("sizefmt"), text::literal("bytes")));
-        state.options.formats.insert(std::make_pair(text::literal("timefmt"), text::literal("%A, %d-%b-%Y %H:%M:%S %Z")));
-    }
-
     std::pair<string_type, string_type> parse_attribute( match_type   const& attr
                                                        , args_type    const& args
                                                        , boolean_type const  interpolate
@@ -222,7 +212,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                , options_type const& options
                                , string_type  const& name
                                ) const {
-        string_type const time_format = options.format(text::literal("timefmt"));
+        string_type const time_format = context.format(text::literal("timefmt"));
 
         // First, check the context.
         if (boost::optional<value_type> const value = context.get(name)) {
@@ -236,11 +226,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             AJG_SYNTH_THROW(not_implemented("DOCUMENT_URI"));
         }
         else if (name == text::literal("DATE_LOCAL")) {
-            return traits_type::format_datetime(time_format, traits_type::local_datetime());
+            return traits_type::format_datetime(time_format, traits_type::local_datetime(context.timezone()));
         }
         else if (name == text::literal("DATE_GMT")) {
-            return traits_type::format_time(time_format, traits_type::utc_time());
-            // OR: return traits_type::format_datetime(time_format, traits_type::utc_datetime());
+            // return traits_type::format_time(time_format, traits_type::utc_time());
+            return traits_type::format_datetime(time_format, traits_type::utc_datetime());
         }
         else if (name == text::literal("LAST_MODIFIED")) {
             AJG_SYNTH_THROW(not_implemented("LAST_MODIFIED"));
@@ -252,7 +242,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         }
         // Otherwise, use the undefined echo message.
         else {
-            return options.default_value.to_string();
+            return context.format(text::literal("echomsg"));
         }
     }
 
@@ -261,6 +251,13 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                , state_type   const& state
                , context_type&       context
                ) const {
+        static char const* errormsg = "[an error occurred while processing this directive]";
+
+        context.format(text::literal("echomsg"),  text::literal("(none)"),                   false);
+        context.format(text::literal("errormsg"), text::literal(errormsg),                   false);
+        context.format(text::literal("sizefmt"),  text::literal("bytes"),                    false);
+        context.format(text::literal("timefmt"),  text::literal("%A, %d-%b-%Y %H:%M:%S %Z"), false);
+
         this->render_block(ostream, state.match, context, options);
     }
 
@@ -304,9 +301,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             args_type const args =
                 { *this
                 , match_
+                , options
                 , context
                 , ostream
-                , const_cast<options_type&>(options) // FIXME
                 };
             tag(args);
         }
@@ -321,7 +318,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             std::cerr << std::endl << "error (" << e.what() << ") in `" << match.str() << "`" << std::endl;
         }*/
 
-        ostream << options.error_value;
+        ostream << context.format(text::literal("errormsg"));
     }
 
     void render_match( ostream_type&       ostream
@@ -403,21 +400,21 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     string_type parse_string(args_type const& args, string_match_type const& match) const {
         string_match_type const& string = this->unnest_(match);
-        if (is_(string, this->raw_string))           return match.str();
-        if (is_(string, this->regex_expression))     return this->extract_attribute(match);
-        if (is_(string, this->variable))             return this->interpolate(args, match.str());
-        if (is_(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
+        if (this->is_(string, this->raw_string))           return match.str();
+        if (this->is_(string, this->regex_expression))     return this->extract_attribute(match);
+        if (this->is_(string, this->variable))             return this->interpolate(args, match.str());
+        if (this->is_(string, this->quoted_string))        return this->interpolate(args, this->extract_attribute(match));
         AJG_SYNTH_THROW(std::logic_error("invalid string"));
     }
 
     boolean_type evaluate_expression(args_type const& args, string_match_type const& expr) const {
-        if (is_(expr, this->and_expression))        return fold(args, expr, boolean_type(true), std::logical_and<boolean_type>());
-        if (is_(expr, this->or_expression))         return fold(args, expr, boolean_type(false), std::logical_or<boolean_type>());
-        if (is_(expr, this->not_expression))        return !evaluate_expression(args, this->unnest_(expr));
-        if (is_(expr, this->primary_expression))    return evaluate_expression(args, this->unnest_(expr));
-        if (is_(expr, this->expression))            return evaluate_expression(args, this->unnest_(expr));
-        if (is_(expr, this->string_expression))     return !parse_string(args, expr).empty();
-        if (is_(expr, this->comparison_expression)) return equals(args, expr);
+        if (this->is_(expr, this->and_expression))        return fold(args, expr, boolean_type(true), std::logical_and<boolean_type>());
+        if (this->is_(expr, this->or_expression))         return fold(args, expr, boolean_type(false), std::logical_or<boolean_type>());
+        if (this->is_(expr, this->not_expression))        return !evaluate_expression(args, this->unnest_(expr));
+        if (this->is_(expr, this->primary_expression))    return evaluate_expression(args, this->unnest_(expr));
+        if (this->is_(expr, this->expression))            return evaluate_expression(args, this->unnest_(expr));
+        if (this->is_(expr, this->string_expression))     return !parse_string(args, expr).empty();
+        if (this->is_(expr, this->comparison_expression)) return equals(args, expr);
         AJG_SYNTH_THROW(std::logic_error("invalid expression"));
 
     }

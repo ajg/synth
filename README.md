@@ -41,8 +41,9 @@ def simple_tmpl_example():
     t = synth.Template('Howdy, <TMPL_VAR user>!', 'tmpl')
     c = {'user': 'Dolph Lundgren'}
 
-    t.render_to_path("greeting.txt", c) # or, e.g.:
-    t.render_to_file(sys.stdout, c) # or, e.g.:
+    # Render to different destinations:
+    t.render_to_path("greeting.txt", c)
+    t.render_to_file(sys.stdout, c)
     print t.render_to_string(c)
 ```
 
@@ -89,7 +90,6 @@ Reference
       -c file, --context=file      contextual data             *.{ini,json,xml}
       -e name, --engine=name       template engine             {django,ssi,tmpl}
       -d path, --directory=path    template location(s)        (default: '.')
-      -r text, --replacement=text  replaces missing values     (default: '')
 
 Installation
 ------------
@@ -389,25 +389,21 @@ Django Engine
  - `django::builtin_filters::wordwrap_filter`
  - `django::builtin_filters::yesno_filter`
 
-### Relevant Options
+### Formats
 
- - `base_options::default_value` (akin to `TEMPLATE_STRING_IF_INVALID`; default: `""`)
- - `base_options::debug`         (akin to `TEMPLATE_DEBUG`;             default: `false`)
- - `base_options::directories`   (akin to `TEMPLATE_DIRS`;              default: `"."`)
- - `base_options::libraries`     (for external tags & filters)
- - `base_options::loaders`       (for dynamically loading libraries)
- - `base_options::formats`
+ - `base_context::formats["TEMPLATE_STRING_IF_INVALID"]` (default: `""`)
+ - `base_context::formats["DATE_FORMAT"]`                (default: `"N j, Y"`)
+ - `base_context::formats["DATETIME_FORMAT"]`            (default: `"N j, Y, P"`)
+ - `base_context::formats["MONTH_DAY_FORMAT"]`           (default: `"F j"`)
+ - `base_context::formats["SHORT_DATE_FORMAT"]`          (default: `"m/d/Y"`)
+ - `base_context::formats["SHORT_DATETIME_FORMAT"]`      (default: `"m/d/Y P"`)
+ - `base_context::formats["TIME_FORMAT"]`                (default: `"P"`)
+ - `base_context::formats["YEAR_MONTH_FORMAT"]`          (default: `"F Y"`)
 
-#### Relevant Formats
-
- - `"DATE_FORMAT"`            (default: `"N j, Y"`)
- - `"DATETIME_FORMAT"`        (default: `"N j, Y, P"`)
- - `"MONTH_DAY_FORMAT"`       (default: `"F j"`)
- - `"SHORT_DATE_FORMAT"`      (default: `"m/d/Y"`)
- - `"SHORT_DATETIME_FORMAT"`  (default: `"m/d/Y P"`)
- - `"TIME_FORMAT"`            (default: `"P"`)
- - `"YEAR_MONTH_FORMAT"`      (default: `"F Y"`)
- - `"SPACE_FORMAT"`           (default: `"&nbsp;"`)
+<!--
+ - `TEMPLATE_DEBUG`
+ - `TEMPLATE_DIRS`
+-->
 
 SSI Engine
 ----------
@@ -424,17 +420,12 @@ SSI Engine
  - `ssi::builtin_tags::printenv_tag`
  - `ssi::builtin_tags::set_tag`
 
-### Relevant Options
+### Formats
 
- - `base_options::default_value` (akin to `echo_message`;  default: `"(none)"`)
- - `base_options::error_value`   (akin to `error_message`; default: `"[an error occurred while processing this directive]"`)
- - `base_options::directories`
- - `base_options::formats`
-
-#### Relevant Formats
-
- - `sizefmt` (default: `"bytes"`)
- - `timefmt` (default: `"%A, %d-%b-%Y %H:%M:%S %Z"`)
+ - `base_context::formats["echomsg"]`  (default: `"(none)"`)
+ - `base_context::formats["errormsg"]` (default: `"[an error occurred while processing this directive]"`)
+ - `base_context::formats["sizefmt"]`  (default: `"bytes"`)
+ - `base_context::formats["timefmt"]`  (default: `"%A, %d-%b-%Y %H:%M:%S %Z"`)
 
 TMPL Engine
 -----------
@@ -448,9 +439,15 @@ TMPL Engine
  - `tmpl::builtin_tags::unless_tag`
  - `tmpl::builtin_tags::variable_tag`
 
-### Relevant Options
+General Options
+---------------
 
- - `base_options::default_value` (default: `""`)
+ - `base_options::debug`       (default: `false`)
+ - `base_options::directories` (default: `"."`)
+ - `base_options::libraries`   (for dynamic tags & filters)
+ - `base_options::loaders`     (for dynamic library loading)
+ - `base_options::resolvers`   (for dynamic URL resolution and reversal)
+
 
 Future Work
 -----------

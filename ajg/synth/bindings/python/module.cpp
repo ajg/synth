@@ -4,6 +4,7 @@
 
 // TODO? #include <boost/python/detail/wrap_python.hpp>
 #include <Python.h>              // This prevents a strange macro issue in pyport.h.
+#include <datetime.h>            // Not included by default by Python.h.
 #include <ajg/synth/support.hpp> // Must come ahead of everything except Python.h.
 
 #include <boost/python.hpp>
@@ -12,6 +13,7 @@
 #include <ajg/synth/bindings/python/binding.hpp>
 
 BOOST_PYTHON_MODULE(synth) {
+    PyDateTime_IMPORT;
     namespace s  = ajg::synth;
     namespace py = boost::python;
 

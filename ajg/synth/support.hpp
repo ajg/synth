@@ -7,6 +7,9 @@
 
 #include <ajg/synth/config.hpp>
 
+// Enable nanosecond (96-bit) precision, instead of microsecond (64-bit).
+// #define BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
+
 //
 // AJG_SYNTH_IS_DEBUG
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,15 +177,25 @@
 #endif
 
 //
+// AJG_SYNTH_HAS_CXX11:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if __cplusplus >= 201103L
+#    define AJG_SYNTH_HAS_CXX11 1
+#else
+#    define AJG_SYNTH_HAS_CXX11 0
+#endif
+
+//
 // AJG_SYNTH_THREAD_LOCAL:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
+#if AJG_SYNTH_HAS_CXX11
+#    define AJG_SYNTH_THREAD_LOCAL thread_local
+#elif AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
 #    define AJG_SYNTH_THREAD_LOCAL __declspec(thread)
 #elif AJG_SYNTH_IS_COMPILER_CLANG || AJG_SYNTH_IS_COMPILER_GCC || AJG_SYNTH_IS_COMPILER_INTEL
 #    define AJG_SYNTH_THREAD_LOCAL __thread
-#elif __cplusplus >= 201103L // C++11+
-#    define AJG_SYNTH_THREAD_LOCAL thread_local
 #else
 #    define AJG_SYNTH_THREAD_LOCAL // Cross your fingers and pray.
 #endif

@@ -37,12 +37,16 @@ struct conversions {
     typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::date_type                                     date_type;
     typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::region_type                                   region_type;
     typedef typename traits_type::timezone_type                                 timezone_type;
+    typedef typename traits_type::language_type                                 language_type;
+    typedef typename traits_type::formats_type                                  formats_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
@@ -52,9 +56,15 @@ struct conversions {
 
   public:
 
+    /*
     inline static boost::optional<boolean_type> make_boolean(py::object const& obj) {
         py::extract<boolean_type> e(obj);
         return e.check() ? boost::optional<boolean_type>(e()) : boost::none;
+    }
+    */
+
+    inline static boolean_type make_boolean(py::object const& obj) {
+        return boolean_type(obj);
     }
 
     inline static boost::optional<size_type> make_size(py::object const& obj) {
@@ -85,7 +95,7 @@ struct conversions {
             ( make_size(dt.attr("hour")).get_value_or(0)
             , make_size(dt.attr("minute")).get_value_or(0)
             , make_size(dt.attr("second")).get_value_or(0)
-            , make_size(dt.attr("microsecond")).get_value_or(0) * 1000
+            , make_size(dt.attr("microsecond")).get_value_or(0)
             );
     }
     */
@@ -95,60 +105,140 @@ struct conversions {
             ( make_size(dt.attr("hour")).get_value_or(0)
             , make_size(dt.attr("minute")).get_value_or(0)
             , make_size(dt.attr("second")).get_value_or(0)
-            , make_size(dt.attr("microsecond")).get_value_or(0) * 1000
+            , make_size(dt.attr("microsecond")).get_value_or(0)
             );
     }
 
     inline static duration_type make_duration(py::object const& timedelta) {
         return traits_type::to_duration
-            ( make_size(timedelta.attr("days")).get_value_or(0) * 24 * 60 * 60
-            + make_size(timedelta.attr("seconds")).get_value_or(0)
-            , make_size(timedelta.attr("microseconds")).get_value_or(0) * 1000
+            ( make_size(timedelta.attr("days")).get_value_or(0) * 24
+            , 0
+            , make_size(timedelta.attr("seconds")).get_value_or(0)
+            , make_size(timedelta.attr("microseconds")).get_value_or(0)
             );
     }
 
-    inline static timezone_type make_timezone(py::object const& dt) {
-        if (py::object const& tzinfo = dt.attr("tzinfo")) {
-            (void) tzinfo;
-
-            string_type   name;
-            duration_type offset;
-            string_type   dst_name;
-            duration_type dst_offset;
-
-            if (py::object const& utcoffset = dt.attr("utcoffset")()) {
-                offset = make_duration(utcoffset);
-            }
-
-            if (py::object const& dst = dt.attr("dst")()) {
-                dst_offset = make_duration(dst);
-            }
-
-            if (py::object const& tzname = dt.attr("tzname")()) {
-                if (!traits_type::is_empty(dst_offset)) {
-                    // TODO: name = tzinfo.tzname(dt without dst) or attempt to map common ones manually (e.g. EDT -> EST).
-                    dst_name = make_string(tzname);
-                }
-                else {
-                    name = make_string(tzname);
-                    // TODO: dst_name = tzinfo.tzname(dt with dst) or attempt to map common ones manually (e.g. EST -> EDT).
-                }
-            }
-
-            return traits_type::to_timezone(name, offset, dst_name, dst_offset);
-        }
-        else {
+    inline static timezone_type make_timezone(py::object const tzinfo, py::object dt = make_none()) {
+        if (!tzinfo) {
             return traits_type::empty_timezone();
         }
+
+        string_type const s = make_string(tzinfo);
+
+        if (traits_type::is_region(s)) {
+            return traits_type::to_region_timezone(s);
+        }
+
+        string_type   std_name;
+        duration_type std_offset;
+        string_type   dst_name;
+        duration_type dst_offset;
+
+        if (!dt) {
+            dt = make_dt(traits_type::utc_datetime());
+        }
+
+        if (py::object const& utcoffset = tzinfo.attr("utcoffset")(dt)) {
+            std_offset = make_duration(utcoffset);
+        }
+
+        if (py::object const& dst = tzinfo.attr("dst")(dt)) {
+            dst_offset = make_duration(dst);
+        }
+
+        if (py::object const& tzname = tzinfo.attr("tzname")(dt)) {
+            if (!traits_type::is_empty(dst_offset)) {
+                // TODO: std_name = tzinfo.tzname(dt without dst) or use tz_database (e.g. EDT -> EST).
+                dst_name = make_string(tzname);
+            }
+            else {
+                std_name = make_string(tzname);
+                // TODO: dst_name = tzinfo.tzname(dt with dst) or use tz_database (e.g. EST -> EDT).
+            }
+        }
+
+        return traits_type::to_posix_timezone(std_name, std_offset, dst_name, dst_offset);
     }
 
-    inline static datetime_type make_datetime(py::object const& dt) {
+    inline static datetime_type make_datetime(py::object const dt) {
+        if (!dt) {
+            return traits_type::empty_datetime();
+        }
         return traits_type::to_datetime
             ( make_date(dt)
             , make_time_as_duration(dt)
-            , make_timezone(dt)
+            , make_timezone(dt.attr("tzinfo"), dt)
             );
     }
+
+    inline static py::object make_dt(datetime_type const& datetime) {
+        date_type     const date = traits_type::to_date(datetime);
+        duration_type const time = traits_type::to_duration(traits_type::to_utc_time(datetime));
+        // TODO: obj.attr("tzinfo", make_tzinfo(traits_type::to_timezone(datetime)))
+        return py::object(py::handle<>(PyDateTime_FromDateAndTime(
+            date.year(), date.month(), date.day(),
+            time.hours(), time.minutes(), time.seconds(), time.fractional_seconds())));
+    }
+
+    // TODO: Handle non-region typezones as datetime.tzinfo/PyDateTime_TZInfo.
+    // For now, we're relying on the fact that pytz accepts region strings.
+    inline static py::object make_tzinfo(timezone_type const& timezone) {
+        if (traits_type::to_boolean(timezone)) {
+            return py::object(traits_type::to_string(timezone));
+        }
+        return make_none();
+    }
+
+    inline static language_type make_language(py::object const& l) {
+        if (l) {
+            string_type  const code = make_string(l[0]);
+            boolean_type const rtl  = make_boolean(l[1]);
+            return language_type(std::make_pair(code, rtl));
+        }
+        return language_type();
+    }
+
+    inline static formats_type make_formats(py::dict const& fmts) {
+        if (!fmts) {
+            return formats_type();
+        }
+        py::stl_input_iterator<py::tuple> begin(fmts.items()), end;
+        formats_type formats;
+
+        BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
+            string_type const& name   = make_string(item[0]);
+            string_type const& format = make_string(item[1]);
+            // formats.insert(typename formats_type::value_type(name, format));
+            formats[name] = format;
+        }
+        return formats;
+
+        /*if (fmts) {
+            py::list const names = fmts.keys();
+
+            // TODO: Replace with stl_input_iterator version.
+            for (std::size_t i = 0, n = py::len(names); i < n; ++i) {
+                py::object const name = names[i];
+                context.format(make_string(name), make_string(names[name]));
+            }
+        }
+        */
+    }
+
+    inline static paths_type make_paths(py::list const& dirs) {
+        py::stl_input_iterator<string_type> begin(dirs), end;
+        return paths_type(begin, end);
+    }
+
+    inline static py::object make_none() {
+        return py::object();
+    }
+
+    /*
+    inline static py::object make_object(py::object const& object) {
+        return object;
+    }
+    */
 
     inline static py::object make_object(value_type const& value) {
         BOOST_ASSERT(value.initialized());
@@ -171,33 +261,43 @@ struct conversions {
         else if (value.template is<PyObject*>())   return py::object(py::handle<>(value.template as<PyObject*>()));
      // else if (value.template is<void*>())       return py::long_(reinterpret_cast<intptr_t>(value.template as<void*>()));
      // else if (value.template is<void const*>()) return py::long_(reinterpret_cast<intptr_t>(value.template as<void const*>()));
-        else if (value.is_unit())                  return py::object(); // == None
+        else if (value.template is<void>())        return make_none();
+        else if (value.is_unit())                  return make_none();
         else if (value.is_boolean())               return py::object(value.to_boolean());
-        else if (value.is_chronologic())           AJG_SYNTH_THROW(not_implemented("make_object(chronologic)"));
         else if (value.is_textual())               return py::object(value.to_string());
         else if (value.is_numeric())               return py::object(value.to_number()); // Must come after textual due to C++ chars being both numeric and textual.
-        else if (value.is_sequential()) {
-            py::list list;
-            BOOST_FOREACH(value_type const& element, value) {
-                list.append(make_object(element));
-            }
-            return list;
-        }
-        else if (value.is_associative()) {
-            py::dict dict;
-            BOOST_FOREACH(value_type const& key, value.attributes()) {
-                if (typename value_type::attribute_type const attribute = value.attribute(key)) {
-                    dict[make_object(key)] = make_object(*attribute);
-                }
-            }
-            return dict;
-        }
-        else {
-            AJG_SYNTH_THROW(not_implemented("make_object(" + text::narrow(value.type_name()) + ")"));
-        }
+        else if (value.is_chronologic())           return make_dt(value.to_datetime());
+        else if (value.is_timezone())              return make_tzinfo(value.to_timezone());
+        // TODO: Rather than force conversion of complex types, they should be held in bidirectional
+        //       wrappers that convert as needed via __bool__, __str__, etc.
+        else if (value.is_sequential())            return make_list(value);
+        else if (value.is_associative())           return make_dict(value);
+        else AJG_SYNTH_THROW(not_implemented("make_object(" + text::narrow(value.type_name()) + ")"));
     }
 
-    inline static std::pair<py::tuple, py::dict> make_args(arguments_type const& arguments, py::list& list, py::dict& dict) {
+    inline static py::list make_list(value_type const& value) {
+        py::list list;
+        BOOST_FOREACH(value_type const& element, value) {
+            list.append(make_object(element));
+        }
+        return list;
+    }
+
+    inline static py::dict make_dict(value_type const& value) {
+        py::dict dict;
+        BOOST_FOREACH(value_type const& key, value.attributes()) {
+            if (typename value_type::attribute_type const attribute = value.attribute(key)) {
+                dict[make_object(key)] = make_object(*attribute);
+            }
+        }
+        return dict;
+    }
+
+    // TODO: Split this into make_args and make_kwargs, and remove make_args_with.
+    inline static std::pair<py::tuple, py::dict> make_args(arguments_type const& arguments) {
+        py::list list;
+        py::dict dict;
+
         BOOST_FOREACH(typename arguments_type::first_type::value_type const& value, arguments.first) {
             list.append(make_object(value));
         }
@@ -206,13 +306,7 @@ struct conversions {
             dict[pair.first] = make_object(pair.second);
         }
 
-        return std::pair<py::tuple, py::dict>((py::tuple(list)), dict);
-    }
-
-    inline static std::pair<py::tuple, py::dict> make_args(arguments_type const& arguments) {
-        py::list list;
-        py::dict dict;
-        return make_args(arguments, list, dict);
+        return std::pair<py::tuple, py::dict>(py::tuple(list), dict);
     }
 
     inline static std::pair<py::tuple, py::dict> make_args_with(value_type const& v0, arguments_type arguments) {
@@ -229,6 +323,18 @@ struct conversions {
     }
 
     /*
+    inline static std::pair<py::tuple, py::dict> make_args(arguments_type const& arguments, py::list& list, py::dict& dict) {
+        BOOST_FOREACH(typename arguments_type::first_type::value_type const& value, arguments.first) {
+            list.append(make_object(value));
+        }
+
+        BOOST_FOREACH(typename arguments_type::second_type::value_type const& pair, arguments.second) {
+            dict[pair.first] = make_object(pair.second);
+        }
+
+        return std::pair<py::tuple, py::dict>(py::tuple(list), dict);
+    }
+
     inline static std::pair<py::tuple, py::dict> make_args_with_object(py::object const& obj, arguments_type arguments) {
         py::list list;
         py::dict dict;

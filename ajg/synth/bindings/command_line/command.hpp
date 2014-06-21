@@ -33,17 +33,18 @@ enum command_options
     , context_option
     , engine_option
     , directory_option
-    , replacement_option
     };
 
 template <class Binding>
+// TODO: Fold this into binding.
 struct command {
   public:
 
     typedef command                                                             command_type;
     typedef Binding                                                             binding_type;
 
-    typedef typename binding_type::ptree_type                                   ptree_type;
+    typedef typename binding_type::foreign_type                                 ptree_type;
+    typedef typename binding_type::options_type                                 options_type;
     typedef typename binding_type::traits_type                                  traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
@@ -58,7 +59,7 @@ struct command {
 
     typedef ::option::ArgStatus                                                 status_type;
     typedef ::option::Descriptor                                                descriptor_type;
-    typedef ::option::Option                                                    option_type;
+    typedef ::option::Option                                                    option_type; // Unrelated to options_type.
     typedef ::option::Parser                                                    parser_type;
     typedef detail::text<string_type>                                           text;
 
@@ -72,18 +73,18 @@ struct command {
             , {context_option,     0, "c", "context",     param_required, "  -c file, --context=file      contextual data             *.{ini,json,xml}"}
             , {engine_option,      0, "e", "engine",      param_required, "  -e name, --engine=name       template engine             {django,ssi,tmpl}"}
             , {directory_option,   0, "d", "directory",   param_required, "  -d path, --directory=path    template location(s)        (default: '.')"}
-            , {replacement_option, 0, "r", "replacement", param_required, "  -r text, --replacement=text  replaces missing values     (default: '')"}
             , {unknown_option,     0, "",  "",            param_allowed,  "\n"}
             // ("input,i",       ("file", string),  "the source (default: '-')")            // TODO
             // ("output,o",      ("file", string),  "the destination (default: '-')")       // TODO
             // ("source,s",      ("text", string),  "inline alternative to input file")     // TODO
-            // ("format,f",      ("name", string),  "the context's format: {ini,json,xml}") // TODO
+            // ("?,?",           ("name", string),  "the context's format: {ini,json,xml}") // TODO
+            // TODO: formats
             , {0, 0, 0, 0, 0, 0}
             };
 
         size_type const n = sizeof(descriptors) / sizeof(descriptors[0]);
-        option_type options[n], buffer[n];
-        parser_type parser(descriptors, argc, argv, options, buffer);
+        option_type opts[n], buffer[n];
+        parser_type parser(descriptors, argc, argv, opts, buffer);
 
         if (parser.error()) {
             AJG_SYNTH_THROW(std::runtime_error("command option parsing"));
@@ -97,36 +98,37 @@ struct command {
             AJG_SYNTH_THROW(synth::unknown_argument(parser.nonOption(i)));
         }
 
-        for (option_type* option = options[unknown_option]; option; option = option->next()) {
+        for (option_type* option = opts[unknown_option]; option; option = option->next()) {
             AJG_SYNTH_THROW(synth::unknown_option(option->name));
         }
 
-        if (options[help_option]/* || TODO: (argc == 0 && input is stdin and empty [non-blocking])*/) {
+        if (opts[help_option]/* || TODO: (argc == 0 && input is stdin and empty [non-blocking])*/) {
             ::option::printUsage(error, descriptors);
             return;
         }
-        else if (options[version_option]) {
+        else if (opts[version_option]) {
             output << "synth v" << AJG_SYNTH_VERSION_STRING << std::endl;
             return;
         }
-        else if (!options[engine_option]) {
+        else if (!opts[engine_option]) {
             AJG_SYNTH_THROW(missing_option("engine"));
         }
 
         paths_type directories;
-        for (option_type* option = options[directory_option]; option; option = option->next()) {
+        for (option_type* option = opts[directory_option]; option; option = option->next()) {
             directories.push_back(to_string(option));
         }
 
-        binding_type const binding
-            ( input >> std::noskipws
-            , to_string(options[engine_option].last())
-            , to_string(options[replacement_option].last())
-            , directories
-            );
+        options_type options;
+        // TODO: options.defaults.
+        options.debug       = false; // TODO: Turn into a flag.
+        options.directories = directories;
+
+        string_type  const engine = to_string(opts[engine_option].last());
+        binding_type const binding(input >> std::noskipws, engine, options);
 
         ptree_type ptree;
-        if (option_type const* const option = options[context_option].last()) {
+        if (option_type const* const option = opts[context_option].last()) {
             std::string const narrow_path = option->arg;
             std::basic_ifstream<char_type> file;
 

@@ -15,6 +15,7 @@
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/find.hpp>
+#include <ajg/synth/detail/text.hpp>
 
 namespace ajg {
 namespace synth {
@@ -47,17 +48,34 @@ struct base_context : boost::noncopyable {
     typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::date_type                                     date_type;
+    typedef typename traits_type::time_type                                     time_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
     typedef typename traits_type::duration_type                                 duration_type;
+    typedef typename traits_type::timezone_type                                 timezone_type;
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::names_type                                    names_type;
+    typedef typename traits_type::language_type                                 language_type;
+    typedef typename traits_type::format_type                                   format_type;
+    typedef typename traits_type::formats_type                                  formats_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
+    typedef value_type                                                          data_type;
+    typedef struct metadata {
+        boolean_type  caseless;
+        boolean_type  safe;
+        string_type   application;
+        timezone_type timezone;
+        language_type language;
+        formats_type  formats;
+
+        metadata() : caseless(false), safe(false) {}
+    }                                                                           metadata_type;
     typedef void const*                                                         match_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
+    typedef boost::optional<value_type>                                         change_type;
 
   private:
 
@@ -69,44 +87,41 @@ struct base_context : boost::noncopyable {
 
   public:
 
-    inline base_context(value_type const& data)
-        : caseless_(false), autoescape_(true), data_(data) {}
+    inline explicit base_context(data_type const& data, metadata_type const& metadata = metadata_type())
+        : data_(data), metadata_(metadata) {}
 
   public:
 
-    inline boolean_type caseless() const {
-        return this->caseless_;
-    }
-
-    inline boolean_type caseless(boolean_type caseless) {
-        std::swap(caseless, this->caseless_);
-        return caseless;
-    }
-
-    inline boolean_type autoescape() const {
-        return this->autoescape_;
-    }
-
-    inline boolean_type autoescape(boolean_type autoescape) {
-        std::swap(autoescape, this->autoescape_);
-        return autoescape;
-    }
-
-    inline void set(key_type const& key, value_type const& value) { this->data_.attribute(this->cased(key), value); }
-
-    inline void unset(key_type const& key) { this->data_.attribute(this->cased(key), attribute_type()); }
-
-    inline attribute_type get(key_type const& key) const { return this->data_.attribute(this->cased(key)); }
-
-    inline boolean_type has(key_type const& key) const { return detail::contains(this->cased(key), this->keys()); }
-
+    inline void            set  (key_type const& key, value_type const& value) { this->data_.attribute(this->cased(key), value); }
+    inline void            unset(key_type const& key) { this->data_.attribute(this->cased(key), attribute_type()); }
+    inline attribute_type  get  (key_type const& key) const { return this->data_.attribute(this->cased(key)); }
+    inline boolean_type    has  (key_type const& key) const { return detail::contains(this->cased(key), this->keys()); }
     inline attributes_type keys() const { return this->data_.attributes(); }
 
-    inline value_type const& data() const { return this->data_; }
+ // inline data_type&       data()       { return this->data_; }
+    inline data_type const& data() const { return this->data_; }
+    inline data_type        data(data_type data) { std::swap(data, this->data_); return data; }
 
-    inline value_type data(value_type data) {
-        std::swap(data, this->data_);
-        return data;
+    inline boolean_type caseless() const { return this->metadata_.caseless; }
+    inline boolean_type caseless(boolean_type caseless) { std::swap(caseless, this->metadata_.caseless); return caseless; }
+
+    inline boolean_type safe() const { return this->metadata_.safe; }
+    inline boolean_type safe(boolean_type safe) { std::swap(safe, this->metadata_.safe); return safe; }
+
+    inline string_type application() const { return this->metadata_.application; }
+    inline string_type application(string_type application) { std::swap(application, this->metadata_.application); return application; }
+
+    inline timezone_type timezone() const { return this->metadata_.timezone; }
+    inline timezone_type timezone(timezone_type timezone) { std::swap(timezone, this->metadata_.timezone); return timezone; }
+
+    inline language_type language() const { return this->metadata_.language; }
+    inline language_type language(language_type language) { std::swap(language, this->metadata_.language); return language; }
+
+    inline formats_type formats() const { return this->metadata_.formats; }
+    inline void         formats(formats_type const& formats) {
+        BOOST_FOREACH(typename formats_type::value_type const& format, formats) {
+            this->format(format.first, format.second);
+        }
     }
 
     inline string_type current() const {
@@ -160,12 +175,32 @@ struct base_context : boost::noncopyable {
         return current;
     }
 
-    inline boost::optional<value_type> change(match_type const match) const {
+    inline change_type change(match_type const match) const {
         return detail::find(match, this->changes_);
     }
 
     inline void change(match_type const match, value_type const& value) {
         this->changes_[match] = value;
+    }
+
+    inline format_type format(string_type const& name) const {
+        if (boost::optional<format_type> const f = detail::find(name, this->metadata_.formats)) {
+            return *f;
+        }
+        AJG_SYNTH_THROW(std::invalid_argument("format: " + text::narrow(name))); // TODO: unknown_format/missing_format
+    }
+
+    inline format_type format_or(string_type const& name, format_type const& f) const {
+        return detail::find(name, this->metadata_.formats).get_value_or(f);
+    }
+
+    inline void format(string_type const& name, format_type const& format, boolean_type const overwrite = true) {
+        if (overwrite) {
+            this->metadata_.formats[name] = format;
+        }
+        else {
+            this->metadata_.formats.insert(std::make_pair(name, format));
+        }
     }
 
   private:
@@ -187,9 +222,8 @@ struct base_context : boost::noncopyable {
 
   private:
 
-    boolean_type  caseless_;
-    boolean_type  autoescape_;
-    value_type    data_;
+    data_type     data_;
+    metadata_type metadata_;
     string_type   current_;
     blocks_type   blocks_;
     matches_type  matches_;

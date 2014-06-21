@@ -54,6 +54,9 @@ struct base_template : boost::noncopyable {
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+    typedef typename context_type::data_type                                    data_type;
+    typedef typename context_type::metadata_type                                metadata_type;
+
   private:
 
     typedef detail::text<string_type>                                           text;
@@ -76,11 +79,13 @@ struct base_template : boost::noncopyable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline void render_to_stream(ostream_type& ostream, context_type& context) const {
+        ostream.imbue(traits_type::standard_locale());
+
         this->kernel().render(ostream, this->state_.options, this->state_, context);
     }
 
-    inline void render_to_stream(ostream_type& ostream, value_type const value) const {
-        context_type context((value));
+    inline void render_to_stream(ostream_type& ostream, data_type const& data) const {
+        context_type context(data, this->options().defaults);
         this->render_to_stream(ostream, context);
     }
 
@@ -89,13 +94,13 @@ struct base_template : boost::noncopyable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline string_type render_to_string(context_type& context) const {
-        std::basic_ostringstream<char_type> ostream;
-        this->kernel().render(ostream, this->state_.options, this->state_, context);
-        return ostream.str();
+        std::basic_ostringstream<char_type> oss;
+        this->render_to_stream(oss, context);
+        return oss.str();
     }
 
-    inline string_type render_to_string(value_type const value) const {
-        context_type context((value));
+    inline string_type render_to_string(data_type const& data) const {
+        context_type context(data, this->options().defaults);
         return this->render_to_string(context);
     }
 
@@ -114,11 +119,11 @@ struct base_template : boost::noncopyable {
             AJG_SYNTH_THROW(write_error(narrow_path, e.what()));
         }
 
-        this->kernel().render(file, this->state_.options, this->state_, context);
+        this->render_to_stream(file, context);
     }
 
-    inline void render_to_path(path_type const& path, value_type const value) const {
-        context_type context((value));
+    inline void render_to_path(path_type const& path, data_type const& data) const {
+        context_type context(data, this->options().defaults);
         this->render_to_path(path, context);
     }
 
@@ -137,7 +142,6 @@ struct base_template : boost::noncopyable {
 
     inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) {
         this->state_ = state_type(range_type(begin, end), options);
-        this->kernel().initialize_state(this->state_);
         this->kernel().parse(this->state_);
     }
 

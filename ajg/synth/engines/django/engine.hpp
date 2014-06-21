@@ -147,9 +147,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         names
             = +name
             ;
-        unreserved_name
-            = (id = unreserved_identifier) >> *_s
-            ;
         package
             = (id = (nonkeyword_identifier >> *('.' >> identifier))) >> *_s
             ;
@@ -385,25 +382,23 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         return names;
     }
 
-    inline static void initialize_state(state_type& state) {
-        state.options.default_value = string_type();
-
-        // Note: insert will not replace existing values.
-        state.options.formats.insert(std::make_pair(text::literal("DATE_FORMAT"),           text::literal("N j, Y")));
-        state.options.formats.insert(std::make_pair(text::literal("DATETIME_FORMAT"),       text::literal("N j, Y, P")));
-        state.options.formats.insert(std::make_pair(text::literal("MONTH_DAY_FORMAT"),      text::literal("F j")));
-        state.options.formats.insert(std::make_pair(text::literal("SHORT_DATE_FORMAT"),     text::literal("m/d/Y")));
-        state.options.formats.insert(std::make_pair(text::literal("SHORT_DATETIME_FORMAT"), text::literal("m/d/Y P")));
-        state.options.formats.insert(std::make_pair(text::literal("TIME_FORMAT"),           text::literal("P")));
-        state.options.formats.insert(std::make_pair(text::literal("YEAR_MONTH_FORMAT"),     text::literal("F Y")));
-        state.options.formats.insert(std::make_pair(text::literal("SPACE_FORMAT"),          text::literal("&nbsp;")));
-    }
-
     void render( ostream_type&       ostream
                , options_type const& options
                , state_type   const& state
                , context_type&       context
                ) const {
+        // context.safe(false);
+
+        context.format(text::literal("TEMPLATE_STRING_IF_INVALID"), text::literal(""),          false);
+        context.format(text::literal("DATE_FORMAT"),                text::literal("N j, Y"),    false);
+        context.format(text::literal("DATETIME_FORMAT"),            text::literal("N j, Y, P"), false);
+        context.format(text::literal("MONTH_DAY_FORMAT"),           text::literal("F j"),       false);
+        context.format(text::literal("SHORT_DATE_FORMAT"),          text::literal("m/d/Y"),     false);
+        context.format(text::literal("SHORT_DATETIME_FORMAT"),      text::literal("m/d/Y P"),   false);
+        context.format(text::literal("TIME_FORMAT"),                text::literal("P"),         false);
+        context.format(text::literal("YEAR_MONTH_FORMAT"),          text::literal("F Y"),       false);
+        context.format(text::literal("SPACE_FORMAT"),               text::literal("&nbsp;"),    false);
+
         this->render_block(ostream, options, state, state.match, context);
     }
 
@@ -518,8 +513,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             value_type const& value = this->evaluate_expression(options, state, match(this->expression), context);
             return this->apply_filters(value, options, state, match, context);
         }
-        catch (missing_variable  const&) { return options.default_value; }
-        catch (missing_attribute const&) { return options.default_value; }
+        catch (missing_variable  const&) { return context.format(text::literal("TEMPLATE_STRING_IF_INVALID")); }
+        catch (missing_attribute const&) { return context.format(text::literal("TEMPLATE_STRING_IF_INVALID")); }
     }
 
     arguments_type evaluate_arguments( options_type  const& options
@@ -772,7 +767,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     regex_type keyword_identifier;
     regex_type nonkeyword_identifier;
     regex_type unreserved_identifier;
-    regex_type unreserved_name;
     regex_type name;
     regex_type names;
     regex_type variable_names;
@@ -802,7 +796,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     regex_type string_literal;
     regex_type variable_literal;
     regex_type literal;
-    regex_type polyadic_tag; // monadic_tag, dyadic_tag; // library_tag;
+    regex_type polyadic_tag; // TODO: Rename custom_tag or library_tag.
 
     string_regex_type html_namechar;
     string_regex_type html_whitespace;

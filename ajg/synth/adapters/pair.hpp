@@ -26,14 +26,25 @@ struct adapter<Value, std::pair<First, Second> >     : concrete_adapter<Value, s
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-    // virtual boolean_type to_boolean() const { return true; }
-    virtual optional<range_type> get_range() const {
+    virtual optional<boolean_type> get_boolean() const { return boolean_type(true); }
+    virtual optional<range_type>   get_range() const {
         return range_type( const_pair_iterator(this->adapted(), first)
                          , const_pair_iterator(this->adapted(), past)
                          );
     }
 
-    virtual boolean_type output(ostream_type& ostream) const { return (ostream << this->adapted().first << ": " << this->adapted().second), true; }
+    virtual boolean_type input(istream_type& istream) const {
+        char_type a = 0, b = 0;
+        value_type f(this->adapted().first);
+        value_type s(this->adapted().second);
+        return (istream >> f >> a >> b >> s) && (a == char_type(':') && b == char_type(' '));
+    }
+
+    virtual boolean_type output(ostream_type& ostream) const {
+        value_type const f(this->adapted().first);
+        value_type const s(this->adapted().second);
+        return ostream << f << ": " << s;
+    }
 
   private:
 

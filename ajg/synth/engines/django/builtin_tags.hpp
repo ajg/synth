@@ -68,6 +68,7 @@ struct builtin_tags {
     typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::datetime_type                                 datetime_type;
+    typedef typename traits_type::timezone_type                                 timezone_type;
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::url_type                                      url_type;
     typedef typename traits_type::names_type                                    names_type;
@@ -188,14 +189,14 @@ struct builtin_tags {
                           ) {
             string_type const& setting  = match(kernel.name)[id].str();
             match_type  const& block    = match(kernel.block);
-            boolean_type const previous = context.autoescape();
+            boolean_type const previous = context.safe();
 
-                 if (setting == text::literal("on"))  context.autoescape(true);
-            else if (setting == text::literal("off")) context.autoescape(false);
+                 if (setting == text::literal("on"))  context.safe(false);
+            else if (setting == text::literal("off")) context.safe(true);
             else AJG_SYNTH_THROW(std::invalid_argument("setting"));
 
             kernel.render_block(ostream, options, state, block, context);
-            context.autoescape(previous);
+            context.safe(previous);
         }
     };
 
@@ -216,7 +217,7 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            match_type  const& block = match(kernel.block);
+            match_type  const& body  = match(kernel.block);
             match_type  const& open  = match(kernel.name, 0);
             match_type  const& close = match(kernel.name, 1);
             string_type const  name  = open[id].str();
@@ -227,17 +228,17 @@ struct builtin_tags {
             }
 
             context.push_block(name, boost::bind(&kernel_type::render_block, &kernel,
-                _1, boost::ref(options), boost::ref(state), boost::ref(block), _2));
+                _1, boost::ref(options), boost::ref(state), boost::ref(body), _2));
             if (ostream.rdbuf() == 0) return; // Coming from an extends_tag; no need to render.
 
-            // TODO: Make current/previous swap exception safe.
+            // TODO: Use a stage to make the current/previous swap exception safe.
             string_type const previous = context.current(name);
 
-            if (block_type const& b = context.pop_block(name)) {
-                b(ostream, context);
+            if (block_type const& block = context.pop_block(name)) {
+                block(ostream, context);
             }
             else {
-                return kernel.render_block(ostream, options, state, block, context);
+                return kernel.render_block(ostream, options, state, body, context);
             }
 
             context.current(previous);
@@ -509,14 +510,7 @@ struct builtin_tags {
             if (reversed) {
                 value = value.reverse();
             }
-        /*
-        #if AJG_SYNTH_IS_COMPILER_GCC
-            else {
-                // FIXME: This extra copy shouldn't be necessary but it fixes the odd invalid reads in Travis.
-                value = value.to_sequence();
-            }
-        #endif
-        */
+
             typename value_type::const_iterator it(value.begin()), end(value.end());
             typename options_type::names_type const& variables = kernel.extract_names(vars);
 
@@ -530,6 +524,7 @@ struct builtin_tags {
             size_type const n = variables.size();
             BOOST_ASSERT(n > 0);
             stage<context_type> stage(context);
+            string_type const f = context.format(text::literal("TEMPLATE_STRING_IF_INVALID"));
 
             for (; it != end; ++it) {
                 if (n == 1) { // e.g. for x in ...
@@ -543,7 +538,7 @@ struct builtin_tags {
                     }
 
                     while (i < n) { // Overwrite the remaining vars in the context.
-                        stage.set(variables[i++], options.default_value);
+                        stage.set(variables[i++], f);
                     }
                 }
 
@@ -799,9 +794,8 @@ struct builtin_tags {
             typename x::function<on_continue_>::type const on_continue = {{}};
             typename x::function<on_polyadic1_tag_>::type const on_polyadic1_tag = {{}};
             typename x::function<on_polyadic2_tag_>::type const on_polyadic2_tag = {{}};
-
-            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_name) >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
-                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_name) >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._state, s2, _))]));
+            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
+                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._state, s2, _))]));
 
             return kernel.polyadic_tag;
         }
@@ -813,7 +807,7 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-         // string_type    const& name      = match(kernel.unreserved_name)[id].str();
+         // string_type    const& name      = match(kernel.unreserved_identifier).str();
             size_type      const  position  = static_cast<size_type>(match.position(1));
             match_type     const& args      = match; // (kernel.arguments);
             arguments_type const  arguments = kernel.evaluate_arguments(options, state, args, context);
@@ -829,6 +823,10 @@ struct builtin_tags {
                 AJG_SYNTH_THROW(std::logic_error("missing renderer"));
             }
         }
+
+      private:
+
+        typedef typename state_type::pieces_type                                pieces_type;
 
       private:
 
@@ -865,14 +863,8 @@ struct builtin_tags {
                                    , sub_match_type const&  n
                                    , sub_match_type const&  c
                                    ) const {
-                // TODO: These numbers assume that block_open and block_close will always be 2
-                //       characters wide, which may not be the case if they become configurable.
-                BOOST_ASSERT(c.length() >= 4);
-                string_type const name     = text::strip_right(n.str());
-                string_type const contents = text::strip(string_type(c.str()).substr(2, c.length() - 4));
-                std::vector<string_type> const args = state.library_tag_args_;
-                state.library_tag_args_.clear();
-
+                string_type const& name   = n.str();
+                pieces_type const& pieces = state.get_pieces(name, c.str());
 
                 if (!state.library_tag_entries_.empty()) {
                     entry_type const& entry = state.library_tag_entries_.top();
@@ -884,15 +876,15 @@ struct builtin_tags {
 
                 if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
                     size_type const position = std::distance(state.range.first, n.first);
-                    std::vector<string_type> pieces;
-                    pieces.push_back(contents);
-                    pieces.push_back(name);
-                    BOOST_FOREACH(string_type const& arg, args) {
-                        pieces.push_back(arg);
+
+                    if (tag->simple) {
+                        state.set_renderer(position, tag->function(segments_type()));
+                        state.library_tag_continue_ = false;
+                        return true;
                     }
 
                     renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(state), _1, _2, _3);
-                    segments_type segments(1, segment_type(pieces, renderer));
+                    segments_type const segments = segments_type(1, segment_type(pieces, renderer));
 
                     if (tag->middle_names.empty() && tag->last_names.empty()) {
                         state.set_renderer(position, tag->function(segments));
@@ -919,14 +911,13 @@ struct builtin_tags {
                                    , sub_match_type const&  n
                                    , sub_match_type const&  c
                                    ) const {
-                string_type const name     = text::strip_right(n.str());
-                string_type const contents = text::strip_right(c.str());
-                std::vector<string_type> const args = state.library_tag_args_;
-                state.library_tag_args_.clear();
+                string_type const& name   = n.str();
+                pieces_type const& pieces = state.get_pieces(name, c.str());
 
                 BOOST_ASSERT(!state.library_tag_entries_.empty());
                 entry_type& entry = state.library_tag_entries_.top();
                 size_type const position = entry.position;
+                BOOST_ASSERT(!entry.tag.simple);
                 BOOST_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
 
                 boolean_type const is_middle = detail::contains(name, entry.tag.middle_names);
@@ -934,13 +925,6 @@ struct builtin_tags {
 
                 if (!is_middle && !is_last) {
                     return false;
-                }
-
-                std::vector<string_type> pieces;
-                pieces.push_back(contents);
-                pieces.push_back(name);
-                BOOST_FOREACH(string_type const& arg, args) {
-                    pieces.push_back(arg);
                 }
 
                 renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(state), _1, _2, _3);
@@ -1036,8 +1020,9 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            string_type const format = kernel.extract_string(match(kernel.string_literal));
-            ostream << formatter_type::format_datetime(options, format, traits_type::utc_datetime());
+            string_type   const f        = kernel.extract_string(match(kernel.string_literal));
+            datetime_type const datetime = traits_type::local_datetime(context.timezone());
+            ostream << formatter_type::format_datetime(context.format_or(f, f), datetime);
         }
     };
 
@@ -1190,7 +1175,7 @@ struct builtin_tags {
                 ostream << *marker;
             }
             else {
-                ostream << options.default_value;
+                ostream << context.format(text::literal("TEMPLATE_STRING_IF_INVALID"));
             }
         }
     };
@@ -1276,14 +1261,26 @@ struct builtin_tags {
                           , ostream_type&       ostream
                           ) {
             if (match_type const& v = match(kernel.value)) { // Regular value.
-                value_type const& value = kernel.evaluate(options, state, v, context);
-                boolean_type const safe = !context.autoescape() || value.safe();
+                value_type value = kernel.evaluate(options, state, v, context);
+                boolean_type const safe = context.safe() || value.safe();
+
+                // TODO: This only works for top-level chronological values.
+                if (value.is_chronologic()) {
+                    timezone_type const timezone = context.timezone();
+
+                    if (traits_type::to_boolean(timezone)) {
+                        value = value.to_datetime(timezone);
+                    }
+                }
                 safe ? ostream << value : ostream << value.escape();
             }
             else { // Literal block.super.
-                if (block_type const& b = context.pop_block(context.current())) {
-                    b(ostream, context);
-                    context.push_block(context.current(), b);
+                // Note: block.super is an actual variable in Django, but using it as such (e.g.
+                //       to apply filters to it) seems like an extremely obscure corner case so it's
+                //       not supported for now; that permits rendering only out what's necessary.
+                if (block_type const& block = context.pop_block(context.current())) {
+                    block(ostream, context);
+                    context.push_block(context.current(), block);
                 }
                 else {
                     AJG_SYNTH_THROW(std::runtime_error("block.super at top level"));

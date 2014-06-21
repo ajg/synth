@@ -116,7 +116,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         , tag_attribute (text::literal("NAME"))
         , alt_open      (text::literal("<!--"))
         , alt_close     (text::literal("-->"))
-        , default_value (text::literal("")) {
+        , fallback      (text::literal("")) {
 //
 // common grammar
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +209,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             return *variable;
         }
         else {
-            return default_value;
+            return this->fallback;
         }
     }
 
@@ -219,10 +219,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                        ) const {
         match_type const& attr = match(attribute);
         return evaluate_attribute(attr, context, options);
-    }
-
-    inline static void initialize_state(state_type& state) {
-        state.options.default_value = string_type();
     }
 
     void render( ostream_type&       ostream
@@ -344,7 +340,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     string_type const tag_attribute;
     string_type const alt_open;
     string_type const alt_close;
-    value_type  const default_value;
+    value_type  const fallback;
 
   public:
 

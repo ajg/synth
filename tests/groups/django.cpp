@@ -621,17 +621,17 @@ DJANGO_TEST(formatting, "{{ past|time:'w;W;' }}",                "4;2;")
 DJANGO_TEST(formatting, "{{ before_past|time:'w;W;' }}",         "2;2;")
 DJANGO_TEST(formatting, "{{ after_past|time:'w;W;' }}",          "5;9;")
 
-DJANGO_TEST(timesince_filter, "{{ past|timesince:before_past }}",       "0&nbsp;minutes")
-DJANGO_TEST(timesince_filter, "{{ before_past|timesince:past }}",       "1&nbsp;day, 12&nbsp;hours")
-DJANGO_TEST(timesince_filter, "{{ before_past|timesince:after_past }}", "1&nbsp;month, 3&nbsp;weeks")
-DJANGO_TEST(timesince_filter, "{{ past|timesince:after_past }}",        "1&nbsp;month, 2&nbsp;weeks")
-DJANGO_TEST(timesince_filter, "{{ future|timesince }}",                 "0&nbsp;minutes")
+DJANGO_TEST(timesince_filter, "{{ past|timesince:before_past }}",       "0""\xc2\xa0""minutes")
+DJANGO_TEST(timesince_filter, "{{ before_past|timesince:past }}",       "1""\xc2\xa0""day, 12""\xc2\xa0""hours")
+DJANGO_TEST(timesince_filter, "{{ before_past|timesince:after_past }}", "1""\xc2\xa0""month, 3""\xc2\xa0""weeks")
+DJANGO_TEST(timesince_filter, "{{ past|timesince:after_past }}",        "1""\xc2\xa0""month, 2""\xc2\xa0""weeks")
+DJANGO_TEST(timesince_filter, "{{ future|timesince }}",                 "0""\xc2\xa0""minutes")
 
-DJANGO_TEST(timeuntil_filter, "{{ past|timeuntil:before_past }}",       "1&nbsp;day, 12&nbsp;hours")
-DJANGO_TEST(timeuntil_filter, "{{ after_past|timeuntil:before_past }}", "1&nbsp;month, 3&nbsp;weeks")
-DJANGO_TEST(timeuntil_filter, "{{ after_past|timeuntil:past }}",        "1&nbsp;month, 2&nbsp;weeks")
-DJANGO_TEST(timeuntil_filter, "{{ before_past|timeuntil:past }}",       "0&nbsp;minutes")
-DJANGO_TEST(timeuntil_filter, "{{ past|timeuntil }}",                   "0&nbsp;minutes")
+DJANGO_TEST(timeuntil_filter, "{{ past|timeuntil:before_past }}",       "1""\xc2\xa0""day, 12""\xc2\xa0""hours")
+DJANGO_TEST(timeuntil_filter, "{{ after_past|timeuntil:before_past }}", "1""\xc2\xa0""month, 3""\xc2\xa0""weeks")
+DJANGO_TEST(timeuntil_filter, "{{ after_past|timeuntil:past }}",        "1""\xc2\xa0""month, 2""\xc2\xa0""weeks")
+DJANGO_TEST(timeuntil_filter, "{{ before_past|timeuntil:past }}",       "0""\xc2\xa0""minutes")
+DJANGO_TEST(timeuntil_filter, "{{ past|timeuntil }}",                   "0""\xc2\xa0""minutes")
 
 DJANGO_TEST(title_filter, "{{ \"my FIRST post\"|title }}", "My First Post")
 DJANGO_TEST(title_filter, "{{ 'joel is a slug'|title }}", "Joel Is A Slug")
@@ -815,7 +815,7 @@ DJANGO_TEST(length_is_filter, "{{ 'abcde'|length_is:'6' }}", "False")
 AJG_SYNTH_TEST_UNIT(random_filter) {
     string_template_type const t("{{ 'abcde'|random }}", options);
     string_type s = t.render_to_string(context);
-    MUST_NOT(s != "a" && s != "b" && s == "c" && s != "d" && s != "e");
+    MUST_NOT(s != "a" && s != "b" && s != "c" && s != "d" && s != "e");
 }}}
 
 DJANGO_TEST(join_filter, "{{ 'abcde'|join:'_' }}", "a_b_c_d_e")

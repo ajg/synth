@@ -29,15 +29,15 @@ def main():
 
 total, failures = 0, 0
 
-def run_test(name, context_data, golden, source, engine, args=()):
-    run_test_as('default', name, context_data, golden, source, engine, args)
-    run_test_as('utf-8',   name, context_data, golden, source.encode('utf-8'), engine, args)
-  # TODO: run_test_as('utf-16',  name, context_data, golden, source.encode('utf-16'), engine, args)
-  # TODO: run_test_as('utf-32',  name, context_data, golden, source.encode('utf-32'), engine, args)
-    run_test_as('unicode', name, context_data, golden, unicode(source), engine, args)
-    run_test_as('str',     name, context_data, golden, str(source), engine, args)
+def run_test(name, data, golden, source, engine, args=()):
+    run_test_as('default', name, data, golden, source, engine, args)
+    run_test_as('utf-8',   name, data, golden, source.encode('utf-8'), engine, args)
+  # TODO: run_test_as('utf-16',  name, data, golden, source.encode('utf-16'), engine, args)
+  # TODO: run_test_as('utf-32',  name, data, golden, source.encode('utf-32'), engine, args)
+    run_test_as('unicode', name, data, golden, unicode(source), engine, args)
+    run_test_as('str',     name, data, golden, str(source), engine, args)
 
-def run_test_as(type, name, context_data, golden, source, engine, args):
+def run_test_as(type, name, data, golden, source, engine, args):
     global total, failures
     total += + 1
     print('  Test #%d [%s] [%s]' % (total, name, type))
@@ -51,7 +51,7 @@ def run_test_as(type, name, context_data, golden, source, engine, args):
         return
 
     try:
-        string = template.render_to_string(context_data)
+        string = template.render_to_string(data)
         print('    - Rendering to string succeeded')
     except Exception as e:
         failures += 1
@@ -60,7 +60,7 @@ def run_test_as(type, name, context_data, golden, source, engine, args):
 
     with tempfile.TemporaryFile() as file:
         try:
-            template.render_to_file(file, context_data)
+            template.render_to_file(file, data)
             print('    - Rendering to file succeeded')
         except Exception as e:
             failures += 1
@@ -81,7 +81,7 @@ def run_test_as(type, name, context_data, golden, source, engine, args):
     else:
         with tempfile.NamedTemporaryFile() as file:
             try:
-                template.render_to_path(file.name, context_data)
+                template.render_to_path(file.name, data)
                 print('    - Rendering to path succeeded')
             except Exception as e:
                 failures += 1

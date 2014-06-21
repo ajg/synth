@@ -36,7 +36,10 @@
 //     FIXME: Needs boost/config.hpp, which is not yet available here.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(BOOST_NO_INTRINSIC_WCHAR_T) || defined(DISABLE_WIDE_CHAR_SUPPORT)
+#if defined(BOOST_NO_INTRINSIC_WCHAR_T) \
+ || defined(BOOST_NO_STD_WSTREAMBUF) \
+ || defined(BOOST_NO_STD_WSTRING) \
+ || defined(DISABLE_WIDE_CHAR_SUPPORT)
 #    ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 #    define AJG_SYNTH_CONFIG_NO_WCHAR_T
 #    endif

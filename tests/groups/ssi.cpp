@@ -67,7 +67,7 @@ AJG_SYNTH_TEST_UNIT(environment variable) {
 AJG_SYNTH_TEST_UNIT(non-extant variable) {
     MUST(std::getenv("non_extant_var") == 0);
     string_template_type const t("<!--#echo var='non_extant_var' -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().default_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "(none)");
 }}}
 
 AJG_SYNTH_TEST_UNIT(print environment) {
@@ -200,12 +200,12 @@ AJG_SYNTH_TEST_UNIT(if_elif_else_tag) {
 
 AJG_SYNTH_TEST_UNIT(invalid if_tag: no expr) {
     string_template_type const t("<!--#if -->foo<!--#endif -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "[an error occurred while processing this directive]");
 }}}
 
 AJG_SYNTH_TEST_UNIT(invalid if_tag: multiple expr) {
     string_template_type const t("<!--#if expr='1' expr='1' -->foo<!--#endif -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "[an error occurred while processing this directive]");
 }}}
 
 
@@ -227,12 +227,12 @@ AJG_SYNTH_TEST_UNIT(malformed tag) {
 
 AJG_SYNTH_TEST_UNIT(invalid config_tag) {
     string_template_type const t("<!--#config foo='bar' -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "[an error occurred while processing this directive]");
 }}}
 
 AJG_SYNTH_TEST_UNIT(invalid config_tag sizefmt) {
     string_template_type const t("<!--#config sizefmt='foo' -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "[an error occurred while processing this directive]");
 }}}
 
 AJG_SYNTH_TEST_UNIT(fsize_tag bytes) {
@@ -249,8 +249,7 @@ AJG_SYNTH_TEST_UNIT(fsize_tag abbrev) {
 
 AJG_SYNTH_TEST_UNIT(flastmod_tag) {
     string_template_type const t("<!--#flastmod file='tests/templates/ssi/example.shtml' -->");
-    string_type const time_format = t.options().format(text::literal("timefmt"));
-    MUST_EQUAL(t.render_to_string(context), traits_type::format_time(time_format,
+    MUST_EQUAL(t.render_to_string(context), traits_type::format_time("%A, %d-%b-%Y %H:%M:%S %Z",
         traits_type::to_time(s::detail::stat_file("tests/templates/ssi/example.shtml").st_mtime)));
 }}}
 
@@ -265,7 +264,7 @@ AJG_SYNTH_TEST_UNIT(flastmod_tag custom) {
 
 AJG_SYNTH_TEST_UNIT(tag with error) {
     string_template_type const t("<!--#fsize file='non-extant' -->");
-    MUST_EQUAL(t.render_to_string(context), t.options().error_value.to_string());
+    MUST_EQUAL(t.render_to_string(context), "[an error occurred while processing this directive]");
 }}}
 
 AJG_SYNTH_TEST_UNIT(file template) {

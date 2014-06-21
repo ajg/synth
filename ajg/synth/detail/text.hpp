@@ -120,6 +120,7 @@ struct text {
 
 //
 // escape_controls
+//     XXX: Should this actually be equivalent to quote()?
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static string_type escape_controls(string_type const& string) {

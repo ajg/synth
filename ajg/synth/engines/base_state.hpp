@@ -5,6 +5,8 @@
 #ifndef AJG_SYNTH_ENGINES_BASE_STATE_HPP_INCLUDED
 #define AJG_SYNTH_ENGINES_BASE_STATE_HPP_INCLUDED
 
+#include <vector>
+
 #include <ajg/synth/detail/text.hpp>
 
 #include <ajg/synth/engines/base_context.hpp>
@@ -61,6 +63,8 @@ struct base_state {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
+    typedef std::vector<string_type>                                            pieces_type;
+
   private:
 
     typedef detail::text<string_type>                                           text;
@@ -103,6 +107,24 @@ struct base_state {
 
     inline void set_renderer(size_type const position, renderer_type const& renderer) {
         this->parsed_renderers_[position] = renderer;
+    }
+
+    inline pieces_type get_pieces(string_type const& name, string_type const& c) {
+        // TODO: These numbers assume that block_open and block_close will always be 2
+        //       characters wide, which may not be the case if they become configurable.
+        BOOST_ASSERT(c.length() >= 4);
+
+        string_type const contents = text::strip(c.substr(2, c.length() - 4));
+        std::vector<string_type> const args = this->library_tag_args_;
+        this->library_tag_args_.clear();
+
+        std::vector<string_type> pieces;
+        pieces.push_back(contents);
+        pieces.push_back(name);
+        BOOST_FOREACH(string_type const& arg, args) {
+            pieces.push_back(arg);
+        }
+        return pieces;
     }
 
     void load_library(string_type const& library_name, names_type const& names = names_type()) {
@@ -173,7 +195,7 @@ struct base_state {
     libraries_type           loaded_libraries_;
     renderers_type           parsed_renderers_;
 
-    std::vector<string_type> library_tag_args_;
+    pieces_type              library_tag_args_;
     entries_type             library_tag_entries_;
     boolean_type             library_tag_continue_;
 };

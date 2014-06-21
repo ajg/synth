@@ -26,8 +26,9 @@ namespace bindings {
 
 // TODO[c++11]: Make variadic.
 template < class Traits
+         , class Foreign
          , template <class E> class Template
-         , template <class T> class Engine0 = engines::null::engine
+         , template <class T> class Engine0
          , template <class T> class Engine1 = engines::null::engine
          , template <class T> class Engine2 = engines::null::engine
          , template <class T> class Engine3 = engines::null::engine
@@ -38,8 +39,9 @@ struct base_binding : boost::noncopyable {
 
     typedef base_binding                                                        base_binding_type;
     typedef Traits                                                              traits_type;
+    typedef Foreign                                                             foreign_type;
 
-    typedef engines::base_engine<traits_type>                                   base_engine_type;
+    typedef engines::null::engine<traits_type>                                  null_engine_type;
     typedef Engine0<traits_type>                                                engine0_type;
     typedef Engine1<traits_type>                                                engine1_type;
     typedef Engine2<traits_type>                                                engine2_type;
@@ -47,14 +49,17 @@ struct base_binding : boost::noncopyable {
     typedef Engine4<traits_type>                                                engine4_type;
 
     // Note: A boost::variant won't work here because it doesn't seem to support in-place construction.
+    typedef Template<null_engine_type>                                          null_template_type;
     typedef boost::optional<Template<engine0_type> >                            template0_type;
     typedef boost::optional<Template<engine1_type> >                            template1_type;
     typedef boost::optional<Template<engine2_type> >                            template2_type;
     typedef boost::optional<Template<engine3_type> >                            template3_type;
     typedef boost::optional<Template<engine4_type> >                            template4_type;
 
-    typedef typename base_engine_type::context_type                             context_type;
-    typedef typename base_engine_type::options_type                             options_type;
+    typedef typename null_template_type::source_type                            source_type;
+    typedef typename null_engine_type::options_type                             options_type;
+
+    // typedef typename options_type::context_type                              context_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
@@ -68,43 +73,51 @@ struct base_binding : boost::noncopyable {
 
   public:
 
-    template <class Source>
-    base_binding(Source const& source, string_type const& engine, options_type const& options) {
+    base_binding(source_type source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
-             if (name == engine0_type::name()) this->template0_ = boost::in_place(source, options);
-        else if (name == engine1_type::name()) this->template1_ = boost::in_place(source, options);
-        else if (name == engine2_type::name()) this->template2_ = boost::in_place(source, options);
-        else if (name == engine3_type::name()) this->template3_ = boost::in_place(source, options);
-        else if (name == engine4_type::name()) this->template4_ = boost::in_place(source, options);
+             if (name == engine0_type::name()) this->template0_ = boost::in_place(boost::ref(source), options);
+        else if (name == engine1_type::name()) this->template1_ = boost::in_place(boost::ref(source), options);
+        else if (name == engine2_type::name()) this->template2_ = boost::in_place(boost::ref(source), options);
+        else if (name == engine3_type::name()) this->template3_ = boost::in_place(boost::ref(source), options);
+        else if (name == engine4_type::name()) this->template4_ = boost::in_place(boost::ref(source), options);
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
   protected:
 
-    void render_to_stream(ostream_type& ostream, context_type& context) const {
-             if (template0_) return template0_->render_to_stream(ostream, context);
-        else if (template1_) return template1_->render_to_stream(ostream, context);
-        else if (template2_) return template2_->render_to_stream(ostream, context);
-        else if (template3_) return template3_->render_to_stream(ostream, context);
-        else if (template4_) return template4_->render_to_stream(ostream, context);
+    void render_to_stream(ostream_type& ostream, foreign_type& data) const {
+             if (template0_) return template0_->render_to_stream(ostream, data);
+        else if (template1_) return template1_->render_to_stream(ostream, data);
+        else if (template2_) return template2_->render_to_stream(ostream, data);
+        else if (template3_) return template3_->render_to_stream(ostream, data);
+        else if (template4_) return template4_->render_to_stream(ostream, data);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
-    string_type render_to_string(context_type& context) const {
-             if (template0_) return template0_->render_to_string(context);
-        else if (template1_) return template1_->render_to_string(context);
-        else if (template2_) return template2_->render_to_string(context);
-        else if (template3_) return template3_->render_to_string(context);
-        else if (template4_) return template4_->render_to_string(context);
+    string_type render_to_string(foreign_type& data) const {
+             if (template0_) return template0_->render_to_string(data);
+        else if (template1_) return template1_->render_to_string(data);
+        else if (template2_) return template2_->render_to_string(data);
+        else if (template3_) return template3_->render_to_string(data);
+        else if (template4_) return template4_->render_to_string(data);
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 
-    void render_to_path(string_type const& path, context_type& context) const {
-             if (template0_) return template0_->render_to_path(path, context);
-        else if (template1_) return template1_->render_to_path(path, context);
-        else if (template2_) return template2_->render_to_path(path, context);
-        else if (template3_) return template3_->render_to_path(path, context);
-        else if (template4_) return template4_->render_to_path(path, context);
+    void render_to_path(string_type const& path, foreign_type& data) const {
+             if (template0_) return template0_->render_to_path(path, data);
+        else if (template1_) return template1_->render_to_path(path, data);
+        else if (template2_) return template2_->render_to_path(path, data);
+        else if (template3_) return template3_->render_to_path(path, data);
+        else if (template4_) return template4_->render_to_path(path, data);
+        else AJG_SYNTH_THROW(std::logic_error("missing template"));
+    }
+
+    inline options_type const& options() const {
+             if (template0_) return template0_->options();
+        else if (template1_) return template1_->options();
+        else if (template2_) return template2_->options();
+        else if (template3_) return template3_->options();
+        else if (template4_) return template4_->options();
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
     }
 

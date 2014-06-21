@@ -21,24 +21,26 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
     typedef typename options_type::traits_type                                  traits_type;
     typedef typename traits_type::string_type                                   string_type;
 
+    typedef string_type                                                         source_type;
+
   public:
 
-    string_template(string_type const& string, options_type const& options = options_type()) : string_(string) {
-        this->reset(this->string_.begin(), this->string_.end(), options);
+    string_template(source_type source, options_type const& options = options_type()) : source_(source) {
+        this->reset(this->source_.begin(), this->source_.end(), options);
     }
 
     template <class I>
-    string_template(I const& begin, I const& end, options_type const& options = options_type()) : string_(begin, end) {
-        this->reset(this->string_.begin(), this->string_.end(), options);
+    string_template(I const& begin, I const& end, options_type const& options = options_type()) : source_(begin, end) {
+        this->reset(this->source_.begin(), this->source_.end(), options);
     }
 
   public:
 
-    string_type const& string() const { return this->string_; }
+    source_type const& source() const { return this->source_; }
 
   private:
 
-    string_type const string_;
+    source_type source_;
 };
 
 }}} // namespace ajg::synth::templates

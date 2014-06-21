@@ -5,42 +5,37 @@
 import sys
 
 def get():
-    return (context_data, golden, source, 'django', ('', {}, False, [], {}, [library_loader], []))
+    return (data, golden, source, 'django', ({}, False, [], {}, [library_loader], []))
 
 class Library(object):
     def __init__(self, tags={}, filters={}):
-        self.tags = tags
+        self.tags    = tags
         self.filters = filters
 
 def dump(n, x): print n, '=', x; return x
 
-def render_block(segments, context_data, index=0):
-    # print '### render_block(', segments, ')'
-    renderer = segments[index][1]
-    return renderer(context_data)
+def render_segment(segment, data, **kwargs):
+    # print '### render_segment(', segment, ')'
+    pieces, renderer = segment
+    return renderer(data, **kwargs)
 
 def dummy_tag():
-    return ((lambda segments: ''), None, None)
+    return ((lambda: ''), None, None, True, True)
 
-def monadic_tag(fn, plain=False):
-    return variadic_tag(fn, None, None, None, plain=plain)
+def simple_tag(fn, dataless=True):
+    return (lambda: (lambda *args, **kwargs: fn(*args, **kwargs)), None, None, True, dataless)
 
-def dyadic_tag(fn, first, last, plain=False):
-    return variadic_tag(fn, first, None, (last,), plain=plain)
+def variadic_tag(fn, first, middles, lasts, dataless=False):
+    return (lambda segments: (lambda *args, **kwargs: fn(segments, *args, **kwargs)), middles, lasts, False, dataless)
 
-def triadic_tag(fn, first, middle, last, plain=False):
-    return variadic_tag(fn, first, (middle,), (last,), plain=plain)
+def monadic_tag(fn, first, dataless=False):
+    return variadic_tag(fn, None, None, None, dataless=dataless)
 
-def variadic_tag(fn, first, middles, lasts, plain=False):
-    if plain:
-        return (lambda segments:
-                    (lambda context_data, *args, **kwargs:
-                        str(fn(*args, **kwargs))), middles, lasts)
-    else:
-        return (lambda segments:
-                    (lambda context_data, *args, **kwargs:
-                        str(fn(context_data, segments, *args, **kwargs))), middles, lasts)
+def dyadic_tag(fn, first, last, dataless=False):
+    return variadic_tag(fn, first, None, (last,), dataless=dataless)
 
+def triadic_tag(fn, first, middle, last, dataless=False):
+    return variadic_tag(fn, first, (middle,), (last,), dataless=dataless)
 
 
 def dummy_filter():
@@ -62,14 +57,14 @@ def library_loader(name):
 
     elif name == 'test_tags':
         return Library(tags={
-            # Monadic ('simple') tags:
-            'answer_to_life': monadic_tag(answer_to_life, plain=True), # Nullary
-            'identity':       monadic_tag(identity,       plain=True), # Unary
-            'ackermann':      monadic_tag(ackermann,      plain=True), # Binary
-            'add':            monadic_tag(add,            plain=True), # N-ary
-            'set':            monadic_tag(set_variable),
-            'unset':          monadic_tag(unset_variable),
-            # Polyadic ('block') tags:
+            # Monadic tags:
+            'answer_to_life': simple_tag(answer_to_life), # Nullary
+            'identity':       simple_tag(identity),       # Unary
+            'ackermann':      simple_tag(ackermann),      # Binary
+            'add':            simple_tag(add),            # N-ary
+            'set':            monadic_tag(set_variable, 'set'),
+            'unset':          monadic_tag(unset_variable, 'unset'),
+            # Polyadic tags:
             'encode':         dyadic_tag(encode, 'encode', 'endencode'),
             'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
             'unless':         triadic_tag(unless, 'unless', 'otherwise', 'endunless'),
@@ -102,42 +97,41 @@ def ackermann(m, n):
 def add(*args):
     return sum(args)
 
-def encode(context_data, segments, arg):
-    # print '### encode(', arg, ')'
-    s = render_block(segments, context_data)
-    return s.encode(arg)
+def encode(segments, data, name, *args, **kwargs):
+    # print '### encode(', name, ')'
+    s = render_segment(segments[0], data, **kwargs)
+    return s.encode(name)
 
-def decode(context_data, segments, arg):
-    # print '### decode(', arg, ')'
-    s = render_block(segments, context_data)
-    return s.decode(arg)
+def decode(segments, data, name, *args, **kwargs):
+    # print '### decode(', name, ')'
+    s = render_segment(segments[0], data, **kwargs)
+    return s.decode(name)
 
-def unless(context_data, segments, arg):
-    # print '### unless(', repr(segments), repr(arg), ')'
-    pieces, renderer = segments[1 if arg else 0]
-    return renderer(context_data)
+def unless(segments, data, condition, *args, **kwargs):
+    # print '### unless(', condition, ')'
+    return render_segment(segments[1 if condition else 0], data, **kwargs)
 
-def set_variable(context_data, segments, *args, **kwargs):
+def set_variable(segments, data, *args, **kwargs):
     # print '### set(', args, kwargs, ')'
     pieces = segments[0][0]
     name  = pieces[2]
     value = pieces[3]
-    context_data[name] = value
+    data[name] = value
     return ''
 
-def unset_variable(context_data, segments, *args, **kwargs):
+def unset_variable(segments, data, *args, **kwargs):
     # print '### unset(', args, kwargs, ')'
     pieces = segments[0][0]
     name = pieces[2]
-    del context_data[name]
+    del data[name]
     return ''
 
-def fml(context_data, segments, *args, **kwargs):
+def fml(segments, data, *args, **kwargs):
     return str(len(segments) - 1)
 
 
 
-context_data = {'motto': 'May the Force be with you.'}
+data = {'motto': 'May the Force be with you.'}
 source = """\
 {% load empty_library %}
 {% load a x b y c z from dummy.tags.and.filters %}

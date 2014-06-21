@@ -38,6 +38,7 @@ inline char const* version() {
 template <class Traits>
 struct binding : private boost::base_from_member<PyObject*>
                , bindings::base_binding< Traits
+                                       , py::object
                                        , templates::char_template
                                        , engines::django::engine
                                        , engines::ssi::engine
@@ -54,11 +55,11 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename traits_type::string_type                                   string_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+    typedef typename base_type::source_type                                     source_type;
     typedef typename base_type::options_type                                    options_type;
 
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::context_type                                 context_type;
-    typedef typename options_type::formats_type                                 formats_type;
     typedef typename options_type::library_type                                 library_type;
     typedef typename options_type::libraries_type                               libraries_type;
     typedef typename options_type::loader_type                                  loader_type;
@@ -68,8 +69,7 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef py::init< py::object
                     , py::str
                     , py::optional
-                        < py::object
-                        , py::dict
+                        < py::dict
                         , boolean_type
                         , py::list
                         , py::dict
@@ -79,6 +79,11 @@ struct binding : private boost::base_from_member<PyObject*>
                     >                                                           constructor_type;
 
     typedef typename value_type::arguments_type                                 arguments_type;
+
+    typedef typename context_type::data_type                                    data_type;
+    typedef typename context_type::metadata_type                                metadata_type;
+    typedef typename context_type::format_type                                  format_type;
+    typedef typename context_type::formats_type                                 formats_type;
 
   private:
 
@@ -92,7 +97,7 @@ struct binding : private boost::base_from_member<PyObject*>
     binding( py::object   const& src
            , py::str      const& engine
            // TODO: Rename abbreviated parameters and expose them as kwargs.
-           , py::object   const& replacement = py::str()
+           // TODO: Change the non-boolean defaults to None (py::object()) to reduce allocations.
            , py::dict     const& fmts        = py::dict()
            , boolean_type const  debug       = false
            , py::list     const& dirs        = py::list()
@@ -101,39 +106,36 @@ struct binding : private boost::base_from_member<PyObject*>
            , py::list     const& rslvrs      = py::list()
            )
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
-        , base_type( get_source(boost::base_from_member<PyObject*>::member)
+        , base_type( make_source(boost::base_from_member<PyObject*>::member)
                    , c::make_string(engine)
-                   , get_options(replacement, fmts, debug, dirs, libs, ldrs, rslvrs)
+                   , make_options(fmts, debug, dirs, libs, ldrs, rslvrs)
                    ) {}
 
     ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
   private:
 
-    inline static options_type get_options( py::object   const& replacement
-                                          , py::dict     const& fmts
-                                          , boolean_type const  debug
-                                          , py::list     const& dirs
-                                          , py::dict     const& libs
-                                          , py::list     const& ldrs
-                                          , py::list     const& rslvrs
-                                          ) {
+    inline static options_type make_options( py::dict     const& fmts
+                                           , boolean_type const  debug
+                                           , py::list     const& dirs
+                                           , py::dict     const& libs
+                                           , py::list     const& ldrs
+                                           , py::list     const& rslvrs
+                                           ) {
         options_type options;
-        options.default_value = replacement;
-        options.formats       = get_formats(fmts);
-        options.debug         = debug;
-        options.directories   = get_directories(dirs);
-        options.libraries     = get_libraries(libs);
-        options.loaders       = get_loaders(ldrs);
-        options.resolvers     = get_resolvers(rslvrs);
+        options.defaults    = make_defaults(fmts);
+        options.debug       = debug;
+        options.directories = c::make_paths(dirs);
+        options.libraries   = make_libraries(libs);
+        options.loaders     = make_loaders(ldrs);
+        options.resolvers   = make_resolvers(rslvrs);
         return options;
     }
 
   public:
 
-    void render_to_file(py::object const& file, py::object const& object) const {
-        context_type context((object));
-        file.attr("write")(base_type::render_to_string(context));
+    void render_to_file(py::object const& file, py::object& data) const {
+        file.attr("write")(base_type::render_to_string(data));
         // XXX: Automatically call flush()?
 
         /* TODO: Be more intelligent and use something like:
@@ -148,25 +150,26 @@ struct binding : private boost::base_from_member<PyObject*>
         */
     }
 
-    void render_to_path(py::str const& path, py::object const& object) const {
-        context_type context((object));
-        return base_type::render_to_path(c::make_string(path), context);
+    void render_to_path(py::str const& path, py::object& data) const {
+        return base_type::render_to_path(c::make_string(path), data);
     }
 
-    string_type render_to_string(py::object const& object) const {
-        context_type context((object));
-        return base_type::render_to_string(context);
+    using base_type::render_to_string;
+    /*
+    string_type render_to_string(py::object& data) const {
+        return base_type::render_to_string(data);
     }
+    */
 
   private:
 
     // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
-    // inline static std::pair<char_type const*, size_type> get_source(PyObject* const o) {
+    // inline static std::pair<char_type const*, size_type> make_source(PyObject* const o) {
     //     if (PyString_Check(o)) { use char template }
     //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
     // }
 
-    inline static std::pair<char const*, size_type> get_source(PyObject* const o) {
+    inline static source_type make_source(PyObject* const o) {
         char*      data;
         Py_ssize_t size;
 
@@ -177,28 +180,13 @@ struct binding : private boost::base_from_member<PyObject*>
         return std::pair<char const*, size_type>(data, size);
     }
 
-    // TODO: Rename these to_*
-
-    inline static formats_type get_formats(py::dict const& fmts) {
-        py::stl_input_iterator<py::tuple> begin(fmts.items()), end;
-        formats_type formats;
-
-        BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
-            string_type const& key = c::make_string(item[0]);
-            string_type const& fmt = c::make_string(item[1]);
-            typedef typename formats_type::value_type pair_type;
-            formats.insert(pair_type(key, fmt));
-        }
-
-        return formats;
+    inline static metadata_type make_defaults(py::dict const& fmts) {
+        metadata_type defaults;
+        defaults.formats = c::make_formats(fmts);
+        return defaults;
     }
 
-    inline static paths_type get_directories(py::list const& dirs) {
-        py::stl_input_iterator<string_type> begin(dirs), end;
-        return paths_type(begin, end);
-    }
-
-    inline static libraries_type get_libraries(py::dict const& libs) {
+    inline static libraries_type make_libraries(py::dict const& libs) {
         py::stl_input_iterator<py::tuple> begin(libs.items()), end;
         libraries_type libraries;
 
@@ -212,7 +200,7 @@ struct binding : private boost::base_from_member<PyObject*>
         return libraries;
     }
 
-    inline static loaders_type get_loaders(py::list const& ldrs) {
+    inline static loaders_type make_loaders(py::list const& ldrs) {
         py::stl_input_iterator<py::object> begin(ldrs), end;
         loaders_type loaders;
 
@@ -223,7 +211,7 @@ struct binding : private boost::base_from_member<PyObject*>
         return loaders;
     }
 
-    inline static resolvers_type get_resolvers(py::list const& rslvrs) {
+    inline static resolvers_type make_resolvers(py::list const& rslvrs) {
         py::stl_input_iterator<py::object> begin(rslvrs), end;
         resolvers_type resolvers;
 

@@ -144,11 +144,11 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("sizefmt")) {
                     validate_attribute("sizefmt", value, "bytes", "abbrev");
-                    args.options.format(text::literal("sizefmt"), value);
+                    args.context.format(text::literal("sizefmt"), value);
                 }
-                else if (name == text::literal("timefmt")) args.options.format(text::literal("timefmt"), value);
-                else if (name == text::literal("echomsg")) args.options.default_value = value;
-                else if (name == text::literal("errmsg"))  args.options.error_value   = value;
+                else if (name == text::literal("timefmt")) args.context.format(text::literal("timefmt"), value);
+                else if (name == text::literal("echomsg")) args.context.format(text::literal("echomsg"), value);
+                else if (name == text::literal("errmsg"))  args.context.format(text::literal("errmsg"),  value);
             );
         }
     };
@@ -221,9 +221,9 @@ enum { interpolated = true, raw = false };
                     AJG_SYNTH_THROW(not_implemented("fsize virtual"));
                 }
                 else if (name == text::literal("file")) {
-                    string_type const time_format = args.options.format(text::literal("timefmt"));
-                    std::time_t const stamp = detail::stat_file(text::narrow(value)).st_mtime;
-                    args.ostream << traits_type::format_time(time_format, traits_type::to_time(stamp));
+                    string_type const format = args.context.format(text::literal("timefmt"));
+                    std::time_t const stamp  = detail::stat_file(text::narrow(value)).st_mtime;
+                    args.ostream << traits_type::format_time(format, traits_type::to_time(stamp));
                 }
             );
         }
@@ -239,9 +239,9 @@ enum { interpolated = true, raw = false };
         }
 
         static void render(args_type const& args) {
-            string_type  const size_format = args.options.format(text::literal("sizefmt"));
-            boolean_type const abbreviate  = size_format == text::literal("abbrev");
-            validate_attribute("size_format", size_format, "bytes", "abbrev");
+            string_type  const format     = args.context.format(text::literal("sizefmt"));
+            boolean_type const abbreviate = format == text::literal("abbrev");
+            validate_attribute("size_format", format, "bytes", "abbrev");
 
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("virtual")) {

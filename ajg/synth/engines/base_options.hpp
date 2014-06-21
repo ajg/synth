@@ -10,9 +10,6 @@
 #include <vector>
 #include <utility>
 
-#include <ajg/synth/detail/find.hpp>
-#include <ajg/synth/detail/text.hpp>
-
 namespace ajg {
 namespace synth {
 namespace engines {
@@ -29,6 +26,8 @@ struct base_options {
     typedef base_options                                                        options_type;
 
     typedef typename context_type::value_type                                   value_type;
+    typedef typename context_type::data_type                                    data_type;
+    typedef typename context_type::metadata_type                                metadata_type;
 
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
@@ -50,10 +49,9 @@ struct base_options {
     typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::names_type                                    names_type;
+    typedef typename traits_type::formats_type                                  formats_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
-
-    typedef std::map<string_type, string_type>                                  formats_type;
 
     struct abstract_library;
     struct abstract_loader;
@@ -69,10 +67,15 @@ struct base_options {
     typedef std::pair<std::vector<string_type>, renderer_type>                                   segment_type;
     typedef std::vector<segment_type>                                                            segments_type;
     typedef boost::function<value_type(value_type const&, arguments_type const&, context_type&)> filter_type;
-    typedef struct {
+    typedef struct tag {
         boost::function<renderer_type(segments_type const&)> function;
+     // string_type/* symbol_type */                         first_name;
         symbols_type                                         middle_names;
         symbols_type                                         last_names;
+        boolean_type                                         simple;
+        boolean_type                                         dataless;
+
+        tag() : simple(false), dataless(false) {}
 
         inline operator boolean_type() const { return this->function; }
     }                                                                           tag_type;
@@ -90,30 +93,12 @@ struct base_options {
         tag_type      tag;
         segments_type segments;
      // boolean_type  proceed;
-
     }                                                                           entry_type;
     typedef std::stack<entry_type>                                              entries_type;
 
-  private:
-
-    typedef detail::text<string_type>                                           text;
-
   public:
 
-    inline string_type format(string_type const& name) const {
-        // TODO: Throw unknown_format/missing_format instead?
-        return detail::find(name, this->formats).get_value_or(text::literal("[missing format]"));
-    }
-
-    inline void format(string_type const& name, string_type const& value) {
-        this->formats[name] = value;
-    }
-
-  public:
-
-    value_type        default_value;
-    value_type        error_value;
-    formats_type      formats;
+    metadata_type     defaults;
     boolean_type      debug;
     paths_type        directories;
     libraries_type    libraries;

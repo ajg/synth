@@ -59,7 +59,7 @@ struct resolver : Options::abstract_resolver {
                             ) {
         try {
             std::pair<py::tuple, py::dict> const args = c::make_args(arguments);
-            py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app
+            py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app/application.
             return url_type(c::make_string(result));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?

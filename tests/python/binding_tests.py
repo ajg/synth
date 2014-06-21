@@ -5,9 +5,9 @@
 from datetime import datetime
 
 def get():
-    return (context_data, golden, source, 'django')
+    return (data, golden, source, 'django')
 
-context_data = {
+data = {
     'bool_true':        True,
     'bool_false':       False,
     'int_0':            0,
@@ -131,14 +131,14 @@ bar
 1776-07-04 00:00:00
 1984-11-02 00:00:00
 
-0&nbsp;minutes
-208&nbsp;years, 5&nbsp;months
-0&nbsp;minutes
-0&nbsp;minutes
+0\xc2\xa0minutes
+208\xc2\xa0years, 5\xc2\xa0months
+0\xc2\xa0minutes
+0\xc2\xa0minutes
 
-208&nbsp;years, 5&nbsp;months
-0&nbsp;minutes
-0&nbsp;minutes
-0&nbsp;minutes
+208\xc2\xa0years, 5\xc2\xa0months
+0\xc2\xa0minutes
+0\xc2\xa0minutes
+0\xc2\xa0minutes
 
 """

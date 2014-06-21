@@ -309,9 +309,9 @@ struct builtin_filters {
                                         , context_type&         context
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
-            string_type const format = arguments.first.empty() ?
+            string_type const f = arguments.first.empty() ?
                 text::literal("DATE_FORMAT") : arguments.first[0].to_string();
-            return formatter_type::format_datetime(options, format, value.to_datetime());
+            return formatter_type::format_datetime(context.format_or(f, f), value.to_datetime());
         }
     };
 
@@ -685,7 +685,7 @@ struct builtin_filters {
             string_type const input = x::regex_replace(value.to_string(), newline, kernel.newline);
 
             regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
-            boolean_type const safe = !context.autoescape() || value.safe();
+            boolean_type const safe = context.safe() || value.safe();
 
             BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
                 string_type const s = safe ? value_type(line).escape().to_string() : line;
@@ -732,7 +732,7 @@ struct builtin_filters {
 
             string_type  const input   = value.to_string();
             string_type  const pattern = text::literal("%%0%dd. %%s");
-            boolean_type const safe    = !context.autoescape() || value.safe();
+            boolean_type const safe    = context.safe() || value.safe();
 
             std::vector<string_type> const& lines = text::split(input, text::literal("\n"));
             size_type   const width = text::stringize(lines.size()).size();
@@ -867,7 +867,7 @@ struct builtin_filters {
                 kernel.split_argument(options, state, arguments.first[0], context, char_type(','));
 
             switch (args.size()) {
-            case 0: plural = text::literal("s");           break;
+            case 0: plural = text::literal("s");  break;
             case 1: plural = args[0].to_string(); break;
             default: // 2+
                 singular = args[0].to_string();
@@ -993,7 +993,7 @@ struct builtin_filters {
             with_arity<0>::validate(arguments.first.size());
             // NOTE: The to_string is there because `safe` is expected to stringize its operand
             //       immediately, not just mark it safe.
-            return context.autoescape() ? value_type(value.to_string()).mark_safe() : value;
+            return context.safe() ? value : value_type(value.to_string()).mark_safe();
         }
     };
 
@@ -1126,9 +1126,9 @@ struct builtin_filters {
                                         , context_type&         context
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
-            string_type const format = arguments.first.empty() ?
+            string_type const f = arguments.first.empty() ?
                 text::literal("TIME_FORMAT") : arguments.first[0].to_string();
-            return formatter_type::format_datetime(options, format, value.to_datetime());
+            return formatter_type::format_datetime(context.format_or(f, f), value.to_datetime());
         }
     };
 
@@ -1146,8 +1146,10 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
-            datetime_type const from = arguments.first.empty() ? traits_type::local_datetime() : arguments.first[0].to_datetime();
-            return value_type(formatter_type::format_duration(options, from - to)).mark_safe();
+            datetime_type const from = arguments.first.empty() ?
+                traits_type::local_datetime(context.timezone()) :
+                arguments.first[0].to_datetime(context.timezone());
+            return value_type(formatter_type::format_duration(from - to)).mark_safe();
         }
     };
 
@@ -1165,8 +1167,10 @@ struct builtin_filters {
                                         ) {
             with_arity<0, 1>::validate(arguments.first.size());
             datetime_type const to   = value.to_datetime();
-            datetime_type const from = arguments.first.empty() ? traits_type::local_datetime() : arguments.first[0].to_datetime();
-            return value_type(formatter_type::format_duration(options, to - from)).mark_safe();
+            datetime_type const from = arguments.first.empty() ?
+                traits_type::local_datetime(context.timezone()) :
+                arguments.first[0].to_datetime(context.timezone());
+            return value_type(formatter_type::format_duration(to - from)).mark_safe();
         }
     };
 

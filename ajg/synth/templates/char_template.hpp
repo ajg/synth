@@ -39,30 +39,30 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
 
-    typedef std::pair<char_type const*, size_type>                              buffer_type;
+    typedef std::pair<char_type const*, size_type>                              source_type;
 
   public:
 
-    inline char_template(buffer_type const& buffer, options_type const& options = options_type()) : buffer_(buffer) {
-        this->reset(this->buffer_.first, this->buffer_.first + this->buffer_.second, options);
+    inline char_template(source_type const& source, options_type const& options = options_type()) : source_(source) {
+        this->reset(this->source_.first, this->source_.first + this->source_.second, options);
     }
 
-    inline char_template(char_type const* data, size_type const size, options_type const& options = options_type()) : buffer_(data, size) {
+    inline char_template(char_type const* data, size_type const size, options_type const& options = options_type()) : source_(data, size) {
         this->reset(data, data + size, options);
     }
 
-    inline char_template(char_type const* data, options_type const& options = options_type()) : buffer_(data, get_size(data)) {
-        this->reset(data, data + this->buffer_.second, options);
+    inline char_template(char_type const* data, options_type const& options = options_type()) : source_(data, get_size(data)) {
+        this->reset(data, data + this->source_.second, options);
     }
 
     template <size_type N>
-    inline char_template(char_type const (&data)[N], options_type const& options = options_type()): buffer_(data, N) {
+    inline char_template(char_type const (&data)[N], options_type const& options = options_type()): source_(data, N) {
         this->reset(data, data + N, options);
     }
 
   public:
 
-    buffer_type const& buffer() const { return this->buffer_; }
+    source_type const& source() const { return this->source_; }
 
   private:
 
@@ -81,7 +81,7 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
 
   private:
 
-    buffer_type const buffer_;
+    source_type const source_;
 };
 
 }}} // namespace ajg::synth::templates

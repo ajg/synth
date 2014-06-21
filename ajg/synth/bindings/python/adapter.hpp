@@ -42,6 +42,7 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
     virtual type_flags flags() const {
         PyObject* const o = this->adapted().ptr();
         type_flags flags  = unspecified;
+        if (!o) return flags;
 
         if (Py_None == o)              flags = type_flags(flags | unit);
         if (PyBool_Check(o))           flags = type_flags(flags | boolean);
@@ -56,6 +57,10 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
             if (PyString_Size(o) == 1) flags = type_flags(flags | textual | character);
             else                       flags = type_flags(flags | textual);
         }
+        if (PyDate_Check(o) ||
+            PyTime_Check(o) ||
+            PyDateTime_Check(o))       flags = type_flags(flags | chronologic);
+        // TODO: PyTZInfo_Check
         if (PySequence_Check(o))       flags = type_flags(flags | container | sequential);
         if (PyMapping_Check(o))        flags = type_flags(flags | container | associative);
         return flags;
@@ -73,7 +78,7 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
 
     virtual attributes_type attributes() const {
         attributes_type attributes;
-        py::list const keys = py::dict(this->adapted()).keys();
+        py::list const keys = py::dict(this->adapted()).keys(); // FIXME: Not all mapping types can be converted to a dict.
 
         // TODO: Replace with stl_input_iterator version.
         for (std::size_t i = 0, n = len(keys); i < n; ++i) {

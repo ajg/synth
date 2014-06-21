@@ -41,6 +41,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
+    // TODO: source_type and source()
     typedef std::pair<path_type, size_type>                                     info_type;
 
   private:

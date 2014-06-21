@@ -270,7 +270,7 @@ struct builtin_tags {
                 result = *attrs.fallback;
             }
             else {
-                result = kernel.default_value;
+                result = kernel.fallback;
             }
 
             if (attrs.escape) {

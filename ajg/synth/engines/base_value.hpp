@@ -133,6 +133,7 @@ struct base_value {
     inline boolean_type is_integral()    const { return boolean_type(this->flags() & adapters::integral); }
     inline boolean_type is_numeric()     const { return boolean_type(this->flags() & adapters::numeric); }
     inline boolean_type is_chronologic() const { return boolean_type(this->flags() & adapters::chronologic); }
+    inline boolean_type is_timezone()    const { return boolean_type(this->template is<timezone_type>()); }
     inline boolean_type is_sequential()  const { return boolean_type(this->flags() & adapters::sequential); }
     inline boolean_type is_associative() const { return boolean_type(this->flags() & adapters::associative); }
     inline boolean_type is_container()   const { return boolean_type(this->flags() & adapters::container); }
@@ -240,20 +241,35 @@ struct base_value {
         return this->template to<number_type>();
     }
 
-    inline datetime_type to_datetime() const {
-        /* TODO: Once there's an adapter for datetime_type.
+    inline duration_type to_duration() const {
+        return traits_type::to_duration(); // TODO.
+    }
+
+    inline datetime_type to_datetime(timezone_type const& timezone = timezone_type()) const {
         if (this->template is<datetime_type>()) {
-            return this->template as<datetime_type>();
+            return this->template as<datetime_type>().local_time_in(timezone.second);
         }
-        else*/ if (boost::optional<datetime_type> const dt = this->adapter()->get_datetime()) {
-            return *dt;
+        else if (boost::optional<datetime_type> const dt = this->adapter()->get_datetime()) {
+            return dt->local_time_in(timezone.second);
         }
         else if (this->is_unit()) {
             return traits_type::empty_datetime();
         }
         datetime_type dt = traits_type::empty_datetime();
         this->template into<datetime_type>(dt);
-        return dt;
+        return dt.local_time_in(timezone.second);
+    }
+
+    inline timezone_type to_timezone() const {
+        if (this->template is<timezone_type>()) {
+            return this->template as<timezone_type>();
+        }
+        else if (this->is_unit()) { // TODO: !this->to_boolean()
+            return traits_type::empty_timezone();
+        }
+        else {
+            return traits_type::to_timezone(this->to_string());
+        }
     }
 
     inline string_type to_string() const {
@@ -338,7 +354,7 @@ struct base_value {
         // TODO: Once we have value_iterator::advance_to consider using return begin() + index,
         //       to be O(1). For now, we must use this O(n) method:
         for (integer_type i = 0; it != end; ++it, ++i) {
-            if ((index >= 0 && i == index) || i == index + size) {
+            if ((index >= 0 && i == index) || i == index + static_cast<integer_type>(size)) {
                 return it;
             }
         }
@@ -352,7 +368,7 @@ struct base_value {
         size_type const size = this->size();
         integer_type l = lower.get_value_or(0);
         integer_type u = upper.get_value_or(static_cast<integer_type>(size));
-        
+
         // Wrap negative indices.
         if (l < 0) l += size;
         if (u < 0) u += size;
@@ -413,6 +429,8 @@ struct base_value {
     template <class V> friend
     typename boost::enable_if<boost::is_same<value_type, V>, ostream_type&>::type
     operator <<(ostream_type& ostream, V const& value) {
+        ostream.imbue(traits_type::standard_locale());
+
         // TODO: Move non-output behavior to traits.
         if (value.is_unit()) {
             return ostream << "None";
@@ -437,6 +455,8 @@ struct base_value {
     template <class V> friend
     typename boost::enable_if<boost::is_same<value_type, V>, istream_type&>::type
     operator >>(istream_type& istream, value_type& value) {
+        istream.imbue(traits_type::standard_locale());
+
         if (value.adapter()->input(istream)) {
             return istream;
         }
@@ -458,6 +478,7 @@ struct base_value {
     // NOTE: This method does not copy the actual held value (in the adapter) just the metadata.
     inline value_type metacopy() const { return *this; }
 
+    // TODO: escape(ostream_type& ostream) to reduce string/stream allocations.
     value_type escape() const {
         // XXX: Should this method escape binary and control characters?
         return text::escape_entities(this->to_string());

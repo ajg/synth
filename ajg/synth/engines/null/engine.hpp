@@ -62,7 +62,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     inline void parse(state_type&) const {}
     inline void render(ostream_type&, options_type const&, state_type const&, context_type&) const {}
-    inline static void initialize_state(state_type& state) {}
 
 }; // kernel
 

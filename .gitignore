@@ -28,13 +28,16 @@
 /ide/cb*/*.layout
 
 # Visual Studio
-*.idb
-/ide/vs*/ipch/
-/ide/vs*/Debug/
-/ide/vs*/Release/
-/ide/vs*/*.suo
-/ide/vs*/*.sdf
+/ide/vs*/*/ipch/
+/ide/vs*/*/Debug/
+/ide/vs*/*/Release/
+/ide/vs*/*.idb
+/ide/vs*/*.log
+/ide/vs*/*.ncb
 /ide/vs*/*.opensdf
+/ide/vs*/*.sbr
+/ide/vs*/*.sdf
+/ide/vs*/*.suo
 
 # Python
 /build/

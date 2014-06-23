@@ -16,7 +16,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <external/optionparser.h>
+#include <external/other/optionparser.h>
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>

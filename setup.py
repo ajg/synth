@@ -8,7 +8,8 @@ import platform
 import re
 import sys
 from distutils import sysconfig
-from distutils.core import setup, Extension
+# from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 # TODO: Allow CHAR and BOOST to be passed via command-line.
 DEBUG = ('-g' in sys.argv or '--debug' in sys.argv)
@@ -226,13 +227,14 @@ def get_sources():
 def get_data_files():
     data_files = []
 
-    for base, _, files in os.walk('ajg/synth'):
-        headers = []
-        for file in fnmatch.filter(files, '*.hpp'):
-            header = base + '/' + file
-            headers.append(header)
-        target = 'include/' + base
-        data_files.append((target, headers))
+    for root in ('external/boost', 'external/other', 'ajg/synth'):
+        for base, _, files in os.walk(root):
+            headers = []
+            for file in fnmatch.filter(files, '*.?pp') + fnmatch.filter(files, '*.h'):
+                header = base + '/' + file
+                headers.append(header)
+            target = 'include/' + base
+            data_files.append((target, headers))
 
     return data_files
 

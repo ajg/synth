@@ -8,10 +8,11 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4180;4244;4503;4800</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4100;4127;4180;4244;4245;4503;4510;4512;4610;4668;4800;4820</DisableSpecificWarnings>
       <CompileAs>CompileAsCpp</CompileAs>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

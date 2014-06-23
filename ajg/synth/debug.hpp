@@ -193,6 +193,7 @@ inline void fprint_backtrace(FILE* file, std::size_t frames_skipped = 0) {
 
 #else
 
+    (void)frames_skipped;
     fprintf(file, "Backtrace unavailable\n");
 
 #endif

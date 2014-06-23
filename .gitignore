@@ -11,6 +11,8 @@
 *.so-*
 *.dll
 *.dll-*
+*.exe
+*.exe-*
 *.lib
 *.lib-*
 
@@ -24,20 +26,22 @@
 *.sublime-workspace
 
 # Code Blocks
-/ide/cb*/*.depend
-/ide/cb*/*.layout
+/ide/cb**/*.depend
+/ide/cb**/*.layout
 
 # Visual Studio
-/ide/vs*/*/ipch/
-/ide/vs*/*/Debug/
-/ide/vs*/*/Release/
-/ide/vs*/*.idb
-/ide/vs*/*.log
-/ide/vs*/*.ncb
-/ide/vs*/*.opensdf
-/ide/vs*/*.sbr
-/ide/vs*/*.sdf
-/ide/vs*/*.suo
+/ide/vs**/ipch/
+/ide/vs**/Debug/
+/ide/vs**/Release/
+/ide/vs**/*.log
+/ide/vs**/*.tlog
+/ide/vs**/*.ncb
+/ide/vs**/*.idb
+/ide/vs**/*.obj
+/ide/vs**/*.opensdf
+/ide/vs**/*.sbr
+/ide/vs**/*.sdf
+/ide/vs**/*.suo
 
 # Python
 /build/

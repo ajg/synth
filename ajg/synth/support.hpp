@@ -163,6 +163,12 @@
 
 #define AJG_SYNTH_ASSERT(e) (AJG_SYNTH_CONFIG_HANDLE_ASSERT(e))
 
+// AJG_SYNTH_THROW:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e))
+
+/*
 //
 // AJG_SYNTH_THROW:
 //     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
@@ -175,6 +181,7 @@
 #else
 #    define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e))
 #endif
+*/
 
 //
 // AJG_SYNTH_HAS_CXX11:

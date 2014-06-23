@@ -437,7 +437,8 @@ struct formatter {
         size_type i = 0;
 
         for (; i < N; ++i) {
-            if ((count = total / seconds[i])) {
+            count = total / seconds[i];
+            if (count != 0) {
                 break;
             }
         }
@@ -445,7 +446,8 @@ struct formatter {
         result += formatter::pluralize_unit(count, units[i]);
 
         if (i + 1 < N) {
-            if ((count = (total - (seconds[i] * count)) / seconds[i + 1])) {
+            count = (total - (seconds[i] * count)) / seconds[i + 1];
+            if (count != 0) {
                 result += text::literal(", ") + pluralize_unit(count, units[i + 1]);
             }
         }

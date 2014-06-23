@@ -154,12 +154,9 @@ struct binding : private boost::base_from_member<PyObject*>
         return base_type::render_to_path(c::make_string(path), data);
     }
 
-    using base_type::render_to_string;
-    /*
     string_type render_to_string(py::object& data) const {
         return base_type::render_to_string(data);
     }
-    */
 
   private:
 

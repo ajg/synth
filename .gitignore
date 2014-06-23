@@ -50,6 +50,7 @@
 *.pyc
 *.pyd
 *.egg-info
+/vc*.idb
 
 # Misc.
 SCRATCH

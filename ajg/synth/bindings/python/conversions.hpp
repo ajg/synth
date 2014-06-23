@@ -176,8 +176,13 @@ struct conversions {
         duration_type const time = traits_type::to_duration(traits_type::to_utc_time(datetime));
         // TODO: obj.attr("tzinfo", make_tzinfo(traits_type::to_timezone(datetime)))
         return py::object(py::handle<>(PyDateTime_FromDateAndTime(
-            date.year(), date.month(), date.day(),
-            time.hours(), time.minutes(), time.seconds(), time.fractional_seconds())));
+            static_cast<int>(date.year()),
+            static_cast<int>(date.month()),
+            static_cast<int>(date.day()),
+            static_cast<int>(time.hours()),
+            static_cast<int>(time.minutes()),
+            static_cast<int>(time.seconds()),
+            static_cast<int>(time.fractional_seconds()))));
     }
 
     // TODO: Handle non-region typezones as datetime.tzinfo/PyDateTime_TZInfo.

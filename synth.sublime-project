@@ -34,7 +34,6 @@
             "file_exclude_patterns":
             [
                 ".sconsign.dblite",
-                "MANIFEST",
                 "synth",
                 "tests/harness.out",
                 "examples/all",

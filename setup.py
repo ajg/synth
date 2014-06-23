@@ -41,6 +41,7 @@ def run():
         ext_modules      = [get_extension()],
         data_files       = get_data_files(),
         classifiers      = get_classifiers(),
+        zip_safe         = True,
         # TODO: test_suite
     )
 
@@ -79,6 +80,7 @@ def get_extension():
         extra_compile_args   = get_extra_compile_args(compiler),
         define_macros        = get_define_macros(),
         undef_macros         = get_undef_macros(),
+        depends              = get_depends(),
     )
 
 def find_synth_version():
@@ -148,7 +150,7 @@ def find_msvc_info():
 
 def get_extra_compile_args(compiler):
     if compiler == 'msvc':
-        # TODO: Some of this is repeated in *.vcxproj.
+        # TODO: Use Synth.props instead.
         return [
             '/bigobj', # Prevent reaching object limit.
             '/EHsc',   # Override structured exception handling (SEH).
@@ -206,6 +208,9 @@ def get_undef_macros():
 
     return undefines
 
+def get_depends():
+    return get_sources() + get_headers()
+
 def get_language():
     return 'c++'
 
@@ -220,23 +225,18 @@ def get_sources():
 
     return sources
 
-# NOTE: distutils does not recognize the .hpp extension for headers so they have to be included as
-#       data files, otherwise they won't show up in the MANIFEST and build_ext will fail (one known
-#       "workaround", which is to deal with MANIFEST.in manually, sounds like a first-class ticket
-#       to an asylum.) Also, sadly, the `depends` argument to `Extension` is, essentially, useless.
+def get_headers():
+    headers = []
+
+    for base, _, files in os.walk('.'):
+        for file in fnmatch.filter(files, '*.[hi]pp') + fnmatch.filter(files, '*.h'):
+            header = base + '/' + file
+            headers.append(header)
+
+    return headers
+
 def get_data_files():
-    data_files = []
-
-    for root in ('external/boost', 'external/other', 'ajg/synth'):
-        for base, _, files in os.walk(root):
-            headers = []
-            for file in fnmatch.filter(files, '*.?pp') + fnmatch.filter(files, '*.h'):
-                header = base + '/' + file
-                headers.append(header)
-            target = 'include/' + base
-            data_files.append((target, headers))
-
-    return data_files
+    return []
 
 boost_python_sources = [
     'libs/python/src/numeric.cpp',

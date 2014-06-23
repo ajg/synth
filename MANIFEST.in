@@ -1,0 +1,4 @@
+recursive-include ajg            *.hpp
+recursive-include external/boost *.hpp *.h *.ipp
+recursive-include external/other *.hpp *.h
+recursive-include examples       *.py

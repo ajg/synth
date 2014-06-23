@@ -35,17 +35,19 @@ struct adapter<Value, std::pair<First, Second> >     : concrete_adapter<Value, s
 
     /* TODO:
     virtual boolean_type input(istream_type& istream) const {
-        char_type a = 0, b = 0;
         value_type f(this->adapted().first);
         value_type s(this->adapted().second);
-        return (istream >> f >> a >> b >> s) && (a == char_type(':') && b == char_type(' '));
+        char_type a = 0, b = 0;
+        istream >> f >> a >> b >> s;
+        return true;
     }
     */
 
     virtual boolean_type output(ostream_type& ostream) const {
         value_type const f(this->adapted().first);
         value_type const s(this->adapted().second);
-        return ostream << f << ": " << s;
+        ostream << f << ": " << s;
+        return true;
     }
 
   private:

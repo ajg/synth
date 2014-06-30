@@ -43,8 +43,8 @@ struct resolver : Options::abstract_resolver {
                             , options_type const& options
                             ) {
         try {
-            py::object const& result = object_.attr("resolve")(path);
-            return url_type(c::make_string(result));
+            // TODO: Pass the context and have django-synth handle eliding it.
+            return url_type(c::make_string(this->resolver_(path)));
         }
         catch (...) { // TODO: Catch only Resolver404?
             return url_type();
@@ -59,20 +59,24 @@ struct resolver : Options::abstract_resolver {
                             ) {
         try {
             std::pair<py::tuple, py::dict> const args = c::make_args(arguments);
-            py::object const& result = object_.attr("reverse")(name, *args.first, **args.second); // TODO: current_app/application.
-            return url_type(c::make_string(result));
+            // TODO: Pass the context instead and let django-synth handle the mapping.
+            return url_type(c::make_string(this->reverser_(name, c::make_none(), // == urlconf
+                args.first, args.second, context.application())));
         }
         catch (...) { // TODO: Catch only NoReverseMatch?
             return url_type();
         }
     }
 
-    explicit resolver(py::object const& object) : object_(object) {}
+    explicit resolver(py::object const& obj)
+        : resolver_(obj.attr("resolve"))
+        , reverser_(obj.attr("reverse")) {}
     virtual ~resolver() {}
 
   private:
 
-    py::object /*const*/ object_;
+    py::object /*const*/ resolver_;
+    py::object /*const*/ reverser_;
 };
 
 }}}} // namespace ajg::synth::bindings::python

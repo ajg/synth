@@ -172,6 +172,7 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
 
   private:
 
+    // TODO: Move this to conversions.
     template <class I>
     inline static I begin(py::object const& obj) {
         if (PyObject_HasAttrString(obj.ptr(), "__iter__")) {

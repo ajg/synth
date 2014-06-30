@@ -61,12 +61,12 @@ struct library : Options::abstract_library {
 
   public:
 
+
     explicit library(py::object const& lib) {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {
-            py::stl_input_iterator<string_type> begin(tags.keys()), end;
-            tag_names_ = names_type(begin, end);
+            this->tag_names_ = c::make_names(tags.keys());
 
-            BOOST_FOREACH(string_type const& name, tag_names_) {
+            BOOST_FOREACH(string_type const& name, this->tag_names_) {
                 py::tuple t(tags[name]);
                 py::object const& fn       = t[0];
                 py::object const& mns      = t[1];
@@ -75,23 +75,23 @@ struct library : Options::abstract_library {
                 py::object const& dataless = t[4];
 
                 if (!fn) {
-                    AJG_SYNTH_THROW(std::invalid_argument("tag function"));
+                    AJG_SYNTH_THROW(std::invalid_argument("no tag function"));
                 }
                 tag_type tag;
                 tag.simple   = c::make_boolean(simple);
                 tag.dataless = c::make_boolean(dataless);
                 tag.function = boost::bind(call_tag, fn, tag.simple, tag.dataless, _1);
-                if (mns) tag.middle_names.insert(py::stl_input_iterator<string_type>(mns), end);
-                if (lns) tag.last_names.insert(py::stl_input_iterator<string_type>(lns), end);
+                if (mns) tag.middle_names = c::make_symbols(mns);
+                if (lns) tag.last_names   = c::make_symbols(lns);
+
                 this->tags_[name] = tag;
             }
         }
 
-        if (py::dict filters = py::extract<py::dict>(lib.attr("filters"))) {
-            py::stl_input_iterator<string_type> begin(filters.keys()), end;
-            filter_names_ = names_type(begin, end);
+        if (py::dict const& filters = py::extract<py::dict>(lib.attr("filters"))) {
+            this->filter_names_ = c::make_names(filters.keys());
 
-            BOOST_FOREACH(string_type const& name, filter_names_) {
+            BOOST_FOREACH(string_type const& name, this->filter_names_) {
                 this->filters_[name] = filter_type(boost::bind(call_filter, filters[name], _1, _2, _3));
             }
         }

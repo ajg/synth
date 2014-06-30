@@ -67,10 +67,10 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename options_type::resolver_type                                resolver_type;
     typedef typename options_type::resolvers_type                               resolvers_type;
     typedef py::init< py::object
-                    , py::str
+                    , py::object
                     , py::optional
                         < py::dict
-                        , boolean_type
+                        , bool
                         , py::list
                         , py::dict
                         , py::list
@@ -95,18 +95,18 @@ struct binding : private boost::base_from_member<PyObject*>
     // TODO: Override filters like pprint with Python's own pprint.pprint,
     //       perhaps using a passed-in "overrides" library.
     binding( py::object   const& src
-           , py::str      const& engine
+           , py::object   const& engine
            // TODO: Rename abbreviated parameters and expose them as kwargs.
            // TODO: Change the non-boolean defaults to None (py::object()) to reduce allocations.
            , py::dict     const& fmts        = py::dict()
-           , boolean_type const  debug       = false
+           , bool         const  debug       = false
            , py::list     const& dirs        = py::list()
            , py::dict     const& libs        = py::dict()
            , py::list     const& ldrs        = py::list()
            , py::list     const& rslvrs      = py::list()
            )
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
-        , base_type( make_source(boost::base_from_member<PyObject*>::member)
+        , base_type( c::make_buffer(boost::base_from_member<PyObject*>::member)
                    , c::make_string(engine)
                    , make_options(fmts, debug, dirs, libs, ldrs, rslvrs)
                    ) {}
@@ -115,16 +115,16 @@ struct binding : private boost::base_from_member<PyObject*>
 
   private:
 
-    inline static options_type make_options( py::dict     const& fmts
-                                           , boolean_type const  debug
-                                           , py::list     const& dirs
-                                           , py::dict     const& libs
-                                           , py::list     const& ldrs
-                                           , py::list     const& rslvrs
+    inline static options_type make_options( py::dict const& fmts
+                                           , bool     const  debug
+                                           , py::list const& dirs
+                                           , py::dict const& libs
+                                           , py::list const& ldrs
+                                           , py::list const& rslvrs
                                            ) {
         options_type options;
         options.defaults    = make_defaults(fmts);
-        options.debug       = debug;
+        options.debug       = boolean_type(debug);
         options.directories = c::make_paths(dirs);
         options.libraries   = make_libraries(libs);
         options.loaders     = make_loaders(ldrs);
@@ -159,23 +159,6 @@ struct binding : private boost::base_from_member<PyObject*>
     }
 
   private:
-
-    // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
-    // inline static std::pair<char_type const*, size_type> make_source(PyObject* const o) {
-    //     if (PyString_Check(o)) { use char template }
-    //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
-    // }
-
-    inline static source_type make_source(PyObject* const o) {
-        char*      data;
-        Py_ssize_t size;
-
-        if (PyString_AsStringAndSize(o, &data, &size) == -1) {
-            AJG_SYNTH_THROW(std::invalid_argument("source"));
-        }
-
-        return std::pair<char const*, size_type>(data, size);
-    }
 
     inline static metadata_type make_defaults(py::dict const& fmts) {
         metadata_type defaults;

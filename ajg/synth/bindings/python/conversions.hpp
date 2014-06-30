@@ -37,7 +37,9 @@ struct conversions {
     typedef typename traits_type::floating_type                                 floating_type;
     typedef typename traits_type::number_type                                   number_type;
     typedef typename traits_type::string_type                                   string_type;
+    typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
+    typedef typename traits_type::names_type                                    names_type;
     typedef typename traits_type::symbols_type                                  symbols_type;
     typedef typename traits_type::date_type                                     date_type;
     typedef typename traits_type::time_type                                     time_type;
@@ -49,6 +51,8 @@ struct conversions {
     typedef typename traits_type::formats_type                                  formats_type;
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
+
+    typedef std::pair<char const*, size_type>                                   buffer_type;
 
   private:
 
@@ -73,12 +77,51 @@ struct conversions {
     }
 
     inline static boost::optional<number_type> make_number(py::object const& obj) {
+        // FIXME: Use number_type only for non-integer numbers.
         py::extract<number_type> e(obj);
         return e.check() ? boost::optional<number_type>(e()) : boost::none;
     }
 
+    inline static path_type make_path(py::object const& obj) {
+        return make_string(obj);
+    }
+
     inline static string_type make_string(py::object const& obj) {
+        PyObject* const o = obj.ptr();
+        if (PyString_Check(o) || PyUnicode_Check(o)) {
+            buffer_type const buffer = make_buffer(o);
+            return string_type(buffer.first, buffer.second);
+        }
+        else if (PyObject_HasAttrString(o, "__unicode__")) {
+            py::object  const& unicode = obj.attr("__unicode__")();
+            buffer_type const  buffer  = make_buffer(unicode.ptr());
+            return string_type(buffer.first, buffer.second);
+        }
+        else if (PyObject_HasAttrString(o, "__str__")) {
+            py::object  const& str    = obj.attr("__str__")();
+            buffer_type const  buffer = make_buffer(str.ptr());
+            return string_type(buffer.first, buffer.second);
+        }
         return py::extract<string_type>(py::str(obj));
+    }
+
+    // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
+    // inline static std::pair<char_type const*, size_type> make_buffer(PyObject* const o) {
+    //     if (PyString_Check(o)) { use char template }
+    //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
+    // }
+
+    inline static buffer_type make_buffer(PyObject* const o) {
+        BOOST_ASSERT(PyString_Check(o) || PyUnicode_Check(o));
+
+        char*      data;
+        Py_ssize_t size;
+
+        if (PyString_AsStringAndSize(o, &data, &size) == -1) {
+            AJG_SYNTH_THROW(std::invalid_argument("buffer source"));
+        }
+
+        return buffer_type(data, size);
     }
 
     inline static date_type make_date(py::object const& dt) {
@@ -230,10 +273,42 @@ struct conversions {
         */
     }
 
-    inline static paths_type make_paths(py::list const& dirs) {
-        py::stl_input_iterator<string_type> begin(dirs), end;
-        return paths_type(begin, end);
+    inline static names_type make_names(py::list const& lst) {
+        // TODO: Avoid temporary symbols.
+        symbols_type const symbols = make_symbols(lst);
+        return names_type(symbols.begin(), symbols.end());
     }
+
+    inline static symbols_type make_symbols(py::object const& obj) {
+        // Note: stl_input_iterator<string_type> doesn't work with unicode object or a string_type
+        //       other than std::string.
+        py::list const& syms = py::list(obj);
+
+        symbols_type symbols;
+        if (long const l = py::len(syms)) {
+            for (long i = 0; i < l; ++i) {
+                symbols.insert(make_string(syms[i]));
+            }
+        }
+        return symbols;
+    }
+
+    inline static paths_type make_paths(py::list const& dirs) {
+        paths_type paths;
+        if (long const l = py::len(dirs)) {
+            paths.reserve(l);
+
+            for (long i = 0; i < l; ++i) {
+                paths.push_back(make_path(dirs[i]));
+            }
+        }
+        return paths;
+    }
+
+    /*inline static paths_type make_paths(py::list const& dirs) {
+        py::stl_input_iterator<path_type> begin(dirs), end;
+        return paths_type(begin, end);
+    }*/
 
     inline static py::object make_none() {
         return py::object();

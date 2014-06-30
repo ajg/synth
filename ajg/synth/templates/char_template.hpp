@@ -25,6 +25,8 @@ namespace templates {
 ///
 ///     In general, prefer string_template over char_template unless you know what you're doing and
 ///     you've determined the latter provides a tangible net performance advantage over the former.
+///
+///     TODO: Rename buffer_template.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine>

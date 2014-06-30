@@ -725,14 +725,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     url_type get_view_url( options_type   const& options
                          , state_type     const& state
-                         , value_type     const& view
+                         , string_type    const& view
                          , arguments_type const& arguments
                          , context_type&         context
                          ) const {
-        string_type name = view.to_string();
-
         BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
-            if (url_type const& url = resolver->reverse(name, arguments, context, options)) {
+            if (url_type const& url = resolver->reverse(view, arguments, context, options)) {
                 return url;
             }
         }

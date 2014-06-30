@@ -1199,14 +1199,14 @@ struct builtin_tags {
             match_type const& expr = match(kernel.value);
             match_type const& args = match(kernel.arguments);
 
-            value_type     const view      = kernel.evaluate(options, state, expr, context);
+            string_type    const view      = kernel.evaluate(options, state, expr, context).to_string();
             arguments_type const arguments = kernel.evaluate_arguments(options, state, args, context);
 
             if (url_type const& url = kernel.get_view_url(options, state, view, arguments, context)) {
                 ostream << *url;
             }
             else {
-                AJG_SYNTH_THROW(std::runtime_error("view not found"));
+                AJG_SYNTH_THROW(std::runtime_error("url for `" + text::narrow(view) + "` not found"));
             }
         }
     };
@@ -1233,7 +1233,7 @@ struct builtin_tags {
             match_type  const& block = match(kernel.block);
             string_type const& name  = match(kernel.name)[id].str();
 
-            value_type     const view      = kernel.evaluate(options, state, expr, context);
+            string_type    const view      = kernel.evaluate(options, state, expr, context).to_string();
             arguments_type const arguments = kernel.evaluate_arguments(options, state, args, context);
             string_type    const url       = kernel.get_view_url(options, state, view, arguments, context)
                                                    .get_value_or(string_type());

@@ -65,6 +65,8 @@ DJANGO_TEST(text, "ABC", "ABC")
 
 DJANGO_TEST(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>")
 DJANGO_TEST(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {")
+DJANGO_TEST(html, "foo { bar qux } }} }}} }}}} }}}}}", "foo { bar qux } }} }}} }}}} }}}}}")
+DJANGO_TEST(html, "{% block x %}foo }}{% endblock %}", "foo }}")
 
 ///
 /// Literal tests
@@ -218,6 +220,14 @@ DJANGO_TEST(if_tag, "{% if False %}Bad{% else %}Good{% endif %}",               
 DJANGO_TEST(if_tag, "{% if 1 %}Good{% endif %}{% if False %}Bad{% endif %}",    "Good")
 DJANGO_TEST(if_tag, "{% if 1 %}Good{% else %}Bad{% endif %}",                   "Good")
 DJANGO_TEST(if_tag, "{% if 0 %}Bad{% else %}Good{% endif %}",                   "Good")
+DJANGO_TEST(if_tag, "{% if 0 != 0 %}Bad{% else %}Good{% endif %}",              "Good")
+DJANGO_TEST(if_tag, "{% if 0 == 1 %}Bad{% else %}Good{% endif %}",              "Good")
+DJANGO_TEST(if_tag, "{% if 1 >  0 %}Good{% endif %}",                           "Good")
+DJANGO_TEST(if_tag, "{% if 1 >= 1 %}Good{% endif %}",                           "Good")
+DJANGO_TEST(if_tag, "{% if True  or False %}Good{% endif %}",                   "Good")
+DJANGO_TEST(if_tag, "{% if True  or True  %}Good{% endif %}",                   "Good")
+DJANGO_TEST(if_tag, "{% if False or True  %}Good{% endif %}",                   "Good")
+DJANGO_TEST(if_tag, "{% if False or False %}Bad{%else%}Good{% endif %}",        "Good")
 
 DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% endifchanged %}{% endfor %}",                  "42foo")
 DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% else %}-{% endifchanged %}{% endfor %}",       "42-foo-")

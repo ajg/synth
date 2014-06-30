@@ -200,12 +200,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = op("not")
             ;
         binary_operator
-            = op("==")
-            | op("!=")
-            | op("<=")
-            | op(">=")
-            | op("<")
-            | op(">")
+            = as_xpr("==")
+            | as_xpr("!=")
+            | as_xpr("<=")
+            | as_xpr(">=")
+            | as_xpr("<")
+            | as_xpr(">")
             | op("and")
             | op("or")
             | op("in")
@@ -250,11 +250,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             ;
         this->skipper
             = block_open
-            | block_close
+            | block_close    // TODO: Comment out if it is allowed on its own outside a block tag.
             | comment_open
-            | comment_close
+            | comment_close  // TODO: Comment out if it is allowed on its own outside a comment tag.
             | variable_open
-            | variable_close
+         // | variable_close // Note: This is allowed outside of a variable tag.
             ;
         html_namechar
             = ~(x::set = ' ', '\t', '\n', '\v', '\f', '\r', '>')

@@ -183,14 +183,11 @@ struct text {
 
 //
 // unquote:
-//     Can handle "string" or 'string'.
-//     TODO: Unquote sequences (\n, ...), etc.
+//     TODO: Handle escape sequences (\n, ...), etc.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static string_type unquote(string_type const& string) {
-        BOOST_ASSERT(string.size() >= 2);
-        BOOST_ASSERT(string[string.size() - 1] == string[0]);
-        return string.substr(1, string.size() - 2);
+        return string;
     }
 
 //

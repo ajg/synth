@@ -91,8 +91,10 @@ DJANGO_TEST(number floating, "{{3.30}}",  "3.3")
 DJANGO_TEST(number floating, "{{03.3}}",  "3.3")
 DJANGO_TEST(number floating, "{{03.30}}", "3.3")
 
-DJANGO_TEST(string, "{{'Foo'}}",   "Foo")
-DJANGO_TEST(string, "{{\"Bar\"}}", "Bar")
+DJANGO_TEST(string, "{{'Foo'}}",      "Foo")
+DJANGO_TEST(string, "{{\"Bar\"}}",    "Bar")
+DJANGO_TEST(string, "{{_('Foo')}}",   "Foo")
+DJANGO_TEST(string, "{{_(\"Bar\")}}", "Bar")
 
 /// Value tests
 ///     NOTE: The use of firstof is incidental; many other tags would work for these tests.
@@ -530,6 +532,10 @@ DJANGO_TEST(date_filter, "{{ after_past|date:'SHORT_DATE_FORMAT' }}", "03/01/200
 DJANGO_TEST(default_filter, "{{ True|default:\"default\" }}",  "True")
 DJANGO_TEST(default_filter, "{{ False|default:\"default\" }}", "default")
 DJANGO_TEST(default_filter, "{{ None|default:\"default\" }}",  "default")
+DJANGO_TEST(default_filter, "{{ foo|default:_(\'unknown\') }}", "A")
+DJANGO_TEST(default_filter, "{{ foo|default:_(\"unknown\") }}", "A")
+DJANGO_TEST(default_filter, "{{ 0|default:_(\'unknown\') }}",   "unknown")
+DJANGO_TEST(default_filter, "{{ 0|default:_(\"unknown\") }}",   "unknown")
 
 DJANGO_TEST(default_if_none_filter, "{{ True|default_if_none:\"default\" }}",  "True")
 DJANGO_TEST(default_if_none_filter, "{{ False|default_if_none:\"default\" }}", "False")

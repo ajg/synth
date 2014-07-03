@@ -170,8 +170,10 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = !(x::set = '-','+') >> +_d >> !('.' >> +_d) >> !('e' >> +_d)
             ;
         string_literal
-            = '"'  >> *~as_xpr('"')  >> '"'
-            | '\'' >> *~as_xpr('\'') >> '\''
+            =   '\"' >> (str = *~as_xpr('\"')) >> '\"'
+            |   '\'' >> (str = *~as_xpr('\'')) >> '\''
+            | "_(\"" >> (str = *~as_xpr('\"')) >> "\")"
+            | "_(\'" >> (str = *~as_xpr('\'')) >> "\')"
             ;
         variable_literal
             = nonkeyword_identifier
@@ -371,7 +373,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     string_type extract_string(match_type const& match) const {
         BOOST_ASSERT(this->is(match, this->string_literal));
-        return text::unquote(match.str());
+        return text::unquote(match[str].str()); // TODO: Handle _(...).
     }
 
     names_type extract_names(match_type const& match) const {

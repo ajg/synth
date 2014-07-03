@@ -337,6 +337,10 @@ struct base_value {
     // TODO: Defer these to adapter first.
     inline size_type empty() const { return this->size() == 0; }
     inline size_type size()  const {
+        if (this->is_unit()) {
+            return 0;
+        }
+
         range_type const r = this->to_range();
         return std::distance(r.first, r.second);
     }

@@ -34,6 +34,7 @@ namespace synth {
 namespace engines {
 namespace django {
 
+x::mark_tag const str(8);
 x::mark_tag const id(9);
 
 template <class Kernel>

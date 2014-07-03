@@ -98,7 +98,9 @@ struct base_options {
 
   public:
 
-    metadata_type     defaults;
+    // TODO: Subsume metadata with:
+    // context_type      context;
+    metadata_type     metadata; // defaults
     boolean_type      debug;
     paths_type        directories;
     libraries_type    libraries;

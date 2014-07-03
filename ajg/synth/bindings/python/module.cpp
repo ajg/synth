@@ -23,8 +23,10 @@ BOOST_PYTHON_MODULE(synth) {
     py::def("version", s::bindings::python::version);
 
     py::class_<binding_type, boost::noncopyable>("Template", binding_type::constructor_type())
-        .def("render_to_file",   &binding_type::render_to_file)
-        .def("render_to_path",   &binding_type::render_to_path)
-        .def("render_to_string", &binding_type::render_to_string)
+        .def("render_to_file",      &binding_type::render_to_file)
+        .def("render_to_path",      &binding_type::render_to_path)
+        .def("render_to_string",    &binding_type::render_to_string)
+        // TODO: Use a property instead.
+        .def("set_default_options", &binding_type::set_default_options).staticmethod("set_default_options")
     ;
 }

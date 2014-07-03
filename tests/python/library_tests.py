@@ -5,7 +5,9 @@
 import sys
 
 def get():
-    return (data, golden, source, 'django', ({}, False, [], {}, [library_loader], []))
+    return (data, golden, source, 'django', {
+        'loaders': [library_loader],
+    })
 
 class Library(object):
     def __init__(self, tags={}, filters={}):

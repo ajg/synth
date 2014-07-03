@@ -5,7 +5,11 @@
 directory = 'tests/templates/django/'
 
 def get():
-    return (data, golden, source, 'django', ({'TEMPLATE_STRING_IF_INVALID': 'INVALID_VALUE'}, False, [directory]))
+    return (data, golden, source, 'django', {
+        'formats':     {'TEMPLATE_STRING_IF_INVALID': 'INVALID_VALUE'},
+        'debug':       False,
+        'directories': [directory],
+    })
 
 class User(object):
     def __init__(self):

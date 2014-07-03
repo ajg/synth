@@ -71,7 +71,7 @@ struct base_binding : boost::noncopyable {
 
     typedef detail::text<string_type>                                           text;
 
-  public:
+  protected:
 
     base_binding(source_type source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
@@ -119,6 +119,13 @@ struct base_binding : boost::noncopyable {
         else if (template3_) return template3_->options();
         else if (template4_) return template4_->options();
         else AJG_SYNTH_THROW(std::logic_error("missing template"));
+    }
+
+    inline static options_type& default_options(options_type const* const o = 0) {
+        // TODO: Make thread-safe (but not thread-local.)
+        static options_type options;
+        if (o != 0) options = *o;
+        return options;
     }
 
   private:

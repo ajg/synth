@@ -120,7 +120,7 @@ struct command {
         }
 
         options_type options;
-        // TODO: options.defaults.
+        // TODO: options.metadata.
         options.debug       = false; // TODO: Turn into a flag.
         options.directories = directories;
 

@@ -29,21 +29,21 @@ def main():
 
 total, failures = 0, 0
 
-def run_test(name, data, golden, source, engine, args=()):
-    run_test_as('default', name, data, golden, source, engine, args)
-    run_test_as('utf-8',   name, data, golden, source.encode('utf-8'), engine, args)
-  # TODO: run_test_as('utf-16',  name, data, golden, source.encode('utf-16'), engine, args)
-  # TODO: run_test_as('utf-32',  name, data, golden, source.encode('utf-32'), engine, args)
-    run_test_as('unicode', name, data, golden, unicode(source), engine, args)
-    run_test_as('str',     name, data, golden, str(source), engine, args)
+def run_test(name, data, golden, source, engine, options):
+    run_test_as('default', name, data, golden, source, engine, options)
+    run_test_as('utf-8',   name, data, golden, source.encode('utf-8'), engine, options)
+  # TODO: run_test_as('utf-16',  name, data, golden, source.encode('utf-16'), engine, options)
+  # TODO: run_test_as('utf-32',  name, data, golden, source.encode('utf-32'), engine, options)
+    run_test_as('unicode', name, data, golden, unicode(source), engine, options)
+    run_test_as('str',     name, data, golden, str(source), engine, options)
 
-def run_test_as(type, name, data, golden, source, engine, args):
+def run_test_as(type, name, data, golden, source, engine, options):
     global total, failures
     total += + 1
     print('  Test #%d [%s] [%s]' % (total, name, type))
 
     try:
-        template = synth.Template(source, engine, *args)
+        template = synth.Template(source, engine, options)
         print('    - Parsing succeeded')
     except Exception as e:
         failures += 1

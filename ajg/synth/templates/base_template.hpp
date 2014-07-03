@@ -85,7 +85,7 @@ struct base_template : boost::noncopyable {
     }
 
     inline void render_to_stream(ostream_type& ostream, data_type const& data) const {
-        context_type context(data, this->options().defaults);
+        context_type context(data, this->options().metadata);
         this->render_to_stream(ostream, context);
     }
 
@@ -100,7 +100,7 @@ struct base_template : boost::noncopyable {
     }
 
     inline string_type render_to_string(data_type const& data) const {
-        context_type context(data, this->options().defaults);
+        context_type context(data, this->options().metadata);
         return this->render_to_string(context);
     }
 
@@ -123,7 +123,7 @@ struct base_template : boost::noncopyable {
     }
 
     inline void render_to_path(path_type const& path, data_type const& data) const {
-        context_type context(data, this->options().defaults);
+        context_type context(data, this->options().metadata);
         this->render_to_path(path, context);
     }
 

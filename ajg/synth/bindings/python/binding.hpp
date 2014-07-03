@@ -66,17 +66,7 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename options_type::loaders_type                                 loaders_type;
     typedef typename options_type::resolver_type                                resolver_type;
     typedef typename options_type::resolvers_type                               resolvers_type;
-    typedef py::init< py::object
-                    , py::object
-                    , py::optional
-                        < py::dict
-                        , bool
-                        , py::list
-                        , py::dict
-                        , py::list
-                        , py::list
-                        >
-                    >                                                           constructor_type;
+    typedef py::init<py::object, py::object, py::object>                        constructor_type;
 
     typedef typename value_type::arguments_type                                 arguments_type;
 
@@ -92,43 +82,33 @@ struct binding : private boost::base_from_member<PyObject*>
   public:
 
     // TODO: Support passing either a string or a file-like object.
-    // TODO: Override filters like pprint with Python's own pprint.pprint,
-    //       perhaps using a passed-in "overrides" library.
-    binding( py::object   const& src
-           , py::object   const& engine
-           // TODO: Rename abbreviated parameters and expose them as kwargs.
-           // TODO: Change the non-boolean defaults to None (py::object()) to reduce allocations.
-           , py::dict     const& fmts        = py::dict()
-           , bool         const  debug       = false
-           , py::list     const& dirs        = py::list()
-           , py::dict     const& libs        = py::dict()
-           , py::list     const& ldrs        = py::list()
-           , py::list     const& rslvrs      = py::list()
-           )
+    // TODO: Override e.g. pprint_filter with Python's own pprint.pprint?
+    binding(py::object const& src, py::object const& eng, py::object const& opts)
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
         , base_type( c::make_buffer(boost::base_from_member<PyObject*>::member)
-                   , c::make_string(engine)
-                   , make_options(fmts, debug, dirs, libs, ldrs, rslvrs)
+                   , c::make_string(eng)
+                   , make_options(opts)
                    ) {}
 
     ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
   private:
 
-    inline static options_type make_options( py::dict const& fmts
-                                           , bool     const  debug
-                                           , py::list const& dirs
-                                           , py::dict const& libs
-                                           , py::list const& ldrs
-                                           , py::list const& rslvrs
-                                           ) {
-        options_type options;
-        options.defaults    = make_defaults(fmts);
-        options.debug       = boolean_type(debug);
-        options.directories = c::make_paths(dirs);
-        options.libraries   = make_libraries(libs);
-        options.loaders     = make_loaders(ldrs);
-        options.resolvers   = make_resolvers(rslvrs);
+    inline static options_type make_options(py::object const& opts) {
+        options_type options = base_type::default_options();
+        if (opts) {
+            // TODO: boolean_type  metadata.caseless
+            // TODO: boolean_type  metadata.safe
+            // TODO: string_type   metadata.application
+            // TODO: timezone_type metadata.timezone
+            // TODO: language_type metadata.language
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("formats")))     options.metadata.formats = c::make_formats(py::dict(opts["formats"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("debug")))       options.debug            = boolean_type(opts["debug"]);
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("directories"))) options.directories      = c::make_paths(py::list(opts["directories"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("libraries")))   options.libraries        = make_libraries(py::dict(opts["libraries"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("loaders")))     options.loaders          = make_loaders(py::list(opts["loaders"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("resolvers")))   options.resolvers        = make_resolvers(py::list(opts["resolvers"]));
+        }
         return options;
     }
 
@@ -150,7 +130,7 @@ struct binding : private boost::base_from_member<PyObject*>
         */
     }
 
-    void render_to_path(py::str const& path, py::object& data) const {
+    void render_to_path(py::object const& path, py::object& data) const {
         return base_type::render_to_path(c::make_string(path), data);
     }
 
@@ -158,13 +138,12 @@ struct binding : private boost::base_from_member<PyObject*>
         return base_type::render_to_string(data);
     }
 
-  private:
-
-    inline static metadata_type make_defaults(py::dict const& fmts) {
-        metadata_type defaults;
-        defaults.formats = c::make_formats(fmts);
-        return defaults;
+    static void set_default_options(py::dict const& opts) {
+        options_type const options = make_options(opts);
+        base_type::default_options(&options);
     }
+
+  private:
 
     inline static libraries_type make_libraries(py::dict const& libs) {
         py::stl_input_iterator<py::tuple> begin(libs.items()), end;

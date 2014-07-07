@@ -72,10 +72,9 @@ struct base_options {
      // string_type/* symbol_type */                         first_name;
         symbols_type                                         middle_names;
         symbols_type                                         last_names;
-        boolean_type                                         simple;
-        boolean_type                                         dataless;
+        boolean_type                                         pure;
 
-        tag() : simple(false), dataless(false) {}
+        tag() : pure(false) {}
 
         inline operator boolean_type() const { return this->function; }
     }                                                                           tag_type;

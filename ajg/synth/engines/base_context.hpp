@@ -69,9 +69,10 @@ struct base_context : boost::noncopyable {
         string_type   application;
         timezone_type timezone;
         language_type language;
+        boolean_type  localized;
         formats_type  formats;
 
-        metadata() : caseless(false), safe(false) {}
+        metadata() : caseless(false), safe(false), localized(false) {}
     }                                                                           metadata_type;
     typedef void const*                                                         match_type;
     typedef boost::function<void(ostream_type&, context_type&)>                 block_type;
@@ -116,6 +117,9 @@ struct base_context : boost::noncopyable {
 
     inline language_type language() const { return this->metadata_.language; }
     inline language_type language(language_type language) { std::swap(language, this->metadata_.language); return language; }
+
+    inline boolean_type localized() const { return this->metadata_.localized; }
+    inline boolean_type localized(boolean_type localized) { std::swap(localized, this->metadata_.localized); return localized; }
 
     inline formats_type formats() const { return this->metadata_.formats; }
     inline void         formats(formats_type const& formats) {

@@ -87,21 +87,21 @@ struct binding : private boost::base_from_member<PyObject*>
         : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
         , base_type( c::make_buffer(boost::base_from_member<PyObject*>::member)
                    , c::make_string(eng)
-                   , make_options(opts)
+                   , make_options(opts, base_type::default_options())
                    ) {}
 
     ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
-  private:
+  public: // private:
 
-    inline static options_type make_options(py::object const& opts) {
-        options_type options = base_type::default_options();
+    inline static options_type make_options(py::object const& opts, options_type options) {
         if (opts) {
             // TODO: boolean_type  metadata.caseless
             // TODO: boolean_type  metadata.safe
             // TODO: string_type   metadata.application
             // TODO: timezone_type metadata.timezone
             // TODO: language_type metadata.language
+            // TODO: boolean_type  metadata.localized
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("formats")))     options.metadata.formats = c::make_formats(py::dict(opts["formats"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("debug")))       options.debug            = boolean_type(opts["debug"]);
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("directories"))) options.directories      = c::make_paths(py::list(opts["directories"]));
@@ -139,7 +139,7 @@ struct binding : private boost::base_from_member<PyObject*>
     }
 
     static void set_default_options(py::dict const& opts) {
-        options_type const options = make_options(opts);
+        options_type const options = make_options(opts, base_type::default_options());
         base_type::default_options(&options);
     }
 

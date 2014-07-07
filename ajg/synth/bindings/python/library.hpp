@@ -68,19 +68,17 @@ struct library : Options::abstract_library {
 
             BOOST_FOREACH(string_type const& name, this->tag_names_) {
                 py::tuple t(tags[name]);
-                py::object const& fn       = t[0];
-                py::object const& mns      = t[1];
-                py::object const& lns      = t[2];
-                py::object const& simple   = t[3];
-                py::object const& dataless = t[4];
+                py::object const& fn   = t[0];
+                py::object const& mns  = t[1];
+                py::object const& lns  = t[2];
+                py::object const& pure = t[3];
 
                 if (!fn) {
                     AJG_SYNTH_THROW(std::invalid_argument("no tag function"));
                 }
                 tag_type tag;
-                tag.simple   = c::make_boolean(simple);
-                tag.dataless = c::make_boolean(dataless);
-                tag.function = boost::bind(call_tag, fn, tag.simple, tag.dataless, _1);
+                tag.pure     = c::make_boolean(pure);
+                tag.function = boost::bind(call_tag, fn, tag.pure, _1);
                 if (mns) tag.middle_names = c::make_symbols(mns);
                 if (lns) tag.last_names   = c::make_symbols(lns);
 
@@ -110,66 +108,59 @@ struct library : Options::abstract_library {
         return c ? *(context = c) : *context;
     }
 
-    typedef boost::mpl::vector
-            < string_type
-            , py::object
-            , boolean_type
-            , boolean_type
-            , py::object
-            , py::object
-            , py::object
-            , py::object> python_renderer_signature_type;
+    typedef boost::mpl::vector<std::string, py::object, py::object> python_renderer_signature_type;
 
-    static string_type call_native_renderer( renderer_type const& renderer
+    static std::string call_native_renderer( renderer_type const& renderer
                                            , py::object    const& data
-                                           , boolean_type  const  caseless    = false
-                                           , boolean_type  const  safe        = false
-                                           , py::object    const  application = py::object()
-                                           , py::object    const  timezone    = py::object()
-                                           , py::object    const  language    = py::object()
-                                           , py::object    const  formats     = py::object()
+                                           , py::object    const& opts
                                            ) {
         context_type& context = local_context();
         std::basic_ostringstream<char_type> ss;
         ss.imbue(traits_type::standard_locale());
         BOOST_ASSERT(!renderer.empty());
+        timezone_type const old_tz = context.timezone();
 
-        // TODO: Use a stage to push and pop all these values.
-        context.caseless(caseless);
-        context.safe(safe);
-        context.application(application ? c::make_string(application) : string_type());
-        timezone_type const old_tz = context.timezone(c::make_timezone(timezone));
-        context.language(c::make_language(language));
-        if (formats) {
-            context.formats(c::make_formats(py::extract<py::dict>(formats)));
+        if (opts) {
+            // TODO: Use a stage to push and pop all these values.
+            // TODO: Unify with binding::make_options.
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("caseless")))    context.caseless(c::make_boolean(opts["caseless"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("safe")))        context.safe(c::make_boolean(opts["safe"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("application"))) context.application(c::make_string(opts["application"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("timezone")))    context.timezone(c::make_timezone(opts["timezone"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("language")))    context.language(c::make_language(opts["language"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("localized")))   context.localized(c::make_boolean(opts["localized"]));
+         // if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("formats")))     context.formats(c::make_formats(py::dict(opts["formats"])));
+            // TODO: debug, directories, libraries, loaders, resolvers.
         }
 
         renderer(arguments_type(), ss, context);
         BOOST_ASSERT(ss);
         context.timezone(old_tz);
-        return ss.str();
+        return text::narrow(ss.str());
     }
 
     static void call_python_renderer( py::object     const& renderer
-                                    , boolean_type   const  simple
-                                    , boolean_type   const  dataless
+                                    , boolean_type   const  pure
                                     , arguments_type        arguments
                                     , ostream_type&         ostream
                                     , context_type&         context
                                     ) {
         local_context(&context);
 
-        if (!dataless) {
-            arguments.first.insert(arguments.first.begin(), 1, context.data());
-        }
+        if (!pure) {
+            py::object opts = py::dict();
+            // TODO: Only set each option when it has changed.
+            // TODO: Only create the dict when an option has changed.
+            opts["caseless"]    = c::make_object(value_type(context.caseless()));
+            opts["safe"]        = c::make_object(value_type(context.safe()));
+            opts["application"] = c::make_object(value_type(context.application()));
+            opts["timezone"]    = c::make_object(value_type(context.timezone()));
+            opts["language"]    = c::make_object(value_type(context.language()));
+            opts["localized"]   = c::make_object(value_type(context.localized()));
+         // opts["formats"]     = c::make_object(value_type(context.formats()));
 
-        if (!simple) {
-            arguments.second[text::literal("caseless")]    = value_type(context.caseless());
-            arguments.second[text::literal("safe")]        = value_type(context.safe());
-            arguments.second[text::literal("application")] = value_type(context.application());
-            arguments.second[text::literal("timezone")]    = value_type(context.timezone());
-            arguments.second[text::literal("language")]    = value_type(context.language());
-            arguments.second[text::literal("formats")]     = value_type(formats_type()); // value_type(context.formats());
+            arguments.first.insert(arguments.first.begin() + 0, 1, context.data());
+            arguments.first.insert(arguments.first.begin() + 1, 1, opts);
         }
 
         std::pair<py::tuple, py::dict> const args = c::make_args(arguments);
@@ -177,40 +168,28 @@ struct library : Options::abstract_library {
     }
 
     static renderer_type call_tag( py::object    const& tag
-                                 , boolean_type  const  simple
-                                 , boolean_type  const  dataless
+                                 , boolean_type  const  pure
                                  , segments_type const& segments
                                  ) {
-        if (simple) {
-            return boost::bind(call_python_renderer, tag(), simple, dataless, _1, _2, _3);
+        if (pure) {
+            return boost::bind(call_python_renderer, tag(), pure, _1, _2, _3);
         }
 
         py::list segs;
 
         BOOST_FOREACH(segment_type const& segment, segments) {
-            // boost::function<typename boost::function_types::function_type<python_renderer_signature_type>::type>
-            //     f(boost::bind(call_native_renderer, segment.second, _1, _2, _3, _4, _5, _6, _7));
-
             py::list pcs;
             BOOST_FOREACH(string_type const& piece, segment.first) {
                 pcs.append(piece);
             }
             py::object const rndr = py::make_function(
-                boost::bind(call_native_renderer, segment.second, _1, _2, _3, _4, _5, _6, _7),
-                py::default_call_policies(),
-                    ( py::arg("context")
-                    , py::arg("caseless")    = false
-                    , py::arg("safe")        = false
-                    , py::arg("application") = py::object()
-                    , py::arg("timezone")    = py::object()
-                    , py::arg("language")    = py::object()
-                    , py::arg("formats")     = py::object()
-                    ), python_renderer_signature_type());
+                boost::bind(call_native_renderer, segment.second, _1, _2),
+                py::default_call_policies(), python_renderer_signature_type());
 
             segs.append(py::make_tuple(pcs, rndr));
         }
 
-        return boost::bind(call_python_renderer, tag(segs), simple, dataless, _1, _2, _3);
+        return boost::bind(call_python_renderer, tag(segs), pure, _1, _2, _3);
     }
 
     static value_type call_filter( py::object            filter

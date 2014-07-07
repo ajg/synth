@@ -878,7 +878,7 @@ struct builtin_tags {
                 if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
                     size_type const position = std::distance(state.range.first, n.first);
 
-                    if (tag->simple) {
+                    if (tag->pure) {
                         state.set_renderer(position, tag->function(segments_type()));
                         state.library_tag_continue_ = false;
                         return true;
@@ -918,7 +918,7 @@ struct builtin_tags {
                 BOOST_ASSERT(!state.library_tag_entries_.empty());
                 entry_type& entry = state.library_tag_entries_.top();
                 size_type const position = entry.position;
-                BOOST_ASSERT(!entry.tag.simple);
+                BOOST_ASSERT(!entry.tag.pure);
                 BOOST_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
 
                 boolean_type const is_middle = detail::contains(name, entry.tag.middle_names);

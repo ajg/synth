@@ -16,28 +16,28 @@ class Library(object):
 
 def dump(n, x): print n, '=', x; return x
 
-def render_segment(segment, data, **kwargs):
+def render_segment(segment, data, options=None):
     # print '### render_segment(', segment, ')'
     pieces, renderer = segment
-    return renderer(data, **kwargs)
+    return renderer(data, options)
 
 def dummy_tag():
-    return ((lambda: ''), None, None, True, True)
+    return ((lambda: ''), None, None, True)
 
-def simple_tag(fn, dataless=True):
-    return (lambda: (lambda *args, **kwargs: fn(*args, **kwargs)), None, None, True, dataless)
+def pure_tag(fn):
+    return (lambda: (lambda *args, **kwargs: fn(*args, **kwargs)), None, None, True)
 
-def variadic_tag(fn, first, middles, lasts, dataless=False):
-    return (lambda segments: (lambda *args, **kwargs: fn(segments, *args, **kwargs)), middles, lasts, False, dataless)
+def variadic_tag(fn, first, middles, lasts):
+    return (lambda segments: (lambda data, options, *args, **kwargs: fn(segments, data, *args, **kwargs)), middles, lasts, False)
 
-def monadic_tag(fn, first, dataless=False):
-    return variadic_tag(fn, None, None, None, dataless=dataless)
+def monadic_tag(fn, first):
+    return variadic_tag(fn, None, None, None)
 
-def dyadic_tag(fn, first, last, dataless=False):
-    return variadic_tag(fn, first, None, (last,), dataless=dataless)
+def dyadic_tag(fn, first, last):
+    return variadic_tag(fn, first, None, (last,))
 
-def triadic_tag(fn, first, middle, last, dataless=False):
-    return variadic_tag(fn, first, (middle,), (last,), dataless=dataless)
+def triadic_tag(fn, first, middle, last):
+    return variadic_tag(fn, first, (middle,), (last,))
 
 
 def dummy_filter():
@@ -60,10 +60,10 @@ def library_loader(name):
     elif name == 'test_tags':
         return Library(tags={
             # Monadic tags:
-            'answer_to_life': simple_tag(answer_to_life), # Nullary
-            'identity':       simple_tag(identity),       # Unary
-            'ackermann':      simple_tag(ackermann),      # Binary
-            'add':            simple_tag(add),            # N-ary
+            'answer_to_life': pure_tag(answer_to_life), # Nullary
+            'identity':       pure_tag(identity),       # Unary
+            'ackermann':      pure_tag(ackermann),      # Binary
+            'add':            pure_tag(add),            # N-ary
             'set':            monadic_tag(set_variable, 'set'),
             'unset':          monadic_tag(unset_variable, 'unset'),
             # Polyadic tags:
@@ -101,17 +101,17 @@ def add(*args):
 
 def encode(segments, data, name, *args, **kwargs):
     # print '### encode(', name, ')'
-    s = render_segment(segments[0], data, **kwargs)
+    s = render_segment(segments[0], data)
     return s.encode(name)
 
 def decode(segments, data, name, *args, **kwargs):
     # print '### decode(', name, ')'
-    s = render_segment(segments[0], data, **kwargs)
+    s = render_segment(segments[0], data)
     return s.decode(name)
 
 def unless(segments, data, condition, *args, **kwargs):
     # print '### unless(', condition, ')'
-    return render_segment(segments[1 if condition else 0], data, **kwargs)
+    return render_segment(segments[1 if condition else 0], data)
 
 def set_variable(segments, data, *args, **kwargs):
     # print '### set(', args, kwargs, ')'

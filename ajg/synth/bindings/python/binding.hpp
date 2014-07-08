@@ -22,7 +22,7 @@
 #include <ajg/synth/bindings/python/library.hpp>
 #include <ajg/synth/bindings/python/resolver.hpp>
 #include <ajg/synth/bindings/python/conversions.hpp>
-#include <ajg/synth/templates/char_template.hpp>
+#include <ajg/synth/templates/buffer_template.hpp>
 
 namespace ajg {
 namespace synth {
@@ -39,7 +39,7 @@ template <class Traits>
 struct binding : private boost::base_from_member<PyObject*>
                , bindings::base_binding< Traits
                                        , py::object
-                                       , templates::char_template
+                                       , templates::buffer_template
                                        , engines::django::engine
                                        , engines::ssi::engine
                                        , engines::tmpl::engine

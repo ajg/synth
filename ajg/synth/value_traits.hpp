@@ -98,6 +98,7 @@ struct default_traits {
     typedef boost::local_time::local_date_time                                  datetime_type;
  // typedef boost::local_time::local_time_period                                period_type;
 
+    typedef std::pair<char_type const*, size_type>                              buffer_type;
     typedef std::basic_string<char_type>                                        string_type;
 
     typedef string_type                                                         region_type;

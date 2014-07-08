@@ -6,7 +6,7 @@
 #define AJG_SYNTH_TEMPLATE_HPP_INCLUDED
 
 #include <ajg/synth/support.hpp>
-#include <ajg/synth/templates/char_template.hpp>
+#include <ajg/synth/templates/buffer_template.hpp>
 #include <ajg/synth/templates/path_template.hpp>
 #include <ajg/synth/templates/stream_template.hpp>
 #include <ajg/synth/templates/string_template.hpp>

@@ -19,46 +19,45 @@ namespace synth {
 namespace templates {
 
 ///
-/// char_template:
+/// buffer_template:
 ///     A sibling of string_template that doesn't keep a local copy of the source, only a pointer
 ///     to it. This means the source MUST outlive the template or Bad Things will happen.
 ///
-///     In general, prefer string_template over char_template unless you know what you're doing and
+///     In general, prefer string_template over buffer_template unless you know what you're doing and
 ///     you've determined the latter provides a tangible net performance advantage over the former.
-///
-///     TODO: Rename buffer_template.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Engine>
-struct char_template : base_template<Engine, typename Engine::traits_type::char_type const*> {
+struct buffer_template : base_template<Engine, typename Engine::traits_type::char_type const*> {
   public:
 
-    typedef char_template                                                       template_type;
+    typedef buffer_template                                                     template_type;
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::traits_type                                  traits_type;
 
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
+    typedef typename traits_type::buffer_type                                   buffer_type;
 
-    typedef std::pair<char_type const*, size_type>                              source_type;
+    typedef buffer_type                                                         source_type;
 
   public:
 
-    inline char_template(source_type const& source, options_type const& options = options_type()) : source_(source) {
+    inline buffer_template(source_type const& source, options_type const& options = options_type()) : source_(source) {
         this->reset(this->source_.first, this->source_.first + this->source_.second, options);
     }
 
-    inline char_template(char_type const* data, size_type const size, options_type const& options = options_type()) : source_(data, size) {
+    inline buffer_template(char_type const* data, size_type const size, options_type const& options = options_type()) : source_(data, size) {
         this->reset(data, data + size, options);
     }
 
-    inline char_template(char_type const* data, options_type const& options = options_type()) : source_(data, get_size(data)) {
+    inline buffer_template(char_type const* data, options_type const& options = options_type()) : source_(data, infer_size(data)) {
         this->reset(data, data + this->source_.second, options);
     }
 
     template <size_type N>
-    inline char_template(char_type const (&data)[N], options_type const& options = options_type()): source_(data, N) {
+    inline buffer_template(char_type const (&data)[N], options_type const& options = options_type()): source_(data, N) {
         this->reset(data, data + N, options);
     }
 
@@ -68,14 +67,14 @@ struct char_template : base_template<Engine, typename Engine::traits_type::char_
 
   private:
 
-    inline static size_type get_size(char const *const data) { return (std::strlen)(data); }
+    inline static size_type infer_size(char const *const data) { return (std::strlen)(data); }
 
 #ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
-    inline static size_type get_size(wchar_t const *const data) { return (std::wcslen)(data); }
+    inline static size_type infer_size(wchar_t const *const data) { return (std::wcslen)(data); }
 #endif
 
     template <class C>
-    inline static size_type get_size(C const *const data) {
+    inline static size_type infer_size(C const *const data) {
         size_type size = 0;
         while (*data++) size++;
         return size;

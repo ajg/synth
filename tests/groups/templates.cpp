@@ -27,14 +27,14 @@ AJG_SYNTH_TEST_GROUP("templates");
 
 } // namespace
 
-AJG_SYNTH_TEST_UNIT(char_template::str char array) {
-    s::templates::char_template<char_engine> const t("foo bar qux");
+AJG_SYNTH_TEST_UNIT(buffer_template::str char array) {
+    s::templates::buffer_template<char_engine> const t("foo bar qux");
     MUST_EQUAL(t.str(), "foo bar qux");
 }}}
 
-AJG_SYNTH_TEST_UNIT(char_template::str char pointer) {
+AJG_SYNTH_TEST_UNIT(buffer_template::str char pointer) {
     char const *const s = "foo bar qux";
-    s::templates::char_template<char_engine> const t(s);
+    s::templates::buffer_template<char_engine> const t(s);
     MUST_EQUAL(t.str(), "foo bar qux");
 }}}
 
@@ -56,14 +56,14 @@ AJG_SYNTH_TEST_UNIT(string_template::str char) {
 
 #ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 
-AJG_SYNTH_TEST_UNIT(char_template::str wchar_t array) {
-    s::templates::char_template<wchar_t_engine> const t(L"foo bar qux");
+AJG_SYNTH_TEST_UNIT(buffer_template::str wchar_t array) {
+    s::templates::buffer_template<wchar_t_engine> const t(L"foo bar qux");
     MUST_EQUAL(t.str(), L"foo bar qux");
 }}}
 
-AJG_SYNTH_TEST_UNIT(char_template::str wchar_t pointer) {
+AJG_SYNTH_TEST_UNIT(buffer_template::str wchar_t pointer) {
     wchar_t const *const s = L"foo bar qux";
-    s::templates::char_template<wchar_t_engine> const t(s);
+    s::templates::buffer_template<wchar_t_engine> const t(s);
     MUST_EQUAL(t.str(), L"foo bar qux");
 }}}
 

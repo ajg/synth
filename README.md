@@ -171,7 +171,7 @@ Components
 
 ### Templates
 
- - `char_template`
+ - `buffer_template`
  - `path_template`
  - `stream_template`
  - `string_template`

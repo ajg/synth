@@ -61,7 +61,7 @@ struct builtin_tags {
 
     typedef void (*tag_type)( kernel_type  const& kernel
                             , match_type   const& match
-                            , context_type const& context
+                            , context_type&       context
                             , options_type const& options
                             , ostream_type&       ostream
                             );
@@ -116,7 +116,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
@@ -135,7 +135,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
@@ -160,7 +160,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
@@ -181,7 +181,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
@@ -231,7 +231,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {
@@ -256,7 +256,7 @@ struct builtin_tags {
 
         static void render( kernel_type  const& kernel
                           , match_type   const& match
-                          , context_type const& context
+                          , context_type&       context
                           , options_type const& options
                           , ostream_type&       ostream
                           ) {

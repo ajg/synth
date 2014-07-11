@@ -410,8 +410,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                     , path_type    const& path
                     , context_type&       context
                     ) const {
-        templates::path_template<engine_type> const t(path, options);
-        return t.render_to_stream(ostream, context);
+        options.template render_path_to_stream<engine_type>(path, ostream, context);
     }
 
     void render_plain( ostream_type&       ostream

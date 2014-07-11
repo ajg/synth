@@ -266,8 +266,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                     , context_type&       context
                     , options_type const& options
                     ) const {
-        templates::path_template<engine_type> const t(path, options);
-        return t.render_to_stream(ostream, const_cast<context_type&>(context));
+        options.template render_path_to_stream<engine_type>(path, ostream, context);
     }
 
     void render_plain( ostream_type&       ostream

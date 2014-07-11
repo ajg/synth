@@ -263,6 +263,7 @@ Components
  - `engines::options`
  - `engines::state`
  - `engines::value`
+ - `templates::cache`
 
 ### [Version](./ajg/synth/version.hpp)
 

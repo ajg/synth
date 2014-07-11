@@ -200,7 +200,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
     value_type evaluate_attribute( match_type   const& attr
-                                 , context_type const& context
+                                 , context_type&       context
                                  , options_type const& options
                                  ) const {
         string_type const name = extract_attribute(attr);
@@ -214,7 +214,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
     value_type evaluate( match_type   const& match
-                       , context_type const& context
+                       , context_type&       context
                        , options_type const& options
                        ) const {
         match_type const& attr = match(attribute);
@@ -232,16 +232,15 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     void render_path( ostream_type&       ostream
                     , path_type    const& path
-                    , context_type const& context
+                    , context_type&       context
                     , options_type const& options
                     ) const {
-        templates::path_template<engine_type> const t(path, options);
-        return t.render_to_stream(ostream, const_cast<context_type&>(context));
+        options.template render_path_to_stream<engine_type>(path, ostream, context);
     }
 
     void render_plain( ostream_type&       ostream
                      , match_type   const& plain
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
         ostream << plain.str();
@@ -249,7 +248,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     void render_block( ostream_type&       ostream
                      , match_type   const& block
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
         BOOST_FOREACH(match_type const& nested, block.nested_results()) {
@@ -259,7 +258,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     void render_tag( ostream_type&       ostream
                    , match_type   const& match
-                   , context_type const& context
+                   , context_type&       context
                    , options_type const& options
                    ) const {
         match_type const& match_ = this->unnest(match);
@@ -275,7 +274,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     void render_match( ostream_type&       ostream
                      , match_type   const& match
-                     , context_type const& context
+                     , context_type&       context
                      , options_type const& options
                      ) const {
              if (this->is(match, this->plain)) this->render_plain(ostream, match, context, options);

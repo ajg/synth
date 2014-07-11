@@ -133,6 +133,10 @@ struct base_template : boost::noncopyable {
     inline range_type   const& range()   const { return this->state_.range; }
     inline options_type const& options() const { return this->state_.options; }
 
+    inline static void prime() {
+        template_type::kernel();
+    }
+
   protected:
 
     inline void reset(options_type const& options = options_type()) {

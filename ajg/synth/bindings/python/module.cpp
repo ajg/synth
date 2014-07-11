@@ -20,6 +20,8 @@ BOOST_PYTHON_MODULE(synth) {
     typedef s::default_traits<AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE>                   traits_type;
     typedef s::bindings::python::binding<traits_type>                               binding_type;
 
+    binding_type::prime();
+
     py::def("version", s::bindings::python::version);
 
     py::class_<binding_type, boost::noncopyable>("Template", binding_type::constructor_type())

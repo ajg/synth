@@ -83,6 +83,22 @@ struct base_binding : boost::noncopyable {
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
+  public:
+
+    inline static void prime() {
+        template0_type::value_type::prime();
+        template1_type::value_type::prime();
+        template2_type::value_type::prime();
+        template3_type::value_type::prime();
+        template4_type::value_type::prime();
+
+        templates::path_template<engine0_type>::prime();
+        templates::path_template<engine1_type>::prime();
+        templates::path_template<engine2_type>::prime();
+        templates::path_template<engine3_type>::prime();
+        templates::path_template<engine4_type>::prime();
+    }
+
   protected:
 
     void render_to_stream(ostream_type& ostream, foreign_type& data) const {

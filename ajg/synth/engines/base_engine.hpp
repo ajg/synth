@@ -31,10 +31,10 @@
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/detail/advance_to.hpp>
-#include <ajg/synth/engines/base_state.hpp>
-#include <ajg/synth/engines/base_value.hpp>
-#include <ajg/synth/engines/base_context.hpp>
-#include <ajg/synth/engines/base_options.hpp>
+#include <ajg/synth/engines/state.hpp>
+#include <ajg/synth/engines/value.hpp>
+#include <ajg/synth/engines/context.hpp>
+#include <ajg/synth/engines/options.hpp>
 
 namespace ajg {
 namespace synth {
@@ -58,9 +58,9 @@ struct base_engine {
 
     typedef Traits                                                              traits_type;
     typedef base_engine                                                         engine_type;
-    typedef base_value<traits_type>                                             value_type;
-    typedef base_context<value_type>                                            context_type;
-    typedef base_options<context_type>                                          options_type;
+    typedef value<traits_type>                                                  value_type;
+    typedef context<value_type>                                                 context_type;
+    typedef options<context_type>                                               options_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::size_type                                     size_type;
@@ -106,7 +106,7 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
   public:
 
-    typedef base_state<match_type, range_type, options_type>                    state_type;
+    typedef state<match_type, range_type, options_type>                         state_type;
 
   public:
 

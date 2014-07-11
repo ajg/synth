@@ -127,7 +127,7 @@ struct default_traits {
 
   public:
 
-// TODO: Move everything below to base_value or base_context.
+// TODO: Move everything below to value or context.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///

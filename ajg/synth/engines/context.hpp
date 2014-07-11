@@ -22,16 +22,16 @@ namespace synth {
 namespace engines {
 
 //
-// base_context
+// context
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Value>
-struct base_context : boost::noncopyable {
+struct context : boost::noncopyable {
   public:
 
     typedef Value                                                               key_type;
     typedef Value                                                               value_type;
-    typedef base_context                                                        context_type;
+    typedef context                                                             context_type;
 
     typedef typename value_type::range_type                                     range_type;
     typedef typename value_type::sequence_type                                  sequence_type;
@@ -88,7 +88,7 @@ struct base_context : boost::noncopyable {
 
   public:
 
-    inline explicit base_context(data_type const& data, metadata_type const& metadata = metadata_type())
+    inline explicit context(data_type const& data, metadata_type const& metadata = metadata_type())
         : data_(data), metadata_(metadata) {}
 
   public:

@@ -15,15 +15,15 @@ namespace synth {
 namespace engines {
 
 //
-// base_options
+// options
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Context>
-struct base_options {
+struct options {
   public:
 
     typedef Context                                                             context_type;
-    typedef base_options                                                        options_type;
+    typedef options                                                             options_type;
 
     typedef typename context_type::value_type                                   value_type;
     typedef typename context_type::data_type                                    data_type;
@@ -109,7 +109,7 @@ struct base_options {
 
 
 template <class Value>
-struct base_options<Value>::abstract_library {
+struct options<Value>::abstract_library {
   public:
 
     virtual boolean_type has_tag(string_type const& name) const    = 0;
@@ -123,7 +123,7 @@ struct base_options<Value>::abstract_library {
 };
 
 template <class Value>
-struct base_options<Value>::abstract_loader {
+struct options<Value>::abstract_loader {
   public:
 
     virtual library_type load_library(string_type const& name) = 0;
@@ -132,7 +132,7 @@ struct base_options<Value>::abstract_loader {
 };
 
 template <class Value>
-struct base_options<Value>::abstract_resolver {
+struct options<Value>::abstract_resolver {
   public:
 
     virtual url_type resolve( string_type  const& path

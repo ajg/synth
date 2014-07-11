@@ -9,24 +9,24 @@
 
 #include <ajg/synth/detail/text.hpp>
 
-#include <ajg/synth/engines/base_context.hpp>
+#include <ajg/synth/engines/context.hpp>
 
 namespace ajg {
 namespace synth {
 namespace engines {
 
 //
-// base_state
+// state
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Match, class Range, class Options>
-struct base_state {
+struct state {
   public:
 
     typedef Match                                                               match_type;
     typedef Range                                                               range_type;
     typedef Options                                                             options_type;
-    typedef base_state                                                          base_state_type;
+    typedef state                                                               state_type;
 
     typedef typename options_type::value_type                                   value_type;
     typedef typename options_type::filter_type                                  filter_type;
@@ -71,8 +71,8 @@ struct base_state {
 
   public:
 
-    inline explicit base_state() {}
-    inline explicit base_state(range_type const& range, options_type const& options)
+    inline explicit state() {}
+    inline explicit state(range_type const& range, options_type const& options)
         : range(range), options(options), loaders_(options.loaders), loaded_libraries_(options.libraries) {}
 
   public:

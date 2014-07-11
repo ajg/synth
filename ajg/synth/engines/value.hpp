@@ -45,10 +45,10 @@ namespace engines {
 
 // TODO: Factor out the safe/token metadata into a separate (possibly sub-) class.
 template <class Traits>
-struct base_value {
+struct value {
   public:
 
-    typedef base_value                                                          value_type;
+    typedef value                                                               value_type;
     typedef Traits                                                              traits_type;
 
     typedef typename traits_type::none_type                                     none_type;
@@ -90,18 +90,18 @@ struct base_value {
   public:
 
     // An uninitialized value; in general to be avoided except where there's no better solution.
-    base_value() : safe_(false), adapter_() {}
+    value() : safe_(false), adapter_() {}
 
     template <class T>
-    base_value(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value(T const& t, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : safe_(false), adapter_(new adapters::adapter<value_type, T>(t)) {}
 
     template <class T, class U>
-    base_value(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value(T const& t, U const& u, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : safe_(false), adapter_(new adapters::adapter<value_type, T>(t, u)) {}
 
     template <class T, class U, class V>
-    base_value(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
+    value(T const& t, U const& u, V const& v, typename boost::disable_if<boost::is_same<T, value_type> >::type* = 0)
         : safe_(false), adapter_(new adapters::adapter<value_type, T>(t, u, v)) {}
 
   public:
@@ -404,8 +404,8 @@ struct base_value {
     inline const_iterator begin() const { return this->to_range().first; }
     inline const_iterator end()   const { return this->to_range().second; }
 
-    inline iterator begin() { return const_cast<base_value const*>(this)->begin(); }
-    inline iterator end()   { return const_cast<base_value const*>(this)->end(); }
+    inline iterator begin() { return const_cast<value const*>(this)->begin(); }
+    inline iterator end()   { return const_cast<value const*>(this)->end(); }
 
     inline operator boolean_type()                          const { return this->to_boolean(); }
     inline boolean_type operator!()                         const { return !this->to_boolean(); }

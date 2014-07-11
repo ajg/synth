@@ -255,10 +255,14 @@ Components
  - `adapters::base_adapter`
  - `bindings::base_binding`
  - `engines::base_engine`
- - `engines::base_options`
- - `engines::base_context`
- - `engines::base_value`
  - `templates::base_template`
+
+### Other Components
+
+ - `engines::context`
+ - `engines::options`
+ - `engines::state`
+ - `engines::value`
 
 ### [Version](./ajg/synth/version.hpp)
 
@@ -391,14 +395,14 @@ Django Engine
 
 ### Formats
 
- - `base_context::formats["TEMPLATE_STRING_IF_INVALID"]` (default: `""`)
- - `base_context::formats["DATE_FORMAT"]`                (default: `"N j, Y"`)
- - `base_context::formats["DATETIME_FORMAT"]`            (default: `"N j, Y, P"`)
- - `base_context::formats["MONTH_DAY_FORMAT"]`           (default: `"F j"`)
- - `base_context::formats["SHORT_DATE_FORMAT"]`          (default: `"m/d/Y"`)
- - `base_context::formats["SHORT_DATETIME_FORMAT"]`      (default: `"m/d/Y P"`)
- - `base_context::formats["TIME_FORMAT"]`                (default: `"P"`)
- - `base_context::formats["YEAR_MONTH_FORMAT"]`          (default: `"F Y"`)
+ - `context::formats["TEMPLATE_STRING_IF_INVALID"]` (default: `""`)
+ - `context::formats["DATE_FORMAT"]`                (default: `"N j, Y"`)
+ - `context::formats["DATETIME_FORMAT"]`            (default: `"N j, Y, P"`)
+ - `context::formats["MONTH_DAY_FORMAT"]`           (default: `"F j"`)
+ - `context::formats["SHORT_DATE_FORMAT"]`          (default: `"m/d/Y"`)
+ - `context::formats["SHORT_DATETIME_FORMAT"]`      (default: `"m/d/Y P"`)
+ - `context::formats["TIME_FORMAT"]`                (default: `"P"`)
+ - `context::formats["YEAR_MONTH_FORMAT"]`          (default: `"F Y"`)
 
 <!--
  - `TEMPLATE_DEBUG`
@@ -422,10 +426,10 @@ SSI Engine
 
 ### Formats
 
- - `base_context::formats["echomsg"]`  (default: `"(none)"`)
- - `base_context::formats["errormsg"]` (default: `"[an error occurred while processing this directive]"`)
- - `base_context::formats["sizefmt"]`  (default: `"bytes"`)
- - `base_context::formats["timefmt"]`  (default: `"%A, %d-%b-%Y %H:%M:%S %Z"`)
+ - `context::formats["echomsg"]`  (default: `"(none)"`)
+ - `context::formats["errormsg"]` (default: `"[an error occurred while processing this directive]"`)
+ - `context::formats["sizefmt"]`  (default: `"bytes"`)
+ - `context::formats["timefmt"]`  (default: `"%A, %d-%b-%Y %H:%M:%S %Z"`)
 
 TMPL Engine
 -----------
@@ -442,11 +446,11 @@ TMPL Engine
 General Options
 ---------------
 
- - `base_options::debug`       (default: `false`)
- - `base_options::directories` (default: `"."`)
- - `base_options::libraries`   (for dynamic tags & filters)
- - `base_options::loaders`     (for dynamic library loading)
- - `base_options::resolvers`   (for dynamic URL resolution and reversal)
+ - `options::debug`       (default: `false`)
+ - `options::directories` (default: `"."`)
+ - `options::libraries`   (for dynamic tags & filters)
+ - `options::loaders`     (for dynamic library loading)
+ - `options::resolvers`   (for dynamic URL resolution and reversal)
 
 
 Future Work

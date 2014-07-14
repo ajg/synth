@@ -56,7 +56,7 @@ AJG_SYNTH_TEST_UNIT(html comment) {
 }}}
 
 AJG_SYNTH_TEST_UNIT(environment variable) {
-    std::string const name = AJG_SYNTH_IF_WINDOWS("Path", "PATH");
+    std::string const name = AJG_SYNTH_IF_WINDOWS("HOMEPATH", "PATH");
     char const *const path = std::getenv(name.c_str());
     MUST_NOT(path == 0);
 

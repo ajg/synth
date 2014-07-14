@@ -66,6 +66,7 @@ struct binding : private boost::base_from_member<PyObject*>
     typedef typename options_type::loaders_type                                 loaders_type;
     typedef typename options_type::resolver_type                                resolver_type;
     typedef typename options_type::resolvers_type                               resolvers_type;
+    typedef typename options_type::caching_type                                 caching_type;
     typedef py::init<py::object, py::object, py::object>                        constructor_type;
 
     typedef typename value_type::arguments_type                                 arguments_type;
@@ -108,6 +109,7 @@ struct binding : private boost::base_from_member<PyObject*>
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("libraries")))   options.libraries        = make_libraries(py::dict(opts["libraries"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("loaders")))     options.loaders          = make_loaders(py::list(opts["loaders"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("resolvers")))   options.resolvers        = make_resolvers(py::list(opts["resolvers"]));
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("caching")))     options.caching          = make_caching(opts["resolvers"]);
         }
         return options;
     }
@@ -179,6 +181,13 @@ struct binding : private boost::base_from_member<PyObject*>
         }
 
         return resolvers;
+    }
+
+    inline static caching_type make_caching(py::object const& cchng) {
+        if (boost::optional<size_type> const s = c::make_size(cchng)) {
+            return static_cast<caching_type>(*s);
+        }
+        AJG_SYNTH_THROW(std::invalid_argument("caching"));
     }
 };
 

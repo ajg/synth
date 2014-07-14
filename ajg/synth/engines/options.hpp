@@ -18,6 +18,7 @@ namespace engines {
 
 //
 // options
+//     TODO: Move out of engines namespace/directory.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Context>
@@ -98,6 +99,8 @@ struct options {
     }                                                                           entry_type;
     typedef std::stack<entry_type>                                              entries_type;
 
+    typedef caching_flags                                                       caching_type;
+
   public:
 
     options() : debug(false) {}
@@ -114,6 +117,7 @@ struct options {
                               , ostream_type&       ostream
                               , context_type&       context
                               ) const {
+        // TODO: Make thread-safe or at least thread-local.
         global_cache<Engine>().render_path_to_stream(path, ostream, context, *this);
     }
 
@@ -135,6 +139,7 @@ struct options {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
+    caching_type      caching;
 };
 
 

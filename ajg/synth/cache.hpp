@@ -7,16 +7,22 @@
 
 #include <ajg/synth/support.hpp>
 
+#include <map>
 #include <string>
 #include <vector>
-#include <cstring>
-// #include <sys/stat.h>
 
 #include <ajg/synth/detail/text.hpp>
 #include <ajg/synth/templates.hpp>
 
 namespace ajg {
 namespace synth {
+
+enum caching_flags {
+    no_caching   = 0,
+    path_caching = 1
+    // TODO: buffer_caching, string_caching
+    // TODO: timestamp/checksum/forever/aggressive
+};
 
 template <class Options, class Engine>
 struct cache {
@@ -37,32 +43,29 @@ struct cache {
     typedef typename traits_type::paths_type                                    paths_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-
     // TODO: source_type and source()
     // typedef std::pair<path_type, size_type>                                     info_type;
 
-  /*
   private:
 
+    typedef templates::path_template<engine_type>                               path_template_type;
+
     // TODO[c++11]: Use unique_ptr
-    typedef boost::shared_ptr<std::pair<std::time_t, state_type> >              cached_type;
-    typedef std::map<path_type, cached_type>                                    cache_type;
+    typedef boost::shared_ptr<path_template_type>                               path_cached_type;
+    typedef std::multimap<path_type, path_cached_type>                          path_cache_type;
 
     typedef detail::text<string_type>                                           text;
 
 
   public:
 
-    cache() {
-
-    }
-  */
+    cache() {}
 
   public:
 
     inline static void prime() {
         templates::buffer_template<engine_type>::prime();
-        templates::path_template<engine_type>::prime();
+        path_template_type::prime();
         templates::stream_template<engine_type>::prime();
         templates::string_template<engine_type>::prime();
     }
@@ -72,9 +75,35 @@ struct cache {
                               , context_type&       context
                               , options_type const& options
                               ) {
-        templates::path_template<engine_type> const t(path, options);
-        return t.render_to_stream(ostream, context);
+        if (!(options.caching & path_caching)) {
+            templates::path_template<engine_type> const t(path, options);
+            return t.render_to_stream(ostream, context);
+        }
+
+        typedef typename path_cache_type::iterator it_type;
+        std::pair<it_type, it_type> const r = this->path_cache_.equal_range(path);
+
+        for (it_type it = r.first; it != r.second; ++it) {
+            // TODO: it->second->options() == options
+            if (it->second->options().directories == options.directories) {
+                if (!it->second->stale()) {
+                    return it->second->render_to_stream(ostream, context);
+                }
+                else {
+                    this->path_cache_.erase(it);
+                    break;
+                }
+            }
+        }
+
+        path_cached_type t(new path_template_type(path, options));
+        this->path_cache_.insert(std::pair<path_type, path_cached_type>(path, t));
+        return t->render_to_stream(ostream, context);
     }
+
+  private:
+
+    path_cache_type path_cache_;
 };
 
 }} // namespace ajg::synth

@@ -42,7 +42,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
     typedef typename traits_type::paths_type                                    paths_type;
 
     // TODO: source_type and source()
-    typedef std::pair<path_type, size_type>                                     info_type;
+    typedef std::pair<path_type, struct stat>                                   info_type;
 
   private:
 
@@ -52,7 +52,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     path_template(path_type const& path, options_type const& options = options_type())
             : info_(locate_file(path, options.directories)) {
-        if (this->info_.second == 0) { // Empty file.
+        if (this->info_.second.st_size == 0) { // Empty file.
             this->reset(options);
         }
         else {
@@ -72,7 +72,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
             path_type const& base = detail::text<string_type>::trim_right(directory, text::literal("/"));
             path_type const& full = base + char_type('/') + path;
             if (stat(text::narrow(full).c_str(), &stats) == 0) { // Found it.
-                return info_type(full, stats.st_size);
+                return info_type(full, stats);
             }
         }
 
@@ -83,7 +83,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
             AJG_SYNTH_THROW(read_error(narrow_path, std::strerror(errno)));
         }
 
-        return info_type(path, stats.st_size);
+        return info_type(path, stats);
     }
 
     //
@@ -102,6 +102,16 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
   public:
 
     info_type const& info() const { return this->info_; }
+
+    boolean_type const stale() const {
+        struct stat stats;
+
+        if (stat(text::narrow(this->info_.first).c_str(), &stats) == 0) {
+            return this->info_.second.st_mtime < stats.st_mtime;
+        }
+
+        return true; // File may have been deleted, etc.
+    }
 
   private:
 

@@ -123,7 +123,7 @@ struct command {
         // TODO: options.metadata.
         options.debug       = false; // TODO: Turn into a flag.
         options.directories = directories;
-        options.caching     = engines::no_caching;
+        options.caching     = no_caching;
 
         string_type  const engine = to_string(opts[engine_option].last());
         binding_type const binding(input >> std::noskipws, engine, options);

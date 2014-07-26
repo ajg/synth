@@ -103,7 +103,7 @@ struct options {
 
   public:
 
-    options() : debug(false) {}
+    options() : debug(false), caching(no_caching) {}
 
   public:
 

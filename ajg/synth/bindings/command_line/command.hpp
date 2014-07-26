@@ -18,6 +18,7 @@
 
 #include <external/other/optionparser.h>
 
+#include <ajg/synth/cache.hpp>
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
 

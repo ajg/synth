@@ -191,7 +191,7 @@ struct builtin_tags {
             size_type  const  size     = value.size();
             size_type         index    = 1;
 
-            stage<context_type> stage(const_cast<context_type&>(context), kernel_type::global_variables);
+            stage<context_type> stage(context, kernel_type::global_variables);
             BOOST_FOREACH(value_type const& item, value) {
                 if (kernel_type::loop_variables) {
                     stage.set(text::literal("__SIZE__"),    size);

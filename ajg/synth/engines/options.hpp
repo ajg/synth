@@ -100,6 +100,10 @@ struct options {
 
   public:
 
+    options() : debug(false) {}
+
+  public:
+
     template <typename Engine>
     inline static void prime() {
         cache<options_type, Engine>::prime();

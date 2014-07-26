@@ -1010,14 +1010,13 @@ struct builtin_filters {
                                         , context_type&         context
                                         ) {
             with_arity<0>::validate(arguments.first.size());
-            value_type copy = value;
+            sequence_type result;
 
-            // FIXME: These values should be mutable.
-            BOOST_FOREACH(value_type const& v, copy) {
-                const_cast<value_type&>(v).mark_safe();
+            BOOST_FOREACH(value_type const& element, value) {
+                result.push_back(element.metacopy().mark_safe());
             }
 
-            return copy.mark_safe();
+            return value_type(result).mark_safe();
         }
     };
 

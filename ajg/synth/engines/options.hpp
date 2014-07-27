@@ -112,6 +112,21 @@ struct options {
         cache<options_type, Engine>::prime();
     }
 
+    template <typename Template>
+    inline Template parse(typename Template::element_type::source_type source) const {
+        typedef typename Template::element_type::engine_type engine_type;
+        // TODO: Make thread-safe or at least thread-local.
+        return this->template global_cache<engine_type>().get_or_parse(source, *this);
+    }
+
+    /*
+    template <typename Template>
+    inline Template get_or_parse(typename Template::value_type::source_type& source) const {
+        typedef typename Template::value_type::engine_type engine_type;
+        // TODO: Make thread-safe or at least thread-local.
+        global_cache<engine_type>().get_path_template(path, *this);
+    }
+
     template <typename Engine>
     void render_path_to_stream( path_type    const& path
                               , ostream_type&       ostream
@@ -120,6 +135,7 @@ struct options {
         // TODO: Make thread-safe or at least thread-local.
         global_cache<Engine>().render_path_to_stream(path, ostream, context, *this);
     }
+    */
 
   private:
 

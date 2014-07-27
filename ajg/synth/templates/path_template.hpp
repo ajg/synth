@@ -41,7 +41,8 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
     typedef typename traits_type::path_type                                     path_type;
     typedef typename traits_type::paths_type                                    paths_type;
 
-    // TODO: source_type and source()
+    // TODO: source()
+    typedef path_type                                                           source_type;
     typedef std::pair<path_type, struct stat>                                   info_type;
 
   private:
@@ -103,11 +104,19 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     info_type const& info() const { return this->info_; }
 
-    boolean_type const stale() const {
+    source_type const& source() const { return this->info_.first; }
+
+    boolean_type const compatible(path_type const& path, options_type const& options) const {
+        return this->info_.first == path && this->options().directories == options.directories;
+    }
+
+    boolean_type const stale(path_type const& path, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->compatible(path, options));
         struct stat stats;
 
         if (stat(text::narrow(this->info_.first).c_str(), &stats) == 0) {
-            return this->info_.second.st_mtime < stats.st_mtime;
+            return this->info_.second.st_mtime < stats.st_mtime
+                || this->info_.second.st_size != stats.st_size;
         }
 
         return true; // File may have been deleted, etc.

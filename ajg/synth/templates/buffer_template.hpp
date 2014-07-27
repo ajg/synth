@@ -36,6 +36,7 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::traits_type                                  traits_type;
 
+    typedef typename traits_type::boolean_type                                  boolean_type;
     typedef typename traits_type::char_type                                     char_type;
     typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::buffer_type                                   buffer_type;
@@ -64,6 +65,17 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
   public:
 
     source_type const& source() const { return this->source_; }
+
+    boolean_type const compatible(buffer_type const& buffer, options_type const& options) const {
+        return this->source_.second == buffer.second &&
+            (this->source_.first == buffer.first ||
+            ((std::memcmp)(this->source_.first, buffer.first, buffer.second) == 0));
+    }
+
+    boolean_type const stale(buffer_type const& buffer, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->compatible(buffer, options));
+        return false;
+    }
 
   private:
 

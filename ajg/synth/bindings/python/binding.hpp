@@ -109,7 +109,7 @@ struct binding : private boost::base_from_member<PyObject*>
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("libraries")))   options.libraries        = make_libraries(py::dict(opts["libraries"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("loaders")))     options.loaders          = make_loaders(py::list(opts["loaders"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("resolvers")))   options.resolvers        = make_resolvers(py::list(opts["resolvers"]));
-            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("caching")))     options.caching          = make_caching(opts["resolvers"]);
+            if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("caching")))     options.caching          = make_caching(opts["caching"]);
         }
         return options;
     }

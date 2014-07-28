@@ -19,13 +19,17 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
     typedef Engine                                                              engine_type;
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::traits_type                                  traits_type;
+
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::string_type                                   string_type;
 
-    typedef string_type                                                         source_type;
+    typedef string_type const                                                   source_type;
+    typedef size_type                                                           key_type;
 
   public:
 
-    string_template(source_type source, options_type const& options = options_type()) : source_(source) {
+    string_template(string_type const& source, options_type const& options = options_type()) : source_(source) {
         this->reset(this->source_.begin(), this->source_.end(), options);
     }
 
@@ -36,7 +40,18 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
 
   public:
 
-    source_type const& source() const { return this->source_; }
+    inline string_type const& source() const { return this->source_; }
+
+    inline static key_type const key(string_type const& source) { return source.size(); }
+
+    boolean_type const compatible(string_type const& source, options_type const& options) const {
+        return this->source_ == source;
+    }
+
+    boolean_type const stale(string_type const& source, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->compatible(source, options));
+        return false;
+    }
 
   private:
 

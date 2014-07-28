@@ -46,6 +46,12 @@ struct caching_for<templates::path_template<Engine> > {
     BOOST_STATIC_CONSTANT(caching_flags, value = path_caching);
 };
 
+template <typename Engine>
+struct caching_for<templates::string_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_flags, value = string_caching);
+};
+
+
 template <class Template>
 struct cache {
   public:
@@ -92,12 +98,7 @@ struct cache {
     }
 
     cached_type get_or_parse(source_type source, options_type const& options) {
-        std::cerr << "cache: size for (" << caching_for<template_type>::value << "): " << this->cache_.size() << std::endl;
-        std::cerr << "cache: address for (" << caching_for<template_type>::value << "): " << &this->cache_ << std::endl;
-
-
         if (!this->enabled(options)) {
-            std::cerr << "cache: disabled for (" << caching_for<template_type>::value << "): " << template_type::key(source) << std::endl;
             return cached_type(new template_type(source, options));
         }
 
@@ -106,21 +107,17 @@ struct cache {
 
         for (it_type it = r.first; it != r.second; ++it) {
             if (!it->second->compatible(source, options)) {
-                std::cerr << "cache: incompatible for (" << caching_for<template_type>::value << "): " << key << std::endl;
                 continue;
             }
             else if (it->second->stale(source, options)) {
-                std::cerr << "cache: stale for (" << caching_for<template_type>::value << "): " << key << std::endl;
                 this->cache_.erase(it);
                 break;
             }
             else {
-                std::cerr << "cache: fresh for (" << caching_for<template_type>::value << "): " << key << std::endl;
                 return it->second;
             }
         }
 
-        std::cerr << "cache: missing for (" << caching_for<template_type>::value << "): " << key << std::endl;
         cached_type const t(new template_type(source, options));
         this->cache_.insert(std::pair<key_type, cached_type>(key, t));
         return t;
@@ -136,6 +133,7 @@ extern inline typename cache<Template>::cached_type parse_template
         ( typename Template::source_type         source
         , typename Template::options_type const& options
         ) {
+    // TODO: Make cache a parameter.
     static cache<Template> global_cache;
     // TODO: Make thread-safe or at least thread-local.
     return global_cache.get_or_parse(source, options);

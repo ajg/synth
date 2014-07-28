@@ -23,16 +23,39 @@ enum caching_flags {
     path_caching   = 2,
     buffer_caching = 4,
     string_caching = 8
-    // TODO: timestamp/checksum/forever/aggressive
 };
 
-template <class Options, class Engine>
+template <typename Template>
+struct caching_for;
+
+template <typename Engine>
+inline void prime_all() {
+    templates::buffer_template<Engine>::prime();
+    templates::path_template<Engine>::prime();
+    templates::stream_template<Engine>::prime();
+    templates::string_template<Engine>::prime();
+}
+
+template <typename Engine>
+struct caching_for<templates::buffer_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_flags, value = buffer_caching);
+};
+
+template <typename Engine>
+struct caching_for<templates::path_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_flags, value = path_caching);
+};
+
+template <class Template>
 struct cache {
   public:
 
-    typedef cache                                                               cache_type;
-    typedef Options                                                             options_type;
-    typedef Engine                                                              engine_type;
+    typedef Template                                                            template_type;
+
+    typedef typename template_type::options_type                                options_type;
+    typedef typename template_type::engine_type                                 engine_type;
+    typedef typename template_type::source_type                                 source_type;
+    typedef typename template_type::key_type                                    key_type;
 
     typedef typename options_type::context_type                                 context_type;
     typedef typename options_type::traits_type                                  traits_type;
@@ -47,19 +70,12 @@ struct cache {
     typedef typename traits_type::buffer_type                                   buffer_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    // TODO: source_type and source()
-    // typedef std::pair<path_type, size_type>                                     info_type;
+    typedef boost::shared_ptr<template_type const>                              cached_type; // TODO[c++11]: Use unique_ptr?
 
   private:
 
-    typedef templates::path_template<engine_type>                               path_template_type;
-    typedef boost::shared_ptr<path_template_type const>                         path_cached_type; // TODO[c++11]: Use unique_ptr
-    typedef std::multimap<path_type, path_cached_type>                          path_cache_type;
-
-    typedef templates::buffer_template<engine_type>                             buffer_template_type;
-    typedef boost::shared_ptr<buffer_template_type const>                       buffer_cached_type; // TODO[c++11]: Use unique_ptr
-    typedef std::multimap<size_type, buffer_cached_type>                        buffer_cache_type;
-
+    typedef std::multimap<key_type, cached_type>                                cache_type;
+    typedef typename cache_type::iterator                                       it_type;
     typedef detail::text<string_type>                                           text;
 
 
@@ -69,75 +85,62 @@ struct cache {
 
   public:
 
-    inline static void prime() {
-        buffer_template_type::prime();
-        path_template_type::prime();
-        templates::stream_template<engine_type>::prime();
-        templates::string_template<engine_type>::prime();
-    }
-
-    inline static boolean_type enabled(caching_type const c, options_type const& options) {
+    inline boolean_type enabled(options_type const& options) const {
+        caching_type const c = caching_for<template_type>::value;
         AJG_SYNTH_ASSERT((c & (c - 1)) == 0);
         return (options.caching & c) || (options.caching & all_caching);
     }
 
-    buffer_cached_type get_or_parse(buffer_type const& buffer, options_type const& options) {
-        if (!cache_type::enabled(buffer_caching, options)) {
-            return buffer_cached_type(new buffer_template_type(buffer, options));
+    cached_type get_or_parse(source_type source, options_type const& options) {
+        std::cerr << "cache: size for (" << caching_for<template_type>::value << "): " << this->cache_.size() << std::endl;
+        std::cerr << "cache: address for (" << caching_for<template_type>::value << "): " << &this->cache_ << std::endl;
+
+
+        if (!this->enabled(options)) {
+            std::cerr << "cache: disabled for (" << caching_for<template_type>::value << "): " << template_type::key(source) << std::endl;
+            return cached_type(new template_type(source, options));
         }
 
-        typedef typename buffer_cache_type::iterator it_type;
-        std::pair<it_type, it_type> const r = this->buffer_cache_.equal_range(buffer.second);
+        key_type const key = template_type::key(source);
+        std::pair<it_type, it_type> const r = this->cache_.equal_range(key);
 
         for (it_type it = r.first; it != r.second; ++it) {
-            if (!it->second->compatible(buffer, options)) {
+            if (!it->second->compatible(source, options)) {
+                std::cerr << "cache: incompatible for (" << caching_for<template_type>::value << "): " << key << std::endl;
                 continue;
             }
-            else if (it->second->stale(buffer, options)) {
-                this->buffer_cache_.erase(it);
+            else if (it->second->stale(source, options)) {
+                std::cerr << "cache: stale for (" << caching_for<template_type>::value << "): " << key << std::endl;
+                this->cache_.erase(it);
                 break;
             }
             else {
+                std::cerr << "cache: fresh for (" << caching_for<template_type>::value << "): " << key << std::endl;
                 return it->second;
             }
         }
 
-        buffer_cached_type const t(new buffer_template_type(buffer, options));
-        this->buffer_cache_.insert(std::pair<size_type, buffer_cached_type>(buffer.second, t));
-        return t;
-    }
-
-    path_cached_type get_or_parse(path_type const& path, options_type const& options) {
-        if (!cache_type::enabled(path_caching, options)) {
-            return path_cached_type(new path_template_type(path, options));
-        }
-
-        typedef typename path_cache_type::iterator it_type;
-        std::pair<it_type, it_type> const r = this->path_cache_.equal_range(path);
-
-        for (it_type it = r.first; it != r.second; ++it) {
-            if (!it->second->compatible(path, options)) {
-                continue;
-            }
-            else if (it->second->stale(path, options)) {
-                this->path_cache_.erase(it);
-                break;
-            }
-            else {
-                return it->second;
-            }
-        }
-
-        path_cached_type const t(new path_template_type(path, options));
-        this->path_cache_.insert(std::pair<path_type, path_cached_type>(path, t));
+        std::cerr << "cache: missing for (" << caching_for<template_type>::value << "): " << key << std::endl;
+        cached_type const t(new template_type(source, options));
+        this->cache_.insert(std::pair<key_type, cached_type>(key, t));
         return t;
     }
 
   private:
 
-    path_cache_type   path_cache_;
-    buffer_cache_type buffer_cache_;
+    cache_type cache_;
 };
+
+template <typename Template>
+extern inline typename cache<Template>::cached_type parse_template
+        ( typename Template::source_type         source
+        , typename Template::options_type const& options
+        ) {
+    static cache<Template> global_cache;
+    // TODO: Make thread-safe or at least thread-local.
+    return global_cache.get_or_parse(source, options);
+}
+
 
 }} // namespace ajg::synth
 

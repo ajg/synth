@@ -42,6 +42,7 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
     typedef typename traits_type::buffer_type                                   buffer_type;
 
     typedef buffer_type                                                         source_type;
+    typedef size_type                                                           key_type;
 
   public:
 
@@ -64,9 +65,15 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
 
   public:
 
-    source_type const& source() const { return this->source_; }
+    inline source_type const& source() const { return this->source_; }
+    inline static key_type const key(source_type source) { return source.second; }
 
     boolean_type const compatible(buffer_type const& buffer, options_type const& options) const {
+        std::cerr << "this->source_.second" << (this->source_.second) << std::endl;
+        std::cerr << "buffer.second" << (buffer.second) << std::endl;
+        std::cerr << "this->source_.second == buffer.second" << (this->source_.second == buffer.second) << std::endl;
+        std::cerr << "this->source_.first == buffer.first" << (this->source_.first == buffer.first) << std::endl;
+        std::cerr << "(std::memcmp)(this->source_.first, buffer.first, buffer.second)" << (std::memcmp)(this->source_.first, buffer.first, buffer.second) << std::endl;
         return this->source_.second == buffer.second &&
             (this->source_.first == buffer.first ||
             ((std::memcmp)(this->source_.first, buffer.first, buffer.second) == 0));

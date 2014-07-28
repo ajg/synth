@@ -58,11 +58,11 @@ struct base_binding : boost::noncopyable {
     */
 
     typedef Template<null_engine_type>                                          null_template_type;
-    typedef boost::shared_ptr<Template<engine0_type> const>                     template0_type;
-    typedef boost::shared_ptr<Template<engine1_type> const>                     template1_type;
-    typedef boost::shared_ptr<Template<engine2_type> const>                     template2_type;
-    typedef boost::shared_ptr<Template<engine3_type> const>                     template3_type;
-    typedef boost::shared_ptr<Template<engine4_type> const>                     template4_type;
+    typedef Template<engine0_type>                                              template0_type;
+    typedef Template<engine1_type>                                              template1_type;
+    typedef Template<engine2_type>                                              template2_type;
+    typedef Template<engine3_type>                                              template3_type;
+    typedef Template<engine4_type>                                              template4_type;
 
     typedef typename null_template_type::source_type                            source_type;
     typedef typename null_engine_type::options_type                             options_type;
@@ -83,11 +83,11 @@ struct base_binding : boost::noncopyable {
 
     base_binding(source_type source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
-             if (name == engine0_type::name()) this->template0_ = options.template parse<template0_type>(source);
-        else if (name == engine1_type::name()) this->template1_ = options.template parse<template1_type>(source);
-        else if (name == engine2_type::name()) this->template2_ = options.template parse<template2_type>(source);
-        else if (name == engine3_type::name()) this->template3_ = options.template parse<template3_type>(source);
-        else if (name == engine4_type::name()) this->template4_ = options.template parse<template4_type>(source);
+             if (name == engine0_type::name()) this->template0_ = parse_template<template0_type>(source, options);
+        else if (name == engine1_type::name()) this->template1_ = parse_template<template1_type>(source, options);
+        else if (name == engine2_type::name()) this->template2_ = parse_template<template2_type>(source, options);
+        else if (name == engine3_type::name()) this->template3_ = parse_template<template3_type>(source, options);
+        else if (name == engine4_type::name()) this->template4_ = parse_template<template4_type>(source, options);
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
@@ -102,11 +102,11 @@ struct base_binding : boost::noncopyable {
         template4_type::value_type::prime();
         */
 
-        options_type::template prime<engine0_type>();
-        options_type::template prime<engine1_type>();
-        options_type::template prime<engine2_type>();
-        options_type::template prime<engine3_type>();
-        options_type::template prime<engine4_type>();
+        prime_all<engine0_type>();
+        prime_all<engine1_type>();
+        prime_all<engine2_type>();
+        prime_all<engine3_type>();
+        prime_all<engine4_type>();
     }
 
   protected:
@@ -156,11 +156,11 @@ struct base_binding : boost::noncopyable {
 
   private:
 
-    template0_type template0_;
-    template1_type template1_;
-    template2_type template2_;
-    template3_type template3_;
-    template4_type template4_;
+    boost::shared_ptr<template0_type const> template0_;
+    boost::shared_ptr<template1_type const> template1_;
+    boost::shared_ptr<template2_type const> template2_;
+    boost::shared_ptr<template3_type const> template3_;
+    boost::shared_ptr<template4_type const> template4_;
 };
 
 }}} // namespace ajg::synth::bindings

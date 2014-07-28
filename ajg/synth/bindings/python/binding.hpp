@@ -36,7 +36,7 @@ inline char const* version() {
 }
 
 template <class Traits>
-struct binding : private boost::base_from_member<PyObject*>
+struct binding : private boost::base_from_member<py::object>
                , bindings::base_binding< Traits
                                        , py::object
                                        , templates::buffer_template
@@ -85,13 +85,11 @@ struct binding : private boost::base_from_member<PyObject*>
     // TODO: Support passing either a string or a file-like object.
     // TODO: Override e.g. pprint_filter with Python's own pprint.pprint?
     binding(py::object const& src, py::object const& eng, py::object const& opts)
-        : boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
-        , base_type( c::make_buffer(boost::base_from_member<PyObject*>::member)
+        : boost::base_from_member<py::object>(src) // Keep the object alive.
+        , base_type( c::make_buffer(boost::base_from_member<py::object>::member.ptr())
                    , c::make_string(eng)
                    , make_options(opts, base_type::default_options())
                    ) {}
-
-    ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
 
   public: // private:
 

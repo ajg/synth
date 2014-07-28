@@ -266,8 +266,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                     , context_type&       context
                     , options_type const& options
                     ) const {
-        typedef boost::shared_ptr<templates::path_template<engine_type> const> path_template_type;
-        options.template parse<path_template_type>(path)->render_to_stream(ostream, context);
+        parse_template<templates::path_template<engine_type> > (path, options)->render_to_stream(ostream, context);
     }
 
     void render_plain( ostream_type&       ostream

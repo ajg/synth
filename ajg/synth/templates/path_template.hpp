@@ -43,6 +43,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     // TODO: source()
     typedef path_type                                                           source_type;
+    typedef path_type                                                           key_type;
     typedef std::pair<path_type, struct stat>                                   info_type;
 
   private:
@@ -102,9 +103,10 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
   public:
 
-    info_type const& info() const { return this->info_; }
+    inline info_type const& info() const { return this->info_; }
 
-    source_type const& source() const { return this->info_.first; }
+    inline source_type const& source() const { return this->info_.first; }
+    inline static key_type const key(source_type const& source) { return source; }
 
     boolean_type const compatible(path_type const& path, options_type const& options) const {
         return this->info_.first == path && this->options().directories == options.directories;

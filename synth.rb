@@ -3,18 +3,15 @@ require "formula"
 class Synth < Formula
   homepage "https://github.com/ajg/synth"
   head "https://github.com/ajg/synth.git"
-  url "https://github.com/ajg/synth/archive/v0.52.0.tar.gz"
-  sha1 "a5ba180c0d8a53c67859da1b49958352c4d807f7"
+  url "https://github.com/ajg/synth/releases/download/v1.0.0/archive.tar.gz"
+  sha1 "41971a1090b5a766959170efe77671996002ef03"
+  version "1.0.0"
 
   depends_on "scons"  => :build
   depends_on "python" => :optional
-  depends_on "boost" if build.without? "python"
-  depends_on "boost"  => "with-python" if build.with? "python"
-  # TODO: debug bool option
-  # TODO: boost enum option {auto,local,system}
 
   def install
-    scons "synth", "debug=0", "boost=system"
+    scons "synth", "debug=0", "boost=local"
     bin.install "synth"
     # TODO: include.install "ajg/synth.hpp", Dir["ajg/**/synth.hpp"]
     # See http://stackoverflow.com/q/23307205/1272391

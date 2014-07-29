@@ -54,7 +54,7 @@ a simple binding to Synth in the form of a Template class.
 
 def get_classifiers():
     return [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: Other Audience',

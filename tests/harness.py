@@ -16,11 +16,13 @@ def main():
     import python.binding_tests   as binding_tests
     import python.directory_tests as directory_tests
     import python.library_tests   as library_tests
+    import python.caching_tests   as caching_tests
 
     print 'Running test harness...'
     run_test('binding_tests',   *binding_tests.get())
     run_test('directory_tests', *directory_tests.get())
     run_test('library_tests',   *library_tests.get())
+    run_test('caching_tests',   *caching_tests.get())
 
     if failures != 0:
         raise Exception('One or more tests failed')
@@ -29,7 +31,7 @@ def main():
 
 total, failures = 0, 0
 
-def run_test(name, data, golden, source, engine, options):
+def run_test(name, data, golden, source, engine, options=None):
     run_test_as('default', name, data, golden, source, engine, options)
     run_test_as('utf-8',   name, data, golden, source.encode('utf-8'), engine, options)
   # TODO: run_test_as('utf-16',  name, data, golden, source.encode('utf-16'), engine, options)
@@ -37,7 +39,7 @@ def run_test(name, data, golden, source, engine, options):
     run_test_as('unicode', name, data, golden, unicode(source), engine, options)
     run_test_as('str',     name, data, golden, str(source), engine, options)
 
-def run_test_as(type, name, data, golden, source, engine, options):
+def run_test_as(type, name, data, golden, source, engine, options=None):
     global total, failures
     total += + 1
     print('  Test #%d [%s] [%s]' % (total, name, type))

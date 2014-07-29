@@ -6,6 +6,7 @@
 #define AJG_SYNTH_ENGINES_BASE_STATE_HPP_INCLUDED
 
 #include <vector>
+#include <algorithm>
 
 #include <ajg/synth/detail/text.hpp>
 
@@ -20,7 +21,7 @@ namespace engines {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Match, class Range, class Options>
-struct state {
+struct state : boost::noncopyable {
   public:
 
     typedef Match                                                               match_type;
@@ -63,6 +64,8 @@ struct state {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
+    typedef typename range_type::first_type                                     iterator_type;
+
     typedef std::vector<string_type>                                            pieces_type;
 
   private:
@@ -71,11 +74,38 @@ struct state {
 
   public:
 
-    inline explicit state() {}
-    inline explicit state(range_type const& range, options_type const& options)
-        : range(range), options(options), loaders_(options.loaders), loaded_libraries_(options.libraries) {}
+    explicit state(range_type const& range, options_type const& options)
+        : match_()
+        , range_(range)
+        , options_(options)
+        , iterator_(range_.first)
+        , loaders_(options.loaders)
+        , loaded_libraries_(options.libraries) {}
 
   public:
+
+    inline iterator_type begin() const { return this->range_.first; }
+    inline iterator_type end()   const { return this->range_.second; }
+
+    inline match_type&       match()       { return this->match_; }
+    inline match_type const& match() const { return this->match_; }
+
+    inline range_type const& range() const { return this->range_; }
+    inline options_type const& options() const { return this->options_; }
+    inline iterator_type const& furthest() const { return this->iterator_; }
+
+    inline void furthest(iterator_type const& iterator) {
+        this->iterator_ = (std::max)(this->iterator_, iterator);
+    }
+
+    inline boolean_type consumed() const { return this->furthest() == this->end();}
+
+    inline string_type line(size_type const limit) const {
+        iterator_type const it = this->furthest();
+        size_type     const buffer(std::distance(it, this->end()));
+        string_type   const site(it, detail::advance_to(it, (std::min)(buffer, limit)));
+        return string_type(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
+    }
 
     /*
     inline filter_type get_filter(string_type const& name) const {
@@ -181,11 +211,12 @@ struct state {
         }
     }
 
-  public:
+  private:
 
-    match_type   match;
-    range_type   range;
-    options_type options;
+    match_type               match_;
+    range_type               range_;
+    options_type             options_;
+    iterator_type            iterator_;
 
   public: // TODO: private:
 

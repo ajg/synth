@@ -24,8 +24,12 @@ struct stream_template : base_template<Engine,
     typedef typename engine_type::options_type                                  options_type;
     typedef typename options_type::traits_type                                  traits_type;
 
+    typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::istream_type                                  istream_type;
+
     typedef istream_type&                                                       source_type;
+    typedef size_type                                                           key_type;
 
   private:
 
@@ -33,14 +37,24 @@ struct stream_template : base_template<Engine,
 
   public:
 
-    stream_template(source_type source, options_type const& options = options_type()) : source_(source), bidi_istream_(source_) {
+    stream_template(istream_type& source, options_type const& options = options_type()) : source_(source), bidi_istream_(source_) {
         this->reset(this->bidi_istream_.begin(), this->bidi_istream_.end(), options);
     }
 
   public:
 
-    source_type const source() const { return this->source_; }
+    istream_type const& source() const { return this->source_; }
 
+    inline static key_type const key(istream_type const& source) { return key_type(0); }
+
+    inline boolean_type same(istream_type const& source, options_type const& options) const {
+        return false;
+    }
+
+    inline boolean_type stale(istream_type const& source, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->same(source, options));
+        return true;
+    }
   private:
 
     source_type       source_;

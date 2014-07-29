@@ -18,6 +18,7 @@
 
 #include <external/other/optionparser.h>
 
+#include <ajg/synth/cache.hpp>
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
 
@@ -123,6 +124,7 @@ struct command {
         // TODO: options.metadata.
         options.debug       = false; // TODO: Turn into a flag.
         options.directories = directories;
+        options.caching     = caching_none;
 
         string_type  const engine = to_string(opts[engine_option].last());
         binding_type const binding(input >> std::noskipws, engine, options);

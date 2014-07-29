@@ -79,7 +79,7 @@ struct base_adapter {
 
   public:
 
-    inline base_adapter() {}
+    base_adapter() {}
     virtual ~base_adapter() {}
 
   public:

@@ -11,9 +11,8 @@
 #include <vector>
 #include <stdexcept>
 
-#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/utility/in_place_factory.hpp>
 
 #include <ajg/synth/engines/null/engine.hpp>
 #include <ajg/synth/adapters.hpp>
@@ -48,6 +47,7 @@ struct base_binding : boost::noncopyable {
     typedef Engine3<traits_type>                                                engine3_type;
     typedef Engine4<traits_type>                                                engine4_type;
 
+    /*
     // Note: A boost::variant won't work here because it doesn't seem to support in-place construction.
     typedef Template<null_engine_type>                                          null_template_type;
     typedef boost::optional<Template<engine0_type> >                            template0_type;
@@ -55,6 +55,14 @@ struct base_binding : boost::noncopyable {
     typedef boost::optional<Template<engine2_type> >                            template2_type;
     typedef boost::optional<Template<engine3_type> >                            template3_type;
     typedef boost::optional<Template<engine4_type> >                            template4_type;
+    */
+
+    typedef Template<null_engine_type>                                          null_template_type;
+    typedef Template<engine0_type>                                              template0_type;
+    typedef Template<engine1_type>                                              template1_type;
+    typedef Template<engine2_type>                                              template2_type;
+    typedef Template<engine3_type>                                              template3_type;
+    typedef Template<engine4_type>                                              template4_type;
 
     typedef typename null_template_type::source_type                            source_type;
     typedef typename null_engine_type::options_type                             options_type;
@@ -75,11 +83,11 @@ struct base_binding : boost::noncopyable {
 
     base_binding(source_type source, string_type const& engine, options_type const& options) {
         std::string const name = text::narrow(engine);
-             if (name == engine0_type::name()) this->template0_ = boost::in_place(boost::ref(source), options);
-        else if (name == engine1_type::name()) this->template1_ = boost::in_place(boost::ref(source), options);
-        else if (name == engine2_type::name()) this->template2_ = boost::in_place(boost::ref(source), options);
-        else if (name == engine3_type::name()) this->template3_ = boost::in_place(boost::ref(source), options);
-        else if (name == engine4_type::name()) this->template4_ = boost::in_place(boost::ref(source), options);
+             if (name == engine0_type::name()) this->template0_ = parse_template<template0_type>(source, options);
+        else if (name == engine1_type::name()) this->template1_ = parse_template<template1_type>(source, options);
+        else if (name == engine2_type::name()) this->template2_ = parse_template<template2_type>(source, options);
+        else if (name == engine3_type::name()) this->template3_ = parse_template<template3_type>(source, options);
+        else if (name == engine4_type::name()) this->template4_ = parse_template<template4_type>(source, options);
         else AJG_SYNTH_THROW(std::invalid_argument("engine: " + name));
     }
 
@@ -94,11 +102,11 @@ struct base_binding : boost::noncopyable {
         template4_type::value_type::prime();
         */
 
-        options_type::template prime<engine0_type>();
-        options_type::template prime<engine1_type>();
-        options_type::template prime<engine2_type>();
-        options_type::template prime<engine3_type>();
-        options_type::template prime<engine4_type>();
+        prime_all<engine0_type>();
+        prime_all<engine1_type>();
+        prime_all<engine2_type>();
+        prime_all<engine3_type>();
+        prime_all<engine4_type>();
     }
 
   protected:
@@ -148,11 +156,11 @@ struct base_binding : boost::noncopyable {
 
   private:
 
-    template0_type template0_;
-    template1_type template1_;
-    template2_type template2_;
-    template3_type template3_;
-    template4_type template4_;
+    boost::shared_ptr<template0_type const> template0_;
+    boost::shared_ptr<template1_type const> template1_;
+    boost::shared_ptr<template2_type const> template2_;
+    boost::shared_ptr<template3_type const> template3_;
+    boost::shared_ptr<template4_type const> template4_;
 };
 
 }}} // namespace ajg::synth::bindings

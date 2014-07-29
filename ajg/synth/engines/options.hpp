@@ -18,6 +18,7 @@ namespace engines {
 
 //
 // options
+//     TODO: Move out of engines namespace/directory.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Context>
@@ -98,32 +99,11 @@ struct options {
     }                                                                           entry_type;
     typedef std::stack<entry_type>                                              entries_type;
 
-  public:
-
-    options() : debug(false) {}
+    typedef caching_mask                                                       caching_type;
 
   public:
 
-    template <typename Engine>
-    inline static void prime() {
-        cache<options_type, Engine>::prime();
-    }
-
-    template <typename Engine>
-    void render_path_to_stream( path_type    const& path
-                              , ostream_type&       ostream
-                              , context_type&       context
-                              ) const {
-        global_cache<Engine>().render_path_to_stream(path, ostream, context, *this);
-    }
-
-  private:
-
-    template <typename Engine>
-    static cache<options_type, Engine>& global_cache() {
-        static cache<options_type, Engine> cache;
-        return cache;
-    }
+    options() : debug(false), caching(caching_none) {}
 
   public:
 
@@ -135,6 +115,7 @@ struct options {
     libraries_type    libraries;
     loaders_type      loaders;
     resolvers_type    resolvers;
+    caching_type      caching;
 };
 
 

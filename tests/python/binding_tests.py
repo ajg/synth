@@ -5,7 +5,7 @@
 from datetime import datetime
 
 def get():
-    return (data, golden, source, 'django', None)
+    return (data, golden, source, 'django')
 
 data = {
     'bool_true':        True,

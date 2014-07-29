@@ -401,7 +401,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         context.format(text::literal("YEAR_MONTH_FORMAT"),          text::literal("F Y"),       false);
         context.format(text::literal("SPACE_FORMAT"),               text::literal("&nbsp;"),    false);
 
-        this->render_block(ostream, options, state, state.match, context);
+        this->render_block(ostream, options, state, state.match(), context);
     }
 
     void render_path( ostream_type&       ostream
@@ -410,7 +410,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                     , path_type    const& path
                     , context_type&       context
                     ) const {
-        options.template render_path_to_stream<engine_type>(path, ostream, context);
+        parse_template<templates::path_template<engine_type> > (path, options)->render_to_stream(ostream, context);
     }
 
     void render_plain( ostream_type&       ostream
@@ -800,10 +800,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     string_regex_type html_namechar;
     string_regex_type html_whitespace;
     string_regex_type html_tag;
-
-  private:
-
-    x::placeholder<state_type> _state;
 
   private:
 

@@ -12,7 +12,6 @@
 #include <utility>
 #include <ostream>
 #include <numeric>
-#include <algorithm>
 
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
@@ -127,8 +126,8 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
         // block = skip(plain[...])(*tag[...]); // Using skip is slightly slower than this:
         this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
-            ( x::ref(this->tag)   [set_furthest(this->_iterator, _)]
-            | x::ref(this->plain) [set_furthest(this->_iterator, _)]
+            ( x::ref(this->tag)   [set_furthest(*this->_state, _)]
+            | x::ref(this->plain) [set_furthest(*this->_state, _)]
             );
     }
 
@@ -190,25 +189,16 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
                              );
     }
 
-    inline void parse(state_type& state) const {
-        range_type     r = state.range;
-        iterator_type it = r.first;
+    inline void parse(state_type* state) const { // Pointer to make clear it's mutable.
+        state->match().let(this->_state = state);
 
-        state.match.let(this->_state    = state);
-        state.match.let(this->_iterator = it);
-
-        if (x::regex_match(r.first, r.second, state.match, this->block)) {
-            // On success, all input should have been consumed.
-            BOOST_ASSERT(it == r.second);
-            return;
+        if (!x::regex_match(state->begin(), state->end(), state->match(), this->block)) {
+            // On failure, throw a semi-informative exception.
+            AJG_SYNTH_THROW(parsing_error(text::narrow(state->line(error_line_limit))));
         }
 
-        // On failure, throw a semi-informative exception.
-        size_type   const buffer(std::distance(it, r.second));
-        size_type   const limit(error_line_limit);
-        string_type const site(it, detail::advance_to(it, (std::min)(buffer, limit)));
-        string_type const line(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
-        AJG_SYNTH_THROW(parsing_error(text::narrow(line)));
+        // On success, all input should have been consumed.
+        AJG_SYNTH_ASSERT(state->consumed());
     }
 
   AJG_SYNTH_IF_MSVC(public, protected):
@@ -221,8 +211,7 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
   public: // TODO: protected
 
-    x::placeholder<state_type>    _state;
-    x::placeholder<iterator_type> _iterator;
+    x::placeholder<state_type*> _state;
 
   private:
 
@@ -234,8 +223,8 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
     struct set_furthest_iterator {
         typedef void result_type;
 
-        void operator()(iterator_type& iterator, sub_match_type const& sub_match) const {
-            iterator = (std::max)(iterator, sub_match.second);
+        void operator()(state_type& state, sub_match_type const& sub_match) const {
+            state.furthest(sub_match.second);
         }
     };
 

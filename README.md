@@ -452,7 +452,14 @@ General Options
  - `options::libraries`   (for dynamic tags & filters)
  - `options::loaders`     (for dynamic library loading)
  - `options::resolvers`   (for dynamic URL resolution and reversal)
-
+ - `options::caching`     (a bit mask of caching behavior)
+   * `caching::none`
+   * `caching::all`
+   * `caching::paths`
+   * `caching::buffers`
+   * `caching::strings`
+   * `caching::per_thread`
+   * `caching::per_process`
 
 Future Work
 -----------

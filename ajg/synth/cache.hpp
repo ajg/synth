@@ -33,8 +33,10 @@ enum mask {
     paths       = (1 << 1),
     buffers     = (1 << 2),
     strings     = (1 << 3),
-    per_thread  = (1 << 4),
-    per_process = (1 << 5)
+    // streams  = (1 << 4),
+
+    per_thread  = (1 << 10),
+    per_process = (1 << 11)
 };
 
 template <typename Template>

@@ -9,7 +9,7 @@ import synth
 def get():
     return (data, golden, source, 'django', {
         'directories': [directory],
-        'caching': synth.CACHE_ALL,
+        'caching': (synth.CACHE_ALL | synth.CACHE_PER_PROCESS),
         'directories': [directory],
     })
 

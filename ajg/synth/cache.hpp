@@ -40,7 +40,6 @@ enum mask {
 template <typename Template>
 struct mask_for;
 
-
 template <typename Engine>
 struct mask_for<templates::buffer_template<Engine> > {
     BOOST_STATIC_CONSTANT(mask, value = buffers);
@@ -52,9 +51,15 @@ struct mask_for<templates::path_template<Engine> > {
 };
 
 template <typename Engine>
+struct mask_for<templates::stream_template<Engine> > {
+    BOOST_STATIC_CONSTANT(mask, value = none);
+};
+
+template <typename Engine>
 struct mask_for<templates::string_template<Engine> > {
     BOOST_STATIC_CONSTANT(mask, value = strings);
 };
+
 };
 
 template <class Template>
@@ -138,7 +143,8 @@ inline typename cache<Template>::cached_type parse_template
 
     else if (options.caching & caching::per_thread) {
         // FIXME: Destroy at program end to avoid leak (currently sigsegvs from Python.)
-        static AJG_SYNTH_THREAD_LOCAL cache<Template>* thread_cache = new cache<Template>;
+        static AJG_SYNTH_THREAD_LOCAL cache<Template>* thread_cache = 0;
+        if (thread_cache == 0) thread_cache = new cache<Template>;
         return thread_cache->get_or_parse(source, options);
     }
     else if (options.caching & caching::per_process) {

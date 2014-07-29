@@ -99,11 +99,11 @@ struct options {
     }                                                                           entry_type;
     typedef std::stack<entry_type>                                              entries_type;
 
-    typedef caching::mask                                                       caching_type;
+    typedef caching_mask                                                       caching_type;
 
   public:
 
-    options() : debug(false), caching(caching::none) {}
+    options() : debug(false), caching(caching_none) {}
 
   public:
 

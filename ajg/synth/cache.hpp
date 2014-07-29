@@ -25,43 +25,39 @@ inline void prime_all() {
     templates::string_template<Engine>::prime();
 }
 
-struct caching {
+enum caching_mask {
+    caching_none        = 0,
+    caching_all         = (1 << 0),
+    caching_paths       = (1 << 1),
+    caching_buffers     = (1 << 2),
+    caching_strings     = (1 << 3),
+    // caching_streams  = (1 << 4),
 
-enum mask {
-    none        = 0,
-    all         = (1 << 0),
-    paths       = (1 << 1),
-    buffers     = (1 << 2),
-    strings     = (1 << 3),
-    // streams  = (1 << 4),
-
-    per_thread  = (1 << 10),
-    per_process = (1 << 11)
+    caching_per_thread  = (1 << 10),
+    caching_per_process = (1 << 11)
 };
 
 template <typename Template>
-struct mask_for;
+struct caching_mask_for;
 
 template <typename Engine>
-struct mask_for<templates::buffer_template<Engine> > {
-    BOOST_STATIC_CONSTANT(mask, value = buffers);
+struct caching_mask_for<templates::buffer_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_mask, value = caching_buffers);
 };
 
 template <typename Engine>
-struct mask_for<templates::path_template<Engine> > {
-    BOOST_STATIC_CONSTANT(mask, value = paths);
+struct caching_mask_for<templates::path_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_mask, value = caching_paths);
 };
 
 template <typename Engine>
-struct mask_for<templates::stream_template<Engine> > {
-    BOOST_STATIC_CONSTANT(mask, value = none);
+struct caching_mask_for<templates::stream_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_mask, value = caching_none);
 };
 
 template <typename Engine>
-struct mask_for<templates::string_template<Engine> > {
-    BOOST_STATIC_CONSTANT(mask, value = strings);
-};
-
+struct caching_mask_for<templates::string_template<Engine> > {
+    BOOST_STATIC_CONSTANT(caching_mask, value = caching_strings);
 };
 
 template <class Template>
@@ -135,21 +131,21 @@ inline typename cache<Template>::cached_type parse_template
         ( typename Template::source_type         source
         , typename Template::options_type const& options
         ) {
-    caching::mask const m = caching::mask_for<Template>::value;
+    caching_mask const m = caching_mask_for<Template>::value;
     AJG_SYNTH_ASSERT((m & (m - 1)) == 0);
-    bool const enabled = (options.caching & m) || (options.caching & caching::all);
+    bool const enabled = (options.caching & m) || (options.caching & caching_all);
     if (!enabled) {
         return typename cache<Template>::cached_type(new Template(source, options));
     }
     // XXX: static cache<Template> global_cache;
 
-    else if (options.caching & caching::per_thread) {
+    else if (options.caching & caching_per_thread) {
         // FIXME: Destroy at program end to avoid leak (currently sigsegvs from Python.)
         static AJG_SYNTH_THREAD_LOCAL cache<Template>* thread_cache = 0;
         if (thread_cache == 0) thread_cache = new cache<Template>;
         return thread_cache->get_or_parse(source, options);
     }
-    else if (options.caching & caching::per_process) {
+    else if (options.caching & caching_per_process) {
         // FIXME: Destroy at program end to avoid leak (currently sigsegvs from Python.)
         // FIXME: Make thread-safe (consider using concurrent hopscotch hashing.)
         static cache<Template>* process_cache = new cache<Template>;

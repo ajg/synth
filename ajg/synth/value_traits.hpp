@@ -74,6 +74,10 @@ template <typename Char, typename Size>
 struct fixed_buffer : std::pair<Char const*, Size> {
   public:
 
+    fixed_buffer(Char const* data, Size const size) : std::pair<Char const*, Size>(data, size) {}
+
+  public:
+
     inline bool operator==(fixed_buffer const& that) const {
         return this->second == that.second && (
                     this->first == that.first ||

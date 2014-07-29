@@ -7,7 +7,8 @@ language: cpp
 # TODO: Add debug/non-debug build environments.
 
 compiler:
-  - g++
+  ### TODO: Re-enable once Travis bumps memory limits.
+  ### - g++
   - clang++
 
 ### TODO: Build environment with boost available.
@@ -23,4 +24,6 @@ script:
   - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
   - scons synth && tests/harness.sh
   - scons # Make sure every other target builds successfully.
-  - sudo python setup.py install && python tests/harness.py
+  ### TODO: Re-enable once Travis bumps memory limits.
+  ### - sudo python setup.py install
+  - python tests/harness.py

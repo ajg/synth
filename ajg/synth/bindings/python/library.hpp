@@ -184,7 +184,8 @@ struct library : Options::abstract_library {
             }
             py::object const rndr = py::make_function(
                 boost::bind(call_native_renderer, segment.second, _1, _2),
-                py::default_call_policies(), python_renderer_signature_type());
+                py::default_call_policies(),
+                python_renderer_signature_type());
 
             segs.append(py::make_tuple(pcs, rndr));
         }

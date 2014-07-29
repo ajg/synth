@@ -17,17 +17,6 @@
 namespace ajg {
 namespace synth {
 
-enum caching_flags {
-    no_caching     = 0,
-    all_caching    = 1,
-    path_caching   = 2,
-    buffer_caching = 4,
-    string_caching = 8
-};
-
-template <typename Template>
-struct caching_for;
-
 template <typename Engine>
 inline void prime_all() {
     templates::buffer_template<Engine>::prime();
@@ -36,21 +25,37 @@ inline void prime_all() {
     templates::string_template<Engine>::prime();
 }
 
+struct caching {
+
+enum mask {
+    none        = 0,
+    all         = (1 << 0),
+    paths       = (1 << 1),
+    buffers     = (1 << 2),
+    strings     = (1 << 3),
+    per_thread  = (1 << 4),
+    per_process = (1 << 5)
+};
+
+template <typename Template>
+struct mask_for;
+
+
 template <typename Engine>
-struct caching_for<templates::buffer_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_flags, value = buffer_caching);
+struct mask_for<templates::buffer_template<Engine> > {
+    BOOST_STATIC_CONSTANT(mask, value = buffers);
 };
 
 template <typename Engine>
-struct caching_for<templates::path_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_flags, value = path_caching);
+struct mask_for<templates::path_template<Engine> > {
+    BOOST_STATIC_CONSTANT(mask, value = paths);
 };
 
 template <typename Engine>
-struct caching_for<templates::string_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_flags, value = string_caching);
+struct mask_for<templates::string_template<Engine> > {
+    BOOST_STATIC_CONSTANT(mask, value = strings);
 };
-
+};
 
 template <class Template>
 struct cache {
@@ -91,29 +96,18 @@ struct cache {
 
   public:
 
-    inline boolean_type enabled(options_type const& options) const {
-        caching_type const c = caching_for<template_type>::value;
-        AJG_SYNTH_ASSERT((c & (c - 1)) == 0);
-        return (options.caching & c) || (options.caching & all_caching);
-    }
-
-    cached_type get_or_parse(source_type source, options_type const& options) {
-        if (!this->enabled(options)) {
-            return cached_type(new template_type(source, options));
-        }
-
+    cached_type get_or_parse(source_type const& source, options_type const& options) {
         key_type const key = template_type::key(source);
         std::pair<it_type, it_type> const r = this->cache_.equal_range(key);
 
         for (it_type it = r.first; it != r.second; ++it) {
-            if (!it->second->compatible(source, options)) {
-                continue;
-            }
-            else if (it->second->stale(source, options)) {
-                this->cache_.erase(it);
-                break;
-            }
-            else {
+            if (it->second->same(source, options)) {
+                if (it->second->stale(source, options)) {
+                    // TODO: Introduce a way to reuse the template's state by re-parsing the source,
+                    //       that way the contained xpressive::match_results can be reused too,
+                    //       which is recommended as it is consumes a good chunk of memory.
+                    it->second.reset(new template_type(source, options));
+                }
                 return it->second;
             }
         }
@@ -128,17 +122,33 @@ struct cache {
     cache_type cache_;
 };
 
+// TODO: Make the cache used a parameter.
 template <typename Template>
-extern inline typename cache<Template>::cached_type parse_template
+inline typename cache<Template>::cached_type parse_template
         ( typename Template::source_type         source
         , typename Template::options_type const& options
         ) {
-    // TODO: Make cache a parameter.
-    static cache<Template> global_cache;
-    // TODO: Make thread-safe or at least thread-local.
-    return global_cache.get_or_parse(source, options);
-}
+    caching::mask const m = caching::mask_for<Template>::value;
+    AJG_SYNTH_ASSERT((m & (m - 1)) == 0);
+    bool const enabled = (options.caching & m) || (options.caching & caching::all);
+    if (!enabled) {
+        return typename cache<Template>::cached_type(new Template(source, options));
+    }
+    // XXX: static cache<Template> global_cache;
 
+    else if (options.caching & caching::per_thread) {
+        // FIXME: Destroy at program end to avoid leak (currently sigsegvs from Python.)
+        static AJG_SYNTH_THREAD_LOCAL cache<Template>* thread_cache = new cache<Template>;
+        return thread_cache->get_or_parse(source, options);
+    }
+    else if (options.caching & caching::per_process) {
+        // FIXME: Destroy at program end to avoid leak (currently sigsegvs from Python.)
+        // FIXME: Make thread-safe (consider using concurrent hopscotch hashing.)
+        static cache<Template>* process_cache = new cache<Template>;
+        return process_cache->get_or_parse(source, options);
+    }
+    AJG_SYNTH_THROW(std::invalid_argument("caching must be per-process or per-thread"));
+}
 
 }} // namespace ajg::synth
 

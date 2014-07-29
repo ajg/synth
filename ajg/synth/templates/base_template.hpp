@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/utility/in_place_factory.hpp>
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/value_traits.hpp>
@@ -63,14 +64,7 @@ struct base_template : boost::noncopyable {
 
   protected:
 
-    inline base_template(options_type const& options = options_type())
-        { this->reset(options); }
-
-    inline base_template(range_type const& range, options_type const& options = options_type())
-        { this->reset(range, options); }
-
-    inline base_template(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type())
-        { this->reset(begin, end, options); }
+    base_template() {}
 
   public:
 
@@ -80,8 +74,7 @@ struct base_template : boost::noncopyable {
 
     inline void render_to_stream(ostream_type& ostream, context_type& context) const {
         ostream.imbue(traits_type::standard_locale());
-
-        this->kernel().render(ostream, this->state_.options, this->state_, context);
+        this->kernel().render(ostream, this->options(), this->state(), context);
     }
 
     inline void render_to_stream(ostream_type& ostream, data_type const& data) const {
@@ -130,8 +123,8 @@ struct base_template : boost::noncopyable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline string_type         str()     const { return string_type(this->range().first, this->range().second); }
-    inline range_type   const& range()   const { return this->state_.range; }
-    inline options_type const& options() const { return this->state_.options; }
+    inline range_type   const& range()   const { return this->state().range(); }
+    inline options_type const& options() const { return this->state().options(); }
 
     inline static void prime() {
         template_type::kernel();
@@ -140,13 +133,13 @@ struct base_template : boost::noncopyable {
   protected:
 
     inline void reset(options_type const& options = options_type()) {
-        this->state_ = state_type(range_type(), options);
+        this->state_ = boost::in_place(range_type(), options);
         // NOTE: Don't parse in this case.
     }
 
     inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) {
-        this->state_ = state_type(range_type(begin, end), options);
-        this->kernel().parse(this->state_);
+        this->state_ = boost::in_place(range_type(begin, end), options);
+        this->kernel().parse(this->state_.get_ptr());
     }
 
   private:
@@ -156,9 +149,12 @@ struct base_template : boost::noncopyable {
         return kernel;
     }
 
+    inline state_type&       state()       { AJG_SYNTH_ASSERT(this->state_); return *this->state_; }
+    inline state_type const& state() const { AJG_SYNTH_ASSERT(this->state_); return *this->state_; }
+
   private:
 
-    state_type state_;
+    boost::optional<state_type> state_;
 };
 
 }}} // namespace ajg::synth::templates

@@ -105,15 +105,16 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     inline info_type const& info() const { return this->info_; }
 
-    inline source_type const& source() const { return this->info_.first; }
-    inline static key_type const key(source_type const& source) { return source; }
+    inline path_type const& source() const { return this->info_.first; }
 
-    boolean_type const compatible(path_type const& path, options_type const& options) const {
+    inline static key_type const key(path_type const& source) { return source; }
+
+    inline boolean_type same(path_type const& path, options_type const& options) const {
         return this->info_.first == path && this->options().directories == options.directories;
     }
 
-    boolean_type const stale(path_type const& path, options_type const& options) const {
-        AJG_SYNTH_ASSERT(this->compatible(path, options));
+    inline boolean_type stale(path_type const& path, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->same(path, options));
         struct stat stats;
 
         if (stat(text::narrow(this->info_.first).c_str(), &stats) == 0) {

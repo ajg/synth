@@ -7,10 +7,11 @@
 
 #include <map>
 #include <set>
-#include <ctime>
-#include <cctype>
 #include <vector>
 #include <string>
+#include <ctime>
+#include <cctype>
+#include <cstring>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -68,6 +69,18 @@
 namespace ajg {
 namespace synth {
 
+// TODO: Move to own file.
+template <typename Char, typename Size>
+struct fixed_buffer : std::pair<Char const*, Size> {
+  public:
+
+    inline bool operator==(fixed_buffer const& that) const {
+        return this->second == that.second && (
+                    this->first == that.first ||
+                    (std::memcmp)(this->first, that.first, that.second) == 0);
+    }
+};
+
 //
 // default_traits
 //     TODO: Rename value_traits or rename file to default_traits.hpp.
@@ -98,7 +111,7 @@ struct default_traits {
     typedef boost::local_time::local_date_time                                  datetime_type;
  // typedef boost::local_time::local_time_period                                period_type;
 
-    typedef std::pair<char_type const*, size_type>                              buffer_type;
+    typedef fixed_buffer<char_type, size_type>                                  buffer_type;
     typedef std::basic_string<char_type>                                        string_type;
 
     typedef string_type                                                         region_type;

@@ -92,8 +92,6 @@ struct binding : /* private boost::base_from_member<PyObject*>
                    , make_options(opts, base_type::default_options())
                    ) {}
 
-    // ~binding() throw() { py::decref(boost::base_from_member<PyObject*>::member); }
-
   public: // private:
 
     inline static options_type make_options(py::object const& opts, options_type options) {

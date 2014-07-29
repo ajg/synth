@@ -44,12 +44,12 @@ struct string_template : base_template<Engine, typename Engine::traits_type::str
 
     inline static key_type const key(string_type const& source) { return source.size(); }
 
-    boolean_type const compatible(string_type const& source, options_type const& options) const {
+    inline boolean_type same(string_type const& source, options_type const& options) const {
         return this->source_ == source;
     }
 
-    boolean_type const stale(string_type const& source, options_type const& options) const {
-        AJG_SYNTH_ASSERT(this->compatible(source, options));
+    inline boolean_type stale(string_type const& source, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->same(source, options));
         return false;
     }
 

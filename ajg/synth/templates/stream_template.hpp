@@ -46,12 +46,12 @@ struct stream_template : base_template<Engine,
 
     inline static key_type const key(istream_type const& source) { return key_type(); }
 
-    boolean_type const compatible(istream_type const& source, options_type const& options) const {
+    inline boolean_type same(istream_type const& source, options_type const& options) const {
         return false;
     }
 
-    boolean_type const stale(istream_type const& source, options_type const& options) const {
-        AJG_SYNTH_ASSERT(this->compatible(source, options));
+    inline boolean_type stale(istream_type const& source, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->same(source, options));
         return true;
     }
   private:

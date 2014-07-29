@@ -24,14 +24,17 @@ BOOST_PYTHON_MODULE(synth) {
 
     py::def("version", s::bindings::python::version);
 
-    py::scope().attr("CACHE_NONE")    = static_cast<std::size_t>(s::no_caching);
-    py::scope().attr("CACHE_ALL")     = static_cast<std::size_t>(s::all_caching);
-    py::scope().attr("CACHE_PATHS")   = static_cast<std::size_t>(s::path_caching);
-    py::scope().attr("CACHE_STRINGS") = static_cast<std::size_t>(s::string_caching);
+    py::scope().attr("CACHE_NONE")        = static_cast<std::size_t>(s::caching::none);
+    py::scope().attr("CACHE_ALL")         = static_cast<std::size_t>(s::caching::all);
+    py::scope().attr("CACHE_PATHS")       = static_cast<std::size_t>(s::caching::paths);
+    py::scope().attr("CACHE_BUFFERS")     = static_cast<std::size_t>(s::caching::buffers);
+    py::scope().attr("CACHE_STRINGS")     = static_cast<std::size_t>(s::caching::strings);
+    py::scope().attr("CACHE_PER_THREAD")  = static_cast<std::size_t>(s::caching::per_thread);
+    py::scope().attr("CACHE_PER_PROCESS") = static_cast<std::size_t>(s::caching::per_process);
 
-    /*
+    /* XXX: Doesn't work with flag-like (bitwise) enums.
     py::enum_<binding_type::caching_type>("caching")
-        .value("NONE", s::no_caching)
+        .value("NONE", s::caching::none)
         ;
     */
 

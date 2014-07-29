@@ -5,8 +5,6 @@
 #ifndef AJG_SYNTH_TEMPLATES_CHAR_TEMPLATE_HPP_INCLUDED
 #define AJG_SYNTH_TEMPLATES_CHAR_TEMPLATE_HPP_INCLUDED
 
-#include <utility>
-
 #ifndef AJG_SYNTH_CONFIG_NO_WCHAR_T
 #    include <cwchar>
 #endif
@@ -45,20 +43,20 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
 
   public:
 
-    inline buffer_template(source_type const& source, options_type const& options = options_type()) : source_(source) {
+    buffer_template(source_type const& source, options_type const& options = options_type()) : source_(source) {
         this->reset(this->source_.first, this->source_.first + this->source_.second, options);
     }
 
-    inline buffer_template(char_type const* data, size_type const size, options_type const& options = options_type()) : source_(data, size) {
+    buffer_template(char_type const* data, size_type const size, options_type const& options = options_type()) : source_(data, size) {
         this->reset(data, data + size, options);
     }
 
-    inline buffer_template(char_type const* data, options_type const& options = options_type()) : source_(data, infer_size(data)) {
+    buffer_template(char_type const* data, options_type const& options = options_type()) : source_(data, infer_size(data)) {
         this->reset(data, data + this->source_.second, options);
     }
 
     template <size_type N>
-    inline buffer_template(char_type const (&data)[N], options_type const& options = options_type()): source_(data, N) {
+    buffer_template(char_type const (&data)[N], options_type const& options = options_type()): source_(data, N) {
         this->reset(data, data + N, options);
     }
 
@@ -68,12 +66,12 @@ struct buffer_template : base_template<Engine, typename Engine::traits_type::cha
 
     inline static key_type const key(buffer_type const& source) { return source.second; }
 
-    boolean_type const compatible(buffer_type const& source, options_type const& options) const {
+    inline boolean_type same(buffer_type const& source, options_type const& options) const {
         return this->source_ == source;
     }
 
-    boolean_type const stale(buffer_type const& buffer, options_type const& options) const {
-        AJG_SYNTH_ASSERT(this->compatible(buffer, options));
+    inline boolean_type stale(buffer_type const& buffer, options_type const& options) const {
+        AJG_SYNTH_ASSERT(this->same(buffer, options));
         return false;
     }
 

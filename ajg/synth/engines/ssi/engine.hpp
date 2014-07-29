@@ -258,7 +258,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         context.format(text::literal("sizefmt"),  text::literal("bytes"),                    false);
         context.format(text::literal("timefmt"),  text::literal("%A, %d-%b-%Y %H:%M:%S %Z"), false);
 
-        this->render_block(ostream, state.match, context, options);
+        this->render_block(ostream, state.match(), context, options);
     }
 
     void render_path( ostream_type&       ostream

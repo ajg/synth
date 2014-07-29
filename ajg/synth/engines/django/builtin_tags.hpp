@@ -795,8 +795,8 @@ struct builtin_tags {
             typename x::function<on_continue_>::type const on_continue = {{}};
             typename x::function<on_polyadic1_tag_>::type const on_polyadic1_tag = {{}};
             typename x::function<on_polyadic2_tag_>::type const on_polyadic2_tag = {{}};
-            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(kernel._state)) ] >>
-                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), kernel._state, s2, _))]));
+            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), *kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(*kernel._state)) ] >>
+                  kernel.block >> x::keep((TAG((s2 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), *kernel._state, s2, _))]));
 
             return kernel.polyadic_tag;
         }
@@ -840,7 +840,7 @@ struct builtin_tags {
                                 ) {
             match_type const& match = *static_cast<match_type const*>(context.get_match());
             match_type const& block = match(kernel.block, index);
-            kernel.render_block(ostream, state.options, state, block, context);
+            kernel.render_block(ostream, state.options(), state, block, context);
         }
 
         struct on_arg_ {
@@ -876,7 +876,7 @@ struct builtin_tags {
                 }
 
                 if (boost::optional<typename options_type::tag_type> const& tag = state.get_tag(name)) {
-                    size_type const position = std::distance(state.range.first, n.first);
+                    size_type const position = std::distance(state.begin(), n.first);
 
                     if (tag->pure) {
                         state.set_renderer(position, tag->function(segments_type()));
@@ -884,7 +884,7 @@ struct builtin_tags {
                         return true;
                     }
 
-                    renderer_type const renderer = boost::bind(render_block, 0, boost::ref(kernel), boost::ref(state), _1, _2, _3);
+                    renderer_type const renderer = boost::bind(render_block, 0, boost::cref(kernel), boost::ref(state), _1, _2, _3);
                     segments_type const segments = segments_type(1, segment_type(pieces, renderer));
 
                     if (tag->middle_names.empty() && tag->last_names.empty()) {
@@ -928,7 +928,7 @@ struct builtin_tags {
                     return false;
                 }
 
-                renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::ref(kernel), boost::ref(state), _1, _2, _3);
+                renderer_type const renderer = boost::bind(render_block, entry.segments.size(), boost::cref(kernel), boost::ref(state), _1, _2, _3);
                 entry.segments.push_back(segment_type(pieces, renderer));
 
                 if (is_last) {
@@ -952,7 +952,7 @@ struct builtin_tags {
     struct load_tag {
         static regex_type syntax(kernel_type& kernel) {
             typename x::function<loader>::type const load = {{}};
-            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.packages))[load(kernel._state, s1)]);
+            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.packages))[load(*kernel._state, s1)]);
         }
 
         static void render( kernel_type  const& kernel
@@ -982,7 +982,7 @@ struct builtin_tags {
     struct load_from_tag {
         static regex_type syntax(kernel_type& kernel) {
             typename x::function<loader>::type const load = {{}};
-            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.names) >> kernel.keyword("from") >> x::keep(s2 = kernel.package))[load(kernel._state, s1, s2)]);
+            return x::keep(TAG(kernel.reserved("load") >> x::keep(s1 = kernel.names) >> kernel.keyword("from") >> x::keep(s2 = kernel.package))[load(*kernel._state, s1, s2)]);
         }
 
         static void render( kernel_type  const& kernel

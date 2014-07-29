@@ -227,7 +227,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                , context_type&       context
                ) const {
         context.caseless(!case_sensitive);
-        this->render_block(ostream, state.match, context, options);
+        this->render_block(ostream, state.match(), context, options);
     }
 
     void render_path( ostream_type&       ostream

@@ -25,10 +25,11 @@ struct stream_template : base_template<Engine,
     typedef typename options_type::traits_type                                  traits_type;
 
     typedef typename traits_type::boolean_type                                  boolean_type;
+    typedef typename traits_type::size_type                                     size_type;
     typedef typename traits_type::istream_type                                  istream_type;
 
     typedef istream_type&                                                       source_type;
-    typedef boost::mpl::void_                                                   key_type;
+    typedef size_type                                                           key_type;
 
   private:
 
@@ -44,7 +45,7 @@ struct stream_template : base_template<Engine,
 
     istream_type const& source() const { return this->source_; }
 
-    inline static key_type const key(istream_type const& source) { return key_type(); }
+    inline static key_type const key(istream_type const& source) { return key_type(0); }
 
     inline boolean_type same(istream_type const& source, options_type const& options) const {
         return false;

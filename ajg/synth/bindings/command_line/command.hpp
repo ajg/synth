@@ -108,7 +108,9 @@ struct command {
             return;
         }
         else if (opts[version_option]) {
-            output << "synth v" << AJG_SYNTH_VERSION_STRING << std::endl;
+            output << "synth v" << AJG_SYNTH_VERSION_STRING
+                   << (AJG_SYNTH_IS_DEBUG ? " [debug]" : "")
+                   << std::endl;
             return;
         }
         else if (!opts[engine_option]) {

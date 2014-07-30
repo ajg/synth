@@ -477,6 +477,7 @@ Future Work
    * RPM package
    * Apt package
    * Yum package
+   * Chocolatey NuGet package
    * MacPort support
    * Standalone pre-built Darwin binaries
    * Standalone pre-built Windows binaries
@@ -508,7 +509,6 @@ Future Work
    * Python:
      + [v1] Set docstrings where appropriate
      + [v1] Turn optional arguments to synth.Template into kwargs
-     + [v1+] Support for Python 3
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
      + Support for non-simple custom tags via token and parser objects
          1. Custom inclusion tags

@@ -22,7 +22,7 @@
 #include <ajg/synth/bindings/python/library.hpp>
 #include <ajg/synth/bindings/python/resolver.hpp>
 #include <ajg/synth/bindings/python/conversions.hpp>
-#include <ajg/synth/templates/string_template.hpp> // buffer_template.hpp>
+#include <ajg/synth/templates/string_template.hpp>
 
 namespace ajg {
 namespace synth {
@@ -36,10 +36,9 @@ inline char const* version() {
 }
 
 template <class Traits>
-struct binding : /* private boost::base_from_member<PyObject*>
-               , */ bindings::base_binding< Traits
+struct binding : bindings::base_binding< Traits
                                        , py::object const&
-                                       , templates::string_template // templates::buffer_template
+                                       , templates::string_template
                                        , engines::django::engine
                                        , engines::ssi::engine
                                        , engines::tmpl::engine
@@ -85,9 +84,7 @@ struct binding : /* private boost::base_from_member<PyObject*>
     // TODO: Support passing either a string or a file-like object.
     // TODO: Override e.g. pprint_filter with Python's own pprint.pprint?
     binding(py::object const& src, py::object const& eng, py::object const& opts = c::make_none())
-        : /* boost::base_from_member<PyObject*>(py::incref(src.ptr())) // Keep the object alive.
-        , base_type( c::make_buffer(boost::base_from_member<PyObject*>::member) */
-          base_type( c::make_string(src)
+        : base_type( c::make_string(src)
                    , c::make_string(eng)
                    , make_options(opts, base_type::default_options())
                    ) {}

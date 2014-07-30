@@ -2,6 +2,8 @@
 ##  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
+from __future__ import print_function
+
 import synth
 import sys
 import tempfile
@@ -18,7 +20,7 @@ def main():
     import python.library_tests   as library_tests
     import python.caching_tests   as caching_tests
 
-    print 'Running test harness...'
+    print('Running test harness...')
     run_test('binding_tests',   *binding_tests.get())
     run_test('directory_tests', *directory_tests.get())
     run_test('library_tests',   *library_tests.get())
@@ -27,7 +29,7 @@ def main():
     if failures != 0:
         raise Exception('One or more tests failed')
 
-    print '...done.'
+    print('...done.')
 
 total, failures = 0, 0
 
@@ -36,8 +38,12 @@ def run_test(name, data, golden, source, engine, options=None):
     run_test_as('utf-8',   name, data, golden, source.encode('utf-8'), engine, options)
   # TODO: run_test_as('utf-16',  name, data, golden, source.encode('utf-16'), engine, options)
   # TODO: run_test_as('utf-32',  name, data, golden, source.encode('utf-32'), engine, options)
-    run_test_as('unicode', name, data, golden, unicode(source), engine, options)
     run_test_as('str',     name, data, golden, str(source), engine, options)
+
+    if sys.version_info < (3, 0):
+        run_test_as('unicode', name, data, golden, unicode(source), engine, options)
+    #else:
+    #    run_test_as('bytes', name, data, golden, bytes(source.encode('utf-8')), engine, options)
 
 def run_test_as(type, name, data, golden, source, engine, options=None):
     global total, failures

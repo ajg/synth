@@ -14,10 +14,7 @@ class Library(object):
         self.tags    = tags
         self.filters = filters
 
-def dump(n, x): print n, '=', x; return x
-
 def render_segment(segment, data, options=None):
-    # print '### render_segment(', segment, ')'
     pieces, renderer = segment
     return renderer(data, options)
 
@@ -100,21 +97,17 @@ def add(*args):
     return sum(args)
 
 def encode(segments, data, name, *args, **kwargs):
-    # print '### encode(', name, ')'
     s = render_segment(segments[0], data)
     return s.encode(name)
 
 def decode(segments, data, name, *args, **kwargs):
-    # print '### decode(', name, ')'
     s = render_segment(segments[0], data)
     return s.decode(name)
 
 def unless(segments, data, condition, *args, **kwargs):
-    # print '### unless(', condition, ')'
     return render_segment(segments[1 if condition else 0], data)
 
 def set_variable(segments, data, *args, **kwargs):
-    # print '### set(', args, kwargs, ')'
     pieces = segments[0][0]
     name  = pieces[2]
     value = pieces[3]
@@ -122,7 +115,6 @@ def set_variable(segments, data, *args, **kwargs):
     return ''
 
 def unset_variable(segments, data, *args, **kwargs):
-    # print '### unset(', args, kwargs, ')'
     pieces = segments[0][0]
     name = pieces[2]
     del data[name]

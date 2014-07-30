@@ -87,6 +87,49 @@ struct conversions {
     }
 
     inline static string_type make_string(py::object const& obj) {
+        return make_string(obj.ptr());
+    }
+
+    inline static string_type make_string(PyObject* const o) {
+        if (o == 0) {
+            AJG_SYNTH_THROW(std::invalid_argument("null object"));
+        }
+
+        char*      data;
+        Py_ssize_t size;
+
+        if (PyUnicode_Check(o)) {
+    #if PY_MAJOR_VERSION >= 3
+            if ((data = PyUnicode_AsUTF8AndSize(o, &size)) == 0) {
+                AJG_SYNTH_THROW(std::invalid_argument("invalid unicode object"));
+            }
+    #else
+            return make_string(PyUnicode_AsUTF8String(o));
+            // XXX: Works only when there are solely ASCII characters.
+            // return string_type(PyUnicode_AS_DATA(o), PyUnicode_GET_DATA_SIZE(o));
+    #endif
+        }
+    #if PY_MAJOR_VERSION >= 3
+        else if (PyBytes_Check(o) && PyBytes_AsStringAndSize(o, &data, &size) == -1) {
+            AJG_SYNTH_THROW(std::invalid_argument("invalid bytes object"));
+        }
+    #else
+        else if (PyString_Check(o) && PyString_AsStringAndSize(o, &data, &size) == -1) {
+            AJG_SYNTH_THROW(std::invalid_argument("invalid str object"));
+        }
+    #endif
+        else {
+    #if PY_MAJOR_VERSION >= 3
+            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or bytes"));
+    #else
+            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or str"));
+    #endif
+        }
+        return string_type(data, size);
+    }
+
+    /*
+    inline static string_type make_string(py::object const& obj) {
         PyObject* const o = obj.ptr();
         if (PyString_Check(o) || PyUnicode_Check(o)) {
             buffer_type const buffer = make_buffer(o);
@@ -104,6 +147,7 @@ struct conversions {
         }
         return py::extract<string_type>(py::str(obj));
     }
+    */
 
     // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
     // inline static std::pair<char_type const*, size_type> make_buffer(PyObject* const o) {
@@ -111,6 +155,7 @@ struct conversions {
     //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
     // }
 
+    /*
     inline static buffer_type make_buffer(PyObject* const o) {
         BOOST_ASSERT(PyString_Check(o) || PyUnicode_Check(o));
 
@@ -123,6 +168,27 @@ struct conversions {
 
         return buffer_type(data, size);
     }
+    */
+
+    /*
+    inline static buffer_type make_buffer(PyObject* const o) {
+        if (PyString_Check(o)) {
+            char*      data;
+            Py_ssize_t size;
+
+            if (PyString_AsStringAndSize(o, &data, &size) == -1) {
+                AJG_SYNTH_THROW(std::invalid_argument("str/bytes object"));
+            }
+            return buffer_type(data, size);
+        }
+        else if (PyUnicode_Check(o)) {
+            return buffer_type(PyUnicode_AS_DATA(o), PyUnicode_GET_DATA_SIZE(o));
+        }
+        else {
+            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or str/bytes"));
+        }
+    }
+    */
 
     inline static date_type make_date(py::object const& dt) {
         return traits_type::to_date

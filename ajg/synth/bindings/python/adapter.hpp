@@ -48,14 +48,26 @@ struct adapter<Value, py::object>      : concrete_adapter_without_operators<Valu
         if (PyBool_Check(o))           flags = type_flags(flags | boolean);
         // FIXME: This PyNumber_Check seems to return true for all instances of "classic" Python classes.
         if (PyNumber_Check(o)) {
-            if (PyInt_Check(o) ||
-                PyLong_Check(o))       flags = type_flags(flags | numeric | integral);
+    #if PY_MAJOR_VERSION >= 3
+            if (PyLong_Check(o))
+    #else
+            if (PyLong_Check(o) || PyInt_Check(o))
+    #endif
+                                       flags = type_flags(flags | numeric | integral);
             else if (PyFloat_Check(o)) flags = type_flags(flags | numeric | floating);
             else                       flags = type_flags(flags | numeric);
         }
+    #if PY_MAJOR_VERSION >= 3
+        if (PyBytes_Check(o))          flags = type_flags(flags | container | sequential);
+    #else
         if (PyString_Check(o)) {
             if (PyString_Size(o) == 1) flags = type_flags(flags | textual | character);
             else                       flags = type_flags(flags | textual);
+        }
+    #endif
+        if (PyUnicode_Check(o)) {
+            if (PyUnicode_GetSize(o) == 1) flags = type_flags(flags | textual | character);
+            else                           flags = type_flags(flags | textual);
         }
         if (PyDate_Check(o) ||
             PyTime_Check(o) ||

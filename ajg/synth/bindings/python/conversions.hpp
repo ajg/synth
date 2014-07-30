@@ -103,6 +103,7 @@ struct conversions {
             if ((data = PyUnicode_AsUTF8AndSize(o, &size)) == 0) {
                 AJG_SYNTH_THROW(std::invalid_argument("invalid unicode object"));
             }
+            return string_type(data, size);
     #else
             return make_string(PyUnicode_AsUTF8String(o));
             // XXX: Works only when there are solely ASCII characters.
@@ -114,14 +115,29 @@ struct conversions {
             if (PyBytes_AsStringAndSize(o, &data, &size) == -1) {
                 AJG_SYNTH_THROW(std::invalid_argument("invalid bytes object"));
             }
+            return string_type(data, size);
         }
     #else
         else if (PyString_Check(o)) {
             if (PyString_AsStringAndSize(o, &data, &size) == -1) {
                 AJG_SYNTH_THROW(std::invalid_argument("invalid str object"));
             }
+            return string_type(data, size);
         }
     #endif
+        else {
+            return make_string(PyObject_Str(o));
+        }
+
+        /*
+        else if (PyObject_HasAttrString(o, "__unicode__")) {
+            return make_string(obj.attr("__unicode__")());
+            // return make_string(PyObject_GetAttrString(o, "__unicode__")(...));
+        }
+        else if (PyObject_HasAttrString(o, "__str__")) {
+            return make_string(obj.attr("__str__")());
+            // return make_string(PyObject_GetAttrString(o, "__str__")(...));
+        }
         else {
     #if PY_MAJOR_VERSION >= 3
             AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or bytes"));
@@ -129,7 +145,7 @@ struct conversions {
             AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or str"));
     #endif
         }
-        return string_type(data, size);
+        */
     }
 
     /*

@@ -2,6 +2,7 @@
 ##  Use, modification and distribution are subject to the Boost Software License, Version 1.0.
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
+import codecs
 import sys
 
 def get():
@@ -98,11 +99,11 @@ def add(*args):
 
 def encode(segments, data, name, *args, **kwargs):
     s = render_segment(segments[0], data)
-    return s.encode(name)
+    return codecs.encode(s, name)
 
 def decode(segments, data, name, *args, **kwargs):
     s = render_segment(segments[0], data)
-    return s.decode(name)
+    return codecs.decode(s, name)
 
 def unless(segments, data, condition, *args, **kwargs):
     return render_segment(segments[1 if condition else 0], data)
@@ -145,7 +146,6 @@ source = """\
 ({% ackermann 3 4 %})
 ({% add %})
 ({% add 1.1 %})
-({% add 1.1 2.2 %})
 ({% add 1.1 2.2 3.3 %})
 {% set foo bar %}({{ foo }})
 {% unset foo bar %}({{ foo }})
@@ -201,7 +201,6 @@ mAY THE fORCE BE WITH YOU.
 (125)
 (0)
 (1.1)
-(3.3)
 (6.6)
 (bar)
 ()

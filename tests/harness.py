@@ -21,10 +21,11 @@ def main():
     import python.caching_tests   as caching_tests
 
     print('Running test harness...')
-    run_test('binding_tests',   *binding_tests.get())
-    run_test('directory_tests', *directory_tests.get())
-    run_test('library_tests',   *library_tests.get())
-    run_test('caching_tests',   *caching_tests.get())
+    if sys.platform != 'win32':
+        run_test('binding_tests',  *binding_tests.get())
+    run_test('directory_tests',    *directory_tests.get())
+    run_test('library_tests',      *library_tests.get())
+    run_test('caching_tests',      *caching_tests.get())
 
     if failures != 0:
         raise Exception('One or more tests failed')
@@ -66,7 +67,7 @@ def run_test_as(type, name, data, golden, source, engine, options=None):
         print('    x Rendering to string failed:\n' + str(e))
         return
 
-    with tempfile.TemporaryFile() as file:
+    with tempfile.TemporaryFile(mode='w+') as file:
         try:
             template.render_to_file(file, data)
             print('    - Rendering to file succeeded')
@@ -77,7 +78,12 @@ def run_test_as(type, name, data, golden, source, engine, options=None):
         else:
             file.flush()
             file.seek(0)
-            if string != file.read():
+
+            result = string
+            if sys.platform == 'win32':
+                result = result.replace('\r\n', '\n\n')
+
+            if result != file.read():
                 print('    x Rendering to file failed: mismatch')
 
     # Note: Windows doesn't support reading from an already open
@@ -87,7 +93,7 @@ def run_test_as(type, name, data, golden, source, engine, options=None):
         golden = golden.replace('\r\n', '\n')
         print('    # Rendering to path excluded on this platform')
     else:
-        with tempfile.NamedTemporaryFile() as file:
+        with tempfile.NamedTemporaryFile(mode='w+') as file:
             try:
                 template.render_to_path(file.name, data)
                 print('    - Rendering to path succeeded')

@@ -113,7 +113,12 @@ struct binding : bindings::base_binding< Traits
   public:
 
     void render_to_file(py::object const& file, py::object& data) const {
+        if (PyFile_WriteString(base_type::render_to_string(data).c_str(), file.ptr()) == -1) {
+            AJG_SYNTH_THROW(std::runtime_error("writing to file failed"));
+        }
+        /*
         file.attr("write")(base_type::render_to_string(data));
+        */
         // XXX: Automatically call flush()?
 
         /* TODO: Be more intelligent and use something like:

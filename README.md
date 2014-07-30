@@ -13,7 +13,7 @@ Synth is a template framework—a set of components that can be mixed and matche
 Status
 ------
 
-Beta, approaching a first full release.
+Version 1 is released and stable.
 
 Motivation
 ----------

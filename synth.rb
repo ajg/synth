@@ -3,12 +3,13 @@ require "formula"
 class Synth < Formula
   homepage "https://github.com/ajg/synth"
   head "https://github.com/ajg/synth.git"
-  url "https://github.com/ajg/synth/releases/download/v1.0.0/archive.tar.gz"
-  sha1 "41971a1090b5a766959170efe77671996002ef03"
-  version "1.0.0"
+  url "https://github.com/ajg/synth/releases/download/v1.0.1/archive.tar.gz"
+  sha1 "e5aa53954050a0b0dd2fa05702b49f0241e1b38c"
+  version "1.0.1"
 
   depends_on "scons"  => :build
   depends_on "python" => :optional
+  # TODO: debug flag
 
   def install
     scons "synth", "debug=0", "boost=local"

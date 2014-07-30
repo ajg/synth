@@ -110,12 +110,16 @@ struct conversions {
     #endif
         }
     #if PY_MAJOR_VERSION >= 3
-        else if (PyBytes_Check(o) && PyBytes_AsStringAndSize(o, &data, &size) == -1) {
-            AJG_SYNTH_THROW(std::invalid_argument("invalid bytes object"));
+        else if (PyBytes_Check(o)) {
+            if (PyBytes_AsStringAndSize(o, &data, &size) == -1) {
+                AJG_SYNTH_THROW(std::invalid_argument("invalid bytes object"));
+            }
         }
     #else
-        else if (PyString_Check(o) && PyString_AsStringAndSize(o, &data, &size) == -1) {
-            AJG_SYNTH_THROW(std::invalid_argument("invalid str object"));
+        else if (PyString_Check(o)) {
+            if (PyString_AsStringAndSize(o, &data, &size) == -1) {
+                AJG_SYNTH_THROW(std::invalid_argument("invalid str object"));
+            }
         }
     #endif
         else {

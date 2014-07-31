@@ -17,20 +17,26 @@ if not settings.configured:
 
 def main():
     print('=== Prepping ===')
-    print('Directories: ' + repr(directories))
-    print('Data: ' + repr(data))
-    print('Files: ' + repr(files))
+    print('Directories:', directories)
+    print('Data:', data)
+    print('Files:', files)
+    print('Debug:', debug)
 
     # Set the right directories:
+    settings.TEMPLATE_DEBUG = debug
     settings.TEMPLATE_DIRS += directories
-    synth.Template.set_default_options({'directories': directories})
+    synth.Template.set_default_options({
+        'debug':       debug,
+        'directories': directories,
+    })
 
     print('=== Starting ===')
-    print('Iterations: %d' % iterations)
+    print('Iterations:', iterations)
     for name in files: bench(name)
     print('Average: %2.1fx' % (sum(changes) / len(changes)))
     print('=== Finished ===')
 
+debug = False
 iterations = 1000
 directories = (
     'tests/templates/django/blog',

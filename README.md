@@ -598,7 +598,7 @@ Infrequently Asked Questions
      + Using Homebrew: `brew install boost` (Append `--with-python` for Boost.Python support.)
      + Using Apt: `sudo apt-get install libboost-all-dev`
      + Using Yum: `sudo yum install boost-devel`
-     + On Windows, try http://sourceforge.net/projects/boost/files/boost-binaries/
+     + On Windows, try `PM> Install-Package boost` in the Package Manager Console
 
 License
 -------

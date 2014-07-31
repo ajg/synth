@@ -53,7 +53,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
   public:
 
     path_template(path_type const& path, options_type const& options = options_type())
-            : info_(locate_file(path, options.directories)) {
+            : source_(path), info_(locate_file(path, options.directories)) {
         if (this->info_.second.st_size == 0) { // Empty file.
             this->reset(options);
         }
@@ -105,12 +105,14 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
     inline info_type const& info() const { return this->info_; }
 
-    inline path_type const& source() const { return this->info_.first; }
+    // inline path_type const& source() const { return this->info_.first; }
+    inline path_type const& source() const { return this->source_; }
 
     inline static key_type const key(path_type const& source) { return source; }
 
     inline boolean_type same(path_type const& path, options_type const& options) const {
-        return this->info_.first == path && this->options().directories == options.directories;
+        // return this->info_.first == path && this->options().directories == options.directories;
+        return this->source_ == path && this->options().directories == options.directories;
     }
 
     inline boolean_type stale(path_type const& path, options_type const& options) const {
@@ -127,7 +129,8 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
 
   private:
 
-    info_type const info_;
+    source_type const source_;
+    info_type   const info_;
 };
 
 }}} // namespace ajg::synth::templates

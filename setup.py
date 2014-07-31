@@ -156,6 +156,8 @@ def get_extra_compile_args(compiler):
             '/EHsc',   # Override structured exception handling (SEH).
             '/FD',     # Allow minimal rebuild.
             '/wd4180', # "qualifier applied to function type has no meaning" in list_of.hpp.
+            '/wd4244', # "conversion from 'Py_ssize_t' to 'unsigned int'" in caller.hpp.
+            '/wd4267', # "conversion from 'size_t' to 'const int'" in various places.
             '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4503', # "decorated name length exceeded, name was truncated" in xpressive.
         ]

@@ -398,7 +398,11 @@ struct default_traits {
                                            , size_type const seconds
                                            , size_type const microseconds = 0
                                            ) {
-        return duration_type(hours, minutes, seconds, microseconds);
+        return duration_type(
+            duration_type::hour_type(hours),
+            duration_type::min_type(minutes),
+            duration_type::sec_type(seconds),
+            duration_type::fractional_seconds_type(microseconds));
     }
 
     inline static duration_type to_duration_at(timezone_type const& tz, datetime_type const& datetime) {

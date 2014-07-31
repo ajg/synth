@@ -106,6 +106,7 @@ struct binding : bindings::base_binding< Traits
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("loaders")))     options.loaders          = make_loaders(py::list(opts["loaders"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("resolvers")))   options.resolvers        = make_resolvers(py::list(opts["resolvers"]));
             if (PyMapping_HasKeyString(opts.ptr(), const_cast<char*>("caching")))     options.caching          = make_caching(opts["caching"]);
+            else                                                                      options.caching          = caching_mask(caching_all | caching_per_process);
         }
         return options;
     }

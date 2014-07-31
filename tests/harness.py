@@ -51,6 +51,9 @@ def run_test_as(type, name, data, golden, source, engine, options=None):
     total += + 1
     print('  Test #%d [%s] [%s]' % (total, name, type))
 
+    if sys.version_info < (3, 0):
+        golden = golden.encode('utf-8')
+
     try:
         template = synth.Template(source, engine, options)
         print('    - Parsing succeeded')

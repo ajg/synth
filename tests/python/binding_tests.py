@@ -17,12 +17,12 @@ data = {
     'list_empty':       [],
     'list_12345':       [1, 2, 3, 4, 5],
     'dict_empty':       {},
-    'dict_abc':         {'a': 'A', 'b': 'B', 'c': 'C'},
+    'dict_foo':         {'foo': 'Foo'},
     'datetime_one':     datetime(1, 1, 1),
     'datetime_id4':     datetime(1776, 7, 4),
     'datetime_1984':    datetime(1984, 11, 2),
 }
-source = """
+source = u"""
 True:   {{ True }}; {% if True %}Good{% else %}Bad{% endif %}
 False:  {{ False }}; {% if False %}Bad{% else %}Good{% endif %}
 
@@ -45,7 +45,7 @@ list_empty: {{ list_empty }}; {% if list_empty %}Bad{% else %}Good{% endif %}
 list_12345: {{ list_12345 }}; {% if list_12345 %}Good{% else %}Bad{% endif %}
 
 dict_empty: {{ dict_empty }}; {% if dict_empty %}Bad{% else %}Good{% endif %}
-dict_abc: {{ dict_abc }}; {% if dict_abc %}Good{% else %}Bad{% endif %}
+dict_foo: {{ dict_foo }}; {% if dict_foo %}Good{% else %}Bad{% endif %}
 
 {% for k, v in str_empty %}Bad{% empty %}Good{% endfor %}
 {% for k, v in list_empty %}Bad{% empty %}Good{% endfor %}
@@ -54,9 +54,9 @@ dict_abc: {{ dict_abc }}; {% if dict_abc %}Good{% else %}Bad{% endif %}
 "literal": {% for v in "literal" %}{{ v }}{% endfor %}
 str_test: {% for v in str_test %}{{ v }}{% endfor %}
 list_12345: {% for v in list_12345 %}{{ v }}{% endfor %}
-dict_abc: {% for v in dict_abc %}{{ v }}{% endfor %}
+dict_foo: {% for v in dict_foo %}{{ v }}{% endfor %}
 
-dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
+dict_foo: {% for k, v in dict_foo.items %}{{ k }}:{{ v }}{% endfor %}
 
 {{ 0 or 0 }}
 {{ 0 and 0 }}
@@ -82,7 +82,7 @@ dict_abc: {% for k, v in dict_abc.items %}{{ k }}:{{ v }}{% endfor %}
 {{ datetime_1984|timeuntil:datetime_1984 }}
 
 """
-golden = """
+golden = u"""
 True:   True; Good
 False:  False; Good
 
@@ -105,7 +105,7 @@ list_empty: []; Good
 list_12345: [1, 2, 3, 4, 5]; Good
 
 dict_empty: {}; Good
-dict_abc: {&apos;a&apos;: &apos;A&apos;, &apos;c&apos;: &apos;C&apos;, &apos;b&apos;: &apos;B&apos;}; Good
+dict_foo: {&apos;foo&apos;: &apos;Foo&apos;}; Good
 
 Good
 Good
@@ -114,9 +114,9 @@ Good
 "literal": literal
 str_test: test
 list_12345: 12345
-dict_abc: acb
+dict_foo: foo
 
-dict_abc: a:Ac:Cb:B
+dict_foo: foo:Foo
 
 0
 0
@@ -131,14 +131,14 @@ bar
 1776-07-04 00:00:00
 1984-11-02 00:00:00
 
-0\xc2\xa0minutes
-208\xc2\xa0years, 5\xc2\xa0months
-0\xc2\xa0minutes
-0\xc2\xa0minutes
+0\u00a0minutes
+208\u00a0years, 5\u00a0months
+0\u00a0minutes
+0\u00a0minutes
 
-208\xc2\xa0years, 5\xc2\xa0months
-0\xc2\xa0minutes
-0\xc2\xa0minutes
-0\xc2\xa0minutes
+208\u00a0years, 5\u00a0months
+0\u00a0minutes
+0\u00a0minutes
+0\u00a0minutes
 
 """

@@ -442,14 +442,9 @@ struct builtin_tags {
             match_type const& vals = match(kernel.values);
 
             BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
-                try {
-                    if (value_type const value = kernel.evaluate(options, state, val, context)) {
-                        ostream << value;
-                        break;
-                    }
-                }
-                catch (missing_variable const&) {
-                    // Missing variables count as 'False' ones.
+                if (value_type const value = kernel.evaluate(options, state, val, context)) {
+                    ostream << value;
+                    break;
                 }
             }
 
@@ -525,7 +520,7 @@ struct builtin_tags {
             size_type const n = variables.size();
             BOOST_ASSERT(n > 0);
             stage<context_type> stage(context);
-            string_type const f = context.format(text::literal("TEMPLATE_STRING_IF_INVALID"));
+            string_type const f = kernel.invalid(context);
 
             for (; it != end; ++it) {
                 if (n == 1) { // e.g. for x in ...
@@ -1050,17 +1045,8 @@ struct builtin_tags {
             string_type const& name  = match(kernel.name)[id].str();
             match_type  const& block = match(kernel.block);
 
-            value_type   values;
-            entries_type entries;
-            try {
-                values = kernel.evaluate(options, state, expr, context);
-            }
-            // Fail silently in these cases:
-            catch (missing_variable  const&) { goto done; }
-            catch (missing_attribute const&) { goto done; }
-            entries = regroup(values, attrs);
-
-          done:
+            value_type   const values  = kernel.evaluate(options, state, expr, context);
+            entries_type const entries = regroup(values, attrs);
             stage<context_type> stage(context, name, entries);
             kernel.render_block(ostream, options, state, block, context);
         }
@@ -1176,7 +1162,7 @@ struct builtin_tags {
                 ostream << *marker;
             }
             else {
-                ostream << context.format(text::literal("TEMPLATE_STRING_IF_INVALID"));
+                ostream << kernel.invalid(context, name);
             }
         }
     };

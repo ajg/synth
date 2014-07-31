@@ -13,7 +13,7 @@ Synth is a template framework—a set of components that can be mixed and matche
 Status
 ------
 
-Beta, approaching a first full release.
+Version 1 is released and stable.
 
 Motivation
 ----------
@@ -477,6 +477,7 @@ Future Work
    * RPM package
    * Apt package
    * Yum package
+   * Chocolatey NuGet package
    * MacPort support
    * Standalone pre-built Darwin binaries
    * Standalone pre-built Windows binaries
@@ -507,13 +508,7 @@ Future Work
      + [v1+] Allow using arbitrary programs as filters
    * Python:
      + [v1] Set docstrings where appropriate
-     + [v1] Turn optional arguments to synth.Template into kwargs
-     + [v1+] Support for Python 3
      + Support is_safe, needs_autoescape, and expects_localtime in custom filters
-     + Support for non-simple custom tags via token and parser objects
-         1. Custom inclusion tags
-         2. Custom assignment tags
-         3. Custom tags with arbitrary blocks
    * Other:
      + Create `ruby` binding based on [Rice](http://rice.rubyforge.org/)
      + Create `go` binding based on [cgo](http://golang.org/cmd/cgo/)
@@ -525,10 +520,7 @@ Future Work
 
  - Engines:
    * Django:
-     + Implement multi-level inheritance
-     + Option to pre-load libraries, tags and filters
      + Make markers dynamically configurable
-     + Consider using hex character entities (vs. named) to match Django's engine
      + Native `i18n` library
      + Native `l10n` library
      + Native `tz` library
@@ -565,9 +557,7 @@ Future Work
 
  - Refactoring:
    * Make documentation comments uniformly `///`
-   * Replace catching `invalid_method` with dedicated attribute methods
    * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
-   * Remove as much dead weight from local Boost copy as possible; and/or
    * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
    * Move `render_block` to `base_engine::kernel`

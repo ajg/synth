@@ -307,61 +307,23 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     inline regex_type keyword (char const* const s) { return this->word(*this->keywords_.insert(text::literal(s)).first) >> *_s; }
     inline regex_type reserved(char const* const s) { return this->word(*this->reserved_.insert(text::literal(s)).first) >> *_s; }
 
-    sequence_type split_argument( options_type const& options
-                                , state_type   const& state
-                                , value_type   const& argument
-                                , context_type&       context
-                                , char_type    const  delimiter
-                                ) const {
-        typedef typename string_type::const_iterator                                string_iterator_type;
-        typedef kernel<string_iterator_type>                                        string_kernel_type;
-        typedef typename string_kernel_type::match_type                             string_match_type;
-        typedef typename string_kernel_type::state_type                             string_state_type;
-        typedef typename string_kernel_type::range_type                             string_range_type;
+    inline string_type invalid(context_type const& context, string_type const& variable = string_type()) const {
+        string_type const& s = context.format(text::literal("TEMPLATE_STRING_IF_INVALID"));
+        return text::replace(s, text::literal("%s"), variable);
+    }
 
-        typedef boost::char_separator<char_type>                                    separator_type;
-        typedef boost::tokenizer<separator_type, string_iterator_type, string_type> tokenizer_type;
+    sequence_type split_argument(value_type const& argument, char_type const delimiter) const {
+        typedef typename string_type::const_iterator                        it_type;
+        typedef boost::char_separator<char_type>                            separator_type;
+        typedef boost::tokenizer<separator_type, it_type, string_type>      tokenizer_type;
 
-        BOOST_ASSERT(argument.is_literal());
-        string_type token = argument.token();
-        size_type const l = token.length();
-
-        if (l >= 2) { // Adjust the token by trimming the quotes:
-            if ((token[0] == char_type('"')  && token[l - 1] == char_type('"')) ||
-                (token[0] == char_type('\'') && token[l - 1] == char_type('\''))) {
-                token = token.substr(1, l - 2);
-            }
-        }
-
-        char_type const d[2] = { delimiter, 0 };
-        tokenizer_type const tokenizer(token, separator_type(d, 0, boost::keep_empty_tokens));
-        static string_kernel_type const string_kernel;
-        static string_range_type  const string_range;
-        string_match_type               string_match;
-        sequence_type                   sequence;
+        char_type      const d[2] = { delimiter, 0 };
+        string_type    const s    = argument.to_string();
+        tokenizer_type const tokenizer(s, separator_type(d, 0, boost::keep_empty_tokens));
+        sequence_type sequence;
 
         BOOST_FOREACH(string_type const& t, tokenizer) {
-            if (std::distance(t.begin(), t.end()) == 0) {
-                sequence.push_back(value_type(none_type()));
-            }
-            else if (x::regex_match(t.begin(), t.end(), string_match, string_kernel.chain)) {
-                try {
-                    string_state_type const string_state(string_range, options);
-                    sequence.push_back(string_kernel.evaluate_chain(options, string_state, string_match, context));
-                }
-                catch (missing_variable const& e) {
-                    string_type const string(t.begin(), t.end());
-
-                    if (text::narrow(string) != e.name) {
-                        throw;
-                    }
-
-                    // A missing variable means an embedded argument was meant as a string literal.
-                    value_type value = string;
-                    value.token(string_match[0]);
-                    sequence.push_back(value);
-                }
-            }
+            sequence.push_back(t);
         }
 
         return sequence;
@@ -509,13 +471,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                        , match_type   const& match
                        , context_type&       context
                        ) const {
-
-        try {
-            value_type const& value = this->evaluate_expression(options, state, match(this->expression), context);
-            return this->apply_filters(value, options, state, match, context);
-        }
-        catch (missing_variable  const&) { return context.format(text::literal("TEMPLATE_STRING_IF_INVALID")); }
-        catch (missing_attribute const&) { return context.format(text::literal("TEMPLATE_STRING_IF_INVALID")); }
+        value_type const& value = this->evaluate_expression(options, state, match(this->expression), context);
+        return this->apply_filters(value, options, state, match, context);
     }
 
     arguments_type evaluate_arguments( options_type  const& options
@@ -545,46 +502,47 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                ) const {
         BOOST_ASSERT(this->is(match, this->literal));
         match_type  const& literal = this->unnest(match);
-        string_type const  string  = match.str();
-        string_type const  token   = literal[0];
 
         if (this->is(literal, this->none_literal)) {
-            return value_type(none_type()).token(token);
+            return value_type(none_type());
         }
         else if (this->is(literal, this->boolean_literal)) {
             match_type const& boolean = this->unnest(literal);
 
             if (this->is(boolean, this->true_literal)) {
-                return value_type(boolean_type(true)).token(token);
+                return value_type(boolean_type(true));
             }
             else if (this->is(boolean, this->false_literal)) {
-                return value_type(boolean_type(false)).token(token);
+                return value_type(boolean_type(false));
             }
             else {
                 AJG_SYNTH_THROW(std::logic_error("invalid boolean literal"));
             }
         }
         else if (this->is(literal, this->number_literal)) {
-            if (string.find(char_type('.')) == string_type::npos) {
+            string_type const s = match.str();
+
+            if (s.find(char_type('.')) == string_type::npos) {
                 // TODO[c++11]: atoll (long long)
-                long const l = (std::atol)(text::narrow(string).c_str());
-                return value_type(integer_type(l)).token(token);
+                long const l = (std::atol)(text::narrow(s).c_str());
+                return value_type(integer_type(l));
             }
             else {
-                double const d = (std::atof)(text::narrow(string).c_str());
-                return value_type(floating_type(d)).token(token);
+                double const d = (std::atof)(text::narrow(s).c_str());
+                return value_type(floating_type(d));
             }
         }
         else if (this->is(literal, this->string_literal)) {
-            return value_type(extract_string(literal)).token(token);
+            return value_type(extract_string(literal));
         }
         else if (this->is(literal, this->variable_literal)) {
-            if (boost::optional<value_type> const& variable = context.get(string)) {
-                return variable->metacopy().token(token);
+            string_type const s = match.str();
+
+            if (boost::optional<value_type> const& variable = context.get(s)) {
+                return variable->metacopy();
             }
             else {
-                // TODO: Don't use exceptions for unexceptional control flow.
-                /*AJG_SYNTH_THROW*/throw (missing_variable(text::narrow(string)));
+                return this->invalid(context, s);
             }
         }
         else {
@@ -718,7 +676,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
         BOOST_FOREACH(match_type const& link, this->select_nested(match, this->link)) {
             value_type const attribute = this->evaluate_link(options, state, link, context);
-            value = value.must_get_attribute(attribute);
+            if (boost::optional<value_type> const& attr = value.attribute(attribute)) {
+                value = *attr;
+            }
+            else {
+                return this->invalid(context, attribute.to_string());
+            }
         }
 
         return value;

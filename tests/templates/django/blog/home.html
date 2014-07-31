@@ -1,0 +1,10 @@
+{% extends 'index.html' %}
+{% block head_title %}Welcome to {{ user }}'s blog{% endblock %}
+
+{% block content %}
+
+This is what I've blogged about:
+
+{{ block.super }}
+
+{% endblock %}

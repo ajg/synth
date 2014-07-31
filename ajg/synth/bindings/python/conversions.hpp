@@ -52,8 +52,6 @@ struct conversions {
     typedef typename traits_type::istream_type                                  istream_type;
     typedef typename traits_type::ostream_type                                  ostream_type;
 
-    typedef std::pair<char const*, size_type>                                   buffer_type;
-
   private:
 
     typedef detail::text<string_type>                                           text;
@@ -118,6 +116,9 @@ struct conversions {
             return string_type(data, size);
         }
     #else
+        else if (PyObject_HasAttrString(o, "__unicode__")) {
+            return make_string(PyObject_CallMethod(o, const_cast<char*>("__unicode__"), const_cast<char*>("()")));
+        }
         else if (PyString_Check(o)) {
             if (PyString_AsStringAndSize(o, &data, &size) == -1) {
                 AJG_SYNTH_THROW(std::invalid_argument("invalid str object"));
@@ -128,88 +129,7 @@ struct conversions {
         else {
             return make_string(PyObject_Str(o));
         }
-
-        /*
-        else if (PyObject_HasAttrString(o, "__unicode__")) {
-            return make_string(obj.attr("__unicode__")());
-            // return make_string(PyObject_GetAttrString(o, "__unicode__")(...));
-        }
-        else if (PyObject_HasAttrString(o, "__str__")) {
-            return make_string(obj.attr("__str__")());
-            // return make_string(PyObject_GetAttrString(o, "__str__")(...));
-        }
-        else {
-    #if PY_MAJOR_VERSION >= 3
-            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or bytes"));
-    #else
-            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or str"));
-    #endif
-        }
-        */
     }
-
-    /*
-    inline static string_type make_string(py::object const& obj) {
-        PyObject* const o = obj.ptr();
-        if (PyString_Check(o) || PyUnicode_Check(o)) {
-            buffer_type const buffer = make_buffer(o);
-            return string_type(buffer.first, buffer.second);
-        }
-        else if (PyObject_HasAttrString(o, "__unicode__")) {
-            py::object  const& unicode = obj.attr("__unicode__")();
-            buffer_type const  buffer  = make_buffer(unicode.ptr());
-            return string_type(buffer.first, buffer.second);
-        }
-        else if (PyObject_HasAttrString(o, "__str__")) {
-            py::object  const& str    = obj.attr("__str__")();
-            buffer_type const  buffer = make_buffer(str.ptr());
-            return string_type(buffer.first, buffer.second);
-        }
-        return py::extract<string_type>(py::str(obj));
-    }
-    */
-
-    // TODO: Investigate using something like: (or creating a utf<{8,16,32}>_iterator)
-    // inline static std::pair<char_type const*, size_type> make_buffer(PyObject* const o) {
-    //     if (PyString_Check(o)) { use char template }
-    //     else if (PyUnicode_Check(o)) { use Py_UNICODE template }
-    // }
-
-    /*
-    inline static buffer_type make_buffer(PyObject* const o) {
-        BOOST_ASSERT(PyString_Check(o) || PyUnicode_Check(o));
-
-        char*      data;
-        Py_ssize_t size;
-
-        if (PyString_AsStringAndSize(o, &data, &size) == -1) {
-            AJG_SYNTH_THROW(std::invalid_argument("buffer source"));
-        }
-
-        return buffer_type(data, size);
-    }
-    */
-
-    /*
-    inline static buffer_type make_buffer(PyObject* const o) {
-        if (PyString_Check(o)) {
-            char*      data;
-            Py_ssize_t size;
-
-            if (PyString_AsStringAndSize(o, &data, &size) == -1) {
-                AJG_SYNTH_THROW(std::invalid_argument("str/bytes object"));
-            }
-            return buffer_type(data, size);
-        }
-        else if (PyUnicode_Check(o)) {
-            return buffer_type(PyUnicode_AS_DATA(o), PyUnicode_GET_DATA_SIZE(o));
-        }
-        else {
-            AJG_SYNTH_THROW(std::invalid_argument("object must be unicode or str/bytes"));
-        }
-    }
-    */
-
     inline static date_type make_date(py::object const& dt) {
         return traits_type::to_date
             ( make_size(dt.attr("year")).get_value_or(0)

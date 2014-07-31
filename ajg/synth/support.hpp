@@ -168,21 +168,6 @@
 
 #define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e))
 
-/*
-//
-// AJG_SYNTH_THROW:
-//     Indirection layer needed because in some cases (e.g. virtual methods with non-void return
-//     types) MSVC won't get it through its head that throw_exception doesn't return, even with
-//     __declspec(noreturn) which in turns triggers warning C4715 or error C4716.
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#if AJG_SYNTH_IS_COMPILER_MSVC
-#    define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e), AJG_SYNTH_UNREACHABLE)
-#else
-#    define AJG_SYNTH_THROW(e) (AJG_SYNTH_CONFIG_HANDLE_EXCEPTION(e))
-#endif
-*/
-
 //
 // AJG_SYNTH_HAS_CXX11:
 ////////////////////////////////////////////////////////////////////////////////////////////////////

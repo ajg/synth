@@ -43,7 +43,6 @@ namespace ajg {
 namespace synth {
 namespace engines {
 
-// TODO: Factor out the safe/token metadata into a separate (possibly sub-) class.
 template <class Traits>
 struct value {
   public:
@@ -474,11 +473,6 @@ struct value {
     inline value_type& mark_unsafe() { return (this->safe_ = false), *this; }
     inline value_type& mark_safe() { return (this->safe_ = true), *this; }
 
-    inline value_type&        token(string_type const& token) { return (this->token_ = token), *this; }
-    inline string_type const& token() const { return this->token_; }
-
-    inline boolean_type is_literal() const { return !this->token_.empty(); }
-
     // NOTE: This method does not copy the actual held value (in the adapter) just the metadata.
     inline value_type metacopy() const { return *this; }
 
@@ -488,20 +482,11 @@ struct value {
         return text::escape_entities(this->to_string());
     }
 
-    value_type must_get_attribute(value_type const& attribute) const {
-        if (attribute_type const& attr = this->attribute(attribute)) {
-            return *attr;
-        }
-        else {
-            AJG_SYNTH_THROW(missing_attribute(text::narrow(attribute.to_string())));
-        }
-    }
-
-    value_type must_get_trail(sequence_type const& trail) const {
+    value_type get_trail_or(sequence_type const& trail, value_type const& fallback) const {
         value_type value = *this;
 
         BOOST_FOREACH(value_type const& attribute, trail) {
-            value = value.must_get_attribute(attribute);
+            value = value.attribute(attribute).get_value_or(fallback);
         }
 
         return value;
@@ -516,7 +501,7 @@ struct value {
         size_type i = 0;
 
         BOOST_FOREACH(value_type const& value, *this) {
-            value_type const& key = value.must_get_trail(make_trail(attrs));
+            value_type const& key = value.get_trail_or(make_trail(attrs), none_type());
 
             // New group (either it's the first one or it has a different key.)
             if (!i++ || current_key != key) {
@@ -580,7 +565,7 @@ struct value {
                                  , value_type           a
                                  , value_type           b
                                  ) {
-        return a.must_get_trail(trail) < b.must_get_trail(trail);
+        return a.get_trail_or(trail, none_type()) < b.get_trail_or(trail, none_type());
     }
 
     static sequence_type make_trail(value_type const& value) {
@@ -598,7 +583,6 @@ struct value {
   private:
 
     boolean_type safe_;
-    string_type  token_;
     adapter_type adapter_;
 };
 

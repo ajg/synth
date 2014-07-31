@@ -864,7 +864,7 @@ struct builtin_filters {
             with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
-                kernel.split_argument(options, state, arguments.first[0], context, char_type(','));
+                kernel.split_argument(arguments.first[0], char_type(','));
 
             switch (args.size()) {
             case 0: plural = text::literal("s");  break;
@@ -1035,7 +1035,7 @@ struct builtin_filters {
             with_arity<0, 1>::validate(arguments.first.size());
             string_type singular, plural;
             sequence_type const args = arguments.first.empty() ? sequence_type() :
-                kernel.split_argument(options, state, arguments.first[0], context, char_type(':'));
+                kernel.split_argument(arguments.first[0], char_type(':'));
             if (args.size() < 2) AJG_SYNTH_THROW(missing_argument());
 
             sequence_type seq;
@@ -1680,7 +1680,7 @@ struct builtin_filters {
                                         , context_type&         context
                                         ) {
             with_arity<1>::validate(arguments.first.size());
-            sequence_type const args = kernel.split_argument(options, state, arguments.first[0], context, char_type(','));
+            sequence_type const args = kernel.split_argument(arguments.first[0], char_type(','));
 
             switch (args.size()) {
             case 0:

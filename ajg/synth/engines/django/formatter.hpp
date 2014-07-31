@@ -315,7 +315,7 @@ struct formatter {
             cooked.P = informal;
             cooked.r = rfc2822;
             cooked.s = flags.S;
-            cooked.S = ordinal_suffix(day);
+            cooked.S = ordinal_suffix(static_cast<int>(day));
             cooked.t = text::stringize(month_days);
             cooked.T = traits_type::to_string_at(machine_tz, machine_dt);
             cooked.u = text::trim_left(flags.f, text::literal("."));

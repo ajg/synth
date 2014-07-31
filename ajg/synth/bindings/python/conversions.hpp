@@ -371,7 +371,7 @@ struct conversions {
         py::list const& syms = py::list(obj);
 
         symbols_type symbols;
-        if (long const l = py::len(syms)) {
+        if (long const l = static_cast<long>(py::len(syms))) {
             for (long i = 0; i < l; ++i) {
                 symbols.insert(make_string(syms[i]));
             }
@@ -381,7 +381,7 @@ struct conversions {
 
     inline static paths_type make_paths(py::list const& dirs) {
         paths_type paths;
-        if (long const l = py::len(dirs)) {
+        if (long const l = static_cast<long>(py::len(dirs))) {
             paths.reserve(l);
 
             for (long i = 0; i < l; ++i) {

@@ -108,6 +108,11 @@ Installation
     brew install https://raw.github.com/ajg/synth/master/synth.rb
     # Note that you must append `--with-python` to install the Python module.
 
+
+#### Using [Chocolatey](https://chocolatey.org/):
+
+    choco install synth
+
 (Support for other system package managers like Apt or Yum is [welcome](#future-work).)
 
 ### Via Python Package Manager
@@ -484,7 +489,6 @@ Future Work
    * RPM package
    * Apt package
    * Yum package
-   * Chocolatey NuGet package
    * MacPort support
    * Standalone pre-built Darwin binaries
    * Standalone pre-built Windows binaries

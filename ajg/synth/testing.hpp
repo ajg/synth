@@ -10,8 +10,6 @@
 #include <string>
 #include <iostream>
 
-#include <boost/static_assert.hpp>
-
 // TODO: Wrap this into AJG_SYNTH_EXTERNAL_PUSH in support.hpp
 #if AJG_SYNTH_IS_COMPILER_CLANG
 #    pragma clang diagnostic push
@@ -50,7 +48,7 @@ std::size_t const max_tests_per_file = AJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH - 4;
 
 template <int N>
 struct check_test_number {
-    BOOST_STATIC_ASSERT(N <= max_tests_per_file);
+    static_assert(N <= max_tests_per_file, "too many tests in one file");
     static int const value = N;
 };
 

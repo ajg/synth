@@ -83,23 +83,35 @@ struct command {
             , {0, 0, 0, 0, 0, 0}
             };
 
+        istream_type& input = std::cin;
+        ostream_type& output = std::cout;
+        ostream_type& error = std::cerr;
+
+        #if AJG_SYNTH_IS_PLATFORM_WINDOWS
+            for (int i = 0; i < argc; ++i) {
+                if (std::string(argv[i]) == "/?") {
+                    ::option::printUsage(error, descriptors);
+                    return;
+                }
+            }
+        #endif
+
         size_type const n = sizeof(descriptors) / sizeof(descriptors[0]);
         option_type opts[n], buffer[n];
         parser_type parser(descriptors, argc, argv, opts, buffer);
 
         if (parser.error()) {
+            ::option::printUsage(error, descriptors);
             AJG_SYNTH_THROW(std::runtime_error("command option parsing"));
         }
-
-        istream_type& input  = std::cin;
-        ostream_type& output = std::cout;
-        ostream_type& error  = std::cerr;
-
+      
         for (int i = 0; i < parser.nonOptionsCount(); ++i) {
+            ::option::printUsage(error, descriptors);
             AJG_SYNTH_THROW(synth::unknown_argument(parser.nonOption(i)));
         }
 
         for (option_type* option = opts[unknown_option]; option; option = option->next()) {
+            ::option::printUsage(error, descriptors);
             AJG_SYNTH_THROW(synth::unknown_option(option->name));
         }
 
@@ -114,6 +126,7 @@ struct command {
             return;
         }
         else if (!opts[engine_option]) {
+            ::option::printUsage(error, descriptors);
             AJG_SYNTH_THROW(missing_option("engine"));
         }
 
@@ -132,21 +145,23 @@ struct command {
         binding_type const binding(input >> std::noskipws, engine, options);
 
         ptree_type ptree;
-        if (option_type const* const option = opts[context_option].last()) {
-            std::string const narrow_path = option->arg;
-            std::basic_ifstream<char_type> file;
+        if (opts[context_option]) {
+            if (option_type const* const option = opts[context_option].last()) {
+                std::string const narrow_path = option->arg;
+                std::basic_ifstream<char_type> file;
 
-            try {
-                file.open(narrow_path.c_str(), std::ios::binary);
-            }
-            catch (std::exception const& e) {
-                AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
-            }
+                try {
+                    file.open(narrow_path.c_str(), std::ios::binary);
+                }
+                catch (std::exception const& e) {
+                    AJG_SYNTH_THROW(read_error(narrow_path, e.what()));
+                }
 
-                 if (text::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, ptree);
-            else if (text::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, ptree);
-            else if (text::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, ptree);
-            else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
+                     if (text::ends_with(narrow_path, ".ini"))  boost::property_tree::read_ini(file, ptree);
+                else if (text::ends_with(narrow_path, ".json")) boost::property_tree::read_json(file, ptree);
+                else if (text::ends_with(narrow_path, ".xml"))  boost::property_tree::read_xml(file, ptree);
+                else AJG_SYNTH_THROW(invalid_parameter(name_of(*option)));
+            }
         }
 
         binding.render_to_stream(output, ptree);

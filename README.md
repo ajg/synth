@@ -26,10 +26,17 @@ Examples
 ### Command-line
 
 ```shell
-echo '{"user": "Dolph Lundgren"}' > 'context.json'
-echo 'Howdy, {{ user }}!' > 'template.txt'
+echo '{"user": "Dolph Lundgren"}' > context.json
+echo 'Howdy, {{ user }}!' > template.txt
+cat template.txt | synth -e django -c context.json
+```
 
-cat template.txt | ./synth -e django -c context.json
+_Or on Windows:_
+
+```
+echo {"user":"Dolph Lundgren"} > context.json
+echo Howdy, {{ user }}! > template.txt
+type template.txt | synth -e django -c context.json
 ```
 
 ### Python

@@ -36,19 +36,16 @@ AJG_SYNTH_TEST_GROUP("adapter");
 } // namespace
 
 AJG_SYNTH_TEST_UNIT(assignments) {
-    using namespace std;   // TODO: Remove.
-    using namespace boost; // TODO: Remove.
-
     context_type context((std::map<string_type, value_type>()));
 
     string_type const X = text::literal("this");
     string_type const Y = text::literal("that");
     string_type const Two = text::literal("2");
-    vector<string_type> some_strings;
+    std::vector<string_type> some_strings;
     some_strings.push_back(text::literal("foo"));
     some_strings.push_back(text::literal("bar"));
     some_strings.push_back(text::literal("qux"));
-    vector<int> doodoo;
+    std::vector<int> doodoo;
     doodoo.push_back(1);
     doodoo.push_back(2);
     doodoo.push_back(3);
@@ -74,8 +71,8 @@ AJG_SYNTH_TEST_UNIT(assignments) {
     /// float const* float_pointer = float_array;
     /// context.set(text::literal("a_float_pointer"), value(float_pointer, 6));
 
-    scoped_ptr<vector<int> > scoped_(new vector<int>(3, 3));
-    auto_ptr<vector<int> > auto_ptr_(new vector<int>(4, 4));
+    boost::scoped_ptr<std::vector<int> > scoped_(new std::vector<int>(3, 3));
+    std::auto_ptr<std::vector<int> > auto_ptr_(new std::vector<int>(4, 4));
 
     context.set(text::literal("X"), text::literal("this")); // X;
     context.set(text::literal("Y"), boost::ref(Y));
@@ -83,7 +80,7 @@ AJG_SYNTH_TEST_UNIT(assignments) {
     context.set(text::literal("some_strings"), some_strings);
     // TODO: context.set(text::literal("a_set", set<string_type, string_type>());
     context.set(text::literal("an_int_vector"), doodoo);
-    context.set(text::literal("a_shared_ptr"), boost::shared_ptr<vector<int> >(new vector<int>(6, 6)));
+    context.set(text::literal("a_shared_ptr"), boost::shared_ptr<std::vector<int> >(new std::vector<int>(6, 6)));
     context.set(text::literal("a_scoped_ptr"), scoped_);
     context.set(text::literal("a_string_array"), string_array);
     context.set(text::literal("tag_list"), tag_list);
@@ -92,7 +89,7 @@ AJG_SYNTH_TEST_UNIT(assignments) {
     context.set(text::literal("a_char"), char_type('z'));
     context.set(text::literal("an_int"), 12);
 
-    scoped_array<int> a_scoped_array(new int[5]);
+    boost::scoped_array<int> a_scoped_array(new int[5]);
     a_scoped_array[0] = 666;
     a_scoped_array[1] = 667;
     a_scoped_array[2] = 668;
@@ -100,22 +97,22 @@ AJG_SYNTH_TEST_UNIT(assignments) {
     a_scoped_array[4] = 670;
     context.set(text::literal("a_scoped_array"), value_type(a_scoped_array, 5));
 
-    map<int, int> a_map = assign::map_list_of(1, 2)(3, 4);
-    context.set(text::literal("a_deque"), deque<char_type>());
+    std::map<int, int> a_map = boost::assign::map_list_of(1, 2)(3, 4);
+    context.set(text::literal("a_deque"), std::deque<char_type>());
     context.set(text::literal("a_map"), a_map);
 
-    vector<vector<vector<int> > > _vectors;
+    std::vector<std::vector<std::vector<int> > > _vectors;
     context.set(text::literal("some_vectors"), _vectors);
-    context.set(text::literal("shared_array"), value_type(shared_array<string_type>(), 0));
+    context.set(text::literal("shared_array"), value_type(boost::shared_array<string_type>(), 0));
 
-    context.set(text::literal("a_complex_float"), complex<float>());
-    context.set(text::literal("a_pair"), make_pair(1, 2.5));
+    context.set(text::literal("a_complex_float"), std::complex<float>());
+    context.set(text::literal("a_pair"), std::make_pair(1, 2.5));
     context.set(text::literal("a_boost_array"), boost::array<double, 2>());
-    context.set(text::literal("an_optional_float"), optional<double>(4.5));
+    context.set(text::literal("an_optional_float"), boost::optional<double>(4.5));
 
     // FIXME:
-    // auto_ptr<vector<bool> > bools_(new vector<bool>(2, false));
-    // vector<bool> *const bools = bools_.get();
+    // std::auto_ptr<vector<bool> > bools_(new std::vector<bool>(2, false));
+    // std::vector<bool> *const bools = bools_.get();
     // context.set(text::literal("a_pointer"), bools);
 
     context.set(text::literal("a_true"), true);

@@ -1,7 +1,7 @@
 [![Synth]](https://github.com/ajg/synth)
 ========================================
 
-A Powerful C++ Templating Framework with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
+A Powerful Templating Framework in C++, with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
 
 [![Build Status]](https://travis-ci.org/ajg/synth)
 
@@ -569,7 +569,7 @@ Future Work
    * Move `render_block` to `base_engine::kernel`
    * Remove all no-op tags (e.g. `cycle_as_silent_tag`)
    * Fold all variant tags into their main version (e.g. `load_from_tag`)
-   * [v2] Create `c++11`/`c++14` branch
+   * Modernize codebase to with C++11 support:
      + Translate macros to variadic templates
      + Replace `boost::assign` use with aggregate initializers
      + Remove complex redundant `typedef`s in favor of `auto`

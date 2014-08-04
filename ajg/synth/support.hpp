@@ -182,9 +182,9 @@
 // AJG_SYNTH_THREAD_LOCAL:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if AJG_SYNTH_HAS_CXX11
+#/*if AJG_SYNTH_HAS_CXX11
 #    define AJG_SYNTH_THREAD_LOCAL thread_local
-#elif AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
+#el*/if AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
 #    define AJG_SYNTH_THREAD_LOCAL __declspec(thread)
 #elif AJG_SYNTH_IS_COMPILER_CLANG || AJG_SYNTH_IS_COMPILER_GCC || AJG_SYNTH_IS_COMPILER_INTEL
 #    define AJG_SYNTH_THREAD_LOCAL __thread

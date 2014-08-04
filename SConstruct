@@ -100,6 +100,7 @@ def get_cpp_flags(cxx):
     cpp_flags = []
 
     # Common flags:
+    cpp_flags += ['-std=c++11']
     cpp_flags += ['-Wall']
     cpp_flags += ['-Woverloaded-virtual']
     cpp_flags += ['-Wsign-promo']

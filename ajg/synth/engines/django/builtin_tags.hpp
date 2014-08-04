@@ -518,7 +518,7 @@ struct builtin_tags {
             }
 
             size_type const n = variables.size();
-            BOOST_ASSERT(n > 0);
+            AJG_SYNTH_ASSERT(n > 0);
             stage<context_type> stage(context);
             string_type const f = kernel.invalid(context);
 
@@ -809,7 +809,7 @@ struct builtin_tags {
             arguments_type const  arguments = kernel.evaluate_arguments(options, state, args, context);
 
             if (boost::optional<renderer_type> const& renderer = state.get_renderer(position)) {
-                BOOST_ASSERT(!renderer->empty());
+                AJG_SYNTH_ASSERT(!renderer->empty());
                 // TODO: Make push/pop exception safe.
                 context.push_match(&match);
                 (*renderer)(arguments, ostream, context);
@@ -910,11 +910,11 @@ struct builtin_tags {
                 string_type const& name   = n.str();
                 pieces_type const& pieces = state.get_pieces(name, c.str());
 
-                BOOST_ASSERT(!state.library_tag_entries_.empty());
+                AJG_SYNTH_ASSERT(!state.library_tag_entries_.empty());
                 entry_type& entry = state.library_tag_entries_.top();
                 size_type const position = entry.position;
-                BOOST_ASSERT(!entry.tag.pure);
-                BOOST_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
+                AJG_SYNTH_ASSERT(!entry.tag.pure);
+                AJG_SYNTH_ASSERT(!entry.tag.middle_names.empty() || !entry.tag.last_names.empty());
 
                 boolean_type const is_middle = detail::contains(name, entry.tag.middle_names);
                 boolean_type const is_last   = detail::contains(name, entry.tag.last_names);

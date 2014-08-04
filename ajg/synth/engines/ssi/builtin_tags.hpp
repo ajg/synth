@@ -194,7 +194,7 @@ enum { interpolated = true, raw = false };
             AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(args.match, interpolated,
                 if (name == text::literal("cgi")) {
                     // TODO:
-                    // BOOST_ASSERT(detail::file_exists(value));
+                    // AJG_SYNTH_ASSERT(detail::file_exists(value));
                     AJG_SYNTH_THROW(not_implemented("exec cgi"));
                 }
                 else if (name == text::literal("cmd")) {

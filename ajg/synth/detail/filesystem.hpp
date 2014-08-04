@@ -90,7 +90,7 @@ template <class Stream> // TODO[c++11]: Make buffer_size a (defaulted) template 
 void read_file_to_stream(FILE *const file, Stream& stream) {
     typedef typename Stream::char_type char_type;
     char_type buffer[read_buffer_size];
-    BOOST_ASSERT(file != 0);
+    AJG_SYNTH_ASSERT(file != 0);
 
     while (std::size_t const items = std::fread(buffer, sizeof(char_type), read_buffer_size, file)) {
         stream.write(buffer, items);

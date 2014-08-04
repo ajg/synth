@@ -109,8 +109,8 @@ struct base_adapter {
     template <class T>
     inline T* get() const {
         void* data = this->data();
-        BOOST_ASSERT(data);
-        BOOST_ASSERT(this->type() == typeid(T));
+        AJG_SYNTH_ASSERT(data);
+        AJG_SYNTH_ASSERT(this->type() == typeid(T));
         return static_cast<T*>(data);
     }
 };

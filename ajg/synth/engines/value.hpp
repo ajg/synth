@@ -119,8 +119,8 @@ struct value {
     //     as<T>: cast to exactly T& (modulo const/volatile)
     //     to<T>: convert to T (i.e. a copy)
 
-    template <class T> inline T const& as() const { BOOST_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); BOOST_ASSERT(t); return *t; }
-    template <class T> inline T&       as()       { BOOST_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); BOOST_ASSERT(t); return *t; }
+    template <class T> inline T const& as() const { AJG_SYNTH_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); AJG_SYNTH_ASSERT(t); return *t; }
+    template <class T> inline T&       as()       { AJG_SYNTH_ASSERT(this->template is<T>()); T* t = this->adapter()->template get<T>(); AJG_SYNTH_ASSERT(t); return *t; }
 
     template <class T> inline boolean_type is() const { return this->type() == typeid(T); }
 
@@ -171,7 +171,7 @@ struct value {
 
         std::basic_stringstream<char_type> stream;
         if (this->adapter()->output(stream)) {
-            BOOST_ASSERT(stream);
+            AJG_SYNTH_ASSERT(stream);
             if (stream >> result) {
                 return;
             }
@@ -280,7 +280,7 @@ struct value {
         }
         std::basic_ostringstream<char_type> ss;
         operator<<(ss, *this);
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
 
         /*

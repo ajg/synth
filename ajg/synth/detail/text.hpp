@@ -98,7 +98,7 @@ struct text {
             allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
 
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -114,7 +114,7 @@ struct text {
             allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
 
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -131,7 +131,7 @@ struct text {
             allowed ? ss << c : ss << "\\x" << hexize(c, 2);
         }
 
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -155,7 +155,7 @@ struct text {
             }
         }
 
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -177,7 +177,7 @@ struct text {
         }
 
         ss << quotation;
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -198,7 +198,7 @@ struct text {
     inline static string_type stringize(T const& t) {
         sstream_type ss;
         ss << t;
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 
@@ -377,7 +377,7 @@ struct text {
         ss << (lowercase ? std::nouppercase : std::uppercase);
         ss << std::hex << std::setw(width) << std::setfill(static_cast<char_type>('0'));
         ss << static_cast<size_type>(c);
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         return ss.str();
     }
 };

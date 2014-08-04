@@ -158,14 +158,14 @@ struct context : boost::noncopyable {
     }
 
     inline match_type get_match() const {
-        BOOST_ASSERT(!this->matches_.empty());
+        AJG_SYNTH_ASSERT(!this->matches_.empty());
         match_type const match = this->matches_.top();
-        BOOST_ASSERT(match);
+        AJG_SYNTH_ASSERT(match);
         return match;
     }
 
     inline void pop_match() {
-        BOOST_ASSERT(!this->matches_.empty());
+        AJG_SYNTH_ASSERT(!this->matches_.empty());
         this->matches_.pop();
     }
 

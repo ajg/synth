@@ -117,7 +117,7 @@ struct library : Options::abstract_library {
         context_type& context = local_context();
         std::basic_ostringstream<char_type> ss;
         ss.imbue(traits_type::standard_locale());
-        BOOST_ASSERT(!renderer.empty());
+        AJG_SYNTH_ASSERT(!renderer.empty());
         timezone_type const old_tz = context.timezone();
 
         if (opts) {
@@ -134,7 +134,7 @@ struct library : Options::abstract_library {
         }
 
         renderer(arguments_type(), ss, context);
-        BOOST_ASSERT(ss);
+        AJG_SYNTH_ASSERT(ss);
         context.timezone(old_tz);
         return text::narrow(ss.str());
     }

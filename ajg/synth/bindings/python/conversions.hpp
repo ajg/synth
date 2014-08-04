@@ -327,7 +327,7 @@ struct conversions {
     */
 
     inline static py::object make_object(value_type const& value) {
-        BOOST_ASSERT(value.initialized());
+        AJG_SYNTH_ASSERT(value.initialized());
 
         // DSHOW(value.type_name());
         // DSHOW(value.is_unit());

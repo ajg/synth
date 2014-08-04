@@ -142,7 +142,7 @@ struct state : boost::noncopyable {
     inline pieces_type get_pieces(string_type const& name, string_type const& c) {
         // TODO: These numbers assume that block_open and block_close will always be 2
         //       characters wide, which may not be the case if they become configurable.
-        BOOST_ASSERT(c.length() >= 4);
+        AJG_SYNTH_ASSERT(c.length() >= 4);
 
         string_type const contents = text::strip(c.substr(2, c.length() - 4));
         std::vector<string_type> const args = this->library_tag_args_;

@@ -154,8 +154,8 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static match_type const& unnest(match_type const& match) {
-        BOOST_ASSERT(match);
-        BOOST_ASSERT(match.size() >= 1);
+        AJG_SYNTH_ASSERT(match);
+        AJG_SYNTH_ASSERT(match.size() >= 1);
         return *match.nested_results().begin();
     }
 
@@ -165,8 +165,8 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline static string_match_type const& unnest_(string_match_type const& match) {
-        BOOST_ASSERT(match);
-        BOOST_ASSERT(match.size() >= 1);
+        AJG_SYNTH_ASSERT(match);
+        AJG_SYNTH_ASSERT(match.size() >= 1);
         return *match.nested_results().begin();
     }
 

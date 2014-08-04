@@ -334,7 +334,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     }
 
     string_type extract_string(match_type const& match) const {
-        BOOST_ASSERT(this->is(match, this->string_literal));
+        AJG_SYNTH_ASSERT(this->is(match, this->string_literal));
         return text::unquote(match[str].str()); // TODO: Handle _(...).
     }
 
@@ -433,7 +433,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         value_type v = value;
 
         BOOST_FOREACH(match_type const& filter, this->select_nested(match, this->filter)) {
-            BOOST_ASSERT(this->is(filter, this->filter));
+            AJG_SYNTH_ASSERT(this->is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
 
@@ -500,7 +500,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                , match_type    const& match
                                , context_type&        context
                                ) const {
-        BOOST_ASSERT(this->is(match, this->literal));
+        AJG_SYNTH_ASSERT(this->is(match, this->literal));
         match_type  const& literal = this->unnest(match);
 
         if (this->is(literal, this->none_literal)) {
@@ -577,7 +577,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                              , match_type   const& match
                              , context_type&       context
                              ) const {
-        BOOST_ASSERT(this->is(match, this->unary_expression));
+        AJG_SYNTH_ASSERT(this->is(match, this->unary_expression));
         string_type const& op      = match(unary_operator).str();
         match_type  const& operand = match(expression);
 
@@ -594,7 +594,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                               , match_type   const& match
                               , context_type&       context
                               ) const {
-        BOOST_ASSERT(this->is(match, this->binary_expression));
+        AJG_SYNTH_ASSERT(this->is(match, this->binary_expression));
         match_type const& chain = match(this->chain);
         value_type value = this->evaluate_chain(options, state, chain, context);
         string_type op;
@@ -670,7 +670,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                              , match_type   const& match
                              , context_type&       context
                              ) const {
-        BOOST_ASSERT(this->is(match, this->chain));
+        AJG_SYNTH_ASSERT(this->is(match, this->chain));
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(options, state, lit, context);
 

@@ -564,7 +564,6 @@ Future Work
 
  - Refactoring:
    * Make documentation comments uniformly `///`
-   * Replace `BOOST_ASSERT` with `AJG_SYNTH_ASSERT`
    * Replace local version of Boost with minimal, shallow submodules once boostorg/boost is ready
    * Move `render_tag` and `builtin_tags_` to `base_engine::kernel`
    * Move `render_block` to `base_engine::kernel`

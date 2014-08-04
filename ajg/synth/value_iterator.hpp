@@ -52,8 +52,8 @@ struct value_iterator
         return (!a && !b) || (a && b && this->iterator_->equal(*that.iterator_));
     }
 
-    void increment() { BOOST_ASSERT(iterator_); iterator_->increment(); }
-    Value dereference() const { BOOST_ASSERT(iterator_); return iterator_->dereference(); }
+    void increment() { AJG_SYNTH_ASSERT(iterator_); iterator_->increment(); }
+    Value dereference() const { AJG_SYNTH_ASSERT(iterator_); return iterator_->dereference(); }
     // value_iterator advance(size_type const distance) const;
 
   private:
@@ -74,8 +74,8 @@ struct value_iterator
         virtual Value dereference() const { return *iterator_; }
         virtual polymorphic_iterator& clone() const { return *new polymorphic_iterator(iterator_); }
         virtual bool equal(virtual_iterator const& that) const {
-         // BOOST_ASSERT(typeid(polymorphic_iterator) == typeid(that));
-            BOOST_ASSERT(dynamic_cast<polymorphic_iterator const*>(&that));
+         // AJG_SYNTH_ASSERT(typeid(polymorphic_iterator) == typeid(that));
+            AJG_SYNTH_ASSERT(dynamic_cast<polymorphic_iterator const*>(&that));
             return static_cast<polymorphic_iterator const&>(that).iterator_ == this->iterator_;
         }
 

@@ -152,7 +152,7 @@ struct formatter {
             static string_type const format_string     = text::join(format_flags, text::literal("|"));
             string_type const formatted_string         = traits_type::format_datetime(format_string, datetime);
             std::vector<string_type> const& specifiers = text::split(formatted_string, text::literal("|"), native_flags::size);
-            BOOST_ASSERT(specifiers.size() == native_flags::size);
+            AJG_SYNTH_ASSERT(specifiers.size() == native_flags::size);
 
             native_flags const flags =
                 { specifiers[0]
@@ -338,7 +338,7 @@ struct formatter {
         }
 
         inline static string_type ordinal_suffix(int const n) {
-            BOOST_ASSERT(n > 0 && n <= 31);
+            AJG_SYNTH_ASSERT(n > 0 && n <= 31);
             switch (n) {
             case 1: case 21: return text::literal("st");
             case 2: case 22: return text::literal("nd");
@@ -402,7 +402,7 @@ struct formatter {
             }
         }
 
-        BOOST_ASSERT(stream);
+        AJG_SYNTH_ASSERT(stream);
         return stream.str();
     }
 

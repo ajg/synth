@@ -305,7 +305,7 @@ struct default_traits {
             return self_type::empty_timezone();
         }
 
-        BOOST_ASSERT(self_type::is_region(region));
+        AJG_SYNTH_ASSERT(self_type::is_region(region));
 
         return timezone_type(region, tz_db.time_zone_from_region(text::narrow(region)));
     }
@@ -315,7 +315,7 @@ struct default_traits {
             return self_type::empty_timezone();
         }
 
-        BOOST_ASSERT(!self_type::is_region(posix_string));
+        AJG_SYNTH_ASSERT(!self_type::is_region(posix_string));
 
         // TODO: Consider using caching here (even thread-locally) to reduce allocations.
         boost::local_time::time_zone_ptr const ptr(new boost::local_time::posix_time_zone(text::narrow(posix_string)));
@@ -538,7 +538,7 @@ struct default_traits {
         typedef typename boost::date_time::time_facet<T, char_type> facet_type;
         // TODO: Matching input facet.
         // TODO: date_facet?
-        BOOST_ASSERT(format);
+        AJG_SYNTH_ASSERT(format);
 
         #if AJG_SYNTH_HAS_CXX11
 
@@ -567,7 +567,7 @@ struct default_traits {
         std::basic_ostringstream<char_type> stream;
         stream.imbue(formatted_locale<time_type>(stream.getloc(), format.c_str()));
         stream << time;
-        BOOST_ASSERT(stream);
+        AJG_SYNTH_ASSERT(stream);
         return stream.str();
     }
 
@@ -579,7 +579,7 @@ struct default_traits {
         std::basic_ostringstream<char_type> stream;
         stream.imbue(formatted_locale<datetime_type>(stream.getloc(), format.c_str()));
         stream << datetime;
-        BOOST_ASSERT(stream);
+        AJG_SYNTH_ASSERT(stream);
         return stream.str();
     }
 
@@ -602,7 +602,7 @@ struct default_traits {
         else if (size >  (bucket = (std::pow)(2, 10.0))) stream << (size / bucket) << " KB";
         else if (size >= (bucket = (std::pow)(2, 00.0))) stream << (size / bucket) << " bytes";
 
-        BOOST_ASSERT(stream);
+        AJG_SYNTH_ASSERT(stream);
         return stream.str();
     }
 };

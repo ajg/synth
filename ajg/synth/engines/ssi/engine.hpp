@@ -204,7 +204,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     template <class Match>
     string_type extract_attribute(Match const& attr) const {
         string_type const string = attr.str();
-        BOOST_ASSERT(string.length() >= 2);
+        AJG_SYNTH_ASSERT(string.length() >= 2);
         return string.substr(1, string.length() - 2);
     }
 

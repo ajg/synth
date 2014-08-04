@@ -226,7 +226,7 @@ struct builtin_filters {
                 }
             }
 
-            BOOST_ASSERT(ss);
+            AJG_SYNTH_ASSERT(ss);
             return ss.str();
         }
     };
@@ -607,7 +607,7 @@ struct builtin_filters {
                 stream << v;
             }
 
-            BOOST_ASSERT(stream);
+            AJG_SYNTH_ASSERT(stream);
             value_type v((stream.str()));
             return value.safe() ? v.mark_safe() : v.mark_unsafe();
         }
@@ -764,7 +764,7 @@ struct builtin_filters {
             size_type const width = arguments.first[0].to_size();
             string_stream_type stream;
             stream << std::left << std::setw(width) << value;
-            BOOST_ASSERT(stream);
+            AJG_SYNTH_ASSERT(stream);
             return stream.str();
         }
     };
@@ -973,7 +973,7 @@ struct builtin_filters {
             size_type const width = arguments.first[0].to_size();
             string_stream_type stream;
             stream << std::right << std::setw(width) << value;
-            BOOST_ASSERT(stream);
+            AJG_SYNTH_ASSERT(stream);
             return stream.str();
         }
     };

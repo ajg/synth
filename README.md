@@ -1,9 +1,9 @@
-synth
-=====
+[![Synth]](https://github.com/ajg/synth)
+========================================
 
 A Powerful C++ Templating Framework with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
 
-[![Build Status](https://travis-ci.org/ajg/synth.png?branch=master)](https://travis-ci.org/ajg/synth)
+[![Build Status]](https://travis-ci.org/ajg/synth)
 
 Synopsis
 --------
@@ -604,3 +604,6 @@ License
 -------
 
 This library is distributed under the Boost [LICENSE](./LICENSE_1_0.txt).
+
+[Synth]:        ./synth.gif
+[Build Status]: https://travis-ci.org/ajg/synth.png?branch=master

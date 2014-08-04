@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>synth</id>
+    <title>synth</title>
+    <version>1.0.3</version>
+    <authors>Alvaro J. Genial</authors>
+    <owners>ajg</owners>
+    <summary>synth</summary>
+    <description>A template parser and renderer</description>
+    <projectUrl>https://github.com/ajg/synth</projectUrl>
+    <tags>synth admin template django html ssi parse render</tags>
+    <copyright>Alvaro J. Genial</copyright>
+    <licenseUrl>https://raw.github.com/ajg/synth/master/LICENSE_1_0.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://raw.github.com/ajg/synth/master/synth.gif</iconUrl>
+    <releaseNotes></releaseNotes>
+  </metadata>
+  <files>
+    <file src="ide\vs2013\Release\synth.exe" target="tools" />
+  </files>
+</package>

@@ -25,7 +25,6 @@
 #    include <direct.h> // For MAX_PATH
 #endif
 
-#include <boost/assert.hpp>
 #include <boost/cstdint.hpp>
 
 #include <ajg/synth/exceptions.hpp>

@@ -12,7 +12,6 @@
 #define BOOST_ENABLE_ASSERT_HANDLER
 
 #include <boost/config.hpp>
-#include <boost/assert.hpp>
 
 #include <csignal>
 #include <cstdio>
@@ -29,7 +28,6 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
-#include <boost/throw_exception.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/exception/detail/attribute_noreturn.hpp>
 

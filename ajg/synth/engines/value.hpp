@@ -19,8 +19,6 @@
 #include <algorithm>
 
 #include <boost/bind.hpp>
-#include <boost/config.hpp>
-#include <boost/assert.hpp>
 #include <boost/none_t.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>

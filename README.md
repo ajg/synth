@@ -108,7 +108,6 @@ Installation
     brew install https://raw.github.com/ajg/synth/master/synth.rb
     # Note that you must append `--with-python` to install the Python module.
 
-
 #### Using [Chocolatey](https://chocolatey.org/):
 
     choco install synth
@@ -417,10 +416,7 @@ Django Engine
  - `context::formats["TIME_FORMAT"]`                (default: `"P"`)
  - `context::formats["YEAR_MONTH_FORMAT"]`          (default: `"F Y"`)
 
-<!--
- - `TEMPLATE_DEBUG`
- - `TEMPLATE_DIRS`
--->
+_(Note: Django's `TEMPLATE_DEBUG` and `TEMPLATE_DIRS` are handled through `options::debug` and `options::directories`, respectively.)_
 
 SSI Engine
 ----------
@@ -456,8 +452,8 @@ TMPL Engine
  - `tmpl::builtin_tags::unless_tag`
  - `tmpl::builtin_tags::variable_tag`
 
-General Options
----------------
+Options
+-------
 
  - `options::debug`       (default: `false`)
  - `options::directories` (default: `"."`)

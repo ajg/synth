@@ -13,7 +13,6 @@
 #include <stdexcept>
 
 #include <boost/cstdint.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
 #include <ajg/synth/exceptions.hpp>
@@ -390,7 +389,7 @@ struct builtin_tags {
                           ) {
             ostream << "<h1>Context:</h1>" << std::endl;
 
-            BOOST_FOREACH(typename context_type::key_type const& key, context.keys()) {
+            for (auto const& key : context.keys()) {
                 ostream << "    " << value_type(key).escape()
                     << " = "  << context.get(key)->escape() << "<br />" << std::endl;
             }
@@ -441,7 +440,7 @@ struct builtin_tags {
                           ) {
             match_type const& vals = match(kernel.values);
 
-            BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
+            for (auto const& val : kernel.select_nested(vals, kernel.value)) {
                 if (value_type const value = kernel.evaluate(options, state, val, context)) {
                     ostream << value;
                     break;
@@ -528,7 +527,7 @@ struct builtin_tags {
                 }
                 else {
                     size_type i = 0;
-                    BOOST_FOREACH(value_type const& var, *it) { // e.g. for x, y, z in ...
+                    for (auto const& var : *it) { // e.g. for x, y, z in ...
                         if (i >= n) break;
                         stage.set(variables[i++], var);
                     }
@@ -613,7 +612,7 @@ struct builtin_tags {
                 // NOTE: The key is a string (rather than e.g. an int) presumably in case variables are repeated.
                 association_type values;
 
-                BOOST_FOREACH(match_type const& val, kernel.select_nested(vals, kernel.value)) {
+                for (auto const& val : kernel.select_nested(vals, kernel.value)) {
                     string_type const s = text::strip(val.str());
                     values[s] = kernel.evaluate(options, state, val, context);
                 }
@@ -741,7 +740,7 @@ struct builtin_tags {
             }
 
             stage<context_type> stage(context, only);
-            BOOST_FOREACH(named_argument_type const& argument, arguments.second) {
+            for (auto const& argument : arguments.second) {
                 context.set(argument.first, argument.second);
             }
             kernel.render_path(ostream, options, state, path, context);
@@ -963,7 +962,7 @@ struct builtin_tags {
         struct loader {
             typedef void result_type;
             void operator()(state_type& state, sub_match_type const& packages) const {
-                BOOST_FOREACH(string_type const& library, text::space(packages.str())) {
+                for (auto const& library : text::space(packages.str())) {
                     state.load_library(library);
                 }
             }
@@ -1059,7 +1058,7 @@ struct builtin_tags {
             static string_type const list_name    = text::literal("list");
             entries_type entries;
 
-            BOOST_FOREACH(typename value_type::group_type const& group, values.group_by(attrs)) {
+            for (auto const& group : values.group_by(attrs)) {
                 value_type const key   = group.first;
                 value_type const value = group.second;
                 entry_type entry;

@@ -12,7 +12,6 @@
 #include <cstring>
 #include <sys/stat.h>
 
-#include <boost/foreach.hpp>
 #include <boost/spirit/include/classic_file_iterator.hpp>
 
 #include <ajg/synth/detail/text.hpp>
@@ -70,7 +69,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
         struct stat stats;
 
         // First try looking in the directories specified.
-        BOOST_FOREACH(path_type const& directory, directories) {
+        for (auto const& directory : directories) {
             path_type const& base = detail::text<string_type>::trim_right(directory, text::literal("/"));
             path_type const& full = base + char_type('/') + path;
             if (stat(text::narrow(full).c_str(), &stats) == 0) { // Found it.

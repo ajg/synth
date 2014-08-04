@@ -10,7 +10,6 @@
 #include <functional>
 
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 
 #include <ajg/synth/detail/pipe.hpp>
 #include <ajg/synth/detail/text.hpp>
@@ -105,7 +104,7 @@ enum { interpolated = true, raw = false };
 
 // TODO: Make `name` and `value` arguments.
 #define AJG_SYNTH_SSI_FOREACH_ATTRIBUTE_IN(x, how, if_statement) do { \
-    BOOST_FOREACH(match_type const& attr, args.kernel.select_nested(x, args.kernel.attribute)) { \
+    for (auto const& attr : args.kernel.select_nested(x, args.kernel.attribute)) { \
         std::pair<string_type, string_type> const attribute = args.kernel.parse_attribute(attr, args, how); \
         string_type const name = attribute.first, value = attribute.second; \
         if_statement else AJG_SYNTH_THROW(invalid_attribute(text::narrow(name))); \
@@ -272,7 +271,7 @@ enum { interpolated = true, raw = false };
             boolean_type condition = false;
 
             // TODO: select_nested(match, ...)
-            BOOST_FOREACH(match_type const& nested, args.match.nested_results()) {
+            for (auto const& nested : args.match.nested_results()) {
                 // if (kernel_type::is(nested, args.kernel.block)) {
                 if (nested.regex_id() == args.kernel.block.regex_id()) {
                     if (condition) {
@@ -351,7 +350,7 @@ enum { interpolated = true, raw = false };
 
         static void render(args_type const& args) {
             AJG_SYNTH_SSI_NO_ATTRIBUTES_IN(args.match);
-            BOOST_FOREACH(typename environment_type::value_type const& nv, args.kernel.environment) {
+            for (auto const& nv : args.kernel.environment) {
                 args.ostream << text::widen(nv.first) << '=' << text::widen(nv.second) << std::endl;
             }
         }

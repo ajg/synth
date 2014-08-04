@@ -8,10 +8,10 @@
 #include <utility>
 
 #include <boost/python.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/range.hpp>
 
 namespace ajg {
 namespace synth {
@@ -259,7 +259,7 @@ struct conversions {
         py::stl_input_iterator<py::tuple> begin(fmts.items()), end;
         formats_type formats;
 
-        BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
+        for (auto const& item : detail::make_range(begin, end)) {
             string_type const& name   = make_string(item[0]);
             string_type const& format = make_string(item[1]);
             // formats.insert(typename formats_type::value_type(name, format));
@@ -363,7 +363,7 @@ struct conversions {
 
     inline static py::list make_list(value_type const& value) {
         py::list list;
-        BOOST_FOREACH(value_type const& element, value) {
+        for (auto const& element : value) {
             list.append(make_object(element));
         }
         return list;
@@ -371,7 +371,7 @@ struct conversions {
 
     inline static py::dict make_dict(value_type const& value) {
         py::dict dict;
-        BOOST_FOREACH(value_type const& key, value.attributes()) {
+        for (auto const& key : value.attributes()) {
             if (typename value_type::attribute_type const attribute = value.attribute(key)) {
                 dict[make_object(key)] = make_object(*attribute);
             }
@@ -384,11 +384,11 @@ struct conversions {
         py::list list;
         py::dict dict;
 
-        BOOST_FOREACH(typename arguments_type::first_type::value_type const& value, arguments.first) {
+        for (auto const& value : arguments.first) {
             list.append(make_object(value));
         }
 
-        BOOST_FOREACH(typename arguments_type::second_type::value_type const& pair, arguments.second) {
+        for (auto const& pair : arguments.second) {
             dict[pair.first] = make_object(pair.second);
         }
 
@@ -410,11 +410,11 @@ struct conversions {
 
     /*
     inline static std::pair<py::tuple, py::dict> make_args(arguments_type const& arguments, py::list& list, py::dict& dict) {
-        BOOST_FOREACH(typename arguments_type::first_type::value_type const& value, arguments.first) {
+        for (auto const& value : arguments.first) {
             list.append(make_object(value));
         }
 
-        BOOST_FOREACH(typename arguments_type::second_type::value_type const& pair, arguments.second) {
+        for (auto const& pair : arguments.second) {
             dict[pair.first] = make_object(pair.second);
         }
 

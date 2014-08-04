@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include <ajg/synth/detail/range.hpp>
 #include <ajg/synth/detail/advance_to.hpp>
 
 namespace ajg {
@@ -18,10 +19,8 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Container, class Number>
-inline std::pair<typename Container::const_iterator, typename Container::const_iterator>
-        drop(Container const& container, Number const number) {
-    return std::pair<typename Container::const_iterator, typename Container::const_iterator>(
-        advance_to(container.begin(), number), container.end());
+inline pair_range<typename Container::const_iterator> drop(Container const& container, Number const number) {
+    return pair_range<typename Container::const_iterator>(advance_to(container.begin(), number), container.end());
 }
 
 }}} // namespace ajg::synth::detail

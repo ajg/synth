@@ -356,7 +356,7 @@ struct formatter {
 
         // TODO: This might not be UTF8-safe; consider using a utf8_iterator.
         std::basic_ostringstream<char_type> stream;
-        BOOST_FOREACH(char_type const c, format) {
+        for (auto const& c : format) {
             switch (c) {
             case char_type('a'): stream << cooked.a; break;
             case char_type('A'): stream << cooked.A; break;

@@ -16,7 +16,6 @@
 
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
 
@@ -282,7 +281,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , context_type&       context
                      , options_type const& options
                      ) const {
-        BOOST_FOREACH(match_type const& nested, block.nested_results()) {
+        for (auto const& nested : block.nested_results()) {
             this->render_match(ostream, nested, context, options);
         }
     }
@@ -390,7 +389,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     template <class Args, class Match, class Initial, class Functor>
     Initial fold(Args const& args, Match const& match, Initial initial, Functor const& functor) const {
-        BOOST_FOREACH(string_match_type const& operand, match.nested_results()) {
+        for (auto const& operand : match.nested_results()) {
             initial = functor(initial, this->evaluate_expression(args, operand));
         }
 

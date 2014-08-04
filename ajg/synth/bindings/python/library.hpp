@@ -66,7 +66,7 @@ struct library : Options::abstract_library {
         if (py::dict tags = py::extract<py::dict>(lib.attr("tags"))) {
             this->tag_names_ = c::make_names(tags.keys());
 
-            BOOST_FOREACH(string_type const& name, this->tag_names_) {
+            for (auto const& name : this->tag_names_) {
                 py::tuple t(tags[name]);
                 py::object const& fn   = t[0];
                 py::object const& mns  = t[1];
@@ -89,7 +89,7 @@ struct library : Options::abstract_library {
         if (py::dict const& filters = py::extract<py::dict>(lib.attr("filters"))) {
             this->filter_names_ = c::make_names(filters.keys());
 
-            BOOST_FOREACH(string_type const& name, this->filter_names_) {
+            for (auto const& name : this->filter_names_) {
                 this->filters_[name] = filter_type(boost::bind(call_filter, filters[name], _1, _2, _3));
             }
         }
@@ -177,9 +177,9 @@ struct library : Options::abstract_library {
 
         py::list segs;
 
-        BOOST_FOREACH(segment_type const& segment, segments) {
+        for (auto const& segment : segments) {
             py::list pcs;
-            BOOST_FOREACH(string_type const& piece, segment.first) {
+            for (auto const& piece : segment.first) {
                 pcs.append(piece);
             }
             py::object const rndr = py::make_function(

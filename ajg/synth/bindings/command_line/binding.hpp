@@ -5,7 +5,6 @@
 #ifndef AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
 #define AJG_SYNTH_BINDINGS_COMMAND_LINE_BINDING_HPP_INCLUDED
 
-#include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <ajg/synth/engines.hpp>

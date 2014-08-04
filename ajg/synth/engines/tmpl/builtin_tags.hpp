@@ -8,8 +8,6 @@
 #include <map>
 #include <string>
 
-#include <boost/foreach.hpp>
-
 #include <ajg/synth/detail/find.hpp>
 #include <ajg/synth/detail/text.hpp>
 
@@ -192,7 +190,7 @@ struct builtin_tags {
             size_type         index    = 1;
 
             stage<context_type> stage(context, kernel_type::global_variables);
-            BOOST_FOREACH(value_type const& item, value) {
+            for (auto const& item : value) {
                 if (kernel_type::loop_variables) {
                     stage.set(text::literal("__SIZE__"),    size);
                     stage.set(text::literal("__TOTAL__"),   size);
@@ -205,7 +203,7 @@ struct builtin_tags {
                     stage.set(text::literal("__COUNTER__"), index++);
                 }
 
-                BOOST_FOREACH(value_type const& pair, item) {
+                for (auto const& pair : item) {
                     string_type const k = pair[0].to_string();
                     value_type  const v = pair[1];
                     stage.set(k, v);

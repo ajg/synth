@@ -153,7 +153,7 @@ struct binding : bindings::base_binding< Traits
         py::stl_input_iterator<py::tuple> begin(libs.items()), end;
         libraries_type libraries;
 
-        BOOST_FOREACH(py::tuple const& item, std::make_pair(begin, end)) {
+        for (auto const& item : detail::make_range(begin, end)) {
             string_type const& key = c::make_string(item[0]);
             py::object  const& lib = item[1];
             typedef typename libraries_type::value_type pair_type;
@@ -167,7 +167,7 @@ struct binding : bindings::base_binding< Traits
         py::stl_input_iterator<py::object> begin(ldrs), end;
         loaders_type loaders;
 
-        BOOST_FOREACH(py::object const& ldr, std::make_pair(begin, end)) {
+        for (auto const& ldr : detail::make_range(begin, end)) {
             loaders.push_back(loader_type(new loader<options_type>(ldr)));
         }
 
@@ -178,7 +178,7 @@ struct binding : bindings::base_binding< Traits
         py::stl_input_iterator<py::object> begin(rslvrs), end;
         resolvers_type resolvers;
 
-        BOOST_FOREACH(py::object const& rslvr, std::make_pair(begin, end)) {
+        for (auto const& rslvr : detail::make_range(begin, end)) {
             resolvers.push_back(resolver_type(new resolver<options_type>(rslvr)));
         }
 

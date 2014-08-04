@@ -54,11 +54,11 @@ struct resolver : Options::abstract_resolver {
         }
 
         string_type path, query;
-        BOOST_FOREACH(value_type const& arg, arguments.first) {
+        for (auto const& arg : arguments.first) {
             path += text::literal("/") + arg.to_string();
         }
         size_type i = 0;
-        BOOST_FOREACH(typename arguments_type::second_type::value_type const& karg, arguments.second) {
+        for (auto const& karg : arguments.second) {
             query += i++ ? text::literal("&") : text::literal("?");
             query += karg.first + text::literal("=") + karg.second.to_string();
         }

@@ -20,7 +20,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/none_t.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -34,6 +33,7 @@
 #include <ajg/synth/adapters/numeric.hpp>
 #include <ajg/synth/adapters/base_adapter.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/range.hpp>
 #include <ajg/synth/detail/unmangle.hpp>
 #include <ajg/synth/detail/has_fraction.hpp>
 
@@ -67,7 +67,7 @@ struct value {
 
     typedef value_iterator<value_type>                                          iterator;
     typedef value_iterator<value_type const>                                    const_iterator;
-    typedef std::pair<const_iterator, const_iterator>                           range_type;
+    typedef detail::pair_range<const_iterator>                                  range_type;
 
     typedef std::vector<value_type>                                             sequence_type;
     typedef std::map<string_type, value_type>                                   association_type;
@@ -326,7 +326,7 @@ struct value {
 
     inline static void delimited(ostream_type& ostream, range_type const& range) {
         size_type i = 0;
-        BOOST_FOREACH(value_type const& value, range) {
+        for (auto const& value : range) {
             i++ ? (ostream << ", " << value) : (ostream << value);
         }
     }
@@ -483,7 +483,7 @@ struct value {
     value_type get_trail_or(sequence_type const& trail, value_type const& fallback) const {
         value_type value = *this;
 
-        BOOST_FOREACH(value_type const& attribute, trail) {
+        for (auto const& attribute : trail) {
             value = value.attribute(attribute).get_value_or(fallback);
         }
 
@@ -498,7 +498,7 @@ struct value {
         value_type current_key;
         size_type i = 0;
 
-        BOOST_FOREACH(value_type const& value, *this) {
+        for (auto const& value : *this) {
             value_type const& key = value.get_trail_or(make_trail(attrs), none_type());
 
             // New group (either it's the first one or it has a different key.)
@@ -520,7 +520,7 @@ struct value {
 
         sequence.resize(this->size());
         size_type i = 0;
-        BOOST_FOREACH(value_type const& value, *this) {
+        for (auto const& value : *this) {
             sequence[i++] = value;
         }
 
@@ -534,7 +534,7 @@ struct value {
 
         result.resize(this->size());
         size_type i = this->size() - 1;
-        BOOST_FOREACH(value_type const& value, *this) {
+        for (auto const& value : *this) {
             result[i--] = value;
         }
 
@@ -547,7 +547,7 @@ struct value {
         sequence_type result, trail = make_trail(attrs);
 
         result.reserve(this->size());
-        BOOST_FOREACH(value_type const& value, *this) {
+        for (auto const& value : *this) {
             result.push_back(value);
         }
 
@@ -572,7 +572,7 @@ struct value {
         std::vector<string_type> const& names = text::split(source, delimiter);
 
         sequence_type trail;
-        BOOST_FOREACH(string_type const& name, names) {
+        for (auto const& name : names) {
             trail.push_back(value_type(name));
         }
         return trail;

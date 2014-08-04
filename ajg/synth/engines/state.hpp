@@ -151,7 +151,7 @@ struct state : boost::noncopyable {
         std::vector<string_type> pieces;
         pieces.push_back(contents);
         pieces.push_back(name);
-        BOOST_FOREACH(string_type const& arg, args) {
+        for (auto const& arg : args) {
             pieces.push_back(arg);
         }
         return pieces;
@@ -161,7 +161,7 @@ struct state : boost::noncopyable {
         library_type library = this->loaded_libraries_[library_name];
 
         if (!library) {
-            BOOST_FOREACH(loader_type const& loader, this->loaders_) {
+            for (auto const& loader : this->loaders_) {
                 if ((library = loader->load_library(library_name))) {
                     this->loaded_libraries_[library_name] = library;
                     break;
@@ -173,7 +173,7 @@ struct state : boost::noncopyable {
             AJG_SYNTH_THROW(missing_library(text::narrow(library_name)));
         }
         else if (!names.empty()) {
-            BOOST_FOREACH(string_type const& name, names) {
+            for (auto const& name : names) {
                 if (name.empty()) {
                     AJG_SYNTH_THROW(std::invalid_argument("empty component name"));
                 }
@@ -192,7 +192,7 @@ struct state : boost::noncopyable {
             }
         }
         else {
-            BOOST_FOREACH(string_type const& name, library->list_tags()) {
+            for (auto const& name : library->list_tags()) {
                 if (tag_type const& tag = library->get_tag(name)) {
                     this->loaded_tags_[name] = tag;
                 }
@@ -200,7 +200,7 @@ struct state : boost::noncopyable {
                     AJG_SYNTH_THROW(missing_tag(text::narrow(name)));
                 }
             }
-            BOOST_FOREACH(string_type const& name, library->list_filters()) {
+            for (auto const& name : library->list_filters()) {
                 if (filter_type const& filter = library->get_filter(name)) {
                     this->loaded_filters_[name] = filter;
                 }

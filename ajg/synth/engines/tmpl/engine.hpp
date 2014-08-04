@@ -13,7 +13,6 @@
 #include <algorithm>
 
 #include <boost/ref.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -251,7 +250,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , context_type&       context
                      , options_type const& options
                      ) const {
-        BOOST_FOREACH(match_type const& nested, block.nested_results()) {
+        for (auto const& nested : block.nested_results()) {
             this->render_match(ostream, nested, context, options);
         }
     }
@@ -289,7 +288,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         optional<string_type>                      name     = boost::none;
         optional<string_type>                      fallback = boost::none;
 
-        BOOST_FOREACH(match_type const& nested, match.nested_results()) {
+        for (auto const& nested : match.nested_results()) {
             match_type const& attr  = this->unnest(nested);
             match_type const& value = attr(this->attribute);
 

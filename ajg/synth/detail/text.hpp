@@ -11,8 +11,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/foreach.hpp>
-
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -93,7 +91,7 @@ struct text {
     inline static string_type uri_encode(string_type const& string) {
         sstream_type ss;
 
-        BOOST_FOREACH(char_type const c, string) {
+        for (auto const& c : string) {
             boolean_type const allowed = (std::isalnum)(c) || c == '_' || c == '-' || c == '.' || c == '/';
             allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
@@ -109,7 +107,7 @@ struct text {
     inline static string_type iri_encode(string_type const& string) {
         sstream_type ss;
 
-        BOOST_FOREACH(char_type const c, string) {
+        for (auto const& c : string) {
             boolean_type const allowed = (std::isalnum)(c) || boost::algorithm::is_any_of("/#%[]=:;$&()+,!?")(c);
             allowed ? ss << c : ss << "%" << hexize(c, 2);
         }
@@ -126,7 +124,7 @@ struct text {
     inline static string_type escape_controls(string_type const& string) {
         sstream_type ss;
 
-        BOOST_FOREACH(char_type const c, string) {
+        for (auto const& c : string) {
             boolean_type const allowed = c >= 32;
             allowed ? ss << c : ss << "\\x" << hexize(c, 2);
         }
@@ -144,7 +142,7 @@ struct text {
                                              ) {
         sstream_type ss;
 
-        BOOST_FOREACH(char_type const c, string) {
+        for (auto const& c : string) {
             switch (c) {
             case char_type('<'):  ss << "&lt;";   break;
             case char_type('>'):  ss << "&gt;";   break;
@@ -171,7 +169,7 @@ struct text {
         sstream_type ss;
         ss << quotation;
 
-        BOOST_FOREACH(char_type const c, string) {
+        for (auto const& c : string) {
             boolean_type const allowed = c != quotation;
             allowed ? ss << c : ss << "\\" << quotation;
         }

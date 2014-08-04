@@ -14,7 +14,6 @@
 #include <numeric>
 
 #include <boost/ref.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -29,6 +28,7 @@
 
 #include <ajg/synth/exceptions.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/range.hpp>
 #include <ajg/synth/detail/advance_to.hpp>
 #include <ajg/synth/engines/state.hpp>
 #include <ajg/synth/engines/value.hpp>
@@ -87,7 +87,7 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
     typedef base_kernel                                                         base_kernel_type;
     typedef Iterator                                                            iterator_type;
-    typedef std::pair<iterator_type, iterator_type>                             range_type;
+    typedef detail::pair_range<iterator_type>                                   range_type;
 
   protected:
 
@@ -176,17 +176,19 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 // select_nested
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static std::pair
-            < boost::filter_iterator<x::regex_id_filter_predicate<typename regex_type::iterator_type>, typename match_type::nested_results_type::const_iterator>
-            , boost::filter_iterator<x::regex_id_filter_predicate<typename regex_type::iterator_type>, typename match_type::nested_results_type::const_iterator>
-            >
-    select_nested(match_type const& match, regex_type const& regex) {
+    typedef boost::filter_iterator<
+        x::regex_id_filter_predicate<typename regex_type::iterator_type>,
+        typename match_type::nested_results_type::const_iterator
+    >                                                                           selected_iterator;
+    typedef detail::pair_range<selected_iterator>                               selected_range;
+
+    inline static selected_range select_nested(match_type const& match, regex_type const& regex) {
         typename match_type::nested_results_type::const_iterator begin(match.nested_results().begin());
         typename match_type::nested_results_type::const_iterator end(match.nested_results().end());
         x::regex_id_filter_predicate<typename regex_type::iterator_type> predicate(regex.regex_id());
-        return std::make_pair( boost::make_filter_iterator(predicate, begin, end)
-                             , boost::make_filter_iterator(predicate, end,   end)
-                             );
+        return selected_range(
+            boost::make_filter_iterator(predicate, begin, end),
+            boost::make_filter_iterator(predicate, end,   end));
     }
 
     inline void parse(state_type* state) const { // Pointer to make clear it's mutable.

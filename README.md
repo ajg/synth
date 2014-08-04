@@ -571,7 +571,6 @@ Future Work
    * Fold all variant tags into their main version (e.g. `load_from_tag`)
    * [v2] Create `c++11`/`c++14` branch
      + Translate macros to variadic templates
-     + Replace `BOOST_FOREACH` with new `for` loop
      + Replace `boost::assign` use with aggregate initializers
      + Remove complex redundant `typedef`s in favor of `auto`
      + Replace `<boost/cstdint.hpp>` with `<cstdint>`

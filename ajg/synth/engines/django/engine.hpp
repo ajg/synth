@@ -16,7 +16,6 @@
 #include <algorithm>
 
 #include <boost/ref.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/noncopyable.hpp>
@@ -322,7 +321,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         tokenizer_type const tokenizer(s, separator_type(d, 0, boost::keep_empty_tokens));
         sequence_type sequence;
 
-        BOOST_FOREACH(string_type const& t, tokenizer) {
+        for (auto const& t : tokenizer) {
             sequence.push_back(t);
         }
 
@@ -340,7 +339,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     names_type extract_names(match_type const& match) const {
         names_type names;
-        BOOST_FOREACH(match_type const& name, this->select_nested(match, this->name)) {
+        for (auto const& name : this->select_nested(match, this->name)) {
             names.push_back(name[id].str());
         }
         return names;
@@ -390,7 +389,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                      , match_type   const& block
                      , context_type&       context
                      ) const {
-        BOOST_FOREACH(match_type const& nested, block.nested_results()) {
+        for (auto const& nested : block.nested_results()) {
             this->render_match(ostream, options, state, nested, context);
         }
     }
@@ -432,7 +431,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                             ) const {
         value_type v = value;
 
-        BOOST_FOREACH(match_type const& filter, this->select_nested(match, this->filter)) {
+        for (auto const& filter : this->select_nested(match, this->filter)) {
             AJG_SYNTH_ASSERT(this->is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
             match_type  const& chain = filter(this->chain);
@@ -481,7 +480,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                                      , context_type&        context
                                      ) const {
         arguments_type arguments;
-        BOOST_FOREACH(match_type const& arg, this->select_nested(match, this->argument)) {
+        for (auto const& arg : this->select_nested(match, this->argument)) {
             value_type const& value = this->evaluate(options, state, arg(this->value), context);
             if (match_type const& name = arg(this->nonkeyword_identifier)) {
                 arguments.second[name.str()] = value; // Keyword argument.
@@ -599,7 +598,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         value_type value = this->evaluate_chain(options, state, chain, context);
         string_type op;
 
-        BOOST_FOREACH(match_type const& segment, detail::drop(match.nested_results(), 1)) {
+        for (auto const& segment : detail::drop(match.nested_results(), 1)) {
             if (this->is(segment, this->binary_operator)) {
                 op = segment.str();
             }
@@ -674,7 +673,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(options, state, lit, context);
 
-        BOOST_FOREACH(match_type const& link, this->select_nested(match, this->link)) {
+        for (auto const& link : this->select_nested(match, this->link)) {
             value_type const attribute = this->evaluate_link(options, state, link, context);
             if (boost::optional<value_type> const& attr = value.attribute(attribute)) {
                 value = *attr;
@@ -693,7 +692,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                          , arguments_type const& arguments
                          , context_type&         context
                          ) const {
-        BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
+        for (auto const& resolver : options.resolvers) {
             if (url_type const& url = resolver->reverse(view, arguments, context, options)) {
                 return url;
             }

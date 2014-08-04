@@ -123,7 +123,7 @@ struct context : boost::noncopyable {
 
     inline formats_type formats() const { return this->metadata_.formats; }
     inline void         formats(formats_type const& formats) {
-        BOOST_FOREACH(typename formats_type::value_type const& format, formats) {
+        for (auto const& format : formats) {
             this->format(format.first, format.second);
         }
     }
@@ -215,7 +215,7 @@ struct context : boost::noncopyable {
         }
         string_type const lowercased = text::lower(original.to_string());
 
-        BOOST_FOREACH(key_type const& key, this->keys()) {
+        for (auto const& key : this->keys()) {
             if (text::lower(key.to_string()) == lowercased) {
                 return key;
             }
@@ -262,7 +262,7 @@ struct stage : boost::noncopyable {
     stage(context_type& context, boolean_type const empty) : context_(context) { if (empty) this->clear(); }
 
     ~stage() {
-        BOOST_FOREACH(typename previous_type::value_type const& kv, this->previous_) {
+        for (auto const& kv : this->previous_) {
             if (kv.second) {
                 this->context_.set(kv.first, *kv.second);
             }
@@ -275,7 +275,7 @@ struct stage : boost::noncopyable {
   public:
 
     inline void clear() {
-        BOOST_FOREACH(key_type const& key, context_.keys()) {
+        for (auto const& key : context_.keys()) {
             this->unset(key);
         }
     }

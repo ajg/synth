@@ -28,6 +28,7 @@
 
 #include <ajg/synth/detail/has_fraction.hpp>
 #include <ajg/synth/detail/text.hpp>
+#include <ajg/synth/detail/range.hpp>
 #include <ajg/synth/engines/django/formatter.hpp>
 
 namespace ajg {
@@ -217,7 +218,7 @@ struct builtin_filters {
             string_type const string = value.to_string();
             string_stream_type ss;
 
-            BOOST_FOREACH(char_type const c, string) {
+            for (auto const& c : string) {
                 switch (c) {
                 case char_type('\''): ss << "\\'";  break;
                 case char_type('"'):  ss << "\\\""; break;
@@ -602,7 +603,7 @@ struct builtin_filters {
 
             size_type i = 0;
             string_stream_type stream;
-            BOOST_FOREACH(value_type const& v, value) {
+            for (auto const& v : value) {
                 if (i++) stream << delimiter;
                 stream << v;
             }
@@ -687,7 +688,7 @@ struct builtin_filters {
             regex_iterator_type begin(input.begin(), input.end(), newlines, -1), end;
             boolean_type const safe = context.safe() || value.safe();
 
-            BOOST_FOREACH(string_type const& line, std::make_pair(begin, end)) {
+            for (string_type const& line : detail::make_range(begin, end)) {
                 string_type const s = safe ? value_type(line).escape().to_string() : line;
                 string_type const p = text::replace(s, kernel.newline, text::literal("<br />"));
                 stream << "<p>" << p << "</p>" << std::endl << std::endl;
@@ -739,8 +740,8 @@ struct builtin_filters {
             string_type const spec  = (format_type(pattern) % width).str();
 
             size_type i = 1;
-            BOOST_FOREACH(value_type const& line, lines) {
-                value_type const item = safe ? line : line.escape();
+            for (auto const& line : lines) {
+                value_type const item = safe ? line : value_type(line).escape();
                 stream << (format_type(spec) % i++ % item) << std::endl;
             }
 
@@ -805,7 +806,7 @@ struct builtin_filters {
 
             size_type i = 0;
             stream << text::literal("[");
-            BOOST_FOREACH(value_type const& item, sequence) {
+            for (auto const& item : sequence) {
                 if (i++) stream << text::literal(", ");
                 stream << item;
             }
@@ -1012,7 +1013,7 @@ struct builtin_filters {
             with_arity<0>::validate(arguments.first.size());
             sequence_type result;
 
-            BOOST_FOREACH(value_type const& element, value) {
+            for (auto const& element : value) {
                 result.push_back(element.metacopy().mark_safe());
             }
 
@@ -1252,7 +1253,7 @@ struct builtin_filters {
             size_type length = 0;
             static string_type const boundaries = text::literal(" \t\n\v\f\r>");
 
-            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
+            for (auto const& match : detail::make_range(begin, end)) {
                 string_type const tag  = match.str();
                 string_type const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
                 string_type const s(last, match.first);
@@ -1373,7 +1374,7 @@ struct builtin_filters {
             regex_iterator_type begin(last, done, kernel.html_tag), end;
             std::stack<string_type> open_tags;
 
-            BOOST_FOREACH(sub_match_type const& match, std::make_pair(begin, end)) {
+            for (auto const& match : detail::make_range(begin, end)) {
                 string_type   const tag  = match.str();
                 string_type   const name = tag.substr(1, tag.find_first_of(boundaries, 1) - 1);
                 string_iterator_type const prev = last; last = match.second;
@@ -1647,7 +1648,7 @@ struct builtin_filters {
 
             size_type i    = 0;
             char_type last = '\0';
-            BOOST_FOREACH(char_type const c, input) {
+            for (auto const& c : input) {
                 if (++i == width) {
                     word = text::strip_left(word);
                     s += newline + word;

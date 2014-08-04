@@ -18,7 +18,6 @@
 #include <utility>
 
 #include <boost/none_t.hpp>
-#include <boost/foreach.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/optional.hpp>
 
@@ -243,7 +242,7 @@ struct default_traits {
         // size_type const a = index_of('/'), b = index_of(','); return a != -1 && (b == -1 || a < b)
 
         size_type n = 0;
-        BOOST_FOREACH(char_type const c, s) {
+        for (auto const& c : s) {
             if ((std::isalnum)(static_cast<int>(c)) || c == char_type('_')) {
                 if (n == 0) n = 1;
                 else if (n == 2) n = 3;

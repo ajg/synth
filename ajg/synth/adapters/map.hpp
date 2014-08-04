@@ -7,8 +7,6 @@
 
 #include <map>
 
-#include <boost/foreach.hpp>
-
 #include <ajg/synth/adapters/container_adapter.hpp>
 
 namespace ajg {
@@ -47,7 +45,7 @@ struct adapter<Value, std::map<K, V> >     : container_adapter<Value, std::map<K
     virtual attributes_type attributes() const {
         attributes_type attributes;
         typedef typename std::map<K, V>::value_type pair_type;
-        BOOST_FOREACH(pair_type const& kv, this->adapted()) {
+        for (auto const& kv : this->adapted()) {
             attributes.insert(kv.first);
         }
         return attributes;
@@ -70,7 +68,7 @@ struct adapter<Value, std::multimap<K, V> >     : container_adapter<Value, std::
     virtual attributes_type attributes() const {
         attributes_type attributes;
         typedef typename std::multimap<K, V>::value_type pair_type;
-        BOOST_FOREACH(pair_type const& kv, this->adapted()) {
+        for (auto const& kv : this->adapted()) {
             attributes.insert(kv.first);
         }
         return attributes;

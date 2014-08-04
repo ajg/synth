@@ -56,8 +56,8 @@ struct engine : base_engine<Traits> {
 
   public:
 
-    BOOST_STATIC_CONSTANT(boolean_type, throw_on_errors    = false);
-    BOOST_STATIC_CONSTANT(size_type,    max_regex_captures = 9);
+    static boolean_type const throw_on_errors    = false;
+    static size_type const    max_regex_captures = 9;
 
   public:
 

@@ -87,30 +87,30 @@ struct concrete_adapter                                                         
 
     template <class A>
     struct has_useful_input_operator {
-        BOOST_STATIC_CONSTANT(bool, value =
+        static bool const value =
           (boost::has_right_shift<istream_type, A>::value) &&
           !boost::is_pointer<A>::value &&
-          !boost::is_array<A>::value);
+          !boost::is_array<A>::value;
     };
 
     template <class A>
     struct has_useful_output_operator {
-        BOOST_STATIC_CONSTANT(bool, value =
+        static bool const value =
           (boost::has_left_shift<ostream_type, A>::value) &&
           !boost::is_pointer<A>::value &&
-          !boost::is_array<A>::value);
+          !boost::is_array<A>::value;
     };
 
     template <class A>
     struct has_useful_equal_to_operator {
-        BOOST_STATIC_CONSTANT(bool, value =
-          (boost::has_equal_to<A, A>::value));
+        static bool const value =
+          (boost::has_equal_to<A, A>::value);
     };
 
     template <class A>
     struct has_useful_less_operator {
-        BOOST_STATIC_CONSTANT(bool, value =
-          (boost::has_less<A, A>::value));
+        static bool const value =
+          (boost::has_less<A, A>::value);
     };
 
     template <class A> boolean_type input_adapted(istream_type& istream, A& a, typename boost::disable_if<has_useful_input_operator<A> >::type* = 0) const { return false; }

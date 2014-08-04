@@ -51,7 +51,7 @@ std::size_t const max_tests_per_file = AJG_SYNTH_CONFIG_MAX_TEMPLATE_DEPTH - 4;
 template <int N>
 struct check_test_number {
     BOOST_STATIC_ASSERT(N <= max_tests_per_file);
-    BOOST_STATIC_CONSTANT(int, value = N);
+    static int const value = N;
 };
 
 //

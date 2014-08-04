@@ -24,7 +24,7 @@ template <class T> one has_mapped_type_(...);
 template <class T> two has_mapped_type_(typename T::mapped_type const volatile *);
 
 template <class T> struct has_mapped_type {
-    BOOST_STATIC_CONSTANT(bool, value = sizeof(has_mapped_type_<T>(0)) == sizeof(two));
+    static bool const value = sizeof(has_mapped_type_<T>(0)) == sizeof(two);
 };
 
 //

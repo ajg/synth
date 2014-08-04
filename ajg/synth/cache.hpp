@@ -42,22 +42,22 @@ struct caching_mask_for;
 
 template <typename Engine>
 struct caching_mask_for<templates::buffer_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_mask, value = caching_buffers);
+    static caching_mask const value = caching_buffers;
 };
 
 template <typename Engine>
 struct caching_mask_for<templates::path_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_mask, value = caching_paths);
+    static caching_mask const value = caching_paths;
 };
 
 template <typename Engine>
 struct caching_mask_for<templates::stream_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_mask, value = caching_none);
+    static caching_mask const value = caching_none;
 };
 
 template <typename Engine>
 struct caching_mask_for<templates::string_template<Engine> > {
-    BOOST_STATIC_CONSTANT(caching_mask, value = caching_strings);
+    static caching_mask const value = caching_strings;
 };
 
 template <class Template>

@@ -96,11 +96,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
   public:
 
-    BOOST_STATIC_CONSTANT(boolean_type,   case_sensitive   = false);
-    BOOST_STATIC_CONSTANT(boolean_type,   shortcut_syntax  = true);
-    BOOST_STATIC_CONSTANT(boolean_type,   loop_variables   = true);
-    BOOST_STATIC_CONSTANT(boolean_type,   global_variables = false);
-    BOOST_STATIC_CONSTANT(tmpl::tag_mode, tag_mode         = loose); // TODO: Implement.
+    static boolean_type   const case_sensitive   = false;
+    static boolean_type   const shortcut_syntax  = true;
+    static boolean_type   const loop_variables   = true;
+    static boolean_type   const global_variables = false;
+    static tmpl::tag_mode const tag_mode         = loose; // TODO: Implement.
 
   private:
 

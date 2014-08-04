@@ -41,7 +41,7 @@ namespace detail {
 
 template <class Path>
 inline bool is_absolute(Path path) {
-    BOOST_STATIC_CONSTANT(bool, check_drive_letter = AJG_SYNTH_IF_WINDOWS(true, false));
+    static bool const check_drive_letter = AJG_SYNTH_IF_WINDOWS(true, false);
     return (!path.empty() && path[0] == '/') || (check_drive_letter && path.size() >= 3
         && (std::isalpha)(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\'));
 }
@@ -133,7 +133,7 @@ inline String read_stream_to_string
         ( Stream& stream
         , boost::optional<typename Stream::size_type> const size = boost::none
         ) {
-    BOOST_STATIC_CONSTANT(typename String::size_type, buffer_size = 4096);
+    static typename String::size_type const buffer_size = 4096;
 
     if (!stream.good()) {
         AJG_SYNTH_THROW(std::runtime_error("bad stream"));

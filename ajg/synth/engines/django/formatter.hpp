@@ -62,7 +62,7 @@ struct formatter {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct native_flags {
-        BOOST_STATIC_CONSTANT(size_type, size = 31);
+        static size_type const size = 31;
         // NOTE:
         //   - Fields marked [#] are not used because their availability is platform-dependent.
         //   - Fields marked [*] are not used because Windows is garbage and barfs otherwise.
@@ -410,7 +410,7 @@ struct formatter {
 
     // TODO: Proper, localizable formatting.
     static string_type format_duration(duration_type const& duration) {
-        BOOST_STATIC_CONSTANT(size_type, N = 6);
+        static size_type const N = 6;
 
         static size_type const seconds[N] = { 60 * 60 * 24 * 365
                                             , 60 * 60 * 24 * 30

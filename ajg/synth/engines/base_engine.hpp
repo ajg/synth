@@ -109,7 +109,7 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
   public:
 
-    BOOST_STATIC_CONSTANT(size_type, error_line_limit = 30);
+    static size_type const error_line_limit = 30;
 
   protected:
 

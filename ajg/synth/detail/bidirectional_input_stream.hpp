@@ -76,7 +76,7 @@ struct bidirectional_input_stream {
     reverse_iterator rend()   { return reverse_iterator(this->end()); }
 
     bool expand() {
-        BOOST_STATIC_CONSTANT(std::size_t, N = 1024);
+        static std::size_t const N = 1024;
         char_type buffer[N];
         this->stream_.read(buffer, N);
         this->buffer_.insert(this->buffer_.end(), buffer, buffer + this->stream_.gcount());

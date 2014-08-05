@@ -9,10 +9,10 @@ import sys
 
 DEBUG = int(ARGUMENTS.get('debug', 0))
 GROUP = str(ARGUMENTS.get('group', ''))
-BOOST = str(ARGUMENTS.get('boost', 'auto'))
+BOOST = str(ARGUMENTS.get('boost', 'local'))
 
-if BOOST not in ('auto', 'local', 'system'):
-    sys.exit('Option `boost` must be `auto`, `local` or `system`')
+if BOOST not in ('local', 'system'):
+    sys.exit('Argument `boost` must be `local` or `system`')
 
 def run():
     cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
@@ -80,8 +80,7 @@ def find_cxx_version(cxx):
         sys.exit('Unable to find compiler (%s) version: ' % cxx + e.strerror)
 
 def find_boost_path():
-    # TODO: For auto, use system if available, otherwise local
-    if BOOST in ('auto', 'local'):
+    if BOOST == 'local':
         return 'external/boost'
     elif BOOST == 'system':
         return None

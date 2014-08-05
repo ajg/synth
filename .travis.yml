@@ -8,19 +8,17 @@ compiler:
   - gcc
   - clang
 
-### TODO: Build environment with boost available.
-### before_install:
-###   - sudo apt-get install libboost-dev libboost-python-dev
-
-before_script:
+install:
+  - sudo apt-get update
   - sudo apt-get install valgrind
-  # Prevent slow builds from dying by echoing something every 5 minutes:
-  - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
+# TODO: Build environment with boost available.
+# - sudo apt-get install libboost-dev libboost-python-dev
 
 script:
-  - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
-  - scons synth && tests/harness.sh
-  - scons tests/synth.so && python tests/harness.py
-  - scons # Make sure every other target builds successfully.
-  ### TODO: Re-enable once Travis bumps memory limits.
-  ### - sudo python setup.py build
+  - travis_wait scons
+  - tests/harness.out
+  - valgrind --track-origins=yes tests/harness.out
+  - bash tests/harness.sh
+  - python tests/harness.py
+# TODO: Re-enable once Travis bumps memory limits.
+# - travis_wait sudo python setup.py build

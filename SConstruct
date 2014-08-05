@@ -15,7 +15,7 @@ if BOOST not in ('auto', 'local', 'system'):
     sys.exit('Option `boost` must be `auto`, `local` or `system`')
 
 def run():
-    cxx = ARGUMENTS.get('CXX', 'c++') # os.environ.get('CXX', 'c++'))
+    cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
     env = make_environment(cxx)
     create_targets(env)
 

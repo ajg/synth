@@ -5,20 +5,47 @@
 language: cpp
 
 compiler:
-  - gcc
-  - clang
+  - g++
+  - clang++
+
+# TODO:
+# os:
+#   - linux
+#   - osx
+#
+# matrix:
+#   allow_failures:
+#     - os: osx
+
+branches:
+  only:
+    - master
+    - v1
+
+before_script:
+  - which clang
+  - which clang++
+
+before_install:
+  - which clang
+  - which clang++
 
 install:
+  - which clang
+  - which clang++
   - sudo apt-get update
   - sudo apt-get install valgrind
 # TODO: Build environment with boost available.
 # - sudo apt-get install libboost-dev libboost-python-dev
 
 script:
+  - which clang
+  - which clang++
   - travis_wait scons
   - tests/harness.out
   - valgrind --track-origins=yes tests/harness.out
   - bash tests/harness.sh
   - python tests/harness.py
 # TODO: Re-enable once Travis bumps memory limits.
-# - travis_wait sudo python setup.py build
+# - travis_wait python setup.py build
+# - sudo python setup.py install

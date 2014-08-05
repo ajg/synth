@@ -15,7 +15,7 @@ if BOOST not in ('auto', 'local', 'system'):
     sys.exit('Option `boost` must be `auto`, `local` or `system`')
 
 def run():
-    cxx = ARGUMENTS.get('CXX', os.environ.get('CXX', 'c++'))
+    cxx = ARGUMENTS.get('CXX', 'c++') # os.environ.get('CXX', 'c++'))
     env = make_environment(cxx)
     create_targets(env)
 
@@ -100,7 +100,6 @@ def get_cpp_flags(cxx):
     cpp_flags = []
 
     # Common flags:
-    cpp_flags += ['-std=c++11']
     cpp_flags += ['-Wall']
     cpp_flags += ['-Woverloaded-virtual']
     cpp_flags += ['-Wsign-promo']
@@ -119,6 +118,7 @@ def get_cpp_flags(cxx):
         cpp_flags += ['-DBOOST_ALL_NO_LIB']
 
     if 'clang' in cxx_version:
+        cpp_flags += ['-std=c++11']
         cpp_flags += ['-pedantic']
         cpp_flags += ['-Wuninitialized']
         cpp_flags += ['-Wc++11-narrowing']
@@ -162,6 +162,11 @@ def get_cpp_flags(cxx):
                 cpp_flags += ['-Wnarrowing']
                 cpp_flags += ['-fmax-errors=1']
                 cpp_flags += ['-ftemplate-backtrace-limit=1']
+
+            if gcc_version >= (4, 7):
+                cpp_flags += ['-std=c++11']
+            else:
+                cpp_flags += ['-std=c++0x']
 
     if DEBUG:
         cpp_flags += ['-g'] # '-fstack-protector-all'

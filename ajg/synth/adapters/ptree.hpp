@@ -27,11 +27,11 @@ struct adapter<Value, boost::property_tree::basic_ptree<K, V> >     : container_
 
     AJG_SYNTH_ADAPTER_TYPEDEFS(Value);
 
-    virtual optional<boolean_type> get_boolean() const {
+    virtual optional<boolean_type> get_boolean() const override {
         return !this->adapted().empty() || boolean_type(value_type(this->adapted().data()));
     }
 
-    virtual attribute_type attribute(value_type const& key) const {
+    virtual attribute_type attribute(value_type const& key) const override {
         K const k = key.template to<K>();
         typename boost::property_tree::basic_ptree<K, V>::const_assoc_iterator const it = this->adapted().find(k);
         if (it == this->adapted().not_found()) {
@@ -43,7 +43,7 @@ struct adapter<Value, boost::property_tree::basic_ptree<K, V> >     : container_
     // TODO: attribute(k, v)
     // TODO: attributes()
 
-    virtual boolean_type output(ostream_type& ostream) const {
+    virtual boolean_type output(ostream_type& ostream) const override {
         if (this->adapted().empty()) {
             ostream << value_type(this->adapted().data());
         }

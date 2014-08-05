@@ -16,7 +16,7 @@ template <class Value, class Adapted, class Specialized, class Iterator, type_fl
 struct range_adapter                      : concrete_adapter<Value, Adapted, Flags, Specialized> {
     range_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, Flags, Specialized>(adapted) {}
 
-    virtual optional<typename Value::range_type> get_range() const { return typename Value::range_type(this->begin(), this->end()); } // TODO[c++11]: Use std::begin & std::end.
+    virtual optional<typename Value::range_type> get_range() const override { return typename Value::range_type(this->begin(), this->end()); } // TODO[c++11]: Use std::begin & std::end.
 
   protected:
 
@@ -31,7 +31,7 @@ template <class Value, class Adapted, type_flags Flags>
 struct container_adapter                      : concrete_adapter<Value, Adapted, type_flags(Flags | container)> {
     container_adapter(Adapted const& adapted) : concrete_adapter<Value, Adapted, type_flags(Flags | container)>(adapted) {}
 
-    virtual optional<typename Value::range_type> get_range() const { return typename Value::range_type(this->adapted().begin(), this->adapted().end()); } // TODO[c++11]: Use std::begin & std::end.
+    virtual optional<typename Value::range_type> get_range() const override { return typename Value::range_type(this->adapted().begin(), this->adapted().end()); } // TODO[c++11]: Use std::begin & std::end.
 };
 
 }}} // namespace ajg::synth::adapters

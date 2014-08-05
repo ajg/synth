@@ -539,7 +539,7 @@ struct default_traits {
         // TODO: date_facet?
         AJG_SYNTH_ASSERT(format);
 
-        #if AJG_SYNTH_HAS_CXX11
+        #if AJG_SYNTH_HAS_CXX11_THREAD_LOCAL
 
             // TODO: Re-use the locale or even the whole ostringstream rather than just the facet.
             // The refcount below is one 1 to prevent it from being deleted prematurely.

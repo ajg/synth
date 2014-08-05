@@ -57,9 +57,13 @@
 // AJG_SYNTH_PLATFORM_*
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define AJG_SYNTH_IS_PLATFORM_DARWIN  0
 #define AJG_SYNTH_IS_PLATFORM_WINDOWS 0
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(__APPLE__)
+#    undef  AJG_SYNTH_IS_PLATFORM_DARWIN
+#    define AJG_SYNTH_IS_PLATFORM_DARWIN 1
+#elif defined(_WIN32) || defined(_WIN64)
 #    undef  AJG_SYNTH_IS_PLATFORM_WINDOWS
 #    define AJG_SYNTH_IS_PLATFORM_WINDOWS 1
 #endif
@@ -179,12 +183,26 @@
 #endif
 
 //
+// AJG_SYNTH_HAS_THREAD_LOCAL:
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if AJG_SYNTH_HAS_CXX11
+#    if AJG_SYNTH_IS_PLATFORM_DARWIN && AJG_SYNTH_IS_COMPILER_CLANG && AJG_SYNTH_COMPILER_VERSION <= 501
+#        define AJG_SYNTH_HAS_CXX11_THREAD_LOCAL 0
+#    else
+#        define AJG_SYNTH_HAS_CXX11_THREAD_LOCAL 1
+#    endif
+#else
+#    define AJG_SYNTH_HAS_CXX11_THREAD_LOCAL 0
+#endif
+
+//
 // AJG_SYNTH_THREAD_LOCAL:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#/*if AJG_SYNTH_HAS_CXX11
+#if AJG_SYNTH_HAS_CXX11_THREAD_LOCAL
 #    define AJG_SYNTH_THREAD_LOCAL thread_local
-#el*/if AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
+#elif AJG_SYNTH_IS_COMPILER_MSVC || (AJG_SYNTH_IS_COMPILER_INTEL && AJG_SYNTH_IS_PLATFORM_WINDOWS)
 #    define AJG_SYNTH_THREAD_LOCAL __declspec(thread)
 #elif AJG_SYNTH_IS_COMPILER_CLANG || AJG_SYNTH_IS_COMPILER_GCC || AJG_SYNTH_IS_COMPILER_INTEL
 #    define AJG_SYNTH_THREAD_LOCAL __thread

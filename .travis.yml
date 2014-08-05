@@ -18,9 +18,9 @@ before_script:
   - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
 script:
-  - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
-  - scons synth && tests/harness.sh
-  - scons tests/synth.so && python tests/harness.py
-  - scons # Make sure every other target builds successfully.
+  - scons CXX=$CXX CC=$CC compiler=$CC tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
+  - scons CXX=$CXX CC=$CC compiler=$CC synth && tests/harness.sh
+  - scons CXX=$CXX CC=$CC compiler=$CC tests/synth.so && python tests/harness.py
+  - scons CXX=$CXX CC=$CC compiler=$CC # Make sure every other target builds successfully.
   ### TODO: Re-enable once Travis bumps memory limits.
   ### - sudo python setup.py build

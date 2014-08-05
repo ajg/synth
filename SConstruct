@@ -111,7 +111,7 @@ def get_cpp_flags(cxx):
     # XXX: Not including -Wold-style-cast due to optionparser.h.
 
     cxx_version    = find_cxx_version(cxx)
-    template_depth = '1024'
+    template_depth = '768'
 
     # Conditional flags:
     if BOOST != 'system':
@@ -142,6 +142,7 @@ def get_cpp_flags(cxx):
         # cpp_flags += ['-pedantic']
         cpp_flags += ['-Wfatal-errors']
         cpp_flags += ['-Wstrict-null-sentinel']
+        cpp_flags += ['-Wno-sign-promo']
 
         triple = re.search(r'\s(\d+)[.](\d+)[.](\d+)\s', cxx_version)
         if triple:

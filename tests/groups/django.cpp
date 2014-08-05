@@ -47,15 +47,8 @@ static string_type const absolute_path = text::widen(get_current_working_directo
 
 } // namespace
 
-///     TODO:
-///     django::load_tag      (Tested implicitly in Python binding tests.)
-///     django::load_from_tag (Tested implicitly in Python binding tests.)
-///     django::library_tag   (Tested implicitly in Python binding tests.)
+#define DJANGO_TEST(name, in, out) AJG_SYNTH_TEST_UNIT(name) { MUST_EQUAL(string_template_type(in, options).render_to_string(context), out); }}}
 
-#define DJANGO_TEST(name, in, out) \
-    AJG_SYNTH_TEST_UNIT(name) { MUST_EQUAL(string_template_type(in, options).render_to_string(context), out); }}}
-
-///
 /// Sanity checks
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +61,6 @@ DJANGO_TEST(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {"
 DJANGO_TEST(html, "foo { bar qux } }} }}} }}}} }}}}}", "foo { bar qux } }} }}} }}}} }}}}}")
 DJANGO_TEST(html, "{% block x %}foo }}{% endblock %}", "foo }}")
 
-///
 /// Literal tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -103,7 +95,6 @@ DJANGO_TEST(string, "{{_(\"Bar\")}}", "Bar")
 DJANGO_TEST(multiple filters,   "{% firstof 0|add:1|add:2|add:3 %}", "6")
 DJANGO_TEST(multiple pipelines, "{% firstof -1|add:1 2|add:-2 3 %}", "3")
 
-///
 /// Escaping tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,14 +119,11 @@ DJANGO_TEST(safe_filter+join_filter,    "{{tags|safe|join:'-'}}",     "<-X->-,- 
 DJANGO_TEST(safeseq_filter,             "{{tags|safeseq}}",           "<X>, <Y>, <Z>")
 DJANGO_TEST(safeseq_filter+join_filter, "{{tags|safeseq|join:'-'}}",  "<X>-<Y>-<Z>")
 
-///
 /// Inheritance tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DJANGO_TEST(inheritance, "{% include 'tests/templates/django/base.tpl' %}",
-    "Base template\nBase header\nBase content\nBase footer\n")
-DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}",
-    "Base template\nBase header\nBase content + 1, 2, 3, 4, 5, 6, 7, 8, 9\nBase footer\n")
+DJANGO_TEST(inheritance, "{% include 'tests/templates/django/base.tpl' %}",    "Base template\nBase header\nBase content\nBase footer\n")
+DJANGO_TEST(inheritance, "{% include 'tests/templates/django/derived.tpl' %}", "Base template\nBase header\nBase content + 1, 2, 3, 4, 5, 6, 7, 8, 9\nBase footer\n")
 
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/A.tpl' %}", "'A'\n")
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/B.tpl' %}", "'AB'\n")
@@ -143,11 +131,8 @@ DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/C.tpl' %}", 
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/D.tpl' %}", "'ABCD'\n")
 DJANGO_TEST(nested inheritance, "{% include 'tests/templates/django/X.tpl' %}", "'X'\n")
 
-DJANGO_TEST(nested inheritance with crossing iterators,
-    "{% extends 'tests/templates/django/A.tpl' %}\n"
-    "{% block x %}Y{% endblock x %}", "'Y'\n")
+DJANGO_TEST(nested inheritance with crossing iterators, "{% extends 'tests/templates/django/A.tpl' %}\n{% block x %}Y{% endblock x %}", "'Y'\n")
 
-///
 /// Tag tests
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -184,28 +169,7 @@ DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x %}; {{x}}) {%
 DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x silent %}; {{x}}) {% endfor %}", "(; CA) (; Florida) (; NY) ")
 DJANGO_TEST(cycle_tag, "{% for k, v in states %}({% cycle k v as x silent %};) {% endfor %}",       "(;) (;) (;) ")
 
-DJANGO_TEST(debug_tag, "{% debug %}",
-    "<h1>Context:</h1>\n"
-    "    after_past = 2002-Mar-01 01:22:03<br />\n"
-    "    bar = B<br />\n"
-    "    before_past = 2002-Jan-08 13:02:03<br />\n"
-    "    cities = country: India, name: Mumbai, population: 19,000,000, country: India, name: Calcutta, population: 15,000,000, country: USA, name: New York, population: 20,000,000, country: USA, name: Chicago, population: 7,000,000, country: Japan, name: Tokyo, population: 33,000,000<br />\n"
-    "    csrf_token = ABCDEF123456<br />\n"
-    "    false_var = False<br />\n"
-    "    foo = A<br />\n"
-    "    friends = age: 23, name: joe, age: 55, name: bob, age: 41, name: lou<br />\n"
-    "    future = 2202-Feb-11 03:02:01<br />\n"
-    "    haiku = Haikus are easy,\nBut sometimes they don&apos;t make sense.\nRefrigerator.\n<br />\n"
-    "    heterogenous = 42, 42, foo, foo<br />\n"
-    "    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n"
-    "    past = 2002-Jan-10 01:02:03<br />\n"
-    "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
-    "    qux = C<br />\n"
-    "    states = CA: California, FL: Florida, NY: New York<br />\n"
-    "    tags = &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;<br />\n"
-    "    true_var = True<br />\n"
-    "    variable_path = tests/templates/django/variables.tpl<br />\n"
-    "    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
+DJANGO_TEST(debug_tag, "{% debug %}", "<h1>Context:</h1>\n    after_past = 2002-Mar-01 01:22:03<br />\n    bar = B<br />\n    before_past = 2002-Jan-08 13:02:03<br />\n    cities = country: India, name: Mumbai, population: 19,000,000, country: India, name: Calcutta, population: 15,000,000, country: USA, name: New York, population: 20,000,000, country: USA, name: Chicago, population: 7,000,000, country: Japan, name: Tokyo, population: 33,000,000<br />\n    csrf_token = ABCDEF123456<br />\n    false_var = False<br />\n    foo = A<br />\n    friends = age: 23, name: joe, age: 55, name: bob, age: 41, name: lou<br />\n    future = 2202-Feb-11 03:02:01<br />\n    haiku = Haikus are easy,\nBut sometimes they don&apos;t make sense.\nRefrigerator.\n<br />\n    heterogenous = 42, 42, foo, foo<br />\n    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n    past = 2002-Jan-10 01:02:03<br />\n    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n    qux = C<br />\n    states = CA: California, FL: Florida, NY: New York<br />\n    tags = &lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;<br />\n    true_var = True<br />\n    variable_path = tests/templates/django/variables.tpl<br />\n    xml_var = &lt;foo&gt;&lt;bar&gt;&lt;qux /&gt;&lt;/bar&gt;&lt;/foo&gt;<br />\n")
 
 DJANGO_TEST(firstof_tag, "{% firstof true_var %}", "True")
 DJANGO_TEST(firstof_tag, "{% firstof true_var 'FALLBACK' %}", "True")
@@ -270,57 +234,18 @@ DJANGO_TEST(filter_tag, "{% filter escape %}<foo />{% endfilter %}", "<foo />")
 DJANGO_TEST(filter_tag, "{% filter force_escape %}<foo />{% endfilter %}", "&lt;foo /&gt;")
 DJANGO_TEST(filter_tag, "{% filter title|lower %}aBcD{% endfilter %}", "abcd")
 DJANGO_TEST(filter_tag, "{% filter upper|lower|title %}aBcD{% endfilter %}", "Abcd")
-DJANGO_TEST(filter_tag,
-        "{% filter upper %}\n"
-        "    <p>\n"
-        "        <a href=\"foo/\">Foo</a>\n"
-        "    </p>\n"
-        "{% endfilter %}\n",
-            "\n"
-            "    <P>\n"
-            "        <A HREF=\"FOO/\">FOO</A>\n"
-            "    </P>\n"
-            "\n")
+DJANGO_TEST(filter_tag, "{% filter upper %}\n    <p>\n        <a href=\"foo/\">Foo</a>\n    </p>\n{% endfilter %}\n", "\n    <P>\n        <A HREF=\"FOO/\">FOO</A>\n    </P>\n\n")
 
-DJANGO_TEST(for_tag-value,
-    "{% for v in friends %}[{{ v }}]{% endfor %}",
-    "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
-
-DJANGO_TEST(for_empty_tag-value,
-    "{% for v in friends %}[{{ v }}]{% empty %}Bad{% endfor %}",
-    "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
-
-DJANGO_TEST(for_empty_tag-none,
-    "{% for v in '' %}Bad{% empty %} It's empty, Jim {% endfor %}",
-    " It's empty, Jim ")
-
-DJANGO_TEST(for_tag-key-value,
-    "{% for k, v in states %}[{{ k }}: {{ v }}]{% endfor %}",
-    "[CA: California][FL: Florida][NY: New York]")
-
-DJANGO_TEST(for_tag-key-value,
-    "{% for k, v in states %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}",
-    "[CA: California][FL: Florida][NY: New York]")
-
-DJANGO_TEST(for_tag-value-reversed,
-    "{% for v in friends reversed %}[{{ v }}]{% endfor %}",
-    "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
-
-DJANGO_TEST(for_empty_tag-value-reversed,
-    "{% for v in friends reversed %}[{{ v }}]{% empty %}Bad{% endfor %}",
-    "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
-
-DJANGO_TEST(for_empty_tag-none-reversed,
-    "{% for v in '' reversed %}Bad{% empty %} It's empty, Jim {% endfor %}",
-    " It's empty, Jim ")
-
-DJANGO_TEST(for_tag-key-value-reversed,
-    "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% endfor %}",
-    "[NY: New York][FL: Florida][CA: California]")
-
-DJANGO_TEST(for_tag-key-value-reversed,
-    "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}",
-    "[NY: New York][FL: Florida][CA: California]")
+DJANGO_TEST(for_tag-value, "{% for v in friends %}[{{ v }}]{% endfor %}", "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
+DJANGO_TEST(for_empty_tag-value, "{% for v in friends %}[{{ v }}]{% empty %}Bad{% endfor %}", "[age: 23, name: joe][age: 55, name: bob][age: 41, name: lou]")
+DJANGO_TEST(for_empty_tag-none, "{% for v in '' %}Bad{% empty %} It's empty, Jim {% endfor %}", " It's empty, Jim ")
+DJANGO_TEST(for_tag-key-value, "{% for k, v in states %}[{{ k }}: {{ v }}]{% endfor %}", "[CA: California][FL: Florida][NY: New York]")
+DJANGO_TEST(for_tag-key-value, "{% for k, v in states %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}", "[CA: California][FL: Florida][NY: New York]")
+DJANGO_TEST(for_tag-value-reversed, "{% for v in friends reversed %}[{{ v }}]{% endfor %}", "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
+DJANGO_TEST(for_empty_tag-value-reversed, "{% for v in friends reversed %}[{{ v }}]{% empty %}Bad{% endfor %}", "[age: 41, name: lou][age: 55, name: bob][age: 23, name: joe]")
+DJANGO_TEST(for_empty_tag-none-reversed, "{% for v in '' reversed %}Bad{% empty %} It's empty, Jim {% endfor %}", " It's empty, Jim ")
+DJANGO_TEST(for_tag-key-value-reversed, "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% endfor %}", "[NY: New York][FL: Florida][CA: California]")
+DJANGO_TEST(for_tag-key-value-reversed, "{% for k, v in states reversed %}[{{ k }}: {{ v }}]{% empty %}Bad{% endfor %}", "[NY: New York][FL: Florida][CA: California]")
 
 AJG_SYNTH_TEST_UNIT(now_tag) {
     string_template_type const t("{% now 'y' %}", options);
@@ -338,75 +263,10 @@ AJG_SYNTH_TEST_UNIT(now_tag) {
     MUST_EQUAL(s, text::stringize(std::localtime(&time)->tm_year + 1900));
 }}}
 
-DJANGO_TEST(regroup_tag,
-    "{% regroup cities by country as country_list %}\n"
-    "\n"
-    "<ul>\n"
-    "{% for country in country_list %}\n"
-    "    <li>{{ country.grouper }}\n"
-    "    <ul>\n"
-    "        {% for item in country.list %}\n"
-    "          <li>{{ item.name }}: {{ item.population }}</li>\n"
-    "        {% endfor %}\n"
-    "    </ul>\n"
-    "    </li>\n"
-    "{% endfor %}\n"
-    "</ul>\n",
-        "\n"
-        "\n"
-        "<ul>\n"
-        "\n"
-        "    <li>India\n"
-        "    <ul>\n"
-        "        \n"
-        "          <li>Mumbai: 19,000,000</li>\n"
-        "        \n"
-        "          <li>Calcutta: 15,000,000</li>\n"
-        "        \n"
-        "    </ul>\n"
-        "    </li>\n"
-        "\n"
-        "    <li>USA\n"
-        "    <ul>\n"
-        "        \n"
-        "          <li>New York: 20,000,000</li>\n"
-        "        \n"
-        "          <li>Chicago: 7,000,000</li>\n"
-        "        \n"
-        "    </ul>\n"
-        "    </li>\n"
-        "\n"
-        "    <li>Japan\n"
-        "    <ul>\n"
-        "        \n"
-        "          <li>Tokyo: 33,000,000</li>\n"
-        "        \n"
-        "    </ul>\n"
-        "    </li>\n"
-        "\n"
-        "</ul>\n")
+DJANGO_TEST(regroup_tag, "{% regroup cities by country as country_list %}\n\n<ul>\n{% for country in country_list %}\n    <li>{{ country.grouper }}\n    <ul>\n        {% for item in country.list %}\n          <li>{{ item.name }}: {{ item.population }}</li>\n        {% endfor %}\n    </ul>\n    </li>\n{% endfor %}\n</ul>\n", "\n\n<ul>\n\n    <li>India\n    <ul>\n        \n          <li>Mumbai: 19,000,000</li>\n        \n          <li>Calcutta: 15,000,000</li>\n        \n    </ul>\n    </li>\n\n    <li>USA\n    <ul>\n        \n          <li>New York: 20,000,000</li>\n        \n          <li>Chicago: 7,000,000</li>\n        \n    </ul>\n    </li>\n\n    <li>Japan\n    <ul>\n        \n          <li>Tokyo: 33,000,000</li>\n        \n    </ul>\n    </li>\n\n</ul>\n")
 
-DJANGO_TEST(spaceless_tag,
-        "{% spaceless %}\n"
-        "    <p>\n"
-        "        <a href=\"foo/\">Foo</a>\n"
-        "    </p>\n"
-        "{% endspaceless %}\n",
-            "\n"
-            "    <p><a href=\"foo/\">Foo</a></p>\n"
-            "\n")
-
-DJANGO_TEST(spaceless_tag,
-        "{% spaceless %}\n"
-        "    <strong>\n"
-        "        Hello\n"
-        "    </strong>\n"
-        "{% endspaceless %}\n",
-            "\n"
-            "    <strong>\n"
-            "        Hello\n"
-            "    </strong>\n"
-            "\n")
+DJANGO_TEST(spaceless_tag, "{% spaceless %}\n    <p>\n        <a href=\"foo/\">Foo</a>\n    </p>\n{% endspaceless %}\n", "\n    <p><a href=\"foo/\">Foo</a></p>\n\n")
+DJANGO_TEST(spaceless_tag, "{% spaceless %}\n    <strong>\n        Hello\n    </strong>\n{% endspaceless %}\n",          "\n    <strong>\n        Hello\n    </strong>\n\n")
 
 DJANGO_TEST(templatetag_tag, "{% templatetag openbrace %}",     "{")
 DJANGO_TEST(templatetag_tag, "{% templatetag closevariable %}", "}}")
@@ -494,13 +354,7 @@ AJG_SYNTH_TEST_UNIT(ssi_tag) {
     MUST_THROW(std::invalid_argument, string_template_type("{% ssi '' %}", options).render_to_string(context));
 }}}
 
-DJANGO_TEST(verbatim_tag,
-        "{% verbatim %}{% for v in friends %}\n"
-        "    <p>{{ v }}</p>\n"
-        "{% endfor %}{% endverbatim %}\n",
-            "{% for v in friends %}\n"
-            "    <p>{{ v }}</p>\n"
-            "{% endfor %}\n")
+DJANGO_TEST(verbatim_tag, "{% verbatim %}{% for v in friends %}\n    <p>{{ v }}</p>\n{% endfor %}{% endverbatim %}\n", "{% for v in friends %}\n    <p>{{ v }}</p>\n{% endfor %}\n")
 
 DJANGO_TEST(with_tag, "[{{ls}}] {% with 'this is a long string' as ls %} {{ls}} {% endwith %} [{{ls}}]", "[]  this is a long string  []")
 
@@ -556,8 +410,7 @@ DJANGO_TEST(escapejs_filter, "{{ haiku|escapejs|safe }}", "Haikus are easy,\\x0A
 
 DJANGO_TEST(filesizeformat_filter, "{{ 123456789|filesizeformat }}", "117.7 MB")
 
-DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;'|fix_ampersands }}",
-                "String &amp; with &amp; ampersands, but not &apos; or &#1234;")
+DJANGO_TEST(fix_ampersands_filter, "{{ 'String & with & ampersands, but not &apos; or &#1234;'|fix_ampersands }}", "String &amp; with &amp; ampersands, but not &apos; or &#1234;")
 
 DJANGO_TEST(floatformat_filter, "{{34.23234|floatformat }}", "34.2")
 DJANGO_TEST(floatformat_filter, "{{34.00000|floatformat }}", "34")
@@ -577,11 +430,7 @@ DJANGO_TEST(getdigit_filter, "{{ 'foobar'|get_digit:'2' }}",   "foobar")
 
 DJANGO_TEST(iriencode_filter, "{{ \"?test=1&me=2\"|iriencode }}", "?test=1&amp;me=2")
 
-DJANGO_TEST(linenumbers_filter, "{{ haiku|linenumbers}}",
-    "1. Haikus are easy,\n"
-    "2. But sometimes they don&apos;t make sense.\n"
-    "3. Refrigerator.\n"
-    "4. \n")
+DJANGO_TEST(linenumbers_filter, "{{ haiku|linenumbers}}", "1. Haikus are easy,\n2. But sometimes they don&apos;t make sense.\n3. Refrigerator.\n4. \n")
 
 DJANGO_TEST(linebreaksbr_filter, "{{ haiku|linebreaksbr }}", "Haikus are easy,<br />But sometimes they don't make sense.<br />Refrigerator.<br />")
 
@@ -777,24 +626,8 @@ DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  <
 // FIXME: DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \"|truncatewords_html:4 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
 DJANGO_TEST(truncatewords_html_filter, "{{ \"  Joel  <a href='#'>  is  <i>  a  </i>  slug  \"|truncatewords_html:5 }}", "  Joel  <a href='#'>  is  <i>  a  </i>  slug  ")
 
-DJANGO_TEST(unordered_list_filter, "{{ 'abc'|unordered_list }}", "<li>abc</li>\n")
-DJANGO_TEST(unordered_list_filter, "{{ places|unordered_list }}",
-                "<li>Parent\n"
-                "<ul>\n"
-                "\t<li>States\n"
-                "\t<ul>\n"
-                "\t\t<li>Kansas\n"
-                "\t\t<ul>\n"
-                "\t\t\t<li>Lawrence</li>\n"
-                "\t\t\t<li>Topeka</li>\n"
-                "\t\t</ul>\n"
-                "\t\t</li>\n"
-                "\t\t<li>Illinois1</li>\n"
-                "\t\t<li>Illinois2</li>\n"
-                "\t</ul>\n"
-                "\t</li>\n"
-                "</ul>\n"
-                "</li>\n")
+DJANGO_TEST(unordered_list_filter, "{{ 'abc'|unordered_list }}",  "<li>abc</li>\n")
+DJANGO_TEST(unordered_list_filter, "{{ places|unordered_list }}", "<li>Parent\n<ul>\n\t<li>States\n\t<ul>\n\t\t<li>Kansas\n\t\t<ul>\n\t\t\t<li>Lawrence</li>\n\t\t\t<li>Topeka</li>\n\t\t</ul>\n\t\t</li>\n\t\t<li>Illinois1</li>\n\t\t<li>Illinois2</li>\n\t</ul>\n\t</li>\n</ul>\n</li>\n")
 
 DJANGO_TEST(upper_filter, "{{ \"Joel is a slug\"|upper }}", "JOEL IS A SLUG")
 
@@ -842,3 +675,8 @@ DJANGO_TEST(slice_filter, "{{ numbers|slice:':'}}",     "1, 2, 3, 4, 5, 6, 7, 8,
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'0:'}}",    "1, 2, 3, 4, 5, 6, 7, 8, 9")
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'2:6'}}",   "3, 4, 5, 6")
 DJANGO_TEST(slice_filter, "{{ numbers|slice:'-6:-2'}}", "4, 5, 6, 7")
+
+///     TODO:
+///     django::load_tag      (Tested implicitly in Python binding tests.)
+///     django::load_from_tag (Tested implicitly in Python binding tests.)
+///     django::library_tag   (Tested implicitly in Python binding tests.)

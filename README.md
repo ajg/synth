@@ -527,11 +527,15 @@ Future Work
 
  - Engines:
    * Django:
+     + `lorem` tag
      + Make markers dynamically configurable
      + Native `i18n` library
      + Native `l10n` library
      + Native `tz` library
      + Native `static` library
+     + Native `staticfiles` library
+     + Native `humanize` library
+     + Native `webdesign` library
    * SSI:
      + Implement additional tags from [Jigsaw](http://www.w3.org/Jigsaw/Doc/User/SSI.html)
    * TMPL:

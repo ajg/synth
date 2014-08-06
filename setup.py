@@ -11,21 +11,9 @@ from distutils import sysconfig
 # from distutils.core import setup, Extension
 from setuptools import setup, Extension
 
-# TODO: Allow CHAR and BOOST to be passed via command-line.
+# TODO: Allow CHAR to be passed via command-line?
 DEBUG = ('-g' in sys.argv or '--debug' in sys.argv)
 CHAR  = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
-BOOST = 'auto' # TODO: Implement `local` and `system`.
-
-if BOOST not in ('auto', 'local', 'system'):
-    sys.exit('Option `boost` must be `auto`, `local` or `system`')
-
-def find_boost_path():
-    if BOOST in ('auto', 'local'):
-        return 'external/boost'
-    elif BOOST == 'system':
-        sys.exit('Not implemented: `system` boost')
-    else:
-        sys.exit('Unknown value for option `boost`')
 
 def run():
     setup(
@@ -172,7 +160,7 @@ def get_extra_compile_args(compiler):
         ]
 
 def get_include_dirs():
-    return ['.', find_boost_path()]
+    return ['.', boost_local_path]
 
 def get_library_dirs():
     return []
@@ -185,18 +173,8 @@ def get_runtime_library_dirs():
 
 def get_define_macros():
     defines = []
-
-    # Common defines:
     defines += [('AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE', CHAR)]
-
-    # Conditional defines:
-    if BOOST != 'system':
-        defines += [
-            ('BOOST_ALL_NO_LIB',            None),
-            ('BOOST_PYTHON_NO_LIB',         None),
-            ('BOOST_PYTHON_STATIC_LIB',     None),
-            ('BOOST_PYTHON_SOURCE',         None),
-        ]
+    defines += [(define, None) for define in boost_local_defines]
 
     if not DEBUG:
         defines += [('NDEBUG', None)]
@@ -219,13 +197,8 @@ def get_language():
 
 def get_sources():
     sources = []
-
     sources += ['ajg/synth/bindings/python/module.cpp']
-
-    if BOOST != 'system':
-        boost_path = find_boost_path() + '/'
-        sources += [boost_path + source for source in boost_python_sources]
-
+    sources += [boost_local_path + '/' + source for source in boost_local_sources]
     return sources
 
 def get_headers():
@@ -241,7 +214,14 @@ def get_headers():
 def get_data_files():
     return []
 
-boost_python_sources = [
+boost_local_path = 'external/boost'
+boost_local_defines = [
+    'BOOST_ALL_NO_LIB',
+    'BOOST_PYTHON_NO_LIB',
+    'BOOST_PYTHON_STATIC_LIB',
+    'BOOST_PYTHON_SOURCE',
+]
+boost_local_sources = [
     'libs/python/src/numeric.cpp',
     'libs/python/src/list.cpp',
     'libs/python/src/long.cpp',

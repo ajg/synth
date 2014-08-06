@@ -13,34 +13,27 @@ compiler:
 #   - linux
 #   - osx
 #
-# matrix:
-#   allow_failures:
-#     - os: osx
+matrix:
+  allow_failures:
+    - compiler: g++
+    # - os: osx
 
 branches:
   only:
     - master
     - v1
 
-before_script:
-  - which clang
-  - which clang++
-
-before_install:
-  - which clang
-  - which clang++
+# before_install:
 
 install:
-  - which clang
-  - which clang++
   - sudo apt-get update
   - sudo apt-get install valgrind
 # TODO: Build environment with boost available.
 # - sudo apt-get install libboost-dev libboost-python-dev
 
+# before_script:
+
 script:
-  - which clang
-  - which clang++
   - travis_wait scons
   - tests/harness.out
   - valgrind --track-origins=yes tests/harness.out

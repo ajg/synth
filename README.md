@@ -118,7 +118,10 @@ Installation
 
 #### Using [Pip](http://www.pip-installer.org/):
 
+    pip install pip --upgrade
     pip install synth # Prefix with `sudo` if needed.
+
+(Make sure you have a recent version of pip.)
 
 #### Using [Easy Install](https://wiki.python.org/moin/EasyInstall):
 

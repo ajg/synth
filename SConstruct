@@ -119,6 +119,7 @@ def get_cpp_flags(cxx):
 
     if 'clang' in cxx_version:
         cpp_flags += ['-std=c++11']
+        cpp_flags += ['-stdlib=libc++']
         cpp_flags += ['-pedantic']
         cpp_flags += ['-Wuninitialized']
         cpp_flags += ['-Wc++11-narrowing']

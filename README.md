@@ -3,7 +3,11 @@
 
 A Powerful Templating Framework in C++, with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
 
+[![PyPI Version]](https://pypi.python.org/pypi/synth)
 [![Build Status]](https://travis-ci.org/ajg/synth)
+
+[PyPI Version]: https://pypip.in/v/synth/badge.png
+[Build Status]: https://travis-ci.org/ajg/synth.png?branch=master
 
 Synopsis
 --------

@@ -116,28 +116,24 @@ Installation
 
     choco install synth
 
-(Support for other system package managers like Apt or Yum is [welcome](#future-work).)
+_Support for other system package managers like Apt or Yum is [welcome](#future-work)._
 
 ### Via Python Package Manager
 
+_Note that these will only install the [Python module](#python)._
+
 #### Using [Pip](http://www.pip-installer.org/):
 
-    pip install pip --upgrade
+    pip install pip --upgrade # Ensure wheel support
     pip install synth # Prefix with `sudo` if needed.
-
-(Make sure you have a recent version of pip.)
 
 #### Using [Easy Install](https://wiki.python.org/moin/EasyInstall):
 
     easy_install synth # Prefix with `sudo` if needed.
 
-### Manually
+_If possible, use [Pip](#using-pip) instead._
 
-#### From Binaries:
-
-(Pre-built binary releases for common platforms are [welcome](#future-work).)
-
-#### From Source:
+### From Source:
 
  1. Ensure you have the following:
    - A tool to get the source (`git`, `curl`, a browser, etc.)

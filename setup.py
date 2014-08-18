@@ -11,9 +11,7 @@ from distutils import sysconfig
 # from distutils.core import setup, Extension
 from setuptools import setup, Extension
 
-# TODO: Allow CHAR to be passed via command-line?
 DEBUG = ('-g' in sys.argv or '--debug' in sys.argv)
-CHAR  = 'char' # Other possibilities are 'wchar_t' or 'Py_UNICODE', which differ until Python 3.something.
 
 def run():
     setup(
@@ -173,11 +171,14 @@ def get_runtime_library_dirs():
 
 def get_define_macros():
     defines = []
-    defines += [('AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE', CHAR)]
     defines += [(define, None) for define in boost_local_defines]
 
     if not DEBUG:
         defines += [('NDEBUG', None)]
+
+    # TODO: Experiment with 'wchar_t' or 'Py_UNICODE',
+    #       which differ until Python 3.something.
+    # defines += [('AJG_SYNTH_CONFIG_DEFAULT_CHAR_TYPE', 'char')]
 
     return defines
 

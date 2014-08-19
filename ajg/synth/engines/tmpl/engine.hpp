@@ -54,9 +54,9 @@ struct engine : base_engine<Traits> {
     struct attributes {
         enum escape_mode { none, html, url, js };
 
-        string_type           name;
-        optional<string_type> fallback;
-        optional<escape_mode> escape;
+        string_type                  name;
+        boost::optional<string_type> fallback;
+        boost::optional<escape_mode> escape;
     };
 
   public:
@@ -285,9 +285,11 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
     // TODO: Throw synth exceptions when possible.
     attributes parse_attributes(match_type const& match) const {
-        optional<typename attributes::escape_mode> escape   = boost::none;
-        optional<string_type>                      name     = boost::none;
-        optional<string_type>                      fallback = boost::none;
+        typedef typename attributes::escape_mode escape_mode;
+
+        boost::optional<escape_mode> escape   = boost::make_optional<escape_mode>(false, attributes::none);
+        boost::optional<string_type> name     = boost::make_optional<string_type>(false, string_type());
+        boost::optional<string_type> fallback = boost::make_optional<string_type>(false, string_type());
 
         BOOST_FOREACH(match_type const& nested, match.nested_results()) {
             match_type const& attr  = this->unnest(nested);

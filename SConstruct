@@ -165,7 +165,7 @@ def get_cpp_flags(cxx):
     if DEBUG:
         cpp_flags += ['-g'] # '-fstack-protector-all'
     else:
-        cpp_flags += ['-O3', '-DNDEBUG']
+        cpp_flags += ['-O2', '-DNDEBUG']
 
     return cpp_flags
 

@@ -90,31 +90,28 @@ def find_synth_version():
     patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
     return (major, minor, patch)
 
-# TODO: For some reason distutils.Extension adds -Wstrict-prototypes to all extensions, even C++
-#       ones, to which it doesn't apply, which causes GCC to print out a warning while building.
+# TODO: Use regexen here with word boundaries (\b) rather than spaces.
 def initialize_compiler(platform):
-    if DEBUG:
-        # Don't optimize when debug is on.
-        if platform != 'windows':
-            cflags = sysconfig.get_config_var('CFLAGS')
-            opt = sysconfig.get_config_var('OPT')
-            sysconfig._config_vars['CFLAGS'] = cflags.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
-            sysconfig._config_vars['OPT'] = opt.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
+    def purge(name):
+        old = sysconfig.get_config_var(name)
 
-        if platform == 'linux':
-            ldshared = sysconfig.get_config_var('LDSHARED')
-            sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -O ', ' ').replace(' -O2 ', ' ').replace(' -O3 ', ' ')
-    else:
-        # Don't produce debug symbols when debug is off.
-        if platform != 'windows':
-            cflags = sysconfig.get_config_var('CFLAGS')
-            opt = sysconfig.get_config_var('OPT')
-            sysconfig._config_vars['CFLAGS'] = cflags.replace(' -g ', ' ')
-            sysconfig._config_vars['OPT'] = opt.replace(' -g ', ' ')
+        if not old:
+            return
 
-        if platform == 'linux':
-            ldshared = sysconfig.get_config_var('LDSHARED')
-            sysconfig._config_vars['LDSHARED'] = ldshared.replace(' -g ', ' ')
+        if DEBUG:
+            # Don't optimize when debug is on.
+            new = (old.
+                replace(' -O ', ' ').
+                replace(' -O2 ', ' ').
+                replace(' -O3 ', ' ').
+                replace('-Wstrict-prototypes', ' '))
+        else:
+            # Don't produce debug symbols when debug is off.
+            new = (old.
+                replace('-g ', ' '). # No space
+                replace('-Wstrict-prototypes', ' '))
+
+        sysconfig._config_vars[name] = new
 
     if platform == 'windows':
         msvc_info = find_msvc_info()
@@ -130,6 +127,14 @@ def initialize_compiler(platform):
 
         return 'msvc'
     else:
+        purge('CFLAGS')
+        purge('CONFIGURE_CFLAGS') # Python 3 specific, it seems.
+        purge('LDSHARED')
+        purge('OPT')
+
+        if not DEBUG and 'CFLAGS' in os.environ: # RPM-specific
+            os.environ['CFLAGS'] = os.environ['CFLAGS'].replace('-g ', ' ')
+
         return 'default' # TODO: clang vs. gcc
 
 def find_msvc_info():
@@ -167,7 +172,7 @@ def get_extra_compile_args(compiler):
             # '-ferror-limit=1',
             # '-ftemplate-backtrace-limit=0',
             # '-Wno-unsequenced',
-            '-Wno-unused-value',
+            '-Wno-unused',
         ]
 
 def get_include_dirs():

@@ -11,4 +11,5 @@ python3 ./setup.py bdist_egg    upload
 python3 ./setup.py bdist_wheel  upload
 
 python2 ./setup.py clean --all
-python2 ./setup.py sdist upload
+python2 ./setup.py sdist              upload
+python2 ./setup.py sdist --format=zip upload

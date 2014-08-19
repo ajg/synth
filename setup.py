@@ -90,29 +90,7 @@ def find_synth_version():
     patch  = int(re.search(r'AJG_SYNTH_VERSION_PATCH\s+(\S+)', config).group(1))
     return (major, minor, patch)
 
-# TODO: Use regexen here with word boundaries (\b) rather than spaces.
 def initialize_compiler(platform):
-    def purge(name):
-        old = sysconfig.get_config_var(name)
-
-        if not old:
-            return
-
-        if DEBUG:
-            # Don't optimize when debug is on.
-            new = (old.
-                replace(' -O ', ' ').
-                replace(' -O2 ', ' ').
-                replace(' -O3 ', ' ').
-                replace('-Wstrict-prototypes', ' '))
-        else:
-            # Don't produce debug symbols when debug is off.
-            new = (old.
-                replace('-g ', ' '). # No space
-                replace('-Wstrict-prototypes', ' '))
-
-        sysconfig._config_vars[name] = new
-
     if platform == 'windows':
         msvc_info = find_msvc_info()
         if msvc_info is None:
@@ -133,9 +111,29 @@ def initialize_compiler(platform):
         purge('OPT')
 
         if not DEBUG and 'CFLAGS' in os.environ: # RPM-specific
-            os.environ['CFLAGS'] = os.environ['CFLAGS'].replace('-g ', ' ')
+            os.environ['CFLAGS'] = elide(os.environ['CFLAGS'], '-g')
 
         return 'default' # TODO: clang vs. gcc
+
+def elide(s, *flags):
+    for flag in flags:
+        s = re.sub(r'(\b|\s)%s(\b|\s)' % flag, ' ', s)
+    return s
+
+def purge(name):
+    value = sysconfig.get_config_var(name)
+
+    if not value:
+        return
+
+    value = elide(value, '-Wstrict-prototypes')
+
+    if DEBUG: # Don't optimize when debug is on.
+        value = elide(value, '-O', '-O2', '-O3')
+    else: # Don't produce debug symbols when debug is off.
+        value = elide(value, '-g')
+
+    sysconfig._config_vars[name] = value
 
 def find_msvc_info():
     latest, path = None, None

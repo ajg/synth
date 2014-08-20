@@ -24,6 +24,7 @@ def make_environment(cxx):
         CXX      = cxx,
         CPPPATH  = get_cpp_path(),
         CPPFLAGS = get_cpp_flags(cxx),
+        ENV      = {'PATH' : os.environ['PATH']},
         # TODO: VariantDir('build' / 'stage', '?', duplicate=0)
     )
 

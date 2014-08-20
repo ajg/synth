@@ -15,13 +15,11 @@ compiler:
 before_script:
   - sudo apt-get update
   - sudo apt-get install valgrind
-  # Prevent slow builds from dying by echoing something every 5 minutes:
-  - (while true; do echo "=== I'm a little teapot ==="; sleep 300; done)&
 
 script:
-  - scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
-  - scons synth && tests/harness.sh
-  - scons tests/synth.so && python tests/harness.py
-  - scons # Make sure every other target builds successfully.
+  - travis_wait scons tests/harness.out && (tests/harness.out; valgrind --track-origins=yes tests/harness.out)
+  - travis_wait scons synth && tests/harness.sh
+  - if [ "$CXX" == "clang++"  ]; then scons tests/synth.so && python tests/harness.py; fi
   ### TODO: Re-enable once Travis bumps memory limits.
+  ### - scons # Make sure every other target builds successfully.
   ### - sudo python setup.py build

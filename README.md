@@ -3,7 +3,7 @@ synth
 
 A Powerful C++ Templating Framework with a [command-line tool](#command-line) and [Python module](#python), written by [Alvaro J. Genial](http://alva.ro).
 
-[![Build Status](https://travis-ci.org/ajg/synth.png?branch=master)](https://travis-ci.org/ajg/synth)
+[![Build Status](https://travis-ci.org/ajg/synth.png?branch=v1)](https://travis-ci.org/ajg/synth)
 
 Synopsis
 --------
@@ -98,7 +98,7 @@ Installation
 
 #### Using [Homebrew](http://brew.sh/):
 
-    brew install https://raw.github.com/ajg/synth/master/synth.rb
+    brew install https://raw.github.com/ajg/synth/v1/synth.rb
     # Note that you must append `--with-python` to install the Python module.
 
 (Support for other system package managers like Apt or Yum is [welcome](#future-work).)
@@ -141,18 +141,6 @@ Installation
  4. *Optionally*, build (and install) the [Python module](#python):
 
         python setup.py install # Prefix with `sudo` if needed.
-
-
-<!-- TODO: Figure out how to include submodules in tarballs & zipballs.
- 2. Get the source (pick your poison):
-      - With Git:
-
-            git clone --depth 1 --recursive https://github.com/ajg/synth.git && cd synth
-      - With Curl:
-
-            curl -L https://github.com/ajg/synth/archive/master.tar.gz | tar xz && cd synth-master
-      - Otherwise, try using https://github.com/ajg/synth/archive/master.zip
--->
 
 Components
 ----------

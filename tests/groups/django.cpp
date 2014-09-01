@@ -65,8 +65,11 @@ DJANGO_TEST(text, "ABC", "ABC")
 
 DJANGO_TEST(html, "<foo>\nA foo <bar /> element.\n</foo>", "<foo>\nA foo <bar /> element.\n</foo>")
 DJANGO_TEST(html, "{$ foo bar baz $}\n{ { { { {", "{$ foo bar baz $}\n{ { { { {")
+DJANGO_TEST(html, "{$ foo bar baz $}\n{ { { { {\n", "{$ foo bar baz $}\n{ { { { {\n")
 DJANGO_TEST(html, "foo { bar qux } }} }}} }}}} }}}}}", "foo { bar qux } }} }}} }}}} }}}}}")
 DJANGO_TEST(html, "{% block x %}foo }}{% endblock %}", "foo }}")
+
+AJG_SYNTH_TEST_UNIT(huge) { string_template_type("{% include 'tests/templates/django/huge.html' %}", options).render_to_string(context); }}}
 
 ///
 /// Literal tests

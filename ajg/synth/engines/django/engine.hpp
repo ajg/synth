@@ -250,14 +250,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         arguments
             = *argument
             ;
-        this->skipper
-            = block_open
-            | block_close    // TODO: Comment out if it is allowed on its own outside a block tag.
-            | comment_open
-            | comment_close  // TODO: Comment out if it is allowed on its own outside a comment tag.
-            | variable_open
-         // | variable_close // Note: This is allowed outside of a variable tag.
-            ;
         html_namechar
             = ~(x::set = ' ', '\t', '\n', '\v', '\f', '\r', '>')
             ;
@@ -274,7 +266,22 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             >> '>'
             ;
 
-        this->initialize_grammar();
+        /*
+        regex_type const& skipper
+            = block_open
+            | block_close    // TODO: Comment out if it is allowed on its own outside a block tag.
+            | comment_open
+            | comment_close  // TODO: Comment out if it is allowed on its own outside a comment tag.
+            | variable_open
+         // | variable_close // Note: This is allowed outside of a variable tag.
+            ;
+        */
+        regex_type const& allowed1 = +~(x::set='{');
+        regex_type const& allowed2 = +((x::set='{') >> +~(x::set='{','%','#'));
+        regex_type const& allowed3 =  ((x::set='{') >> x::eos);
+        regex_type const& allowed = *(allowed1 | allowed2) >> !allowed3;
+
+        this->initialize_grammar(allowed);
         builtin_tags_.initialize(*this);
     }
 

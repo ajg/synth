@@ -158,12 +158,12 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         // We want to skip essentially anything that is not a tmpl tag or comment.
             = *_s >> !as_xpr(tag_finish) >> *_s >> x::icase(tag_prefix)
             ;
-        this->skipper
+        regex_type const& skipper
             = tag_open >> prefix >> +(~x::before(tag_close) >> _) >> tag_close
             | alt_open >> prefix >> +(~x::before(alt_close) >> _) >> alt_close
             ;
 
-        this->initialize_grammar();
+        this->initialize_grammar_using_skipper(skipper);
         builtin_tags_.initialize(*this);
     }
 

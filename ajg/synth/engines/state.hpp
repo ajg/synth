@@ -100,12 +100,19 @@ struct state : boost::noncopyable {
 
     inline boolean_type consumed() const { return this->furthest() == this->end();}
 
-    inline string_type line(size_type const limit) const {
+    inline string_type vicinity(size_type const limit) const {
         iterator_type const it = this->furthest();
         size_type     const buffer(std::distance(it, this->end()));
         string_type   const site(it, detail::advance_to(it, (std::min)(buffer, limit)));
         return string_type(site.begin(), std::find(site.begin(), site.end(), char_type('\n')));
     }
+
+    inline size_type line() const {
+        iterator_type const it = this->furthest();
+        return std::count(this->begin(), it, char_type('\n')) + 1;
+    }
+
+    // TODO: inline size_type column() const {}
 
     /*
     inline filter_type get_filter(string_type const& name) const {

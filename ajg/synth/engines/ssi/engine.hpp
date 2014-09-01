@@ -179,11 +179,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         or_expression
             = primary_expression >> *(*_s >> "||" >> *_s >> expression)
             ;
-        this->skipper
-            = as_xpr(tag_start);
-            ;
 
-        this->initialize_grammar();
+        this->initialize_grammar_using_skipper(as_xpr(tag_start));
         builtin_tags_.initialize(*this);
     }
 

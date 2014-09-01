@@ -117,18 +117,36 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 
   protected:
 
-    void initialize_grammar() {
+//
+// [deprecated] initialize_grammar_using_skipper
+//     NOTE: Using the skipper leads to stack overflows due to this bug in Xpressive:
+//           https://svn.boost.org/trac/boost/ticket/3936
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initialize_grammar_using_skipper(regex_type const& skipper) {
         // TODO: Invoke set_furthest in some (maybe all) the derived engine regexes (like markers)
         //       to present more precise error message lines.
         typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
-
-        this->plain = +(~x::before(this->skipper) >> _);
+        this->plain = +(~x::before(skipper) >> _);
 
         // block = skip(plain[...])(*tag[...]); // Using skip is slightly slower than this:
         this->block = *x::keep // Causes actions (i.e. furthest) to execute eagerly.
             ( x::ref(this->tag)   [set_furthest(*this->_state, _)]
             | x::ref(this->plain) [set_furthest(*this->_state, _)]
             );
+    }
+
+//
+// initialize_grammar
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void initialize_grammar(regex_type const& allowed) {
+        // TODO: Invoke set_furthest in some (maybe all) the derived engine regexes (like markers)
+        //       to present more precise error message lines.
+        typename x::function<set_furthest_iterator>::type const set_furthest = {{}};
+        this->plain = x::keep(allowed[set_furthest(*this->_state, _)]);
+        this->block = this->plain
+            >> *(x::keep(x::ref(this->tag)[set_furthest(*this->_state, _)]) >> this->plain);
     }
 
 //
@@ -189,12 +207,17 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
                              );
     }
 
+//
+// parse
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
     inline void parse(state_type* state) const { // Pointer to make clear it's mutable.
         state->match().let(this->_state = state);
 
         if (!x::regex_match(state->begin(), state->end(), state->match(), this->block)) {
             // On failure, throw a semi-informative exception.
-            AJG_SYNTH_THROW(parsing_error(text::narrow(state->line(error_line_limit))));
+            string_type const vicinity = text::narrow(state->vicinity(error_line_limit));
+            AJG_SYNTH_THROW(parsing_error(static_cast<std::size_t>(state->line()), vicinity));
         }
 
         // On success, all input should have been consumed.
@@ -207,7 +230,6 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
     regex_type plain;
     regex_type block;
     regex_type nothing;
-    regex_type skipper;
 
   public: // TODO: protected
 

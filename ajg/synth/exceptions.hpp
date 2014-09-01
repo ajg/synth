@@ -12,6 +12,8 @@
 #include <stdexcept>
 #include <exception>
 
+#include <boost/lexical_cast.hpp>
+
 #include <ajg/synth/detail/unmangle.hpp>
 
 namespace ajg {
@@ -82,7 +84,9 @@ struct conversion_error : public exception, public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct parsing_error : public exception, public std::runtime_error {
-    parsing_error(std::string const& line) : std::runtime_error("parsing error near `" + line + "`") {}
+    parsing_error(std::string const& vicinity) : std::runtime_error("parsing error near `" + vicinity + "`") {}
+    parsing_error(std::size_t const& line, std::string const& vicinity) : std::runtime_error("parsing error near line " +
+            boost::lexical_cast<std::string>(line) + ", `" + vicinity + "`") {}
     ~parsing_error() throw () {}
 };
 

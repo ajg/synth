@@ -60,7 +60,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 
   public:
 
-    inline void parse(state_type*) const {}
+    inline void parse(state_type*, string_type const& origin = string_type()) const {}
     inline void render(ostream_type&, options_type const&, state_type const&, context_type&) const {}
 
 }; // kernel

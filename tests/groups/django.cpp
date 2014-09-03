@@ -99,6 +99,10 @@ DJANGO_TEST(string, "{{\"Bar\"}}",    "Bar")
 DJANGO_TEST(string, "{{_('Foo')}}",   "Foo")
 DJANGO_TEST(string, "{{_(\"Bar\")}}", "Bar")
 
+DJANGO_TEST(variable, "{{ foo }}",        "A")
+DJANGO_TEST(variable, "{{ states.NY }}",  "New York")
+DJANGO_TEST(variable, "{{ numerals.3 }}", "III")
+
 /// Value tests
 ///     NOTE: The use of firstof is incidental; many other tags would work for these tests.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +205,7 @@ DJANGO_TEST(debug_tag, "{% debug %}",
     "    haiku = Haikus are easy,\nBut sometimes they don&apos;t make sense.\nRefrigerator.\n<br />\n"
     "    heterogenous = 42, 42, foo, foo<br />\n"
     "    numbers = 1, 2, 3, 4, 5, 6, 7, 8, 9<br />\n"
+    "    numerals = 1: I, 2: II, 3: III<br />\n"
     "    past = 2002-Jan-10 01:02:03<br />\n"
     "    places = Parent, States, Kansas, Lawrence, Topeka, Illinois1, Illinois2<br />\n"
     "    qux = C<br />\n"

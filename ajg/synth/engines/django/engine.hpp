@@ -130,7 +130,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((x::alpha | '_') >> *_w >> _b)
+            = ((x::alnum | '_') >> *_w >> _b)
             ;
         keyword_identifier
             = identifier[ x::check(in(keywords_)) ]

@@ -112,6 +112,11 @@ struct kitchen_sink {
         states[text::literal("NY")] = text::literal("New York");
         context.set(text::literal("states"), states);
 
+        numerals[text::literal("1")] = text::literal("I");
+        numerals[text::literal("2")] = text::literal("II");
+        numerals[text::literal("3")] = text::literal("III");
+        context.set(text::literal("numerals"), numerals);
+
         numbers.push_back(1);
         numbers.push_back(2);
         numbers.push_back(3);
@@ -142,6 +147,7 @@ struct kitchen_sink {
     std::map<string_type, std::string>  friends[3];
     std::map<string_type, std::string>  cities[5];
     std::map<string_type, string_type>  states;
+    std::map<string_type, string_type>  numerals;
     std::vector<int>                    numbers;
     std::deque<char const*>             tags;
     std::list<value_type>               heterogenous;

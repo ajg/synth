@@ -68,6 +68,8 @@ def library_loader(name):
             'encode':         dyadic_tag(encode, 'encode', 'endencode'),
             'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
             'unless':         triadic_tag(unless, 'unless', 'otherwise', 'endunless'),
+            'ifgreater':      triadic_tag(ifgreater, 'ifgreater', 'else', 'endifgreater'),
+            'iflesser':       triadic_tag(iflesser, 'iflesser', 'else', 'endiflesser'),
             'f':              variadic_tag(fml, 'f', ('m1', 'm2'), ('l1', 'l2', 'l3',)),
         })
 
@@ -106,7 +108,23 @@ def decode(segments, data, name, *args, **kwargs):
     return codecs.decode(s, name)
 
 def unless(segments, data, condition, *args, **kwargs):
-    return render_segment(segments[1 if condition else 0], data)
+    return _choose('unless', not condition, segments, data)
+
+def ifgreater(segments, data, a, b, *args, **kwargs):
+    return _choose('ifgreater', a > b, segments, data)
+
+def iflesser(segments, data, a, b, *args, **kwargs):
+    return _choose('ifgreater', a < b, segments, data)
+
+def _choose(name, condition, segments, data):
+    if len(segments) == 2:
+        return render_segment(segments[0], data) if condition else ''
+    elif len(segments) == 3:
+        return render_segment(segments[0 if condition else 1], data)
+    if len(segments) < 2:
+        raise Exception('Too few segments for tag `%s`' % name)
+    elif len(segments) > 3:
+        raise Exception('Too many segments for tag `%s`' % name)
 
 def set_variable(segments, data, *args, **kwargs):
     pieces = segments[0][0]
@@ -139,7 +157,7 @@ source = """\
 {% load add from test_tags %}
 {% load set unset from test_tags %}
 {% load encode decode from test_tags %}
-{% load unless from test_tags %}
+{% load unless ifgreater iflesser from test_tags %}
 {% load f from test_tags %}
 ({% answer_to_life %})
 ({% identity 'wow' %})
@@ -159,6 +177,12 @@ source = """\
 ({% if False %}{% encode 'rot13' %}Hello Kitty{% endencode %}{% endif %})
 ({% unless True%}A{% otherwise %}B{% endunless %})
 ({% unless False%}A{% otherwise %}B{% endunless %})
+({% ifgreater 2 1 %}A{% else %}B{% endifgreater %})
+({% ifgreater 3 3 %}A{% else %}B{% endifgreater %})
+({% ifgreater 4 5 %}A{% endifgreater %})
+({% iflesser 1 2 %}A{% else %}B{% endiflesser %})
+({% iflesser 3 3 %}A{% else %}B{% endiflesser %})
+({% iflesser 4 5 %}A{% endiflesser %})
 ({% f %}1{% l1 %})
 ({% f %}1{% l2 %})
 ({% f %}1{% l3 %})
@@ -212,6 +236,12 @@ mAY THE fORCE BE WITH YOU.
 ()
 (Uryyb Xvggl)
 ()
+(B)
+(A)
+(A)
+(B)
+()
+(A)
 (B)
 (A)
 (1)

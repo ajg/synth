@@ -211,13 +211,17 @@ struct base_engine<Traits>::base_kernel : boost::noncopyable {
 // parse
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline void parse(state_type* state) const { // Pointer to make clear it's mutable.
+    inline void parse(state_type* state, string_type const& origin = string_type()) const { // Pointer to make clear it's mutable.
         state->match().let(this->_state = state);
 
         if (!x::regex_match(state->begin(), state->end(), state->match(), this->block)) {
             // On failure, throw a semi-informative exception.
             string_type const vicinity = text::narrow(state->vicinity(error_line_limit));
-            AJG_SYNTH_THROW(parsing_error(static_cast<std::size_t>(state->line()), vicinity));
+            std::size_t const line = static_cast<std::size_t>(state->line());
+            if (origin.empty())
+                AJG_SYNTH_THROW(parsing_error(line, vicinity));
+            else
+                AJG_SYNTH_THROW(parsing_error(origin, line, vicinity));
         }
 
         // On success, all input should have been consumed.

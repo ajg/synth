@@ -137,9 +137,9 @@ struct base_template : boost::noncopyable {
         // NOTE: Don't parse in this case.
     }
 
-    inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type()) {
+    inline void reset(iterator_type const& begin, iterator_type const& end, options_type const& options = options_type(), string_type const& origin = string_type()) {
         this->state_ = boost::in_place(range_type(begin, end), options);
-        this->kernel().parse(this->state_.get_ptr());
+        this->kernel().parse(this->state_.get_ptr(), origin);
     }
 
   private:

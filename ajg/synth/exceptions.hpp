@@ -84,9 +84,14 @@ struct conversion_error : public exception, public std::runtime_error {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct parsing_error : public exception, public std::runtime_error {
-    parsing_error(std::string const& vicinity) : std::runtime_error("parsing error near `" + vicinity + "`") {}
+    std::string const origin;
+    std::size_t const line;
+
+    parsing_error(std::string const& vicinity) : std::runtime_error("parsing error near `" + vicinity + "`"), origin(), line(0) {}
     parsing_error(std::size_t const& line, std::string const& vicinity) : std::runtime_error("parsing error near line " +
-            boost::lexical_cast<std::string>(line) + ", `" + vicinity + "`") {}
+            boost::lexical_cast<std::string>(line) + ", `" + vicinity + "`"), origin(), line(line) {}
+    parsing_error(std::string const& origin, std::size_t const& line, std::string const& vicinity) : std::runtime_error("parsing error near line " +
+            boost::lexical_cast<std::string>(line) + " of " + origin + ", `" + vicinity + "`"), origin(origin), line(line) {}
     ~parsing_error() throw () {}
 };
 

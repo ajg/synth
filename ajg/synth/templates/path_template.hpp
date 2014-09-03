@@ -60,7 +60,7 @@ struct path_template : base_template<Engine, boost::spirit::classic::file_iterat
         else {
             iterator_type begin(text::narrow(this->info_.first));
             iterator_type end = begin ? begin.make_end() : iterator_type();
-            this->reset(begin, end, options);
+            this->reset(begin, end, options, text::quote(this->info_.first, '"'));
         }
     }
 

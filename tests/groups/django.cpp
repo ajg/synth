@@ -250,6 +250,16 @@ DJANGO_TEST(if_elif_tag, "{% if True  or True  %}Good{% elif False and True %}Ba
 DJANGO_TEST(if_elif_tag, "{% if False or True  %}Good{% elif True and False %}Bad{% endif %}",     "Good")
 DJANGO_TEST(if_elif_tag, "{% if False or False %}Bad{% elif False and False %}Bad{% endif %}Good", "Good")
 
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% endif %}Good",                            "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{%else%}Good{% endif %}",                    "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% elif True %}Good{%else%}Bad{% endif %}", "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% elif False %}Bad{%else%}Good{% endif %}", "Good")
+
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length <= 5 %}Good{% endif %}",                               "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length <= 5 %}Good{%else%}Bad{% endif %}",                    "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length <= 5 %}Good{% elif True %}Bad{%else%}Bad{% endif %}",  "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length <= 5 %}Good{% elif False %}Bad{%else%}Bad{% endif %}", "Good")
+
 DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% endifchanged %}{% endfor %}",                  "42foo")
 DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}{{ v }}{% else %}-{% endifchanged %}{% endfor %}",       "42-foo-")
 DJANGO_TEST(ifchanged_tag:content, "{% for v in heterogenous%}{% ifchanged %}Y{% endifchanged %}{% endfor %}",                        "Y")

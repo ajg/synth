@@ -195,8 +195,17 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = attribute_link
             | subscript_link
             ;
-        chain
+        unfiltered_chain
             = literal >> *link
+            ;
+        filter
+            = name >> !(as_xpr(':') >> unfiltered_chain)
+            ;
+        filters
+            = filter >> *(as_xpr('|') >> filter)
+            ;
+        filtered_chain
+            = literal >> *link >> *(as_xpr('|') >> filter)
             ;
         unary_operator
             = op("not")
@@ -214,7 +223,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             | op("not") >> *_s >> op("in")
             ;
         binary_expression
-            = chain >> *(*_s >> binary_operator >> *_s >> x::ref(expression))
+            = filtered_chain >> *(*_s >> binary_operator >> *_s >> x::ref(expression))
             ;
         unary_expression
             = unary_operator >> *_s >> x::ref(expression)
@@ -231,14 +240,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             // TODO: Check whether whitespace can precede or follow ','.
             = name >> *(as_xpr(',') >> *_s >> name)
             ;
-        filter
-            = name >> !(as_xpr(':') >> chain)
-            ;
-        filters
-            = filter >> *(as_xpr('|') >> filter)
-            ;
         value
-            = expression >> *(as_xpr('|') >> filter) >> *_s
+            = expression >> *_s
             ;
         values
             = +value
@@ -269,11 +272,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         /*
         regex_type const& skipper
             = block_open
-            | block_close    // TODO: Comment out if it is allowed on its own outside a block tag.
             | comment_open
-            | comment_close  // TODO: Comment out if it is allowed on its own outside a comment tag.
             | variable_open
-         // | variable_close // Note: This is allowed outside of a variable tag.
             ;
         */
         regex_type const& allowed1 = +~(x::set='{');
@@ -442,7 +442,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
         BOOST_FOREACH(match_type const& filter, this->select_nested(match, this->filter)) {
             BOOST_ASSERT(this->is(filter, this->filter));
             string_type const& name  = filter(this->name)[id].str();
-            match_type  const& chain = filter(this->chain);
+            match_type  const& chain = filter(this->unfiltered_chain);
 
             arguments_type arguments;
             if (chain) {
@@ -478,8 +478,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                        , match_type   const& match
                        , context_type&       context
                        ) const {
-        value_type const& value = this->evaluate_expression(options, state, match(this->expression), context);
-        return this->apply_filters(value, options, state, match, context);
+        return this->evaluate_expression(options, state, match(this->expression), context);
+        // value_type const& value = this->evaluate_expression(options, state, match(this->expression), context);
+        // return this->apply_filters(value, options, state, match, context);
     }
 
     arguments_type evaluate_arguments( options_type  const& options
@@ -602,7 +603,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                               , context_type&       context
                               ) const {
         BOOST_ASSERT(this->is(match, this->binary_expression));
-        match_type const& chain = match(this->chain);
+        match_type const& chain = match(this->filtered_chain);
         value_type value = this->evaluate_chain(options, state, chain, context);
         string_type op;
 
@@ -677,7 +678,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                              , match_type   const& match
                              , context_type&       context
                              ) const {
-        BOOST_ASSERT(this->is(match, this->chain));
         match_type const& lit = match(this->literal);
         value_type value = this->evaluate_literal(options, state, lit, context);
 
@@ -687,8 +687,18 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                 value = *attr;
             }
             else {
-                return this->invalid(context, attribute.to_string());
+                // XXX: Are filters applied to missing values?
+                // return this->invalid(context, attribute.to_string());
+                value = this->invalid(context, attribute.to_string());
+                break;
             }
+        }
+
+        if (this->is(match, this->filtered_chain)) {
+            value = this->apply_filters(value, options, state, match, context);
+        }
+        else if (!this->is(match, this->unfiltered_chain)) {
+            AJG_SYNTH_THROW(std::logic_error("invalid chain"));
         }
 
         return value;
@@ -747,7 +757,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     regex_type values;
     regex_type filter;
     regex_type filters;
-    regex_type chain;
+    regex_type unfiltered_chain;
+    regex_type filtered_chain;
     regex_type link;
     regex_type subscript_link;
     regex_type attribute_link;

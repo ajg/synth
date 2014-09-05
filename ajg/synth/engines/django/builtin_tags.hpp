@@ -565,7 +565,8 @@ struct builtin_tags {
 
     struct if_tag {
         static regex_type syntax(kernel_type& kernel) {
-            return TAG(kernel.reserved("if") >> kernel.value) >> kernel.block
+            return TAG(kernel.reserved("if")    >> kernel.value) >> kernel.block
+              >> *(TAG(kernel.reserved("elif")  >> kernel.value) >> kernel.block)
               >> !(TAG(kernel.reserved("else")) >> kernel.block)
                 >> TAG(kernel.reserved("endif"));
         }
@@ -577,12 +578,18 @@ struct builtin_tags {
                           , context_type&       context
                           , ostream_type&       ostream
                           ) {
-            match_type   const& if_   = match(kernel.block, 0);
-            match_type   const& else_ = match(kernel.block, 1);
-            boolean_type const  cond_ = kernel.evaluate(options, state, match(kernel.value), context);
+            size_type i = 0;
+            BOOST_FOREACH(match_type const& condition, kernel.select_nested(match, kernel.value)) {
+                if (kernel.evaluate(options, state, condition, context)) { // Handle if/elif clauses.
+                    match_type const& block = match(kernel.block, i);
+                    return kernel.render_block(ostream, options, state, block, context);
+                }
+                ++i;
+            }
 
-                 if (cond_) kernel.render_block(ostream, options, state, if_,   context);
-            else if (else_) kernel.render_block(ostream, options, state, else_, context);
+            if (match_type const& block = match(kernel.block, i)) { // Handle else clause.
+                return kernel.render_block(ostream, options, state, block, context);
+            }
         }
     };
 

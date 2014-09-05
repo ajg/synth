@@ -74,6 +74,11 @@ struct conversions {
         return e.check() ? boost::optional<size_type>(e()) : boost::none;
     }
 
+    inline static boost::optional<integer_type> make_integer(py::object const& obj) {
+        py::extract<integer_type> e((py::long_(obj)));
+        return e.check() ? boost::optional<integer_type>(e()) : boost::none;
+    }
+
     inline static boost::optional<number_type> make_number(py::object const& obj) {
         // FIXME: Use number_type only for non-integer numbers.
         py::extract<number_type> e(obj);
@@ -160,10 +165,10 @@ struct conversions {
 
     inline static duration_type make_duration(py::object const& timedelta) {
         return traits_type::to_duration
-            ( make_size(timedelta.attr("days")).get_value_or(0) * 24
+            ( make_integer(timedelta.attr("days")).get_value_or(0) * 24
             , 0
-            , make_size(timedelta.attr("seconds")).get_value_or(0)
-            , make_size(timedelta.attr("microseconds")).get_value_or(0)
+            , make_integer(timedelta.attr("seconds")).get_value_or(0)
+            , make_integer(timedelta.attr("microseconds")).get_value_or(0)
             );
     }
 

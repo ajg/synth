@@ -393,10 +393,10 @@ struct default_traits {
 /// to_duration:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline static duration_type to_duration( size_type const hours
-                                           , size_type const minutes
-                                           , size_type const seconds
-                                           , size_type const microseconds = 0
+    inline static duration_type to_duration( integer_type const hours
+                                           , integer_type const minutes
+                                           , integer_type const seconds
+                                           , integer_type const microseconds = 0
                                            ) {
         return duration_type(
             duration_type::hour_type(hours),

@@ -130,7 +130,8 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         identifier
-            = ((x::alnum | '_') >> *_w >> _b)
+            // TODO: x::alnum >> *_w >> _b
+            = +_w >> _b
             ;
         keyword_identifier
             = identifier[ x::check(in(keywords_)) ]
@@ -237,7 +238,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             | nested_expression
             ;
         variable_names
-            // TODO: Check whether whitespace can precede or follow ','.
             = name >> *(as_xpr(',') >> *_s >> name)
             ;
         value
@@ -247,7 +247,6 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = +value
             ;
         argument
-            // TODO: Check whether whitespace can precede or follow '='.
             = !(nonkeyword_identifier >> as_xpr('=')) >> value
             ;
         arguments

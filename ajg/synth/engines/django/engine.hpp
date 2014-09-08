@@ -133,9 +133,9 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             // TODO: x::alnum >> *_w >> _b
             = +_w >> _b
             ;
-        keyword_identifier
-            = identifier[ x::check(in(keywords_)) ]
-            ;
+        // keyword_identifier
+        //     = identifier[ x::check(in(keywords_)) ]
+        //     ;
         nonkeyword_identifier
             = identifier[ x::check(not_in(keywords_)) ]
             ;
@@ -241,10 +241,16 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
             = name >> *(as_xpr(',') >> *_s >> name)
             ;
         value
-            = expression >> *_s
+            = expression >> ~x::before(as_xpr(':')) >> *_s
             ;
         values
             = +value
+            ;
+        raw_argument
+            // = kernel.keyword_identifier >> *_s
+            // TODO: Remove the ~x::before(as_xpr(':')) from value, using the following here:
+            // = +~x::set[_s | (x::set = '\'', '"', '{', '}', '%')]) >> *_s
+            = +x::set[_w | (x::set=':')] >> *_s
             ;
         argument
             = !(nonkeyword_identifier >> as_xpr('=')) >> value
@@ -742,7 +748,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
   protected:
 
     regex_type identifier;
-    regex_type keyword_identifier;
+    // regex_type keyword_identifier;
     regex_type nonkeyword_identifier;
     regex_type unreserved_identifier;
     regex_type name;
@@ -750,6 +756,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
     regex_type variable_names;
     regex_type package;
     regex_type packages;
+    regex_type raw_argument;
     regex_type argument;
     regex_type arguments;
     regex_type value;

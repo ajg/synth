@@ -799,8 +799,8 @@ struct builtin_tags {
             typename x::function<on_continue_>::type const on_continue = {{}};
             typename x::function<on_polyadic1_tag_>::type const on_polyadic1_tag = {{}};
             typename x::function<on_polyadic2_tag_>::type const on_polyadic2_tag = {{}};
-            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), *kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(*kernel._state)) ] >>
-                  kernel.block >> x::keep((TAG((s2 = kernel.identifier) >> *_s >> *x::keep((kernel.argument | kernel.keyword_identifier >> *_s)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), *kernel._state, s2, _))]));
+            kernel.polyadic_tag = x::keep((TAG((s1 = kernel.unreserved_identifier) >> *_s >> *x::keep((kernel.argument | kernel.raw_argument)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic1_tag(x::ref(kernel), *kernel._state, s1, _))]) >> *(x::nil[ x::check(on_continue(*kernel._state)) ] >>
+                  kernel.block >> x::keep((TAG((s2 = kernel.identifier) >> *_s >> *x::keep((kernel.argument | kernel.raw_argument)[ on_arg(*kernel._state, _) ])))[x::check(on_polyadic2_tag(x::ref(kernel), *kernel._state, s2, _))]));
 
             return kernel.polyadic_tag;
         }

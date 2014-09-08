@@ -149,9 +149,7 @@ def unset_variable(segments, data, *args, **kwargs):
 
 def count_raw_args(segments, data, *args, **kwargs):
     pieces = segments[0][0]
-    print('pieces', pieces)
     raw_args = pieces[2:] # Exclude the whole match [0], and the tag name [1]
-    print('raw_args', raw_args)
     return len(raw_args)
 
 def fml(segments, data, *args, **kwargs):

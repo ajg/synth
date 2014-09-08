@@ -163,6 +163,8 @@ def get_extra_compile_args(compiler):
             '/wd4267', # "conversion from 'size_t' to 'const int'" in various places.
             '/wd4273', # "inconsistent dll linkage" in pymath.h.
             '/wd4503', # "decorated name length exceeded, name was truncated" in xpressive.
+            '/D_CRT_SECURE_NO_WARNINGS', # Non-standard runtime "security" cruft.
+            '/D_SCL_SECURE_NO_WARNINGS', # Non-standard library "security" cruft.
         ]
     else:
         # TODO: Some of this is repeated in SConstruct.

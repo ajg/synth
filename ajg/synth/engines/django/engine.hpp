@@ -712,7 +712,7 @@ struct engine<Traits>::kernel : base_engine<Traits>::AJG_SYNTH_TEMPLATE base_ker
                          ) const {
         BOOST_FOREACH(typename options_type::resolver_type const& resolver, options.resolvers) {
             if (url_type const& url = resolver->reverse(view, arguments, context, options)) {
-                return url;
+                return url->find(char_type('/')) == 0 ? *url : char_type('/') + *url;
             }
         }
         return url_type();

@@ -255,7 +255,9 @@ struct builtin_tags {
         static regex_type syntax(kernel_type& kernel) {
             // Short form (without a closing token or newlines) or long form, below.
             return kernel.comment_open >> *(~x::before(kernel.comment_close | _n) >> _) >> kernel.comment_close
-                | TAG(kernel.reserved("comment")) >> kernel.block >> TAG(kernel.reserved("endcomment"));
+                | TAG(kernel.reserved("comment")) >> *(~x::before(TAG(kernel.reserved("endcomment"))) >> _) >> TAG(kernel.reserved("endcomment"));
+             // Note: This doesn't work because comments can contain invalid/incomplete tags (though not nested comments.)
+             // | TAG(kernel.reserved("comment")) >> kernel.block >> TAG(kernel.reserved("endcomment"));
         }
 
         static void render( kernel_type  const& kernel

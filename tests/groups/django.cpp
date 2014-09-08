@@ -172,12 +172,15 @@ AJG_SYNTH_TEST_UNIT(mismatched block) {
     MUST_THROW(std::invalid_argument, t.render_to_string(context));
 }}}
 
-DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                "01")
-DJANGO_TEST(comment_tag-short, "0{##}1",                                             "01")
-DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                         "01")
-DJANGO_TEST(comment_tag-short, "0{# {{ x|y:'z' }} #}1",                              "01")
-DJANGO_TEST(comment_tag-short, "0{# {% if foo %}bar{% else %} #}1",                  "01")
-DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1", "01")
+DJANGO_TEST(comment_tag-short, "0{# Foo Bar Qux #}1",                                        "01")
+DJANGO_TEST(comment_tag-short, "0{##}1",                                                     "01")
+DJANGO_TEST(comment_tag-short, "0{# {# #}1",                                                 "01")
+DJANGO_TEST(comment_tag-short, "0{# {{ x|y:'z' }} #}1",                                      "01")
+DJANGO_TEST(comment_tag-short, "0{# {% if foo %}bar{% else %} #}1",                          "01")
+DJANGO_TEST(comment_tag-short, "0{# {% if not comment %} #}1",                               "01")
+DJANGO_TEST(comment_tag-long,  "0{% comment %} Foo\n Bar\n Qux\n {% endcomment %}1",         "01")
+DJANGO_TEST(comment_tag-long,  "0{% comment %} {% if foo %}bar{% else %} {% endcomment %}1", "01")
+DJANGO_TEST(comment_tag-long,  "0{% comment %} {% if not comment %} {% endcomment %}1",      "01")
 
 DJANGO_TEST(csrf_token_tag,  "{% csrf_token %}", "<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='ABCDEF123456' /></div>")
 
@@ -252,7 +255,7 @@ DJANGO_TEST(if_elif_tag, "{% if False or False %}Bad{% elif False and False %}Ba
 
 DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% endif %}Good",                            "Good")
 DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{%else%}Good{% endif %}",                    "Good")
-DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% elif True %}Good{%else%}Bad{% endif %}", "Good")
+DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% elif True %}Good{%else%}Bad{% endif %}",  "Good")
 DJANGO_TEST(if_tag_with_filters, "{% if cities|length > 5 %}Bad{% elif False %}Bad{%else%}Good{% endif %}", "Good")
 
 DJANGO_TEST(if_tag_with_filters, "{% if cities|length <= 5 %}Good{% endif %}",                               "Good")

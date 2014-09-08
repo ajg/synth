@@ -3,6 +3,7 @@
 ##  (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
 
 import codecs
+import functools
 import sys
 
 def get():
@@ -19,14 +20,20 @@ def render_segment(segment, data, options=None):
     pieces, renderer = segment
     return renderer(data, options)
 
+def render_pure(fn, *args, **kwargs):
+    return fn(*args, **kwargs)
+
+def render_segments_impure(fn, segments, data, options, *args, **kwargs):
+    return fn(segments, data, *args, **kwargs)
+
 def dummy_tag():
     return ((lambda: ''), None, None, True)
 
 def pure_tag(fn):
-    return (lambda: (lambda *args, **kwargs: fn(*args, **kwargs)), None, None, True)
+    return (lambda: functools.partial(render_pure, fn), None, None, True)
 
 def variadic_tag(fn, first, middles, lasts):
-    return (lambda segments: (lambda data, options, *args, **kwargs: fn(segments, data, *args, **kwargs)), middles, lasts, False)
+    return (lambda segments: functools.partial(render_segments_impure, fn, segments), middles, lasts, False)
 
 def monadic_tag(fn, first):
     return variadic_tag(fn, None, None, None)
@@ -64,6 +71,7 @@ def library_loader(name):
             'add':            pure_tag(add),            # N-ary
             'set':            monadic_tag(set_variable, 'set'),
             'unset':          monadic_tag(unset_variable, 'unset'),
+            'count_raw_args': monadic_tag(count_raw_args, 'count_raw_args'),
             # Polyadic tags:
             'encode':         dyadic_tag(encode, 'encode', 'endencode'),
             'decode':         dyadic_tag(decode, 'decode', 'enddecode'),
@@ -139,6 +147,13 @@ def unset_variable(segments, data, *args, **kwargs):
     del data[name]
     return ''
 
+def count_raw_args(segments, data, *args, **kwargs):
+    pieces = segments[0][0]
+    print('pieces', pieces)
+    raw_args = pieces[2:] # Exclude the whole match [0], and the tag name [1]
+    print('raw_args', raw_args)
+    return len(raw_args)
+
 def fml(segments, data, *args, **kwargs):
     return str(len(segments) - 1)
 
@@ -146,19 +161,20 @@ def fml(segments, data, *args, **kwargs):
 
 data = {'motto': 'May the Force be with you.'}
 source = """\
-{% load empty_library %}
-{% load a x b y c z from dummy.tags.and.filters %}
-{% load flip from test_filters %}
+{% load empty_library %}\
+{% load a x b y c z from dummy.tags.and.filters %}\
+{% load flip from test_filters %}\
 {{ motto }}
 {{ motto|flip }}
-{% load ackermann from test_tags %}
-{% load identity from test_tags %}
-{% load answer_to_life from test_tags %}
-{% load add from test_tags %}
-{% load set unset from test_tags %}
-{% load encode decode from test_tags %}
-{% load unless ifgreater iflesser from test_tags %}
-{% load f from test_tags %}
+{% load ackermann from test_tags %}\
+{% load identity from test_tags %}\
+{% load answer_to_life from test_tags %}\
+{% load add from test_tags %}\
+{% load set unset from test_tags %}\
+{% load count_raw_args from test_tags %}\
+{% load encode decode from test_tags %}\
+{% load unless ifgreater iflesser from test_tags %}\
+{% load f from test_tags %}\
 ({% answer_to_life %})
 ({% identity 'wow' %})
 ({% ackermann 3 4 %})
@@ -167,6 +183,10 @@ source = """\
 ({% add 1.1 2.2 3.3 %})
 {% set foo bar %}({{ foo }})
 {% unset foo bar %}({{ foo }})
+({% count_raw_args A %})
+({% count_raw_args 1 2 3 %})
+({% count_raw_args foo:bar:qux %})
+------
 ({% encode 'rot13' %}Hello Kitty{% endencode %})
 ({% encode 'rot13' %}{{ 'foo'|upper }}{% endencode %})
 ({% decode 'rot13' %}|{% encode 'rot13' %}Hello Kitty{% endencode %}|{% enddecode %})
@@ -183,6 +203,7 @@ source = """\
 ({% iflesser 1 2 %}A{% else %}B{% endiflesser %})
 ({% iflesser 3 3 %}A{% else %}B{% endiflesser %})
 ({% iflesser 4 5 %}A{% endiflesser %})
+------
 ({% f %}1{% l1 %})
 ({% f %}1{% l2 %})
 ({% f %}1{% l3 %})
@@ -207,19 +228,8 @@ source = """\
 ({% f %}4{% m1 %}4{% m1 %}4{% m1 %}4{% l1 %})
 """
 golden = """\
-
-
-
 May the Force be with you.
 mAY THE fORCE BE WITH YOU.
-
-
-
-
-
-
-
-
 (42)
 (wow)
 (125)
@@ -228,6 +238,10 @@ mAY THE fORCE BE WITH YOU.
 (6.6)
 (bar)
 ()
+(1)
+(3)
+(1)
+------
 (Uryyb Xvggl)
 (SBB)
 (|Hello Kitty|)
@@ -244,6 +258,7 @@ mAY THE fORCE BE WITH YOU.
 (A)
 (B)
 (A)
+------
 (1)
 (1)
 (1)

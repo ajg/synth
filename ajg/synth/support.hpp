@@ -187,7 +187,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if AJG_SYNTH_HAS_CXX11
-#    if AJG_SYNTH_IS_PLATFORM_DARWIN && AJG_SYNTH_IS_COMPILER_CLANG && AJG_SYNTH_COMPILER_VERSION <= 501
+#    if AJG_SYNTH_IS_PLATFORM_DARWIN && AJG_SYNTH_IS_COMPILER_CLANG && AJG_SYNTH_COMPILER_VERSION <= 601
 #        define AJG_SYNTH_HAS_CXX11_THREAD_LOCAL 0
 #    else
 #        define AJG_SYNTH_HAS_CXX11_THREAD_LOCAL 1

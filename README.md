@@ -6,7 +6,7 @@ A Powerful Templating Framework in C++, with a [command-line tool](#command-line
 [![PyPI Version]](https://pypi.python.org/pypi/synth)
 [![Build Status]](https://travis-ci.org/ajg/synth)
 
-[PyPI Version]: https://pypip.in/v/synth/badge.png
+[PyPI Version]: https://img.shields.io/pypi/v/synth.svg
 [Build Status]: https://travis-ci.org/ajg/synth.png?branch=master
 
 Synopsis
